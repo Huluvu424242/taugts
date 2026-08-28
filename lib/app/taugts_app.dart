@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/theme/app_theme.dart';
+import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/home/presentation/home_screen.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 import 'package:taugts/features/profil/services/profil_repository.dart';
-import 'package:taugts/core/ids/id_generator.dart';
-import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 
 class TaugtsApp extends StatelessWidget {
   const TaugtsApp({
