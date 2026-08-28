@@ -50,6 +50,7 @@ class Erlebnis {
   const Erlebnis({
     required this.id,
     required this.produktId,
+    required this.herkunftProfilId,
     required this.erlebtAm,
     required this.erstelltAm,
     required this.geaendertAm,
@@ -59,6 +60,7 @@ class Erlebnis {
 
   final String id;
   final String produktId;
+  final String herkunftProfilId;
   final String? kaufortId;
   final String? konsumortId;
   final DateTime erlebtAm;
@@ -85,6 +87,7 @@ class Bewertung {
     required this.id,
     required this.erlebnisId,
     required this.kriteriumId,
+    required this.herkunftProfilId,
     required this.wert,
     required this.erstelltAm,
     required this.geaendertAm,
@@ -93,6 +96,7 @@ class Bewertung {
   final String id;
   final String erlebnisId;
   final String kriteriumId;
+  final String herkunftProfilId;
   final double wert;
   final DateTime erstelltAm;
   final DateTime geaendertAm;
