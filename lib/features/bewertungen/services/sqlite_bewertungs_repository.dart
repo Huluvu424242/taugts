@@ -76,7 +76,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   @override
   Future<void> speichereErlebnis(Erlebnis erlebnis) async {
     datenbank.verbindung.execute(
-      'INSERT INTO erlebnisse VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO erlebnisse VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [
         erlebnis.id,
         erlebnis.produktId,
@@ -85,6 +85,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         _zeit(erlebnis.erlebtAm),
         _zeit(erlebnis.erstelltAm),
         _zeit(erlebnis.geaendertAm),
+        erlebnis.herkunftProfilId,
       ],
     );
   }
@@ -110,7 +111,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   @override
   Future<void> speichereBewertung(Bewertung bewertung) async {
     datenbank.verbindung.execute(
-      'INSERT INTO bewertungen VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO bewertungen VALUES (?, ?, ?, ?, ?, ?, ?)',
       [
         bewertung.id,
         bewertung.erlebnisId,
@@ -118,6 +119,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         bewertung.wert,
         _zeit(bewertung.erstelltAm),
         _zeit(bewertung.geaendertAm),
+        bewertung.herkunftProfilId,
       ],
     );
   }
@@ -134,6 +136,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
             id: row['id'] as String,
             erlebnisId: row['erlebnis_id'] as String,
             kriteriumId: row['kriterium_id'] as String,
+            herkunftProfilId: row['herkunft_profil_id'] as String,
             wert: row['wert'] as double,
             erstelltAm: DateTime.parse(row['erstellt_am'] as String),
             geaendertAm: DateTime.parse(row['geaendert_am'] as String),
