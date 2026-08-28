@@ -8,9 +8,14 @@ void main() {
   late LokaleDatenbank datenbank;
   late SqliteBewertungsRepository repository;
   final zeit = DateTime.utc(2026, 8, 28, 20);
+  const profilId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 
   setUp(() {
     datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+    datenbank.verbindung.execute(
+      'INSERT INTO profile VALUES (?, NULL, ?, ?)',
+      [profilId, zeit.toIso8601String(), zeit.toIso8601String()],
+    );
     repository = SqliteBewertungsRepository(datenbank);
   });
 
@@ -33,7 +38,7 @@ void main() {
     expect(geladen?.erstelltAm, zeit);
   });
 
-  test('bewahrt mehrere Bewertungen desselben Produkts', () async {
+  test('bewahrt mehrere Bewertungen mit Herkunftsprofil', () async {
     const produktId = '2d30ae97-1a64-4bb5-a8fd-1df46be78d67';
     const kriteriumId = '5ef4ace9-f038-40d4-a042-042eac68ca3f';
     await repository.speichereProdukt(Produkt(
@@ -54,6 +59,7 @@ void main() {
       await repository.speichereErlebnis(Erlebnis(
         id: erlebnisId,
         produktId: produktId,
+        herkunftProfilId: profilId,
         erlebtAm: zeit.add(Duration(days: index)),
         erstelltAm: zeit.add(Duration(days: index)),
         geaendertAm: zeit.add(Duration(days: index)),
@@ -62,6 +68,7 @@ void main() {
         id: '10000000-0000-4000-8000-00000000000$index',
         erlebnisId: erlebnisId,
         kriteriumId: kriteriumId,
+        herkunftProfilId: profilId,
         wert: 3.0 + index,
         erstelltAm: zeit.add(Duration(days: index)),
         geaendertAm: zeit.add(Duration(days: index)),
@@ -70,13 +77,18 @@ void main() {
 
     final bewertungen = await repository.ladeBewertungenFuerProdukt(produktId);
     expect(bewertungen.map((bewertung) => bewertung.wert), [3.0, 4.0]);
+    expect(
+      bewertungen.map((bewertung) => bewertung.herkunftProfilId).toSet(),
+      {profilId},
+    );
   });
 
-  test('erzwingt Beziehungen zwischen Produkt, Ort und Erlebnis', () async {
+  test('erzwingt Beziehungen zwischen Profil, Produkt und Erlebnis', () async {
     await expectLater(
       repository.speichereErlebnis(Erlebnis(
         id: '00000000-0000-4000-8000-000000000000',
         produktId: 'nicht-vorhanden',
+        herkunftProfilId: profilId,
         erlebtAm: zeit,
         erstelltAm: zeit,
         geaendertAm: zeit,
