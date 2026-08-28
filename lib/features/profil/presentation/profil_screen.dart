@@ -43,13 +43,19 @@ class _ProfilScreenState extends State<ProfilScreen> {
     );
     try {
       await widget.repository.speichereProfil(profil);
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       Navigator.of(context).pop(profil);
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Das Profil konnte nicht gespeichert werden.')),
+        const SnackBar(
+          content: Text('Das Profil konnte nicht gespeichert werden.'),
+        ),
       );
     }
   }
