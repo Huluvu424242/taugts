@@ -3,7 +3,7 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 
 void main() {
-  test('migriert Bewertungen von Schema 1 auf Schema 2 ohne Datenverlust', () {
+  test('migriert Schema 1 bis zum aktuellen Schema ohne Datenverlust', () {
     final verbindung = sqlite3.openInMemory();
     verbindung.execute('''
       CREATE TABLE bewertungen (
@@ -15,16 +15,19 @@ void main() {
       )
     ''');
     verbindung.execute(
-      "INSERT INTO bewertungen VALUES ('b1', 'e1', 'k1', 4.0, '2026-08-28T20:00:00.000Z')",
+      "INSERT INTO bewertungen VALUES ('b1', 'e1', 'k1', 4.0, "
+      "'2026-08-28T20:00:00.000Z')",
     );
     verbindung.userVersion = 1;
 
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
     final zeile = verbindung.select('SELECT * FROM bewertungen').single;
+    final profile = verbindung.select('SELECT * FROM profile');
 
     expect(verbindung.userVersion, LokaleDatenbank.schemaVersion);
     expect(zeile['wert'], 4.0);
     expect(zeile['geaendert_am'], zeile['erstellt_am']);
+    expect(zeile['herkunft_profil_id'], profile.single['id']);
     datenbank.schliessen();
   });
 }
