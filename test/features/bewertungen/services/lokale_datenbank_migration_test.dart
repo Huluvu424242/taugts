@@ -30,4 +30,27 @@ void main() {
     expect(zeile['herkunft_profil_id'], profile.single['id']);
     datenbank.schliessen();
   });
+
+  test('migriert Produktstammdaten von Schema 3 auf Schema 4', () {
+    final verbindung = sqlite3.openInMemory();
+    verbindung.execute('''
+      CREATE TABLE produkte (
+        objekt_id TEXT PRIMARY KEY,
+        marke TEXT
+      )
+    ''');
+    verbindung.execute(
+      "INSERT INTO produkte VALUES ('p1', 'Bestehende Marke')",
+    );
+    verbindung.userVersion = 3;
+
+    final datenbank = LokaleDatenbank.oeffnen(verbindung);
+    final zeile = verbindung.select('SELECT * FROM produkte').single;
+
+    expect(verbindung.userVersion, LokaleDatenbank.schemaVersion);
+    expect(zeile['marke'], 'Bestehende Marke');
+    expect(zeile['produktart'], 'bier');
+    expect(zeile['barcode'], isNull);
+    datenbank.schliessen();
+  });
 }

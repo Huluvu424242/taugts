@@ -26,6 +26,14 @@ void main() {
       id: '2d30ae97-1a64-4bb5-a8fd-1df46be78d67',
       name: 'Testbier',
       marke: 'Testbrauerei',
+      brauerei: 'Brauerei am Markt',
+      sorte: 'Pils',
+      alkoholgehalt: 4.9,
+      herkunft: 'Sachsen',
+      gebinde: 'Flasche',
+      fuellmengeMl: 500,
+      barcode: '1234567890123',
+      notiz: 'Herb',
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
@@ -35,7 +43,100 @@ void main() {
     final geladen = await repository.ladeProdukt(produkt.id);
     expect(geladen?.name, 'Testbier');
     expect(geladen?.marke, 'Testbrauerei');
+    expect(geladen?.brauerei, 'Brauerei am Markt');
+    expect(geladen?.sorte, 'Pils');
+    expect(geladen?.alkoholgehalt, 4.9);
+    expect(geladen?.fuellmengeMl, 500);
+    expect(geladen?.barcode, '1234567890123');
     expect(geladen?.erstelltAm, zeit);
+  });
+
+  test('speichert ein minimales Produkt nur mit Barcode', () async {
+    final produkt = Produkt(
+      id: '55e34e0e-fb72-450d-9db7-20d42188d226',
+      name: '',
+      barcode: '987654321',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+
+    await repository.speichereProdukt(produkt);
+
+    final geladen = await repository.ladeProdukt(produkt.id);
+    expect(geladen?.anzeigetitel, '987654321');
+    expect(geladen?.istUnvollstaendig, isTrue);
+  });
+
+  test('weist ein Produkt ohne Minimalangabe zurück', () async {
+    final produkt = Produkt(
+      id: '55e34e0e-fb72-450d-9db7-20d42188d228',
+      name: '  ',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+
+    await expectLater(
+      repository.speichereProdukt(produkt),
+      throwsArgumentError,
+    );
+  });
+
+  test('listet Produkte und erlaubt spätere Ergänzungen', () async {
+    final produkt = Produkt(
+      id: '55e34e0e-fb72-450d-9db7-20d42188d227',
+      name: 'Später ergänzen',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereProdukt(produkt);
+    await repository.speichereProdukt(Produkt(
+      id: produkt.id,
+      name: produkt.name,
+      marke: 'Ergänzte Marke',
+      brauerei: 'Ergänzte Brauerei',
+      sorte: 'Lager',
+      erstelltAm: produkt.erstelltAm,
+      geaendertAm: zeit.add(const Duration(minutes: 1)),
+    ));
+
+    final produkte = await repository.ladeProdukte();
+    expect(produkte, hasLength(1));
+    expect(produkte.single.marke, 'Ergänzte Marke');
+    expect(produkte.single.erstelltAm, zeit);
+    expect(produkte.single.istUnvollstaendig, isFalse);
+  });
+
+  test('Produktänderungen lassen historische Erlebnisse bestehen', () async {
+    const produktId = '55e34e0e-fb72-450d-9db7-20d42188d229';
+    final produkt = Produkt(
+      id: produktId,
+      name: 'Alter Name',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereProdukt(produkt);
+    await repository.speichereErlebnis(Erlebnis(
+      id: '65e34e0e-fb72-450d-9db7-20d42188d229',
+      produktId: produktId,
+      herkunftProfilId: profilId,
+      erlebtAm: zeit,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+
+    await repository.speichereProdukt(Produkt(
+      id: produkt.id,
+      name: 'Neuer Name',
+      erstelltAm: produkt.erstelltAm,
+      geaendertAm: zeit.add(const Duration(minutes: 1)),
+    ));
+
+    final erlebnisse = datenbank.verbindung.select(
+      'SELECT * FROM erlebnisse WHERE produkt_id = ?',
+      [produktId],
+    );
+    expect(erlebnisse, hasLength(1));
+    expect(erlebnisse.single['erlebt_am'], zeit.toIso8601String());
   });
 
   test('bewahrt mehrere Bewertungen mit Herkunftsprofil', () async {
