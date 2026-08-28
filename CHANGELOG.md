@@ -8,6 +8,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Lokales, stabiles Profil mit optionalem Anzeigenamen und Herkunftskennung für
+  neue Erlebnisse und Bewertungen.
 - Lokales Fach- und SQLite-Persistenzmodell für Produkte, Orte, Erlebnisse,
   Bewertungen und Bewertungskriterien einschließlich Schemaversion und Migration.
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
