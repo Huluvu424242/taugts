@@ -1,4 +1,5 @@
 import 'package:sqlite3/sqlite3.dart';
+import 'package:uuid/uuid.dart';
 
 class LokaleDatenbank {
   LokaleDatenbank._(this.verbindung);
@@ -9,7 +10,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 2;
+  static const schemaVersion = 3;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -33,21 +34,79 @@ class LokaleDatenbank {
     }
     transaktion(() {
       if (version == 0) {
-        _erstelleSchemaV2();
-      } else if (version == 1) {
-        verbindung.execute(
-          'ALTER TABLE bewertungen ADD COLUMN geaendert_am TEXT',
-        );
-        verbindung.execute(
-          'UPDATE bewertungen SET geaendert_am = erstellt_am '
-          'WHERE geaendert_am IS NULL',
-        );
+        _erstelleSchemaV3();
+      } else {
+        if (version == 1) {
+          verbindung.execute(
+            'ALTER TABLE bewertungen ADD COLUMN geaendert_am TEXT',
+          );
+          verbindung.execute(
+            'UPDATE bewertungen SET geaendert_am = erstellt_am '
+            'WHERE geaendert_am IS NULL',
+          );
+        }
+        if (version <= 2) {
+          _migriereAufSchemaV3();
+        }
       }
       verbindung.userVersion = schemaVersion;
     });
   }
 
-  void _erstelleSchemaV2() {
+  void _migriereAufSchemaV3() {
+    verbindung.execute('''
+      CREATE TABLE profile (
+        id TEXT PRIMARY KEY,
+        anzeigename TEXT,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL
+      )
+    ''');
+    final profilId = const Uuid().v4();
+    final zeitpunkt = DateTime.now().toUtc().toIso8601String();
+    verbindung.execute(
+      'INSERT INTO profile VALUES (?, NULL, ?, ?)',
+      [profilId, zeitpunkt, zeitpunkt],
+    );
+
+    if (_tabelleExistiert('erlebnisse')) {
+      verbindung.execute(
+        'ALTER TABLE erlebnisse ADD COLUMN herkunft_profil_id TEXT '
+        'REFERENCES profile(id)',
+      );
+      verbindung.execute(
+        'UPDATE erlebnisse SET herkunft_profil_id = ?',
+        [profilId],
+      );
+    }
+    if (_tabelleExistiert('bewertungen')) {
+      verbindung.execute(
+        'ALTER TABLE bewertungen ADD COLUMN herkunft_profil_id TEXT '
+        'REFERENCES profile(id)',
+      );
+      verbindung.execute(
+        'UPDATE bewertungen SET herkunft_profil_id = ?',
+        [profilId],
+      );
+    }
+  }
+
+  bool _tabelleExistiert(String name) => verbindung
+      .select(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+        [name],
+      )
+      .isNotEmpty;
+
+  void _erstelleSchemaV3() {
+    verbindung.execute('''
+      CREATE TABLE profile (
+        id TEXT PRIMARY KEY,
+        anzeigename TEXT,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL
+      )
+    ''');
     verbindung.execute('''
       CREATE TABLE objekte (
         id TEXT PRIMARY KEY,
@@ -80,7 +139,8 @@ class LokaleDatenbank {
         konsumort_id TEXT REFERENCES orte(id),
         erlebt_am TEXT NOT NULL,
         erstellt_am TEXT NOT NULL,
-        geaendert_am TEXT NOT NULL
+        geaendert_am TEXT NOT NULL,
+        herkunft_profil_id TEXT NOT NULL REFERENCES profile(id)
       )
     ''');
     verbindung.execute('''
@@ -98,7 +158,8 @@ class LokaleDatenbank {
         kriterium_id TEXT NOT NULL REFERENCES kriterien(id),
         wert REAL NOT NULL,
         erstellt_am TEXT NOT NULL,
-        geaendert_am TEXT NOT NULL
+        geaendert_am TEXT NOT NULL,
+        herkunft_profil_id TEXT NOT NULL REFERENCES profile(id)
       )
     ''');
   }
