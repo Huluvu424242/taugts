@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:taugts/core/ids/id_generator.dart';
+import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 import 'package:taugts/features/profil/presentation/profil_screen.dart';
 import 'package:taugts/features/profil/services/profil_repository.dart';
-import 'package:taugts/core/ids/id_generator.dart';
-import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/produkte/presentation/produkte_screen.dart';
 
 class HomeScreen extends StatefulWidget {
