@@ -7,13 +7,13 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Taugt’s?')),
-      body: const SafeArea(
+      body: SafeArea(
         child: Center(
           child: Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Semantics(
               header: true,
-              child: Text(
+              child: const Text(
                 'Was taugt’s?',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
                 textAlign: TextAlign.center,
