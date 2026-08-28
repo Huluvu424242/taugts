@@ -49,6 +49,15 @@ Das Bug-Issue beschreibt Fehlerbild, Fehlermeldung, Analyse, vermutete Ursache, 
 
 ## Architekturleitplanken
 
+### Geschützte Branches
+
+- Der Branch `master` und alle Branches mit dem Präfix `release/` werden auf GitHub stets als geschützte Branches geführt.
+- Änderungen an diesen Branches erfolgen ausschließlich über Pull Requests. Direkte Änderungen, Löschungen und Force Pushes sind untersagt.
+- Für die Aufnahme einer Änderung ist mindestens eine zustimmende Review erforderlich. Offene Review-Diskussionen müssen vor dem Merge aufgelöst sein.
+- Das aktive, über die GitHub-Oberfläche importierbare Repository-Ruleset liegt unter `gh-rulesets/protected-branches.json`.
+- Ändern sich die Schutzanforderungen, werden `AGENTS.md`, die Ruleset-Datei und das auf GitHub aktive Ruleset gemeinsam aktualisiert.
+- Neu angelegte Branches mit dem Präfix `release/` müssen ohne zusätzliche manuelle Konfiguration durch das Ruleset erfasst werden.
+
 ### Offline-first und Datenschutz
 
 - Die Kernfunktion muss ohne Netzwerkverbindung nutzbar sein.
