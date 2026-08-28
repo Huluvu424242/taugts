@@ -3,16 +3,16 @@ import 'package:sqlite3/sqlite3.dart';
 class LokaleDatenbank {
   LokaleDatenbank._(this.verbindung);
 
-  static const schemaVersion = 2;
-  final Database verbindung;
-
   factory LokaleDatenbank.oeffnen(Database verbindung) {
     final datenbank = LokaleDatenbank._(verbindung);
     datenbank._migriere();
     return datenbank;
   }
 
-  void schliessen() => verbindung.dispose();
+  static const schemaVersion = 2;
+  final Database verbindung;
+
+  void schliessen() => verbindung.close();
 
   void transaktion(void Function() aktion) {
     verbindung.execute('BEGIN IMMEDIATE');
