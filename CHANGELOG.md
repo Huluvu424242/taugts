@@ -8,5 +8,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Lokales Fach- und SQLite-Persistenzmodell für Produkte, Orte, Erlebnisse,
+  Bewertungen und Bewertungskriterien einschließlich Schemaversion und Migration.
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
 - Featureorientierte Ausgangsstruktur, Startscreen und Widget-Test.

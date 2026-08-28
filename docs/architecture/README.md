@@ -8,6 +8,8 @@ Taugt’s? wird featureorientiert und offline-first entwickelt. UI, Fachlogik un
 - Windows und Linux verwenden dieselbe Fachlogik und erhalten nur klar isolierte Plattformanbindungen.
 - Nutzerdaten bleiben lokal; Netzwerkzugriffe sind für die Kernfunktion nicht erforderlich.
 - Import und Export sind explizite Nutzeraktionen. Dateiformat, Konfliktstrategie und Datenschutz werden vor ihrer Implementierung als eigene Architekturentscheidung dokumentiert.
-- State Management, Persistenzbibliothek und Navigation werden erst ausgewählt, wenn die erste fachliche Story konkrete Anforderungen liefert.
+- State Management und Navigation werden erst bei konkretem Bedarf ausgewählt.
+- Die lokale Persistenz verwendet SQLite; Entscheidung und Folgen beschreibt
+  [ADR 0001](0001-lokale-persistenz-mit-sqlite.md).
 
 Diese Zurückhaltung vermeidet Architektur auf Vorrat und hält spätere Entscheidungen offen, ohne die Plattformunterstützung zu behindern.

@@ -12,3 +12,11 @@
 Flutter und Dart werden als Entwicklungs- und Laufzeittechnologien verwendet und stehen unter BSD-Lizenzen. Die jeweils mit der eingesetzten SDK-Version ausgelieferten Lizenztexte und Third-Party-Notices sind beim finalen Distributionsprozess zu berücksichtigen.
 
 Neue Laufzeitabhängigkeiten und ausgelieferte Fremdassets werden vor ihrer Aufnahme auf Lizenzkompatibilität geprüft und hier ergänzt.
+
+## Laufzeitabhängigkeiten der lokalen Persistenz
+
+- `sqlite3` (MIT): Dart-Bindings und gebündelte SQLite-Laufzeit
+- SQLite (Public Domain): eingebettete relationale Datenbank
+- `path` (BSD-3-Clause): plattformneutrale Pfadverarbeitung
+- `path_provider` (BSD-3-Clause): Ermittlung des Anwendungsdatenverzeichnisses
+- `uuid` (MIT): Erzeugung stabiler UUIDs
