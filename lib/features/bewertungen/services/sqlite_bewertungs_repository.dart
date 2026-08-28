@@ -9,6 +9,13 @@ class SqliteBewertungsRepository implements BewertungsRepository {
 
   @override
   Future<void> speichereProdukt(Produkt produkt) async {
+    if (!produkt.hatMinimalangabe) {
+      throw ArgumentError.value(
+        produkt,
+        'produkt',
+        'Name oder Barcode ist erforderlich.',
+      );
+    }
     datenbank.transaktion(() {
       datenbank.verbindung.execute(
         '''
@@ -28,10 +35,35 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       );
       datenbank.verbindung.execute(
         '''
-          INSERT INTO produkte VALUES (?, ?)
-          ON CONFLICT(objekt_id) DO UPDATE SET marke = excluded.marke
+          INSERT INTO produkte (
+            objekt_id, marke, produktart, brauerei, sorte, alkoholgehalt,
+            herkunft, gebinde, fuellmenge_ml, barcode, notiz
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(objekt_id) DO UPDATE SET
+            marke = excluded.marke,
+            produktart = excluded.produktart,
+            brauerei = excluded.brauerei,
+            sorte = excluded.sorte,
+            alkoholgehalt = excluded.alkoholgehalt,
+            herkunft = excluded.herkunft,
+            gebinde = excluded.gebinde,
+            fuellmenge_ml = excluded.fuellmenge_ml,
+            barcode = excluded.barcode,
+            notiz = excluded.notiz
         ''',
-        [produkt.id, produkt.marke],
+        [
+          produkt.id,
+          _leerAlsNull(produkt.marke),
+          produkt.produktart.name,
+          _leerAlsNull(produkt.brauerei),
+          _leerAlsNull(produkt.sorte),
+          produkt.alkoholgehalt,
+          _leerAlsNull(produkt.herkunft),
+          _leerAlsNull(produkt.gebinde),
+          produkt.fuellmengeMl,
+          _leerAlsNull(produkt.barcode),
+          _leerAlsNull(produkt.notiz),
+        ],
       );
     });
   }
@@ -44,10 +76,33 @@ class SqliteBewertungsRepository implements BewertungsRepository {
     ''', [id]);
     if (rows.isEmpty) return null;
     final row = rows.single;
+    return _produktAusZeile(row);
+  }
+
+  @override
+  Future<List<Produkt>> ladeProdukte() async {
+    final rows = datenbank.verbindung.select('''
+      SELECT o.*, p.* FROM objekte o
+      JOIN produkte p ON p.objekt_id = o.id
+      ORDER BY o.geaendert_am DESC, o.name COLLATE NOCASE
+    ''');
+    return rows.map(_produktAusZeile).toList();
+  }
+
+  Produkt _produktAusZeile(Map<String, Object?> row) {
     return Produkt(
       id: row['id'] as String,
       name: row['name'] as String,
+      produktart: Produktart.values.byName(row['produktart'] as String),
       marke: row['marke'] as String?,
+      brauerei: row['brauerei'] as String?,
+      sorte: row['sorte'] as String?,
+      alkoholgehalt: (row['alkoholgehalt'] as num?)?.toDouble(),
+      herkunft: row['herkunft'] as String?,
+      gebinde: row['gebinde'] as String?,
+      fuellmengeMl: (row['fuellmenge_ml'] as num?)?.toInt(),
+      barcode: row['barcode'] as String?,
+      notiz: row['notiz'] as String?,
       erstelltAm: DateTime.parse(row['erstellt_am'] as String),
       geaendertAm: DateTime.parse(row['geaendert_am'] as String),
     );
@@ -146,4 +201,9 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   }
 
   String _zeit(DateTime wert) => wert.toUtc().toIso8601String();
+
+  String? _leerAlsNull(String? wert) {
+    final getrimmt = wert?.trim();
+    return getrimmt == null || getrimmt.isEmpty ? null : getrimmt;
+  }
 }

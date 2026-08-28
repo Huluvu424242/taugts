@@ -1,5 +1,7 @@
 enum Objektart { allgemein, produkt }
 
+enum Produktart { bier, sonstiges }
+
 enum Ortstyp { gastronomie, geschaeft, privat, sonstiger }
 
 class BewertbaresObjekt {
@@ -24,10 +26,45 @@ class Produkt extends BewertbaresObjekt {
     required super.name,
     required super.erstelltAm,
     required super.geaendertAm,
+    this.produktart = Produktart.bier,
     this.marke,
+    this.brauerei,
+    this.sorte,
+    this.alkoholgehalt,
+    this.herkunft,
+    this.gebinde,
+    this.fuellmengeMl,
+    this.barcode,
+    this.notiz,
   }) : super(art: Objektart.produkt);
 
+  final Produktart produktart;
   final String? marke;
+  final String? brauerei;
+  final String? sorte;
+  final double? alkoholgehalt;
+  final String? herkunft;
+  final String? gebinde;
+  final int? fuellmengeMl;
+  final String? barcode;
+  final String? notiz;
+
+  bool get hatMinimalangabe =>
+      name.trim().isNotEmpty || (barcode?.trim().isNotEmpty ?? false);
+
+  bool get istUnvollstaendig {
+    if (name.trim().isEmpty) return true;
+    if (produktart == Produktart.sonstiges) return false;
+    return [marke, brauerei, sorte].any(
+      (wert) => wert == null || wert.trim().isEmpty,
+    );
+  }
+
+  String get anzeigetitel => name.trim().isNotEmpty
+      ? name.trim()
+      : (barcode?.trim().isNotEmpty ?? false)
+          ? barcode!.trim()
+          : 'Unbenanntes Produkt';
 }
 
 class Ort {

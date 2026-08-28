@@ -8,6 +8,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Offline-Produktverwaltung für Bier und andere Produkte mit optionalen
+  Stammdaten, barrierefreier Validierung und Kennzeichnung unvollständiger
+  Einträge.
 - Lokales, stabiles Profil mit optionalem Anzeigenamen und Herkunftskennung für
   neue Erlebnisse und Bewertungen.
 - Lokales Fach- und SQLite-Persistenzmodell für Produkte, Orte, Erlebnisse,

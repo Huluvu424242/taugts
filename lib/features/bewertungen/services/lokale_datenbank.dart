@@ -10,7 +10,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 3;
+  static const schemaVersion = 4;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -34,7 +34,7 @@ class LokaleDatenbank {
     }
     transaktion(() {
       if (version == 0) {
-        _erstelleSchemaV3();
+        _erstelleAktuellesSchema();
       } else {
         if (version == 1) {
           verbindung.execute(
@@ -48,9 +48,29 @@ class LokaleDatenbank {
         if (version <= 2) {
           _migriereAufSchemaV3();
         }
+        if (version <= 3) {
+          _migriereAufSchemaV4();
+        }
       }
       verbindung.userVersion = schemaVersion;
     });
+  }
+
+  void _migriereAufSchemaV4() {
+    if (!_tabelleExistiert('produkte')) return;
+    for (final definition in [
+      'produktart TEXT NOT NULL DEFAULT \'bier\'',
+      'brauerei TEXT',
+      'sorte TEXT',
+      'alkoholgehalt REAL',
+      'herkunft TEXT',
+      'gebinde TEXT',
+      'fuellmenge_ml INTEGER',
+      'barcode TEXT',
+      'notiz TEXT',
+    ]) {
+      verbindung.execute('ALTER TABLE produkte ADD COLUMN $definition');
+    }
   }
 
   void _migriereAufSchemaV3() {
@@ -98,7 +118,7 @@ class LokaleDatenbank {
       )
       .isNotEmpty;
 
-  void _erstelleSchemaV3() {
+  void _erstelleAktuellesSchema() {
     verbindung.execute('''
       CREATE TABLE profile (
         id TEXT PRIMARY KEY,
@@ -119,7 +139,16 @@ class LokaleDatenbank {
     verbindung.execute('''
       CREATE TABLE produkte (
         objekt_id TEXT PRIMARY KEY REFERENCES objekte(id) ON DELETE CASCADE,
-        marke TEXT
+        marke TEXT,
+        produktart TEXT NOT NULL DEFAULT 'bier',
+        brauerei TEXT,
+        sorte TEXT,
+        alkoholgehalt REAL,
+        herkunft TEXT,
+        gebinde TEXT,
+        fuellmenge_ml INTEGER,
+        barcode TEXT,
+        notiz TEXT
       )
     ''');
     verbindung.execute('''
