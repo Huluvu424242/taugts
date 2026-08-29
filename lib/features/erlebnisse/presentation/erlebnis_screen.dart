@@ -151,7 +151,9 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted) return;
       final fehlerContext = _fehlerKey.currentContext;
-      if (fehlerContext != null) await Scrollable.ensureVisible(fehlerContext);
+      if (fehlerContext != null && fehlerContext.mounted) {
+        await Scrollable.ensureVisible(fehlerContext);
+      }
       if (!mounted) return;
       if (_produktFehlt) {
         _produktFokus.requestFocus();
