@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:taugts/core/support/app_support.dart';
+import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
@@ -200,7 +202,16 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Getränk in Gaststätte')),
+        appBar: AppBar(
+          title: const Text('Getränk in Gaststätte'),
+          actions: [
+            AppSupportMenu(
+              contextName: SupportKontexte.erlebnis(
+                entwurfBearbeiten: widget.erlebnis != null,
+              ),
+            ),
+          ],
+        ),
         body: SafeArea(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 104),
