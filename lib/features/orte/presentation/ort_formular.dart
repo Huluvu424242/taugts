@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:taugts/core/support/app_support.dart';
+import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
@@ -226,6 +228,13 @@ class _OrtFormularState extends State<OrtFormular> {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Text(widget.ort == null ? 'Ort anlegen' : 'Ort bearbeiten'),
+          actions: [
+            AppSupportMenu(
+              contextName: SupportKontexte.ortFormular(
+                bearbeiten: widget.ort != null,
+              ),
+            ),
+          ],
         ),
         body: SafeArea(
           child: Form(
