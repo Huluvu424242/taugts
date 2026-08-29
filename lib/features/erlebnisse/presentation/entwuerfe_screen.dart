@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:taugts/core/support/app_support.dart';
+import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
@@ -109,7 +111,12 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Bewertungsentwürfe')),
+        appBar: AppBar(
+          title: const Text('Bewertungsentwürfe'),
+          actions: const [
+            AppSupportMenu(contextName: SupportKontexte.bewertungsentwuerfe),
+          ],
+        ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _oeffnen,
           icon: const Icon(Icons.add),
