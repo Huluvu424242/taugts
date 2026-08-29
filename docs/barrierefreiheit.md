@@ -35,3 +35,12 @@ automatisch gelesen noch übertragen.
 
 Die Android-Integration für Versionsermittlung und Browseröffnung liegt hinter
 injizierbaren Dart-Schnittstellen und kann in Tests durch Fakes ersetzt werden.
+
+## Repository-Konfiguration
+
+Die Issue-Vorlage liegt unter
+`.github/ISSUE_TEMPLATE/app_bug_report.md`. Das Repository benötigt außerdem
+ein Label mit dem exakten Namen `bug`. Falls es noch nicht vorhanden ist, wird
+es unter **Issues → Labels → New label** mit der Beschreibung
+`Fehler in der Anwendung` angelegt. Erst dann kann GitHub das vom App-Link
+vorbelegte Label übernehmen.
