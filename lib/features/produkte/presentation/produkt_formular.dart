@@ -239,14 +239,18 @@ class _ProduktFormularState extends State<ProduktFormular> {
               controller: _scrollController,
               padding: const EdgeInsets.all(24),
               children: [
-                if (_zeigtFehler)
-                  FormularFehlersammler(
-                    key: _fehlerKey,
-                    focusNode: _fehlerFokus,
-                    fehler: [
-                      for (final fehler in _fehler) (fehler.text, fehler.fokus),
-                    ],
-                  ),
+                Builder(
+                  builder: (_) => _zeigtFehler
+                      ? FormularFehlersammler(
+                          key: _fehlerKey,
+                          focusNode: _fehlerFokus,
+                          fehler: [
+                            for (final fehler in _fehler)
+                              (fehler.text, fehler.fokus),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
                 DropdownButtonFormField<Produktart>(
                   initialValue: _produktart,
                   decoration: const InputDecoration(labelText: 'Produktart'),
