@@ -8,6 +8,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Offline-Barrierefreiheitserklärung, app-weites Support-Menü und kontextbezogene Bug-Meldung mit installierter Releaseversion.
 - Durchsuchbare Produktliste, wiederverwendbarer zugänglicher Fehlersammler und
   sichtbare Verwendung des Taugt’s?-Logos in App und Android-Launcher.
 - Verständliche Lade-, Fehler-, Wiederholungs- und Erfolgszustände für die
