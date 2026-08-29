@@ -32,9 +32,11 @@ jobs:
           cache: true
       - name: Abhängigkeiten laden
         run: flutter pub get
-      - name: Formatierung prüfen
-        run: dart format --set-exit-if-changed lib test
+      - name: Code formatieren
+        run: dart format lib test
       - name: Statische Analyse
         run: flutter analyze
       - name: Tests ausführen
         run: flutter test
+      - name: Formatierung prüfen
+        run: git diff --exit-code
