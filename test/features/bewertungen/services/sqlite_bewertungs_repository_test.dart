@@ -341,12 +341,14 @@ void main() {
       await repository.speichereOrt(ort);
     }
 
-    expect((await repository.ladeOrte(suchtext: 'brau')).single.name, 'Brauhaus');
+    expect(
+        (await repository.ladeOrte(suchtext: 'brau')).single.name, 'Brauhaus');
     expect(
       (await repository.ladeOrte(suchtext: 'geschaeft')).single.name,
       'Getränkemarkt',
     );
-    expect((await repository.ladeOrte(suchtext: 'leipzig')).single.name, 'Getränkemarkt');
+    expect((await repository.ladeOrte(suchtext: 'leipzig')).single.name,
+        'Getränkemarkt');
   });
 
   test('findet mögliche Dubletten, ohne das Speichern zu verbieten', () async {
