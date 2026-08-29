@@ -316,8 +316,7 @@ class _BugMeldungDialogState extends State<_BugMeldungDialog> {
       _fehlermeldung = null;
     });
 
-    final titel =
-        '[$_fehlerart] App-Fehler in ${widget.contextName}';
+    final titel = '[$_fehlerart] App-Fehler in ${widget.contextName}';
     final beschreibung = _beschreibung.text.trim();
     final inhalt = [
       '## Fehlerart',
@@ -420,9 +419,8 @@ class _BugMeldungDialogState extends State<_BugMeldungDialog> {
                     onChanged: _oeffnet
                         ? null
                         : (wert) => setState(() => _fehlerart = wert),
-                    validator: (wert) => wert == null
-                        ? 'Bitte eine Fehlerart auswählen.'
-                        : null,
+                    validator: (wert) =>
+                        wert == null ? 'Bitte eine Fehlerart auswählen.' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -467,8 +465,7 @@ class _BugMeldungDialogState extends State<_BugMeldungDialog> {
         ),
         actions: [
           TextButton(
-            onPressed:
-                _oeffnet ? null : () => Navigator.of(context).pop(),
+            onPressed: _oeffnet ? null : () => Navigator.of(context).pop(),
             child: const Text('Abbrechen'),
           ),
           FilledButton.icon(
