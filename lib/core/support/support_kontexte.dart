@@ -11,8 +11,7 @@ abstract final class SupportKontexte {
   static const ortErfassen = 'Ort erfassen';
   static const ortBearbeiten = 'Ort bearbeiten';
   static const bewertungsentwuerfe = 'Bewertungsentwürfe';
-  static const bewertungErfassen =
-      'Bewertung erfassen – Getränk in Gaststätte';
+  static const bewertungErfassen = 'Bewertung erfassen – Getränk in Gaststätte';
   static const bewertungsentwurfBearbeiten =
       'Bewertungsentwurf bearbeiten – Getränk in Gaststätte';
   static const ueberDialog = 'Über-Dialog';
