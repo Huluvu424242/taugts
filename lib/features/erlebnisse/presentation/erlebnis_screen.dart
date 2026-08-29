@@ -152,14 +152,13 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       if (!mounted) return;
       final fehlerContext = _fehlerKey.currentContext;
       if (fehlerContext != null) await Scrollable.ensureVisible(fehlerContext);
-      if (mounted) {
-        if (_produktFehlt) {
-          _produktFokus.requestFocus();
-        } else if (_preisUngueltig) {
-          _preisFokus.requestFocus();
-        } else {
-          _mengeFokus.requestFocus();
-        }
+      if (!mounted) return;
+      if (_produktFehlt) {
+        _produktFokus.requestFocus();
+      } else if (_preisUngueltig) {
+        _preisFokus.requestFocus();
+      } else {
+        _mengeFokus.requestFocus();
       }
       return;
     }
