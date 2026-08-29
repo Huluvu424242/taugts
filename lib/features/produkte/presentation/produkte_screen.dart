@@ -33,9 +33,9 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
   }
 
   void _laden() {
-    setState(
-      () => _produkte = widget.repository.ladeProdukte(suchtext: _suche.text),
-    );
+    setState(() {
+      _produkte = widget.repository.ladeProdukte(suchtext: _suche.text);
+    });
   }
 
   Future<void> _formularOeffnen([Produkt? produkt]) async {
