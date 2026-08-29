@@ -5,6 +5,13 @@ abstract interface class BewertungsRepository {
   Future<Produkt?> ladeProdukt(String id);
   Future<List<Produkt>> ladeProdukte();
   Future<void> speichereOrt(Ort ort);
+  Future<Ort?> ladeOrt(String id);
+  Future<List<Ort>> ladeOrte({String suchtext = ''});
+  Future<List<Ort>> findeAehnlicheOrte({
+    required String name,
+    String? adresse,
+    String? ausgenommenId,
+  });
   Future<void> speichereErlebnis(Erlebnis erlebnis);
   Future<void> speichereKriterium(Bewertungskriterium kriterium);
   Future<void> speichereBewertung(Bewertung bewertung);

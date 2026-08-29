@@ -110,23 +110,108 @@ class SqliteBewertungsRepository implements BewertungsRepository {
 
   @override
   Future<void> speichereOrt(Ort ort) async {
+    if (ort.name.trim().isEmpty) {
+      throw ArgumentError.value(ort, 'ort', 'Der Name ist erforderlich.');
+    }
     datenbank.verbindung.execute(
       '''
-        INSERT INTO orte VALUES (?, ?, ?, ?, ?)
+        INSERT INTO orte (
+          id, name, typ, erstellt_am, geaendert_am, adresse,
+          breitengrad, laengengrad, osm_referenz, notiz
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
           name = excluded.name,
           typ = excluded.typ,
-          geaendert_am = excluded.geaendert_am
+          geaendert_am = excluded.geaendert_am,
+          adresse = excluded.adresse,
+          breitengrad = excluded.breitengrad,
+          laengengrad = excluded.laengengrad,
+          osm_referenz = excluded.osm_referenz,
+          notiz = excluded.notiz
       ''',
       [
         ort.id,
-        ort.name,
+        ort.name.trim(),
         ort.typ.name,
         _zeit(ort.erstelltAm),
         _zeit(ort.geaendertAm),
+        _leerAlsNull(ort.adresse),
+        ort.breitengrad,
+        ort.laengengrad,
+        _leerAlsNull(ort.osmReferenz),
+        _leerAlsNull(ort.notiz),
       ],
     );
   }
+
+  @override
+  Future<Ort?> ladeOrt(String id) async {
+    final rows = datenbank.verbindung.select(
+      'SELECT * FROM orte WHERE id = ?',
+      [id],
+    );
+    return rows.isEmpty ? null : _ortAusZeile(rows.single);
+  }
+
+  @override
+  Future<List<Ort>> ladeOrte({String suchtext = ''}) async {
+    final suche = '%${suchtext.trim().toLowerCase()}%';
+    final rows = datenbank.verbindung.select(
+      '''
+        SELECT * FROM orte
+        WHERE ? = '%%'
+           OR LOWER(name) LIKE ?
+           OR LOWER(typ) LIKE ?
+           OR LOWER(COALESCE(adresse, '')) LIKE ?
+           OR LOWER(COALESCE(osm_referenz, '')) LIKE ?
+        ORDER BY name COLLATE NOCASE, geaendert_am DESC
+      ''',
+      [suche, suche, suche, suche, suche],
+    );
+    return rows.map(_ortAusZeile).toList();
+  }
+
+  @override
+  Future<List<Ort>> findeAehnlicheOrte({
+    required String name,
+    String? adresse,
+    String? ausgenommenId,
+  }) async {
+    final normalisierterName = name.trim().toLowerCase();
+    final normalisierteAdresse = adresse?.trim().toLowerCase();
+    final rows = datenbank.verbindung.select(
+      '''
+        SELECT * FROM orte
+        WHERE LOWER(TRIM(name)) = ?
+          AND (? IS NULL OR id <> ?)
+        ORDER BY name COLLATE NOCASE
+      ''',
+      [normalisierterName, ausgenommenId, ausgenommenId],
+    );
+    final orte = rows.map(_ortAusZeile);
+    if (normalisierteAdresse == null || normalisierteAdresse.isEmpty) {
+      return orte.toList();
+    }
+    return orte.where((ort) {
+      final vorhandeneAdresse = ort.adresse?.trim().toLowerCase();
+      return vorhandeneAdresse == null ||
+          vorhandeneAdresse.isEmpty ||
+          vorhandeneAdresse == normalisierteAdresse;
+    }).toList();
+  }
+
+  Ort _ortAusZeile(Map<String, Object?> row) => Ort(
+        id: row['id'] as String,
+        name: row['name'] as String,
+        typ: Ortstyp.values.byName(row['typ'] as String),
+        adresse: row['adresse'] as String?,
+        breitengrad: (row['breitengrad'] as num?)?.toDouble(),
+        laengengrad: (row['laengengrad'] as num?)?.toDouble(),
+        osmReferenz: row['osm_referenz'] as String?,
+        notiz: row['notiz'] as String?,
+        erstelltAm: DateTime.parse(row['erstellt_am'] as String),
+        geaendertAm: DateTime.parse(row['geaendert_am'] as String),
+      );
 
   @override
   Future<void> speichereErlebnis(Erlebnis erlebnis) async {

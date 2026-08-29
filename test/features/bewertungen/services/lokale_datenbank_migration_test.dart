@@ -53,4 +53,30 @@ void main() {
     expect(zeile['barcode'], isNull);
     datenbank.schliessen();
   });
+
+  test('migriert Ortsdaten von Schema 4 auf Schema 5', () {
+    final verbindung = sqlite3.openInMemory();
+    verbindung.execute('''
+      CREATE TABLE orte (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        typ TEXT NOT NULL,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL
+      )
+    ''');
+    verbindung.execute(
+      "INSERT INTO orte VALUES ('o1', 'Alter Ort', 'privat', 'x', 'x')",
+    );
+    verbindung.userVersion = 4;
+
+    final datenbank = LokaleDatenbank.oeffnen(verbindung);
+    final zeile = verbindung.select('SELECT * FROM orte').single;
+
+    expect(verbindung.userVersion, LokaleDatenbank.schemaVersion);
+    expect(zeile['name'], 'Alter Ort');
+    expect(zeile['adresse'], isNull);
+    expect(zeile['osm_referenz'], isNull);
+    datenbank.schliessen();
+  });
 }

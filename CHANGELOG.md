@@ -8,6 +8,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Vollständig lokale Ortsverwaltung mit Ortstyp, optionaler Adresse,
+  Koordinaten, OSM-Referenz und Notiz sowie Suche, Auswahlmodus und
+  nicht blockierender Dublettenwarnung.
 - Offline-Produktverwaltung für Bier und andere Produkte mit optionalen
   Stammdaten, barrierefreier Validierung und Kennzeichnung unvollständiger
   Einträge.

@@ -198,6 +198,111 @@ void main() {
     );
   });
 
+  test('speichert, lädt und bearbeitet vollständige Ortsdaten', () async {
+    final ort = Ort(
+      id: '75e34e0e-fb72-450d-9db7-20d42188d229',
+      name: 'Gasthaus am Markt',
+      typ: Ortstyp.gastronomie,
+      adresse: 'Markt 1, 09111 Chemnitz',
+      breitengrad: 50.8323,
+      laengengrad: 12.9253,
+      osmReferenz: 'node/123456',
+      notiz: 'Terrasse im Hof',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereOrt(ort);
+
+    final geladen = await repository.ladeOrt(ort.id);
+    expect(geladen?.name, ort.name);
+    expect(geladen?.adresse, ort.adresse);
+    expect(geladen?.breitengrad, 50.8323);
+    expect(geladen?.osmReferenz, 'node/123456');
+
+    await repository.speichereOrt(Ort(
+      id: ort.id,
+      name: 'Gasthaus am Neumarkt',
+      typ: ort.typ,
+      adresse: ort.adresse,
+      erstelltAm: ort.erstelltAm,
+      geaendertAm: zeit.add(const Duration(minutes: 1)),
+    ));
+    expect((await repository.ladeOrt(ort.id))?.name, 'Gasthaus am Neumarkt');
+  });
+
+  test('speichert einen privaten Ort ohne Adresse und Koordinaten', () async {
+    final ort = Ort(
+      id: '75e34e0e-fb72-450d-9db7-20d42188d230',
+      name: 'Bei Freunden',
+      typ: Ortstyp.privat,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+
+    await repository.speichereOrt(ort);
+
+    final geladen = await repository.ladeOrt(ort.id);
+    expect(geladen?.typ, Ortstyp.privat);
+    expect(geladen?.adresse, isNull);
+    expect(geladen?.breitengrad, isNull);
+  });
+
+  test('sucht Orte lokal nach Name, Typ und Adresse', () async {
+    for (final ort in [
+      Ort(
+        id: '75e34e0e-fb72-450d-9db7-20d42188d231',
+        name: 'Brauhaus',
+        typ: Ortstyp.gastronomie,
+        adresse: 'Chemnitz Zentrum',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+      Ort(
+        id: '75e34e0e-fb72-450d-9db7-20d42188d232',
+        name: 'Getränkemarkt',
+        typ: Ortstyp.geschaeft,
+        adresse: 'Leipzig',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    ]) {
+      await repository.speichereOrt(ort);
+    }
+
+    expect((await repository.ladeOrte(suchtext: 'brau')).single.name, 'Brauhaus');
+    expect(
+      (await repository.ladeOrte(suchtext: 'geschaeft')).single.name,
+      'Getränkemarkt',
+    );
+    expect((await repository.ladeOrte(suchtext: 'leipzig')).single.name, 'Getränkemarkt');
+  });
+
+  test('findet mögliche Dubletten, ohne das Speichern zu verbieten', () async {
+    final ersterOrt = Ort(
+      id: '75e34e0e-fb72-450d-9db7-20d42188d233',
+      name: 'Zum Anker',
+      typ: Ortstyp.gastronomie,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereOrt(ersterOrt);
+
+    final dubletten = await repository.findeAehnlicheOrte(
+      name: '  ZUM ANKER ',
+    );
+    expect(dubletten.map((ort) => ort.id), contains(ersterOrt.id));
+
+    final zweiterOrt = Ort(
+      id: '75e34e0e-fb72-450d-9db7-20d42188d234',
+      name: 'Zum Anker',
+      typ: Ortstyp.gastronomie,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereOrt(zweiterOrt);
+    expect(await repository.ladeOrte(), hasLength(2));
+  });
+
   test('rollt einen fehlgeschlagenen atomaren Schreibvorgang zurück', () {
     expect(
       () => datenbank.transaktion(() {

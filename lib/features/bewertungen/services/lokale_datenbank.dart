@@ -10,7 +10,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 4;
+  static const schemaVersion = 5;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -51,9 +51,27 @@ class LokaleDatenbank {
         if (version <= 3) {
           _migriereAufSchemaV4();
         }
+        if (version <= 4) {
+          _migriereAufSchemaV5();
+        }
       }
       verbindung.userVersion = schemaVersion;
     });
+  }
+
+  void _migriereAufSchemaV5() {
+    if (!_tabelleExistiert('orte')) {
+      return;
+    }
+    for (final definition in [
+      'adresse TEXT',
+      'breitengrad REAL',
+      'laengengrad REAL',
+      'osm_referenz TEXT',
+      'notiz TEXT',
+    ]) {
+      verbindung.execute('ALTER TABLE orte ADD COLUMN $definition');
+    }
   }
 
   void _migriereAufSchemaV4() {
@@ -157,7 +175,12 @@ class LokaleDatenbank {
         name TEXT NOT NULL,
         typ TEXT NOT NULL,
         erstellt_am TEXT NOT NULL,
-        geaendert_am TEXT NOT NULL
+        geaendert_am TEXT NOT NULL,
+        adresse TEXT,
+        breitengrad REAL,
+        laengengrad REAL,
+        osm_referenz TEXT,
+        notiz TEXT
       )
     ''');
     verbindung.execute('''
