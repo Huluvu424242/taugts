@@ -1,0 +1,40 @@
+name: Flutter-Prüfungen
+
+on:
+  pull_request:
+    branches:
+      - master
+      - "release/**"
+  push:
+    branches:
+      - master
+      - "release/**"
+
+permissions:
+  contents: read
+
+jobs:
+  format-analyse-tests:
+    name: Formatierung, Analyse und Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Java einrichten
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Flutter einrichten
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          cache: true
+      - name: Abhängigkeiten laden
+        run: flutter pub get
+      - name: Formatierung prüfen
+        run: dart format --set-exit-if-changed lib test
+      - name: Statische Analyse
+        run: flutter analyze
+      - name: Tests ausführen
+        run: flutter test
