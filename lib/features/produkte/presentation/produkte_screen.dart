@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:taugts/core/support/app_support.dart';
+import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
@@ -58,6 +60,13 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Text(widget.zurAuswahl ? 'Produkt auswählen' : 'Produkte'),
+          actions: [
+            AppSupportMenu(
+              contextName: SupportKontexte.produkte(
+                zurAuswahl: widget.zurAuswahl,
+              ),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _formularOeffnen,
