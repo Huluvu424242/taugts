@@ -25,6 +25,25 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
   late Future<List<Erlebnis>> _entwuerfe = widget.repository.ladeEntwuerfe();
 
   Future<void> _oeffnen([Erlebnis? erlebnis]) async {
+    if (erlebnis == null) {
+      final einstieg = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => SimpleDialog(
+          title: const Text('Was möchtest du bewerten?'),
+          children: [
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const ListTile(
+                leading: Icon(Icons.local_drink_outlined),
+                title: Text('Getränk in Gaststätte'),
+                subtitle: Text('Produkt und optionalen Ort erfassen'),
+              ),
+            ),
+          ],
+        ),
+      );
+      if (einstieg != true || !mounted) return;
+    }
     final gespeichert = await Navigator.of(context).push<Erlebnis>(
       MaterialPageRoute(
         builder: (_) => ErlebnisScreen(
