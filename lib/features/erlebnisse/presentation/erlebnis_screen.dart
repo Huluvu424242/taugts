@@ -202,6 +202,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     final zahl = _zahl(text);
     return zahl != null && zahl > 0;
   }
+
   String? _wert(String text) => text.trim().isEmpty ? null : text.trim();
 
   @override
