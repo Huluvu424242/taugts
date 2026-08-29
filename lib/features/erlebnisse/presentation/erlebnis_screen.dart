@@ -137,7 +137,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     );
     if (zeit == null || !mounted) return;
     setState(() {
-      _erlebtAm = DateTime(datum.year, datum.month, datum.day, zeit.hour, zeit.minute);
+      _erlebtAm =
+          DateTime(datum.year, datum.month, datum.day, zeit.hour, zeit.minute);
     });
   }
 
@@ -187,12 +188,15 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       if (!mounted) return;
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Der Entwurf konnte nicht gespeichert werden.')),
+        const SnackBar(
+            content: Text('Der Entwurf konnte nicht gespeichert werden.')),
       );
     }
   }
 
-  double? _zahl(String text) => double.tryParse(text.trim().replaceAll(',', '.'));
+  double? _zahl(String text) =>
+      double.tryParse(text.trim().replaceAll(',', '.'));
+
   bool _istPositiveZahlOderLeer(String text) {
     if (text.trim().isEmpty) return true;
     final zahl = _zahl(text);
@@ -248,7 +252,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
               TextButton.icon(
                 onPressed: () => _ortWaehlen(false),
                 icon: const Icon(Icons.restaurant_outlined),
-                label: Text(_konsumort?.name ?? 'Konsumort auswählen (optional)'),
+                label:
+                    Text(_konsumort?.name ?? 'Konsumort auswählen (optional)'),
               ),
               TextButton.icon(
                 onPressed: () => _ortWaehlen(true),
@@ -258,7 +263,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
               TextField(
                 controller: _preis,
                 focusNode: _preisFokus,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 maxLength: 12,
                 decoration: InputDecoration(
                   labelText: 'Preis (optional)',
@@ -282,13 +288,15 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
               TextField(
                 controller: _gebinde,
                 maxLength: 80,
-                decoration: const InputDecoration(labelText: 'Gebinde (optional)'),
+                decoration:
+                    const InputDecoration(labelText: 'Gebinde (optional)'),
               ),
               TextField(
                 controller: _notiz,
                 maxLength: 1000,
                 maxLines: 4,
-                decoration: const InputDecoration(labelText: 'Notiz (optional)'),
+                decoration:
+                    const InputDecoration(labelText: 'Notiz (optional)'),
               ),
             ],
           ),
@@ -303,7 +311,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.save_outlined),
-            label: Text(_speichert ? 'Entwurf wird gespeichert' : 'Entwurf speichern'),
+            label: Text(
+                _speichert ? 'Entwurf wird gespeichert' : 'Entwurf speichern'),
           ),
         ),
       );
