@@ -255,7 +255,8 @@ class _ProduktFormularState extends State<ProduktFormular> {
                   initialValue: _produktart,
                   decoration: const InputDecoration(labelText: 'Produktart'),
                   items: const [
-                    DropdownMenuItem(value: Produktart.bier, child: Text('Bier')),
+                    DropdownMenuItem(
+                        value: Produktart.bier, child: Text('Bier')),
                     DropdownMenuItem(
                       value: Produktart.sonstiges,
                       child: Text('Anderes Produkt'),
@@ -304,7 +305,8 @@ class _ProduktFormularState extends State<ProduktFormular> {
                   validator: _fuellmengePruefen,
                   focusNode: _fuellmengeFokus,
                 ),
-                _textfeld(_notiz, 'Notiz (optional)', maxLength: 1000, maxLines: 4),
+                _textfeld(_notiz, 'Notiz (optional)',
+                    maxLength: 1000, maxLines: 4),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: _speichert ? null : _speichern,
@@ -324,7 +326,8 @@ class _ProduktFormularState extends State<ProduktFormular> {
     FocusNode? focusNode,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
-  }) => Padding(
+  }) =>
+      Padding(
         padding: const EdgeInsets.only(top: 16),
         child: TextFormField(
           controller: controller,
