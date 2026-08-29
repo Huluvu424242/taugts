@@ -71,7 +71,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   @override
   Future<Produkt?> ladeProdukt(String id) async {
     final rows = datenbank.verbindung.select('''
-      SELECT o.*, p.marke FROM objekte o
+      SELECT o.*, p.* FROM objekte o
       JOIN produkte p ON p.objekt_id = o.id WHERE o.id = ?
     ''', [id]);
     if (rows.isEmpty) return null;
