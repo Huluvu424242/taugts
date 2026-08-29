@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:taugts/core/ids/id_generator.dart';
+import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 
@@ -29,6 +30,7 @@ class OrtFormular extends StatefulWidget {
 class _OrtFormularState extends State<OrtFormular> {
   final _formularKey = GlobalKey<FormState>();
   final _fehlerKey = GlobalKey();
+  final _fehlerFokus = FocusNode();
   final _nameFokus = FocusNode();
   final _breitengradFokus = FocusNode();
   final _laengengradFokus = FocusNode();
@@ -71,6 +73,7 @@ class _OrtFormularState extends State<OrtFormular> {
       _nameFokus,
       _breitengradFokus,
       _laengengradFokus,
+      _fehlerFokus,
     ]) {
       fokus.dispose();
     }
@@ -125,9 +128,7 @@ class _OrtFormularState extends State<OrtFormular> {
       if (!mounted) {
         return;
       }
-      if (_fehler.isNotEmpty) {
-        _fehler.first.fokus.requestFocus();
-      }
+      _fehlerFokus.requestFocus();
       return;
     }
 
@@ -233,27 +234,12 @@ class _OrtFormularState extends State<OrtFormular> {
               padding: const EdgeInsets.all(24),
               children: [
                 if (_fehler.isNotEmpty)
-                  Semantics(
+                  FormularFehlersammler(
                     key: _fehlerKey,
-                    liveRegion: true,
-                    container: true,
-                    child: Card(
-                      color: Theme.of(context).colorScheme.errorContainer,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Bitte Eingaben prüfen'),
-                            for (final fehler in _fehler)
-                              TextButton(
-                                onPressed: fehler.fokus.requestFocus,
-                                child: Text(fehler.text),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    focusNode: _fehlerFokus,
+                    fehler: [
+                      for (final fehler in _fehler) (fehler.text, fehler.fokus),
+                    ],
                   ),
                 DropdownButtonFormField<Ortstyp>(
                   initialValue: _typ,

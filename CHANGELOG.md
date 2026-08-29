@@ -8,6 +8,10 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Durchsuchbare Produktliste, wiederverwendbarer zugänglicher Fehlersammler und
+  sichtbare Verwendung des Taugt’s?-Logos in App und Android-Launcher.
+- Verständliche Lade-, Fehler-, Wiederholungs- und Erfolgszustände für die
+  bereits vorhandenen Profil-, Produkt-, Orts- und Entwurfsabläufe.
 - Lokale Bewertungsentwürfe mit vorbelegtem Erlebniszeitpunkt, Produkt- und
   Ortsauswahl sowie Preis-, Mengen-, Gebinde- und Notizangaben; Entwürfe können
   gespeichert, fortgesetzt und nach Bestätigung verworfen werden.

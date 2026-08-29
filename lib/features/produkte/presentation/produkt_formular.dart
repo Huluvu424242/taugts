@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:taugts/core/ids/id_generator.dart';
+import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 
@@ -29,6 +30,7 @@ class ProduktFormular extends StatefulWidget {
 class _ProduktFormularState extends State<ProduktFormular> {
   final _formularKey = GlobalKey<FormState>();
   final _fehlerKey = GlobalKey();
+  final _fehlerFokus = FocusNode();
   final _nameFokus = FocusNode();
   final _barcodeFokus = FocusNode();
   final _alkoholFokus = FocusNode();
@@ -86,6 +88,7 @@ class _ProduktFormularState extends State<ProduktFormular> {
       _barcodeFokus,
       _alkoholFokus,
       _fuellmengeFokus,
+      _fehlerFokus,
     ]) {
       fokus.dispose();
     }
@@ -141,9 +144,7 @@ class _ProduktFormularState extends State<ProduktFormular> {
       if (!mounted) {
         return;
       }
-      if (_fehler.isNotEmpty) {
-        _fehler.first.fokus.requestFocus();
-      }
+      _fehlerFokus.requestFocus();
       return;
     }
 
@@ -228,27 +229,12 @@ class _ProduktFormularState extends State<ProduktFormular> {
               padding: const EdgeInsets.all(24),
               children: [
                 if (_zeigtFehler)
-                  Semantics(
+                  FormularFehlersammler(
                     key: _fehlerKey,
-                    liveRegion: true,
-                    container: true,
-                    child: Card(
-                      color: Theme.of(context).colorScheme.errorContainer,
-                      child: ListTile(
-                        leading: const Icon(Icons.error_outline),
-                        title: const Text('Bitte Eingaben prüfen'),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (final fehler in _fehler)
-                              TextButton(
-                                onPressed: fehler.fokus.requestFocus,
-                                child: Text(fehler.text),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    focusNode: _fehlerFokus,
+                    fehler: [
+                      for (final fehler in _fehler) (fehler.text, fehler.fokus),
+                    ],
                   ),
                 DropdownButtonFormField<Produktart>(
                   initialValue: _produktart,

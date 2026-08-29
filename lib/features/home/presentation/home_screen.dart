@@ -43,6 +43,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (geaendert != null && mounted) {
       setState(() => _profil = geaendert);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profil gespeichert.')),
+      );
     }
   }
 
@@ -110,49 +113,61 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Semantics(
-                  header: true,
-                  child: Text(
-                    profil?.anzeigename == null
-                        ? 'Was taugt’s?'
-                        : 'Was taugt’s, ${profil!.anzeigename}?',
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w600,
+        child: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Semantics(
+                    image: true,
+                    label: 'Logo von Taugt’s?',
+                    child: Image.asset(
+                      'assets/icons/app_icon_source.png',
+                      width: 112,
+                      height: 112,
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                ),
-                if (widget.bewertungsRepository != null &&
-                    widget.idGenerator != null) ...[
-                  const SizedBox(height: 32),
-                  FilledButton.icon(
-                    onPressed: _bewerten,
-                    icon: const Icon(Icons.rate_review_outlined),
-                    label: const Text('Jetzt bewerten'),
+                  const SizedBox(height: 16),
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      profil?.anzeigename == null
+                          ? 'Was taugt’s?'
+                          : 'Was taugt’s, ${profil!.anzeigename}?',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: _produkteOeffnen,
-                    icon: const Icon(Icons.inventory_2_outlined),
-                    label: const Text('Produkte verwalten'),
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton.icon(
-                    onPressed: _orteOeffnen,
-                    icon: const Icon(Icons.place_outlined),
-                    label: const Text('Orte verwalten'),
-                  ),
+                  if (widget.bewertungsRepository != null &&
+                      widget.idGenerator != null) ...[
+                    const SizedBox(height: 32),
+                    FilledButton.icon(
+                      onPressed: _bewerten,
+                      icon: const Icon(Icons.rate_review_outlined),
+                      label: const Text('Jetzt bewerten'),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: _produkteOeffnen,
+                      icon: const Icon(Icons.inventory_2_outlined),
+                      label: const Text('Produkte verwalten'),
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton.icon(
+                      onPressed: _orteOeffnen,
+                      icon: const Icon(Icons.place_outlined),
+                      label: const Text('Orte verwalten'),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
