@@ -131,6 +131,9 @@ class _ProduktFormularState extends State<ProduktFormular> {
         const SnackBar(content: Text('Bitte Eingaben prüfen.')),
       );
       await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) {
+        return;
+      }
       final fehlerContext = _fehlerKey.currentContext;
       if (fehlerContext != null) {
         await Scrollable.ensureVisible(fehlerContext);
