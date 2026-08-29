@@ -22,7 +22,8 @@ void main() {
 
   tearDown(() => datenbank.schliessen());
 
-  testWidgets('zeigt Pflichtfehler am Feld und im Fehlersammler', (tester) async {
+  testWidgets('zeigt Pflichtfehler am Feld und im Fehlersammler',
+      (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ProduktFormular(
