@@ -79,4 +79,32 @@ void main() {
     expect(zeile['osm_referenz'], isNull);
     datenbank.schliessen();
   });
+
+  test('migriert Erlebnisse von Schema 5 auf Entwurfsfelder', () {
+    final verbindung = sqlite3.openInMemory();
+    verbindung.execute('''
+      CREATE TABLE erlebnisse (
+        id TEXT PRIMARY KEY,
+        produkt_id TEXT NOT NULL,
+        kaufort_id TEXT,
+        konsumort_id TEXT,
+        erlebt_am TEXT NOT NULL,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL,
+        herkunft_profil_id TEXT NOT NULL
+      )
+    ''');
+    verbindung.execute(
+      "INSERT INTO erlebnisse VALUES ('e1', 'p1', NULL, NULL, 'x', 'x', 'x', 'u1')",
+    );
+    verbindung.userVersion = 5;
+
+    final datenbank = LokaleDatenbank.oeffnen(verbindung);
+    final zeile = verbindung.select('SELECT * FROM erlebnisse').single;
+
+    expect(zeile['preis'], isNull);
+    expect(zeile['notiz'], isNull);
+    expect(zeile['ist_entwurf'], 0);
+    datenbank.schliessen();
+  });
 }
