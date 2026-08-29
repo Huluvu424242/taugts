@@ -113,10 +113,10 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
                 );
               }
               if (!snapshot.hasData) {
-                return const Center(
+                return Center(
                   child: Semantics(
                     label: 'Bewertungsentwürfe werden geladen',
-                    child: CircularProgressIndicator(),
+                    child: const CircularProgressIndicator(),
                   ),
                 );
               }
