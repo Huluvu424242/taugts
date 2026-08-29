@@ -35,7 +35,7 @@ void main() {
     final speichern = find.text('Produkt speichern');
     await tester.scrollUntilVisible(
       speichern,
-      300,
+      300.0,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pump();
