@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:taugts/core/support/app_support.dart';
+import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 import 'package:taugts/features/profil/services/profil_repository.dart';
 
@@ -62,7 +64,12 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Mein Profil')),
+        appBar: AppBar(
+          title: const Text('Mein Profil'),
+          actions: const [
+            AppSupportMenu(contextName: SupportKontexte.profil),
+          ],
+        ),
         body: SafeArea(
           child: ListView(
             padding: const EdgeInsets.all(24),
