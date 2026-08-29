@@ -105,6 +105,16 @@ lib/
 - `const` sinnvoll verwenden, Kontrollstrukturen klammern und Kommentare auf das Warum beschränken.
 - Fachlogik unabhängig von Widgets und Plattformdetails testen; technische Abhängigkeiten durch Fakes ersetzen können.
 
+
+### Flutter-spezifische Analysefehler vermeiden
+
+- `Semantics` und andere Konstruktoren, die in der unterstützten Flutter-Version nicht `const` sind, dürfen nicht durch einen äußeren konstanten Konstruktor-Kontext implizit als konstant ausgewertet werden.
+- Bei zusammengesetzten Widgetbäumen nur nachweislich konstante Teilwidgets einzeln mit `const` kennzeichnen. Nach Änderungen an `const`-Kontexten ist mindestens die betroffene Datei mit `flutter analyze` zu prüfen.
+- Jeder einzelne `await` innerhalb eines `State`-Objekts bildet eine neue asynchrone Lücke. Nach jedem `await` muss vor der anschließenden Verwendung von `context`, `Navigator`, `ScaffoldMessenger`, Fokus, Scrollposition oder `setState` erneut `mounted` geprüft werden.
+- Eine `mounted`-Prüfung vor einem weiteren `await` schützt nicht den Code nach diesem `await`.
+- Wird nach einem `await` ein zuvor gespeicherter `BuildContext` verwendet, muss dessen eigener Lebenszyklus mit `context.mounted` geprüft werden.
+- Redundante Konstruktionen wie `if (!mounted) return; if (mounted) ...` sind zu vermeiden.
+
 ## App-Identität: Name und Logo vor Implementierungsbeginn
 
 - Jede neu zu erstellende App erhält vor Beginn der App-Implementierung einen finalen Namen und ein auf diesem Namen sowie der fachlichen Aufgabe beruhendes finales Logo.
@@ -183,6 +193,8 @@ flutter test
 ```
 
 - Plattform- oder UI-Änderungen zusätzlich auf der betroffenen Zielplattform manuell prüfen. Für Android vor dem Merge nach Möglichkeit `flutter clean`, `flutter analyze`, `flutter test` und `flutter run` ausführen.
+- Ein Pull Request mit geändertem Dart- oder Flutter-Code darf nur dann als technisch geprüft und mergebereit gemeldet werden, wenn `dart format`, `flutter analyze` und `flutter test` erfolgreich ausgeführt wurden.
+- Fehlt das Flutter-SDK in der Arbeitsumgebung, muss vor dem Abschluss eine verfügbare CI-Prüfung verwendet werden. Ist auch diese nicht verfügbar, wird der PR ausdrücklich als `implementiert, technische Prüfung ausstehend` und nicht als mergebereit gemeldet.
 - Nicht ausgeführte Prüfungen und der Grund dafür werden ausdrücklich genannt.
 
 ## Dokumentation und Lizenzen
@@ -204,3 +216,8 @@ flutter test
 ## Abschlussdefinition
 
 Eine Arbeit ist fertig, wenn Umfang und Akzeptanzkriterien erfüllt, relevante Tests erfolgreich, Formatierung und Analyse sauber, Dokumentation und Lizenzen geprüft sowie offene manuelle Prüfungen transparent benannt sind.
+
+Die Abschlussmeldung unterscheidet verbindlich:
+
+- `Implementiert, technische Prüfung ausstehend`: Mindestens eine vorgeschriebene automatisierte Prüfung konnte weder lokal noch über CI erfolgreich ausgeführt werden.
+- `Geprüft und mergebereit`: Alle vorgeschriebenen automatisierten Prüfungen waren erfolgreich; noch offene manuelle Prüfungen sind transparent benannt und stehen dem Merge nach den Projektvorgaben nicht entgegen.
