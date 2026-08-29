@@ -477,3 +477,4 @@ class _BugMeldungDialogState extends State<_BugMeldungDialog> {
           ),
         ],
       );
+}
