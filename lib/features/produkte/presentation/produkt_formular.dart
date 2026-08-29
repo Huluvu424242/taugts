@@ -135,8 +135,11 @@ class _ProduktFormularState extends State<ProduktFormular> {
         return;
       }
       final fehlerContext = _fehlerKey.currentContext;
-      if (fehlerContext != null) {
+      if (fehlerContext != null && fehlerContext.mounted) {
         await Scrollable.ensureVisible(fehlerContext);
+      }
+      if (!mounted) {
+        return;
       }
       if (_fehler.isNotEmpty) {
         _fehler.first.fokus.requestFocus();
