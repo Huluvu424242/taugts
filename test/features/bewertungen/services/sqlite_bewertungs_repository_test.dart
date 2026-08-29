@@ -198,6 +198,49 @@ void main() {
     );
   });
 
+  test('speichert, aktualisiert und verwirft einen Erlebnisentwurf', () async {
+    const produktId = '2d30ae97-1a64-4bb5-a8fd-1df46be78d68';
+    const erlebnisId = '3d30ae97-1a64-4bb5-a8fd-1df46be78d68';
+    await repository.speichereProdukt(Produkt(
+      id: produktId,
+      name: 'Entwurfsbier',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+    await repository.speichereErlebnis(Erlebnis(
+      id: erlebnisId,
+      produktId: produktId,
+      herkunftProfilId: profilId,
+      erlebtAm: zeit,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+      preis: 4.9,
+      menge: 0.5,
+      gebinde: 'Glas',
+      notiz: 'Später bewerten',
+    ));
+
+    var entwuerfe = await repository.ladeEntwuerfe();
+    expect(entwuerfe, hasLength(1));
+    expect(entwuerfe.single.preis, 4.9);
+    expect(entwuerfe.single.notiz, 'Später bewerten');
+
+    await repository.speichereErlebnis(Erlebnis(
+      id: erlebnisId,
+      produktId: produktId,
+      herkunftProfilId: profilId,
+      erlebtAm: zeit,
+      erstelltAm: zeit,
+      geaendertAm: zeit.add(const Duration(minutes: 1)),
+      notiz: 'Fortgesetzt',
+    ));
+    entwuerfe = await repository.ladeEntwuerfe();
+    expect(entwuerfe.single.notiz, 'Fortgesetzt');
+
+    await repository.loescheErlebnis(erlebnisId);
+    expect(await repository.ladeEntwuerfe(), isEmpty);
+  });
+
   test('speichert, lädt und bearbeitet vollständige Ortsdaten', () async {
     final ort = Ort(
       id: '75e34e0e-fb72-450d-9db7-20d42188d229',
