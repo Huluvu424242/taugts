@@ -103,6 +103,11 @@ class Erlebnis {
     required this.geaendertAm,
     this.kaufortId,
     this.konsumortId,
+    this.preis,
+    this.menge,
+    this.gebinde,
+    this.notiz,
+    this.istEntwurf = true,
   });
 
   final String id;
@@ -110,6 +115,11 @@ class Erlebnis {
   final String herkunftProfilId;
   final String? kaufortId;
   final String? konsumortId;
+  final double? preis;
+  final double? menge;
+  final String? gebinde;
+  final String? notiz;
+  final bool istEntwurf;
   final DateTime erlebtAm;
   final DateTime erstelltAm;
   final DateTime geaendertAm;
