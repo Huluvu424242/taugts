@@ -66,3 +66,10 @@ chmod +x tool/generate_app_icons.sh
 ```
 
 Herkunft, Verwendung und Lizenz sind in `ATTRIBUTIONS.md` dokumentiert.
+
+
+## Barrierefreiheit und Bug-Meldung
+
+Die App enthält eine offline verfügbare Barrierefreiheitserklärung und bereitet
+kontextbezogene Bugreports zur Prüfung auf GitHub vor. Details stehen in
+[docs/barrierefreiheit.md](docs/barrierefreiheit.md).
