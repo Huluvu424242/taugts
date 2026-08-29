@@ -8,6 +8,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Lokale Bewertungsentwürfe mit vorbelegtem Erlebniszeitpunkt, Produkt- und
+  Ortsauswahl sowie Preis-, Mengen-, Gebinde- und Notizangaben; Entwürfe können
+  gespeichert, fortgesetzt und nach Bestätigung verworfen werden.
 - Vollständig lokale Ortsverwaltung mit Ortstyp, optionaler Adresse,
   Koordinaten, OSM-Referenz und Notiz sowie Suche, Auswahlmodus und
   nicht blockierender Dublettenwarnung.
