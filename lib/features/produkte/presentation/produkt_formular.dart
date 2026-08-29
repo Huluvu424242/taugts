@@ -30,6 +30,7 @@ class ProduktFormular extends StatefulWidget {
 class _ProduktFormularState extends State<ProduktFormular> {
   final _fehlerKey = GlobalKey();
   final _fehlerFokus = FocusNode();
+  final _scrollController = ScrollController();
   final _nameFokus = FocusNode();
   final _barcodeFokus = FocusNode();
   final _alkoholFokus = FocusNode();
@@ -68,6 +69,7 @@ class _ProduktFormularState extends State<ProduktFormular> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     for (final controller in [
       _name,
       _marke,
@@ -132,14 +134,12 @@ class _ProduktFormularState extends State<ProduktFormular> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Bitte Eingaben prüfen.')),
       );
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(
+          _scrollController.position.minScrollExtent,
+        );
+      }
       await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) {
-        return;
-      }
-      final fehlerContext = _fehlerKey.currentContext;
-      if (fehlerContext != null && fehlerContext.mounted) {
-        await Scrollable.ensureVisible(fehlerContext);
-      }
       if (!mounted) {
         return;
       }
@@ -227,6 +227,7 @@ class _ProduktFormularState extends State<ProduktFormular> {
                 ? AutovalidateMode.always
                 : AutovalidateMode.disabled,
             child: ListView(
+              controller: _scrollController,
               padding: const EdgeInsets.all(24),
               children: [
                 if (_zeigtFehler)
