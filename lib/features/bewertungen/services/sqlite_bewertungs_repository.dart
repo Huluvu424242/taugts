@@ -80,12 +80,19 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   }
 
   @override
-  Future<List<Produkt>> ladeProdukte() async {
+  Future<List<Produkt>> ladeProdukte({String suchtext = ''}) async {
+    final suche = '%${suchtext.trim().toLowerCase()}%';
     final rows = datenbank.verbindung.select('''
       SELECT o.*, p.* FROM objekte o
       JOIN produkte p ON p.objekt_id = o.id
+      WHERE ? = '%%'
+         OR LOWER(o.name) LIKE ?
+         OR LOWER(COALESCE(p.marke, '')) LIKE ?
+         OR LOWER(COALESCE(p.brauerei, '')) LIKE ?
+         OR LOWER(COALESCE(p.sorte, '')) LIKE ?
+         OR LOWER(COALESCE(p.barcode, '')) LIKE ?
       ORDER BY o.geaendert_am DESC, o.name COLLATE NOCASE
-    ''');
+    ''', [suche, suche, suche, suche, suche, suche]);
     return rows.map(_produktAusZeile).toList();
   }
 

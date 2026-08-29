@@ -46,6 +46,9 @@ class _OrteScreenState extends State<OrteScreen> {
     );
     if (gespeichert != null && mounted) {
       _suchen(_suche.text);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ort gespeichert.')),
+      );
     }
   }
 
@@ -79,6 +82,7 @@ class _OrteScreenState extends State<OrteScreen> {
                     prefixIcon: Icon(Icons.search),
                   ),
                   onChanged: _suchen,
+                  maxLength: 160,
                 ),
               ),
               Expanded(
@@ -86,20 +90,42 @@ class _OrteScreenState extends State<OrteScreen> {
                   future: _orte,
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
-                      return const Center(
-                        child: Text('Orte konnten nicht geladen werden.'),
+                      return Center(
+                        child: FilledButton.icon(
+                          onPressed: () => _suchen(_suche.text),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Orte erneut laden'),
+                        ),
                       );
                     }
                     if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(
+                        child: Semantics(
+                          label: 'Orte werden geladen',
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
                     }
                     final orte = snapshot.data!;
                     if (orte.isEmpty) {
                       return Center(
-                        child: Text(
-                          _suche.text.trim().isEmpty
-                              ? 'Noch keine Orte angelegt.'
-                              : 'Keine passenden Orte gefunden.',
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _suche.text.trim().isEmpty
+                                    ? 'Noch keine Orte angelegt.'
+                                    : 'Keine passenden Orte gefunden.',
+                              ),
+                              const SizedBox(height: 16),
+                              FilledButton(
+                                onPressed: _formularOeffnen,
+                                child: const Text('Ort anlegen'),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }

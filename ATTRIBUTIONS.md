@@ -3,9 +3,10 @@
 ## Taugt’s?-App-Logo
 
 - Datei: `assets/icons/app_icon_source.png`
-- Verwendung: App-Logo und Quelle für spätere Plattform- und Launcher-Icons
+- Verwendung: sichtbares App-Logo und Quelle der Android-Launcher-Icons
 - Erstellung: von Huluvu424242 mit Unterstützung der ChatGPT-Bildgenerierung erstellt
-- Rechteinhaber/Lizenzierung: projektspezifisches Asset; vor einer öffentlichen Veröffentlichung ist die endgültige Lizenz ausdrücklich festzulegen
+- Rechteinhaber: Huluvu424242
+- Lizenz: [CC0 1.0 Universell](https://creativecommons.org/publicdomain/zero/1.0/deed.de); das Logo darf ohne Namensnennung verwendet werden
 
 ## Flutter und Dart
 

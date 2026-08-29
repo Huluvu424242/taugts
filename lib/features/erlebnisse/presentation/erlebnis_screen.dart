@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:taugts/core/ids/id_generator.dart';
+import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/orte/presentation/orte_screen.dart';
@@ -26,6 +27,7 @@ class ErlebnisScreen extends StatefulWidget {
 
 class _ErlebnisScreenState extends State<ErlebnisScreen> {
   final _fehlerKey = GlobalKey();
+  final _fehlerFokus = FocusNode();
   final _produktFokus = FocusNode();
   final _preisFokus = FocusNode();
   final _mengeFokus = FocusNode();
@@ -79,6 +81,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     _produktFokus.dispose();
     _preisFokus.dispose();
     _mengeFokus.dispose();
+    _fehlerFokus.dispose();
     for (final controller in [_preis, _menge, _gebinde, _notiz]) {
       controller.dispose();
     }
@@ -155,13 +158,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         await Scrollable.ensureVisible(fehlerContext);
       }
       if (!mounted) return;
-      if (_produktFehlt) {
-        _produktFokus.requestFocus();
-      } else if (_preisUngueltig) {
-        _preisFokus.requestFocus();
-      } else {
-        _mengeFokus.requestFocus();
-      }
+      _fehlerFokus.requestFocus();
       return;
     }
     setState(() => _speichert = true);
@@ -209,37 +206,17 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 104),
             children: [
               if (_produktFehlt || _preisUngueltig || _mengeUngueltig)
-                Semantics(
+                FormularFehlersammler(
                   key: _fehlerKey,
-                  liveRegion: true,
-                  container: true,
-                  child: Card(
-                    color: Theme.of(context).colorScheme.errorContainer,
-                    child: ListTile(
-                      leading: const Icon(Icons.error_outline),
-                      title: const Text('Bitte Eingaben prüfen'),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (_produktFehlt)
-                            TextButton(
-                              onPressed: _produktFokus.requestFocus,
-                              child: const Text('Ein Produkt ist erforderlich.'),
-                            ),
-                          if (_preisUngueltig)
-                            TextButton(
-                              onPressed: _preisFokus.requestFocus,
-                              child: const Text('Preis muss größer als null sein.'),
-                            ),
-                          if (_mengeUngueltig)
-                            TextButton(
-                              onPressed: _mengeFokus.requestFocus,
-                              child: const Text('Menge muss größer als null sein.'),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  focusNode: _fehlerFokus,
+                  fehler: [
+                    if (_produktFehlt)
+                      ('Ein Produkt ist erforderlich.', _produktFokus),
+                    if (_preisUngueltig)
+                      ('Preis muss größer als null sein.', _preisFokus),
+                    if (_mengeUngueltig)
+                      ('Menge muss größer als null sein.', _mengeFokus),
+                  ],
                 ),
               TextButton.icon(
                 focusNode: _produktFokus,

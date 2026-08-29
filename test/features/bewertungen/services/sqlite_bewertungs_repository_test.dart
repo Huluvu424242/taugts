@@ -106,6 +106,35 @@ void main() {
     expect(produkte.single.istUnvollstaendig, isFalse);
   });
 
+  test('sucht Produkte über ihre Stammdaten', () async {
+    await repository.speichereProdukt(Produkt(
+      id: '55e34e0e-fb72-450d-9db7-20d42188d235',
+      name: 'Sonnenpils',
+      marke: 'Erzgebirge',
+      brauerei: 'Brauerei am Berg',
+      sorte: 'Pils',
+      barcode: '4012345678901',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+    await repository.speichereProdukt(Produkt(
+      id: '55e34e0e-fb72-450d-9db7-20d42188d236',
+      name: 'Apfelschorle',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+
+    expect(
+      (await repository.ladeProdukte(suchtext: 'berg')).single.name,
+      'Sonnenpils',
+    );
+    expect(
+      (await repository.ladeProdukte(suchtext: '401234')).single.name,
+      'Sonnenpils',
+    );
+    expect(await repository.ladeProdukte(suchtext: 'unbekannt'), isEmpty);
+  });
+
   test('Produktänderungen lassen historische Erlebnisse bestehen', () async {
     const produktId = '55e34e0e-fb72-450d-9db7-20d42188d229';
     final produkt = Produkt(

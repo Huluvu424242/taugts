@@ -1,4 +1,4 @@
-package com.example.taugts
+package de.huluvu.taugts
 
 import io.flutter.embedding.android.FlutterActivity
 

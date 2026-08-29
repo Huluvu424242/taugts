@@ -51,4 +51,18 @@ tool/                   Entwicklungs- und Bootstrap-Skripte
 
 Neue Ordner und Abstraktionen werden erst bei einem konkreten Bedarf angelegt. Die verbindlichen Arbeitsregeln stehen in `AGENTS.md`.
 
-Die bereits erarbeiteten fachlichen Anforderungen und die vorläufige Storyliste stehen in `docs/fachliche_anforderungen.md`. Das ausgewählte Logo liegt als hochauflösende PNG-Quelle unter `assets/icons/app_icon_source.png`; plattformspezifische Icon-Größen werden später reproduzierbar daraus erzeugt.
+Die bereits erarbeiteten fachlichen Anforderungen und die vorläufige Storyliste stehen in `docs/fachliche_anforderungen.md`.
+
+## App-Logo und Android-Icons
+
+Das ausgewählte Logo liegt als hochauflösende PNG-Quelle unter
+`assets/icons/app_icon_source.png`, wird in der App-Oberfläche angezeigt und ist
+die einzige Quelle für die Android-Launcher-Icons. Mit installiertem ImageMagick
+lassen sich alle Größen reproduzierbar neu erzeugen:
+
+```bash
+chmod +x tool/generate_app_icons.sh
+./tool/generate_app_icons.sh
+```
+
+Herkunft, Verwendung und Lizenz sind in `ATTRIBUTIONS.md` dokumentiert.

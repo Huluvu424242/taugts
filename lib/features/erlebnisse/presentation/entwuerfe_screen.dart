@@ -62,31 +62,49 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
     }
   }
 
-  Future<void> _verwerfen(Erlebnis erlebnis) async {
-    final bestaetigt = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Entwurf verwerfen?'),
-        content: const Text('Die bisher erfassten Angaben gehen verloren.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Verwerfen'),
-          ),
-        ],
-      ),
-    );
+  Future<void> _verwerfen(
+    Erlebnis erlebnis, {
+    bool bestaetigungUeberspringen = false,
+  }) async {
+    final bestaetigt = bestaetigungUeberspringen
+        ? true
+        : await showDialog<bool>(
+            context: context,
+            builder: (dialogContext) => AlertDialog(
+              title: const Text('Entwurf verwerfen?'),
+              content: const Text('Die bisher erfassten Angaben gehen verloren.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: const Text('Abbrechen'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  child: const Text('Verwerfen'),
+                ),
+              ],
+            ),
+          );
     if (bestaetigt != true) return;
-    await widget.repository.loescheErlebnis(erlebnis.id);
-    if (!mounted) return;
-    setState(() => _entwuerfe = widget.repository.ladeEntwuerfe());
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Entwurf verworfen.')),
-    );
+    try {
+      await widget.repository.loescheErlebnis(erlebnis.id);
+      if (!mounted) return;
+      setState(() => _entwuerfe = widget.repository.ladeEntwuerfe());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Entwurf verworfen.')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Der Entwurf konnte nicht verworfen werden.'),
+          action: SnackBarAction(
+            label: 'Erneut versuchen',
+            onPressed: () => _verwerfen(erlebnis, bestaetigungUeberspringen: true),
+          ),
+        ),
+      );
+    }
   }
 
   @override
