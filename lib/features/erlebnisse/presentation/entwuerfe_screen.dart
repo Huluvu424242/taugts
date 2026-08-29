@@ -74,7 +74,8 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
             context: context,
             builder: (dialogContext) => AlertDialog(
               title: const Text('Entwurf verwerfen?'),
-              content: const Text('Die bisher erfassten Angaben gehen verloren.'),
+              content:
+                  const Text('Die bisher erfassten Angaben gehen verloren.'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -102,7 +103,8 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
           content: const Text('Der Entwurf konnte nicht verworfen werden.'),
           action: SnackBarAction(
             label: 'Erneut versuchen',
-            onPressed: () => _verwerfen(erlebnis, bestaetigungUeberspringen: true),
+            onPressed: () =>
+                _verwerfen(erlebnis, bestaetigungUeberspringen: true),
           ),
         ),
       );
