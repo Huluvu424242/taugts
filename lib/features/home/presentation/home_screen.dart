@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/erlebnisse/presentation/entwuerfe_screen.dart';
 import 'package:taugts/features/orte/presentation/orte_screen.dart';
 import 'package:taugts/features/produkte/presentation/produkte_screen.dart';
 import 'package:taugts/features/profil/models/profil.dart';
@@ -77,6 +78,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _bewerten() async {
+    final repository = widget.bewertungsRepository;
+    final idGenerator = widget.idGenerator;
+    final profil = _profil;
+    if (repository == null || idGenerator == null || profil == null) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => EntwuerfeScreen(
+          repository: repository,
+          idGenerator: idGenerator,
+          profil: profil,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final profil = _profil;
@@ -116,12 +133,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     widget.idGenerator != null) ...[
                   const SizedBox(height: 32),
                   FilledButton.icon(
+                    onPressed: _bewerten,
+                    icon: const Icon(Icons.rate_review_outlined),
+                    label: const Text('Jetzt bewerten'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
                     onPressed: _produkteOeffnen,
                     icon: const Icon(Icons.inventory_2_outlined),
                     label: const Text('Produkte verwalten'),
                   ),
                   const SizedBox(height: 12),
-                  OutlinedButton.icon(
+                  TextButton.icon(
                     onPressed: _orteOeffnen,
                     icon: const Icon(Icons.place_outlined),
                     label: const Text('Orte verwalten'),
