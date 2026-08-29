@@ -145,6 +145,7 @@ Die folgenden Anforderungen müssen zusammen mit dem jeweiligen Screen geplant, 
 - Erfolgreiche, fehlgeschlagene und noch laufende Aktionen erhalten eine verständliche Rückmeldung; deaktivierte Aktionen bleiben in ihrem Zustand erklärbar.
 - Fokusreihenfolge und Tastaturaktivierung werden bereits in der Widgetstruktur sinnvoll angelegt. Offensichtliche Fokusfallen und ausschließlich gestenbasierte Bedienwege sind unzulässig.
 - Eingabefelder erhalten fachlich begründete Maximallängen. Zeichenzähler und barrierefreie Grenzrückmeldung werden in der jeweiligen Story konkretisiert.
+- In scrollbaren oder lazy aufgebauten Formularen darf die vollständige fachliche Validierung nicht ausschließlich von `FormState.validate()` oder aktuell gemounteten `FormField`-Widgets abhängen. Außerhalb des Viewports liegende Felder können aus dem Widgetbaum entfernt sein. Die Speicherlogik prüft daher alle relevanten Controller- beziehungsweise Modellwerte unabhängig vom Sichtbereich; Feldvalidatoren dienen zusätzlich der lokalen Fehleranzeige. Widgettests lösen die Speicheraktion auch vom Formularende aus und weisen nach, dass Fehler in nicht sichtbaren Feldern erkannt werden.
 - Für diese Grundlagen werden passende Widget- und Semantiktests ergänzt, soweit Flutter sie automatisiert prüfen kann.
 
 Fehlendes Flutter-SDK, fehlender Emulator oder fehlendes Testgerät rechtfertigen nicht das Weglassen dieser Implementierungen. Nicht ausführbare Prüfungen werden benannt, die zugrunde liegenden Anforderungen aber trotzdem im Code umgesetzt.
