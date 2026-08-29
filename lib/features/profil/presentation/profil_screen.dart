@@ -78,7 +78,8 @@ class _ProfilScreenState extends State<ProfilScreen> {
                 controller: _anzeigenameController,
                 decoration: const InputDecoration(
                   labelText: 'Anzeigename (optional)',
-                  helperText: 'Bleibt leer, wenn du keinen Namen angeben möchtest.',
+                  helperText:
+                      'Bleibt leer, wenn du keinen Namen angeben möchtest.',
                 ),
                 maxLength: 80,
                 textInputAction: TextInputAction.done,
