@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:taugts/core/support/app_support.dart';
+import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/app/taugts_app.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/theme/app_theme.dart';
@@ -56,6 +58,11 @@ class _BootstrapAppState extends State<BootstrapApp> {
             theme: AppTheme.light,
             title: 'Taugt’s?',
             home: Scaffold(
+              appBar: AppBar(
+                actions: const [
+                  AppSupportMenu(contextName: SupportKontexte.appStart),
+                ],
+              ),
               body: SafeArea(
                 child: ListView(
                   padding: const EdgeInsets.all(24),
