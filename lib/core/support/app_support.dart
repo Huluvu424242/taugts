@@ -376,13 +376,16 @@ class _BugMeldungDialogState extends State<_BugMeldungDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (_zeigtFehler && _fehlerart == null)
-                    FormularFehlersammler(
-                      focusNode: _fehlerFokus,
-                      fehler: [
-                        ('Fehlerart: Bitte auswählen', _typFokus),
-                      ],
-                    ),
+                  Builder(
+                    builder: (_) => _zeigtFehler && _fehlerart == null
+                        ? FormularFehlersammler(
+                            focusNode: _fehlerFokus,
+                            fehler: [
+                              ('Fehlerart: Bitte auswählen', _typFokus),
+                            ],
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                   Text('Kontext: ${widget.contextName}'),
                   Text(
                     'Releaseversion: ${widget.appInfo.displayVersion}',
