@@ -82,9 +82,8 @@ class _OrtFormularState extends State<OrtFormular> {
     super.dispose();
   }
 
-  String? _namePruefen(String? wert) => wert == null || wert.trim().isEmpty
-      ? 'Der Name ist erforderlich.'
-      : null;
+  String? _namePruefen(String? wert) =>
+      wert == null || wert.trim().isEmpty ? 'Der Name ist erforderlich.' : null;
 
   String? _breitengradPruefen(String? wert) =>
       _koordinatePruefen(wert, -90, 90, _laengengrad.text);
@@ -194,7 +193,8 @@ class _OrtFormularState extends State<OrtFormular> {
       }
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Der Ort konnte nicht gespeichert werden.')),
+        const SnackBar(
+            content: Text('Der Ort konnte nicht gespeichert werden.')),
       );
     }
   }
@@ -333,7 +333,8 @@ class _OrtFormularState extends State<OrtFormular> {
     FocusNode? focusNode,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
-  }) => Padding(
+  }) =>
+      Padding(
         padding: const EdgeInsets.only(top: 16),
         child: TextFormField(
           controller: controller,
