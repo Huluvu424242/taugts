@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:taugts/core/support/app_support.dart';
+import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
@@ -220,6 +222,13 @@ class _ProduktFormularState extends State<ProduktFormular> {
           title: Text(
             widget.produkt == null ? 'Produkt anlegen' : 'Produkt bearbeiten',
           ),
+          actions: [
+            AppSupportMenu(
+              contextName: SupportKontexte.produktFormular(
+                bearbeiten: widget.produkt != null,
+              ),
+            ),
+          ],
         ),
         body: SafeArea(
           child: Form(
