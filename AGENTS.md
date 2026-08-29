@@ -105,7 +105,6 @@ lib/
 - `const` sinnvoll verwenden, Kontrollstrukturen klammern und Kommentare auf das Warum beschränken.
 - Fachlogik unabhängig von Widgets und Plattformdetails testen; technische Abhängigkeiten durch Fakes ersetzen können.
 
-
 ### Flutter-spezifische Analysefehler vermeiden
 
 - `Semantics` und andere Konstruktoren, die in der unterstützten Flutter-Version nicht `const` sind, dürfen nicht durch einen äußeren konstanten Konstruktor-Kontext implizit als konstant ausgewertet werden.
