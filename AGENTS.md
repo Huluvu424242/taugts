@@ -105,15 +105,51 @@ lib/
 - `const` sinnvoll verwenden, Kontrollstrukturen klammern und Kommentare auf das Warum beschränken.
 - Fachlogik unabhängig von Widgets und Plattformdetails testen; technische Abhängigkeiten durch Fakes ersetzen können.
 
+## App-Identität: Name und Logo vor Implementierungsbeginn
+
+- Jede neu zu erstellende App erhält vor Beginn der App-Implementierung einen finalen Namen und ein auf diesem Namen sowie der fachlichen Aufgabe beruhendes finales Logo.
+- Name und Logo sind fachliche Startvoraussetzungen und keine nachträgliche Verschönerung. Erst mit beiden lässt sich die Identität der App eindeutig festlegen; insbesondere hängen Repositoryname, Paket- und Anzeigenamen, visuelle Wiedererkennbarkeit und weitere Projektartefakte davon ab.
+- Das erste lauffähige App-Grundgerüst muss sich bereits durch seinen finalen Namen und sein Logo eindeutig von anderen Apps unterscheiden. Generische Frameworknamen, Standard-Launcher-Icons oder Platzhalterlogos sind nicht als fertiges Grundgerüst zulässig.
+- Das Logo wird von Anfang an mindestens als App- beziehungsweise Launcher-Icon der primären Zielplattform integriert. Erforderliche plattformspezifische Varianten und Größen werden aus einer geeigneten hochwertigen Quelldatei reproduzierbar abgeleitet.
+- Logoentwurf, Auswahl und Integration werden in den initialen Stories und Akzeptanzkriterien berücksichtigt. Ohne finales Logo darf die fachliche Implementierung nicht beginnen.
+- Herkunft, Urheberschaft, Nutzungsrechte, Lizenz und Verwendung des Logos werden spätestens mit seiner Integration in `ATTRIBUTIONS.md` dokumentiert.
+
 ## UX und Barrierefreiheit
 
-- Semantische Beschriftungen, ausreichende Touch-Ziele, Tastaturbedienbarkeit und vergrößerte Schrift von Anfang an berücksichtigen.
-- Information nie ausschließlich über Farbe vermitteln; Kontraste und verständliche Rückmeldungen sicherstellen.
-- Validierungsfehler am Feld und zusätzlich in einem fokussierbaren Fehlersammler am Inhaltsanfang anzeigen. Einträge führen zum zugehörigen Feld.
-- Nach fehlgeschlagener Validierung eine kurze wahrnehmbare Meldung zeigen und Fokus beziehungsweise Scrollposition zum Fehlersammler bewegen.
-- Primäre Aktionen am Seitenende mit Abstand zu Bildschirmrand, Systemgesten, Tastatur und temporären Meldungen platzieren.
+Barrierefreiheit ist Bestandteil jeder einzelnen GUI-Story und keine ausschließlich nachgelagerte Querschnittsaufgabe. Eine spätere Barrierefreiheitsstory dient der systematischen Gesamtprüfung und Vervollständigung, darf aber nicht als Begründung verwendet werden, um ohne Spezialwerkzeuge umsetzbare Grundlagen zu verschieben.
+
+### In jeder GUI-Story sofort verpflichtend
+
+Die folgenden Anforderungen müssen zusammen mit dem jeweiligen Screen geplant, implementiert und soweit automatisierbar getestet werden. Eine GUI-Story darf ohne sie nicht als fachlich fertig gemeldet oder geschlossen werden:
+
+- Interaktive Elemente erhalten verständliche sichtbare Bezeichnungen oder eindeutige semantische Beschriftungen. Symbolschaltflächen erhalten insbesondere einen verständlichen Tooltip beziehungsweise ein Semantics-Label.
+- Touch-Ziele werden ausreichend groß ausgelegt; primäre Aktionen bleiben mit Abstand zu Bildschirmrand, Systemgesten, Bildschirmtastatur und temporären Meldungen erreichbar.
+- Layouts verwenden scroll- und umbruchfähige Strukturen. Große Systemschrift und kleine Android-Bildschirme dürfen keine Kerninhalte abschneiden, überlagern oder Aktionen unerreichbar machen.
+- Information wird nie ausschließlich über Farbe, Position, Form oder ein unbeschriftetes Symbol vermittelt.
+- Lade-, Leer-, Erfolgs- und Fehlerzustände werden verständlich und semantisch wahrnehmbar umgesetzt. Fortschrittsanzeigen erhalten einen zugänglichen Zweck; leere Zustände bieten eine sinnvolle nächste Aktion; behebbare Fehler bieten einen erneuten Versuch.
+- Nutzereingaben und Entwürfe bleiben bei Validierungs-, Persistenz- und Navigationsfehlern erhalten.
+- Validierungsfehler erscheinen am Feld und zusätzlich in einem fokussierbaren Fehlersammler am Inhaltsanfang. Dessen Einträge führen zum zugehörigen Feld.
+- Nach fehlgeschlagener Validierung werden eine kurze wahrnehmbare Meldung sowie Fokus und Scrollposition zum Fehlersammler beziehungsweise ersten Fehler bewegt.
+- Erfolgreiche, fehlgeschlagene und noch laufende Aktionen erhalten eine verständliche Rückmeldung; deaktivierte Aktionen bleiben in ihrem Zustand erklärbar.
+- Fokusreihenfolge und Tastaturaktivierung werden bereits in der Widgetstruktur sinnvoll angelegt. Offensichtliche Fokusfallen und ausschließlich gestenbasierte Bedienwege sind unzulässig.
 - Eingabefelder erhalten fachlich begründete Maximallängen. Zeichenzähler und barrierefreie Grenzrückmeldung werden in der jeweiligen Story konkretisiert.
-- Eine dauerhaft erreichbare Barrierefreiheitserklärung und ein `Über`-Bereich mit Releaseversion werden spätestens vor dem ersten öffentlichen Release umgesetzt.
+- Für diese Grundlagen werden passende Widget- und Semantiktests ergänzt, soweit Flutter sie automatisiert prüfen kann.
+
+Fehlendes Flutter-SDK, fehlender Emulator oder fehlendes Testgerät rechtfertigen nicht das Weglassen dieser Implementierungen. Nicht ausführbare Prüfungen werden benannt, die zugrunde liegenden Anforderungen aber trotzdem im Code umgesetzt.
+
+### Gebündelt prüfbare Querschnittsanforderungen
+
+Folgende Prüfungen dürfen in einer eigenen Barrierefreiheitsstory über alle bis dahin vorhandenen Screens gebündelt werden, weil sie reale Plattformen, Assistenztechnik oder eine konsistente Gesamtschau benötigen:
+
+- manuelle Bedienung der vollständigen Kernabläufe mit TalkBack auf Android,
+- manuelle Prüfung extremer Systemschriftgrößen und Display-Skalierungen auf repräsentativen Geräten,
+- durchgängige Tastatur- und Fokusprüfung unter Windows und Linux,
+- systematische Kontrastmessung aller verwendeten Farbkombinationen und Zustände,
+- Prüfung der Screenreader-Reihenfolge, Live-Regionen und gesprochenen Rückmeldungen im realen Zusammenspiel,
+- Prüfung auf konsistente Navigation und unerwartete Fokusverluste über Screen-Grenzen hinweg,
+- dauerhaft erreichbare Barrierefreiheitserklärung und abschließende dokumentierte Prüfliste vor dem ersten öffentlichen Release.
+
+Eine gebündelte Prüfung darf neue Befunde erzeugen und Nachbesserungen verlangen. Sie ersetzt weder die sofortigen Anforderungen noch deren Prüfung innerhalb der jeweiligen GUI-Story.
 
 ## Sicherheit
 
