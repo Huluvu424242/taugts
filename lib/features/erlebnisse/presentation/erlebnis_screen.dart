@@ -276,7 +276,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
               TextField(
                 controller: _menge,
                 focusNode: _mengeFokus,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 maxLength: 12,
                 decoration: InputDecoration(
                   labelText: 'Menge (optional)',
