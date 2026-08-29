@@ -84,10 +84,10 @@ class _BootstrapAppState extends State<BootstrapApp> {
                         ),
                       ),
                     ] else
-                      const Center(
+                      Center(
                         child: Semantics(
                           label: 'Taugt’s? wird vorbereitet',
-                          child: CircularProgressIndicator(),
+                          child: const CircularProgressIndicator(),
                         ),
                       ),
                   ],

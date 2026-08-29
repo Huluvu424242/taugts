@@ -99,10 +99,10 @@ class _OrteScreenState extends State<OrteScreen> {
                       );
                     }
                     if (!snapshot.hasData) {
-                      return const Center(
+                      return Center(
                         child: Semantics(
                           label: 'Orte werden geladen',
-                          child: CircularProgressIndicator(),
+                          child: const CircularProgressIndicator(),
                         ),
                       );
                     }

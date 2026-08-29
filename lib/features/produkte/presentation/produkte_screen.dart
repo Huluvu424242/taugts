@@ -93,10 +93,10 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
                       );
                     }
                     if (!snapshot.hasData) {
-                      return const Center(
+                      return Center(
                         child: Semantics(
                           label: 'Produkte werden geladen',
-                          child: CircularProgressIndicator(),
+                          child: const CircularProgressIndicator(),
                         ),
                       );
                     }
