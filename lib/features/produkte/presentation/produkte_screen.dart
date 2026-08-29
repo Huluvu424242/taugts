@@ -8,11 +8,13 @@ class ProdukteScreen extends StatefulWidget {
   const ProdukteScreen({
     required this.repository,
     required this.idGenerator,
+    this.zurAuswahl = false,
     super.key,
   });
 
   final BewertungsRepository repository;
   final IdGenerator idGenerator;
+  final bool zurAuswahl;
 
   @override
   State<ProdukteScreen> createState() => _ProdukteScreenState();
@@ -38,7 +40,9 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Produkte')),
+        appBar: AppBar(
+          title: Text(widget.zurAuswahl ? 'Produkt auswählen' : 'Produkte'),
+        ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _formularOeffnen,
           icon: const Icon(Icons.add),
@@ -75,8 +79,14 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
                     subtitle: produkt.istUnvollstaendig
                         ? const Text('Unvollständig – kann später ergänzt werden')
                         : Text(produkt.marke ?? produkt.produktart.name),
-                    trailing: const Icon(Icons.edit_outlined),
-                    onTap: () => _formularOeffnen(produkt),
+                    trailing: Icon(
+                      widget.zurAuswahl
+                          ? Icons.chevron_right
+                          : Icons.edit_outlined,
+                    ),
+                    onTap: () => widget.zurAuswahl
+                        ? Navigator.of(context).pop(produkt)
+                        : _formularOeffnen(produkt),
                   );
                 },
               );
