@@ -216,7 +216,24 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   @override
   Future<void> speichereErlebnis(Erlebnis erlebnis) async {
     datenbank.verbindung.execute(
-      'INSERT INTO erlebnisse VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      '''
+        INSERT INTO erlebnisse (
+          id, produkt_id, kaufort_id, konsumort_id, erlebt_am, erstellt_am,
+          geaendert_am, herkunft_profil_id, preis, menge, gebinde, notiz,
+          ist_entwurf
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          produkt_id = excluded.produkt_id,
+          kaufort_id = excluded.kaufort_id,
+          konsumort_id = excluded.konsumort_id,
+          erlebt_am = excluded.erlebt_am,
+          geaendert_am = excluded.geaendert_am,
+          preis = excluded.preis,
+          menge = excluded.menge,
+          gebinde = excluded.gebinde,
+          notiz = excluded.notiz,
+          ist_entwurf = excluded.ist_entwurf
+      ''',
       [
         erlebnis.id,
         erlebnis.produktId,
@@ -226,9 +243,44 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         _zeit(erlebnis.erstelltAm),
         _zeit(erlebnis.geaendertAm),
         erlebnis.herkunftProfilId,
+        erlebnis.preis,
+        erlebnis.menge,
+        _leerAlsNull(erlebnis.gebinde),
+        _leerAlsNull(erlebnis.notiz),
+        erlebnis.istEntwurf ? 1 : 0,
       ],
     );
   }
+
+  @override
+  Future<List<Erlebnis>> ladeEntwuerfe() async => datenbank.verbindung
+      .select(
+        'SELECT * FROM erlebnisse WHERE ist_entwurf = 1 '
+        'ORDER BY geaendert_am DESC',
+      )
+      .map(_erlebnisAusZeile)
+      .toList();
+
+  @override
+  Future<void> loescheErlebnis(String id) async {
+    datenbank.verbindung.execute('DELETE FROM erlebnisse WHERE id = ?', [id]);
+  }
+
+  Erlebnis _erlebnisAusZeile(Map<String, Object?> row) => Erlebnis(
+        id: row['id'] as String,
+        produktId: row['produkt_id'] as String,
+        kaufortId: row['kaufort_id'] as String?,
+        konsumortId: row['konsumort_id'] as String?,
+        herkunftProfilId: row['herkunft_profil_id'] as String,
+        erlebtAm: DateTime.parse(row['erlebt_am'] as String),
+        erstelltAm: DateTime.parse(row['erstellt_am'] as String),
+        geaendertAm: DateTime.parse(row['geaendert_am'] as String),
+        preis: (row['preis'] as num?)?.toDouble(),
+        menge: (row['menge'] as num?)?.toDouble(),
+        gebinde: row['gebinde'] as String?,
+        notiz: row['notiz'] as String?,
+        istEntwurf: (row['ist_entwurf'] as int) == 1,
+      );
 
   @override
   Future<void> speichereKriterium(Bewertungskriterium kriterium) async {
