@@ -10,7 +10,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 5;
+  static const schemaVersion = 6;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -54,9 +54,25 @@ class LokaleDatenbank {
         if (version <= 4) {
           _migriereAufSchemaV5();
         }
+        if (version <= 5) {
+          _migriereAufSchemaV6();
+        }
       }
       verbindung.userVersion = schemaVersion;
     });
+  }
+
+  void _migriereAufSchemaV6() {
+    if (!_tabelleExistiert('erlebnisse')) return;
+    for (final definition in [
+      'preis REAL',
+      'menge REAL',
+      'gebinde TEXT',
+      'notiz TEXT',
+      'ist_entwurf INTEGER NOT NULL DEFAULT 0',
+    ]) {
+      verbindung.execute('ALTER TABLE erlebnisse ADD COLUMN $definition');
+    }
   }
 
   void _migriereAufSchemaV5() {
@@ -192,7 +208,12 @@ class LokaleDatenbank {
         erlebt_am TEXT NOT NULL,
         erstellt_am TEXT NOT NULL,
         geaendert_am TEXT NOT NULL,
-        herkunft_profil_id TEXT NOT NULL REFERENCES profile(id)
+        herkunft_profil_id TEXT NOT NULL REFERENCES profile(id),
+        preis REAL,
+        menge REAL,
+        gebinde TEXT,
+        notiz TEXT,
+        ist_entwurf INTEGER NOT NULL DEFAULT 0
       )
     ''');
     verbindung.execute('''
