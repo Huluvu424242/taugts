@@ -28,7 +28,6 @@ class ProduktFormular extends StatefulWidget {
 }
 
 class _ProduktFormularState extends State<ProduktFormular> {
-  final _formularKey = GlobalKey<FormState>();
   final _fehlerKey = GlobalKey();
   final _fehlerFokus = FocusNode();
   final _nameFokus = FocusNode();
@@ -124,11 +123,11 @@ class _ProduktFormularState extends State<ProduktFormular> {
 
   Future<void> _speichern() async {
     FocusScope.of(context).unfocus();
-    final gueltig = _formularKey.currentState?.validate() ?? false;
-    if (!gueltig) {
+    final validierungsfehler = _validierungsfehler();
+    if (validierungsfehler.isNotEmpty) {
       setState(() {
         _zeigtFehler = true;
-        _fehler = _validierungsfehler();
+        _fehler = validierungsfehler;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Bitte Eingaben prüfen.')),
@@ -224,7 +223,9 @@ class _ProduktFormularState extends State<ProduktFormular> {
         ),
         body: SafeArea(
           child: Form(
-            key: _formularKey,
+            autovalidateMode: _zeigtFehler
+                ? AutovalidateMode.always
+                : AutovalidateMode.disabled,
             child: ListView(
               padding: const EdgeInsets.all(24),
               children: [
