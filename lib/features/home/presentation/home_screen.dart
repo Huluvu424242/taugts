@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/orte/presentation/orte_screen.dart';
 import 'package:taugts/features/produkte/presentation/produkte_screen.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 import 'package:taugts/features/profil/presentation/profil_screen.dart';
@@ -47,10 +48,28 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _produkteOeffnen() async {
     final repository = widget.bewertungsRepository;
     final idGenerator = widget.idGenerator;
-    if (repository == null || idGenerator == null) return;
+    if (repository == null || idGenerator == null) {
+      return;
+    }
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => ProdukteScreen(
+          repository: repository,
+          idGenerator: idGenerator,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _orteOeffnen() async {
+    final repository = widget.bewertungsRepository;
+    final idGenerator = widget.idGenerator;
+    if (repository == null || idGenerator == null) {
+      return;
+    }
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => OrteScreen(
           repository: repository,
           idGenerator: idGenerator,
         ),
@@ -100,6 +119,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: _produkteOeffnen,
                     icon: const Icon(Icons.inventory_2_outlined),
                     label: const Text('Produkte verwalten'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _orteOeffnen,
+                    icon: const Icon(Icons.place_outlined),
+                    label: const Text('Orte verwalten'),
                   ),
                 ],
               ],

@@ -74,11 +74,21 @@ class Ort {
     required this.typ,
     required this.erstelltAm,
     required this.geaendertAm,
+    this.adresse,
+    this.breitengrad,
+    this.laengengrad,
+    this.osmReferenz,
+    this.notiz,
   });
 
   final String id;
   final String name;
   final Ortstyp typ;
+  final String? adresse;
+  final double? breitengrad;
+  final double? laengengrad;
+  final String? osmReferenz;
+  final String? notiz;
   final DateTime erstelltAm;
   final DateTime geaendertAm;
 }
