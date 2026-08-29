@@ -32,7 +32,10 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Produkt speichern'));
+    final speichern = find.text('Produkt speichern');
+    await tester.ensureVisible(speichern);
+    await tester.pump();
+    await tester.tap(speichern);
     await tester.pumpAndSettle();
 
     expect(find.text('Bitte Eingaben prüfen'), findsOneWidget);
