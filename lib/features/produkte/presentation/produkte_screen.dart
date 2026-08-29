@@ -84,3 +84,4 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
           ),
         ),
       );
+}
