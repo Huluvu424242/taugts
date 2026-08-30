@@ -294,10 +294,11 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   Future<void> _positionOeffnen([
     ErlebnispositionMitProdukt? vorhanden,
   ]) async {
-    var erlebnis = _erlebnisAusEingaben();
+    final erlebnis = _erlebnisAusEingaben();
     if (!await _validiere(erlebnis) || !mounted) return;
     try {
       await widget.repository.speichereErlebnis(erlebnis);
+      if (!mounted) return;
       _gespeichertesErlebnis = erlebnis;
       final gespeichert = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
