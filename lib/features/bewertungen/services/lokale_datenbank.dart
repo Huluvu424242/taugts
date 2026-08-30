@@ -1,6 +1,6 @@
 import 'package:sqlite3/sqlite3.dart';
-import 'package:uuid/uuid.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
+import 'package:uuid/uuid.dart';
 
 class LokaleDatenbank {
   LokaleDatenbank._(this.verbindung);
