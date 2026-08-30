@@ -247,6 +247,100 @@ class Erlebnis {
       );
 }
 
+class Geldbetrag {
+  const Geldbetrag({
+    required this.minorEinheiten,
+    this.waehrung = 'EUR',
+  });
+
+  final int minorEinheiten;
+  final String waehrung;
+
+  static Geldbetrag? ausEingabe(String eingabe, String waehrung) {
+    final normalisiert = eingabe.trim().replaceAll(',', '.');
+    final treffer = RegExp(r'^(\d+)(?:\.(\d{1,2}))?$').firstMatch(normalisiert);
+    if (treffer == null) return null;
+    final ganze = int.parse(treffer.group(1)!);
+    final nachkomma = (treffer.group(2) ?? '').padRight(2, '0');
+    return Geldbetrag(
+      minorEinheiten: ganze * 100 +
+          (nachkomma.isEmpty ? 0 : int.parse(nachkomma)),
+      waehrung: waehrung,
+    );
+  }
+
+  String get dezimalText {
+    final absolut = minorEinheiten.abs();
+    final vorzeichen = minorEinheiten < 0 ? '-' : '';
+    return '$vorzeichen${absolut ~/ 100},'
+        '${(absolut % 100).toString().padLeft(2, '0')}';
+  }
+}
+
+class ErlebnisPosition {
+  const ErlebnisPosition({
+    required this.id,
+    required this.erlebnisId,
+    required this.produktId,
+    required this.anzahl,
+    required this.erstelltAm,
+    required this.geaendertAm,
+  });
+
+  final String id;
+  final String erlebnisId;
+  final String produktId;
+  final int anzahl;
+  final DateTime erstelltAm;
+  final DateTime geaendertAm;
+
+  ErlebnisPosition mitAnzahl(int wert, DateTime geaendertAm) =>
+      ErlebnisPosition(
+        id: id,
+        erlebnisId: erlebnisId,
+        produktId: produktId,
+        anzahl: wert,
+        erstelltAm: erstelltAm,
+        geaendertAm: geaendertAm,
+      );
+}
+
+class Preisbeobachtung {
+  const Preisbeobachtung({
+    required this.id,
+    required this.erlebnisId,
+    required this.erlebnisPositionId,
+    required this.produktId,
+    required this.betrag,
+    required this.beobachtetAm,
+    required this.erstelltAm,
+    required this.geaendertAm,
+    this.ortId,
+  });
+
+  final String id;
+  final String erlebnisId;
+  final String erlebnisPositionId;
+  final String produktId;
+  final String? ortId;
+  final Geldbetrag betrag;
+  final DateTime beobachtetAm;
+  final DateTime erstelltAm;
+  final DateTime geaendertAm;
+}
+
+class ErlebnispositionMitProdukt {
+  const ErlebnispositionMitProdukt({
+    required this.position,
+    required this.produkt,
+    this.preis,
+  });
+
+  final ErlebnisPosition position;
+  final Produkt produkt;
+  final Preisbeobachtung? preis;
+}
+
 class Bewertungskriterium {
   const Bewertungskriterium({
     required this.id,
@@ -349,10 +443,12 @@ class Bewertung {
     required this.wert,
     required this.erstelltAm,
     required this.geaendertAm,
+    this.erlebnisPositionId,
   });
 
   final String id;
   final String erlebnisId;
+  final String? erlebnisPositionId;
   final String kriteriumId;
   final String herkunftProfilId;
   final double wert;

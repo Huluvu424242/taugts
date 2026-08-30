@@ -5,6 +5,7 @@ import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/erlebnisse/presentation/erlebnisposition_formular.dart';
 import 'package:taugts/features/orte/presentation/orte_screen.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 
@@ -47,6 +48,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   DateTime? _tatsaechlichesEnde;
   var _speichert = false;
   var _zeitfehler = <String>[];
+  late Future<List<ErlebnispositionMitProdukt>> _positionen;
 
   @override
   void initState() {
@@ -62,6 +64,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     _tatsaechlichesEnde = erlebnis?.tatsaechlichesEnde?.toLocal();
     _dauer.text = erlebnis?.geplanteDauerMinuten?.toString() ?? '';
     _notiz.text = erlebnis?.notiz ?? '';
+    _positionen = widget.repository.ladeErlebnispositionen(_id);
     _ladeOrt();
   }
 
@@ -282,6 +285,62 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     await _persistieren(status: Erlebnisstatus.beendet, schliessen: false);
   }
 
+  void _positionenLaden() {
+    setState(() {
+      _positionen = widget.repository.ladeErlebnispositionen(_id);
+    });
+  }
+
+  Future<void> _positionOeffnen([
+    ErlebnispositionMitProdukt? vorhanden,
+  ]) async {
+    var erlebnis = _erlebnisAusEingaben();
+    if (!await _validiere(erlebnis) || !mounted) return;
+    try {
+      await widget.repository.speichereErlebnis(erlebnis);
+      _gespeichertesErlebnis = erlebnis;
+      final gespeichert = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => ErlebnispositionFormular(
+            repository: widget.repository,
+            idGenerator: widget.idGenerator,
+            erlebnis: erlebnis,
+            vorhanden: vorhanden,
+          ),
+        ),
+      );
+      if (gespeichert == true && mounted) _positionenLaden();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Das Erlebnis konnte nicht vorbereitet werden.')),
+      );
+    }
+  }
+
+  Future<void> _positionLoeschen(ErlebnispositionMitProdukt eintrag) async {
+    final bestaetigt = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Position entfernen?'),
+        content: Text('${eintrag.produkt.anzeigetitel} wird aus dem Erlebnis entfernt.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Entfernen'),
+          ),
+        ],
+      ),
+    );
+    if (bestaetigt != true) return;
+    await widget.repository.loescheErlebnisposition(eintrag.position.id);
+    if (mounted) _positionenLaden();
+  }
+
   String _datumText(BuildContext context, DateTime? wert) => wert == null
       ? 'Nicht festgelegt'
       : MaterialLocalizations.of(context).formatFullDate(wert);
@@ -429,6 +488,55 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                 maxLines: 4,
                 decoration:
                     const InputDecoration(labelText: 'Notiz (optional)'),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      header: true,
+                      child: Text(
+                        'Erlebnispositionen',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: _speichert ? null : _positionOeffnen,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Hinzufügen'),
+                  ),
+                ],
+              ),
+              FutureBuilder<List<ErlebnispositionMitProdukt>>(
+                future: _positionen,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const LinearProgressIndicator();
+                  }
+                  if (snapshot.data!.isEmpty) {
+                    return const Text('Noch keine Produkte erfasst.');
+                  }
+                  return Column(
+                    children: [
+                      for (final eintrag in snapshot.data!)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(eintrag.produkt.anzeigetitel),
+                          subtitle: Text(
+                            '${eintrag.position.anzahl} ×'
+                            '${eintrag.preis == null ? '' : ' · ${eintrag.preis!.betrag.dezimalText} ${eintrag.preis!.betrag.waehrung}'}',
+                          ),
+                          onTap: () => _positionOeffnen(eintrag),
+                          trailing: IconButton(
+                            tooltip: '${eintrag.produkt.anzeigetitel} entfernen',
+                            onPressed: () => _positionLoeschen(eintrag),
+                            icon: const Icon(Icons.delete_outline),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
             ],
           ),

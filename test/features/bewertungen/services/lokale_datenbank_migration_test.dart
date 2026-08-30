@@ -166,6 +166,11 @@ void main() {
     expect(zeile['geplanter_tag'], '2026-08-28');
     expect(zeile['geplante_minute'], 20 * 60 + 15);
     expect(zeile['produkt_id'], 'p1');
+    final position = verbindung.select(
+      "SELECT * FROM erlebnispositionen WHERE erlebnis_id = 'e1'",
+    ).single;
+    expect(position['produkt_id'], 'p1');
+    expect(position['anzahl'], 1);
     datenbank.schliessen();
   });
 

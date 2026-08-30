@@ -32,3 +32,6 @@ Verbindung aktiviert.
   verlustfrei in allgemeine Restaurantbesuche. Der bisherige Zeitpunkt wird als
   Planung übernommen; Produkt-, Preis-, Mengen- und Ortsbezüge bleiben bis zur
   Einführung der Erlebnispositionen als Migrationsdaten erhalten.
+- Schema 9 trennt Produkte als Erlebnispositionen vom Erlebnis. Preise werden
+  als Preisbeobachtungen in ganzzahligen Minor Units gespeichert; Position und
+  Preisänderung werden gemeinsam in einer Transaktion geschrieben.

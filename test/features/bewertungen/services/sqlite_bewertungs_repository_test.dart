@@ -612,4 +612,100 @@ void main() {
       isEmpty,
     );
   });
+
+  test('speichert Position und Preis atomar und korrigierbar', () async {
+    const produktId = '91000000-0000-4000-8000-000000000001';
+    const erlebnisId = '91000000-0000-4000-8000-000000000002';
+    const positionId = '91000000-0000-4000-8000-000000000003';
+    await repository.speichereProdukt(Produkt(
+      id: produktId,
+      name: 'Marktprodukt',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+    await repository.speichereErlebnis(Erlebnis(
+      id: erlebnisId,
+      typ: Erlebnistyp.einkauf,
+      herkunftProfilId: profilId,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+    final position = ErlebnisPosition(
+      id: positionId,
+      erlebnisId: erlebnisId,
+      produktId: produktId,
+      anzahl: 2,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereErlebnisposition(
+      position: position,
+      preis: Preisbeobachtung(
+        id: '91000000-0000-4000-8000-000000000004',
+        erlebnisId: erlebnisId,
+        erlebnisPositionId: positionId,
+        produktId: produktId,
+        beobachtetAm: zeit,
+        betrag: const Geldbetrag(minorEinheiten: 299),
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
+    await repository.speichereErlebnisposition(
+      position: position.mitAnzahl(3, zeit.add(const Duration(minutes: 1))),
+      preis: Preisbeobachtung(
+        id: 'ignorierte-korrektur-id',
+        erlebnisId: erlebnisId,
+        erlebnisPositionId: positionId,
+        produktId: produktId,
+        beobachtetAm: zeit,
+        betrag: const Geldbetrag(minorEinheiten: 349),
+        erstelltAm: zeit,
+        geaendertAm: zeit.add(const Duration(minutes: 1)),
+      ),
+    );
+
+    final geladen = await repository.ladeErlebnispositionen(erlebnisId);
+    expect(geladen.single.position.anzahl, 3);
+    expect(geladen.single.preis?.betrag.minorEinheiten, 349);
+    expect(
+      (await repository.ladeLetztenPreis(
+        produktId: produktId,
+        waehrung: 'EUR',
+      ))?.betrag.minorEinheiten,
+      349,
+    );
+    expect(
+      datenbank.verbindung.select('SELECT * FROM preisbeobachtungen'),
+      hasLength(1),
+    );
+  });
+
+  test('verwirft Position und Preis gemeinsam bei einem Fehler', () async {
+    final position = ErlebnisPosition(
+      id: '92000000-0000-4000-8000-000000000001',
+      erlebnisId: 'nicht-vorhanden',
+      produktId: 'nicht-vorhanden',
+      anzahl: 1,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await expectLater(
+      repository.speichereErlebnisposition(position: position),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(
+      datenbank.verbindung.select('SELECT * FROM erlebnispositionen'),
+      isEmpty,
+    );
+  });
+
+  test('parst Geldbeträge ohne Gleitkomma-Rundung', () {
+    expect(
+      Geldbetrag.ausEingabe('12,30', 'EUR')?.minorEinheiten,
+      1230,
+    );
+    expect(Geldbetrag.ausEingabe('1.234', 'EUR'), isNull);
+    expect(Geldbetrag.ausEingabe('-1', 'EUR'), isNull);
+  });
 }
