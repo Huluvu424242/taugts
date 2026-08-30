@@ -45,6 +45,7 @@ abstract interface class BewertungsRepository {
     required List<Bewertung> bewertungen,
   });
   Future<List<Bewertung>> ladeBewertungenFuerErlebnis(String erlebnisId);
-  Future<List<Bewertung>> ladeBewertungenFuerErlebnisposition(String positionId);
+  Future<List<Bewertung>> ladeBewertungenFuerErlebnisposition(
+      String positionId);
   Future<List<Bewertung>> ladeBewertungenFuerProdukt(String produktId);
 }
