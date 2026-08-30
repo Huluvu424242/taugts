@@ -144,9 +144,7 @@ Future<void> _scrolleBisSichtbar(
   Finder ziel,
 ) async {
   final liste = find.byType(Scrollable).first;
-  for (var versuch = 0;
-      versuch < 10 && ziel.evaluate().isEmpty;
-      versuch++) {
+  for (var versuch = 0; versuch < 10 && ziel.evaluate().isEmpty; versuch++) {
     await tester.drag(liste, const Offset(0, -300));
     await tester.pumpAndSettle();
   }
