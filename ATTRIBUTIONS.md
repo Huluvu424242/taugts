@@ -1,23 +1,46 @@
 # Attributions
 
+Stand der Prüfung: 30. August 2026 · vorbereitete Version: 0.1.0+1
+
 ## Taugt’s?-App-Logo
 
 - Datei: `assets/icons/app_icon_source.png`
 - Verwendung: sichtbares App-Logo und Quelle der Android-Launcher-Icons
-- Erstellung: von Huluvu424242 mit Unterstützung der ChatGPT-Bildgenerierung erstellt
+- Erstellung: von Huluvu424242 mit Unterstützung der
+  ChatGPT-Bildgenerierung erstellt
 - Rechteinhaber: Huluvu424242
-- Lizenz: [CC0 1.0 Universell](https://creativecommons.org/publicdomain/zero/1.0/deed.de); das Logo darf ohne Namensnennung verwendet werden
+- Lizenz: [CC0 1.0 Universell](https://creativecommons.org/publicdomain/zero/1.0/deed.de);
+  das Logo darf ohne Namensnennung verwendet werden
 
 ## Flutter und Dart
 
-Flutter und Dart werden als Entwicklungs- und Laufzeittechnologien verwendet und stehen unter BSD-Lizenzen. Die jeweils mit der eingesetzten SDK-Version ausgelieferten Lizenztexte und Third-Party-Notices sind beim finalen Distributionsprozess zu berücksichtigen.
+- [Flutter](https://github.com/flutter/flutter) – Copyright The Flutter Authors,
+  BSD-3-Clause
+- [Dart](https://github.com/dart-lang/sdk) – Copyright The Dart Authors,
+  BSD-3-Clause
 
-Neue Laufzeitabhängigkeiten und ausgelieferte Fremdassets werden vor ihrer Aufnahme auf Lizenzkompatibilität geprüft und hier ergänzt.
+Flutter und Dart werden als Entwicklungs- und Laufzeittechnologien verwendet.
+Die jeweils mit der eingesetzten SDK-Version ausgelieferten Lizenztexte und
+Third-Party-Notices bleiben maßgeblich.
 
 ## Laufzeitabhängigkeiten der lokalen Persistenz
 
-- `sqlite3` (MIT): Dart-Bindings und gebündelte SQLite-Laufzeit
-- SQLite (Public Domain): eingebettete relationale Datenbank
-- `path` (BSD-3-Clause): plattformneutrale Pfadverarbeitung
-- `path_provider` (BSD-3-Clause): Ermittlung des Anwendungsdatenverzeichnisses
-- `uuid` (MIT): Erzeugung stabiler UUIDs
+- [sqlite3](https://pub.dev/packages/sqlite3) – MIT; Dart-Bindings und
+  gebündelte SQLite-Laufzeit
+- [SQLite](https://www.sqlite.org/copyright.html) – Public Domain; eingebettete
+  relationale Datenbank
+- [path](https://pub.dev/packages/path) – BSD-3-Clause; plattformneutrale
+  Pfadverarbeitung
+- [path_provider](https://pub.dev/packages/path_provider) – BSD-3-Clause;
+  Ermittlung des Anwendungsdatenverzeichnisses
+- [uuid](https://pub.dev/packages/uuid) – MIT; Erzeugung stabiler UUIDs
+
+## Bereitstellung
+
+Diese Datei gehört zusammen mit [LICENSE](LICENSE) zur
+Releasedokumentation. Die Release Notes verlinken beide Nachweise, damit
+Herkunft und Lizenzbedingungen auch bei einer APK-Veröffentlichung auffindbar
+bleiben.
+
+Neue Laufzeitabhängigkeiten und ausgelieferte Fremdassets werden vor ihrer
+Aufnahme auf Lizenzkompatibilität geprüft und hier ergänzt.
