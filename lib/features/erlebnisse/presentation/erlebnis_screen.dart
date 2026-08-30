@@ -4,6 +4,7 @@ import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
+import 'package:taugts/features/bewertungen/presentation/getraenkebewertung_screen.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/orte/presentation/orte_screen.dart';
 import 'package:taugts/features/produkte/presentation/produkte_screen.dart';
@@ -142,32 +143,35 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     });
   }
 
-  Future<void> _speichern() async {
+  Future<bool> _validiere() async {
     final preisUngueltig = !_istPositiveZahlOderLeer(_preis.text);
     final mengeUngueltig = !_istPositiveZahlOderLeer(_menge.text);
-    if (_produkt == null || preisUngueltig || mengeUngueltig) {
-      setState(() {
-        _produktFehlt = _produkt == null;
-        _preisUngueltig = preisUngueltig;
-        _mengeUngueltig = mengeUngueltig;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bitte Eingaben prüfen.')),
-      );
-      await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) return;
-      final fehlerContext = _fehlerKey.currentContext;
-      if (fehlerContext != null && fehlerContext.mounted) {
-        await Scrollable.ensureVisible(fehlerContext);
-      }
-      if (!mounted) return;
-      _fehlerFokus.requestFocus();
-      return;
+    if (_produkt != null && !preisUngueltig && !mengeUngueltig) {
+      return true;
     }
-    setState(() => _speichert = true);
+    setState(() {
+      _produktFehlt = _produkt == null;
+      _preisUngueltig = preisUngueltig;
+      _mengeUngueltig = mengeUngueltig;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Bitte Eingaben prüfen.')),
+    );
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return false;
+    final fehlerContext = _fehlerKey.currentContext;
+    if (fehlerContext != null && fehlerContext.mounted) {
+      await Scrollable.ensureVisible(fehlerContext);
+    }
+    if (!mounted) return false;
+    _fehlerFokus.requestFocus();
+    return false;
+  }
+
+  Erlebnis _erlebnisAusEingaben({required bool istEntwurf}) {
     final vorher = widget.erlebnis;
     final jetzt = DateTime.now().toUtc();
-    final erlebnis = Erlebnis(
+    return Erlebnis(
       id: vorher?.id ?? widget.idGenerator.neueId(),
       produktId: _produkt!.id,
       herkunftProfilId: widget.profil.id,
@@ -180,16 +184,59 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       menge: _zahl(_menge.text),
       gebinde: _wert(_gebinde.text),
       notiz: _wert(_notiz.text),
+      istEntwurf: istEntwurf,
     );
+  }
+
+  Future<void> _speichern() async {
+    if (!await _validiere() || !mounted) return;
+    setState(() => _speichert = true);
+    final erlebnis = _erlebnisAusEingaben(istEntwurf: true);
     try {
       await widget.repository.speichereErlebnis(erlebnis);
-      if (mounted) Navigator.of(context).pop(erlebnis);
+      if (!mounted) return;
+      Navigator.of(context).pop(erlebnis);
     } catch (_) {
       if (!mounted) return;
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Der Entwurf konnte nicht gespeichert werden.')),
+          content: Text('Der Entwurf konnte nicht gespeichert werden.'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _bewerten() async {
+    if (!await _validiere() || !mounted) return;
+    setState(() => _speichert = true);
+    final erlebnis = _erlebnisAusEingaben(istEntwurf: true);
+    try {
+      await widget.repository.speichereErlebnis(erlebnis);
+      if (!mounted) return;
+      final bewertet = await Navigator.of(context).push<Erlebnis>(
+        MaterialPageRoute(
+          builder: (_) => GetraenkebewertungScreen(
+            repository: widget.repository,
+            idGenerator: widget.idGenerator,
+            profil: widget.profil,
+            erlebnis: erlebnis,
+          ),
+        ),
+      );
+      if (!mounted) return;
+      if (bewertet != null) {
+        Navigator.of(context).pop(bewertet);
+      } else {
+        setState(() => _speichert = false);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _speichert = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Der Entwurf konnte nicht vorbereitet werden.'),
+        ),
       );
     }
   }
@@ -305,16 +352,38 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         ),
         bottomNavigationBar: SafeArea(
           minimum: const EdgeInsets.all(16),
-          child: FilledButton.icon(
-            onPressed: _speichert ? null : _speichern,
-            icon: _speichert
-                ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.save_outlined),
-            label: Text(
-                _speichert ? 'Entwurf wird gespeichert' : 'Entwurf speichern'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _speichert ? null : _bewerten,
+                  icon: _speichert
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.rate_review_outlined),
+                  label: Text(
+                    _speichert
+                        ? 'Vorgang wird vorbereitet'
+                        : widget.erlebnis?.istEntwurf == false
+                            ? 'Bewertung bearbeiten'
+                            : 'Getränk bewerten',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _speichert ? null : _speichern,
+                  icon: const Icon(Icons.save_outlined),
+                  label: const Text('Entwurf speichern'),
+                ),
+              ),
+            ],
           ),
         ),
       );
