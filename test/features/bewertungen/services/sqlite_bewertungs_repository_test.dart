@@ -710,4 +710,69 @@ void main() {
     expect(Geldbetrag.ausEingabe('1.234', 'EUR'), isNull);
     expect(Geldbetrag.ausEingabe('-1', 'EUR'), isNull);
   });
+
+  test('wählt Speise- und Fallbackkriterien anhand der Produktart', () async {
+    final speise = await repository.ladeAktiveKriterienFuerProduktart(
+      Produktart.speise,
+    );
+    final fallback = await repository.ladeAktiveKriterienFuerProduktart(
+      Produktart.sonstiges,
+    );
+
+    expect(speise.map((kriterium) => kriterium.name), contains('Temperatur'));
+    expect(speise.map((kriterium) => kriterium.name), isNot(contains('Aroma')));
+    expect(fallback.map((kriterium) => kriterium.name), ['Gesamturteil']);
+  });
+
+  test('bewahrt Bewertungen je Erlebnisposition historisch getrennt', () async {
+    const produktId = '93000000-0000-4000-8000-000000000001';
+    await repository.speichereProdukt(Produkt(
+      id: produktId,
+      name: 'Pommes',
+      produktart: Produktart.speise,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+    for (var index = 0; index < 2; index++) {
+      final erlebnis = Erlebnis(
+        id: '93000000-0000-4000-8000-00000000001$index',
+        herkunftProfilId: profilId,
+        erstelltAm: zeit.add(Duration(days: index)),
+        geaendertAm: zeit.add(Duration(days: index)),
+      );
+      final position = ErlebnisPosition(
+        id: '93000000-0000-4000-8000-00000000002$index',
+        erlebnisId: erlebnis.id,
+        produktId: produktId,
+        anzahl: 1,
+        erstelltAm: erlebnis.erstelltAm,
+        geaendertAm: erlebnis.geaendertAm,
+      );
+      await repository.speichereErlebnis(erlebnis);
+      await repository.speichereErlebnisposition(position: position);
+      await repository.speichereProduktbewertung(
+        erlebnis: erlebnis,
+        position: position,
+        bewertungen: [
+          Bewertung(
+            id: '93000000-0000-4000-8000-00000000003$index',
+            erlebnisId: erlebnis.id,
+            erlebnisPositionId: position.id,
+            kriteriumId: StandardSpeisekriterien.gesamturteilId,
+            herkunftProfilId: profilId,
+            wert: 3 + index,
+            erstelltAm: erlebnis.erstelltAm,
+            geaendertAm: erlebnis.geaendertAm,
+          ),
+        ],
+      );
+    }
+
+    final historie = await repository.ladeBewertungenFuerProdukt(produktId);
+    expect(historie.map((bewertung) => bewertung.wert), [3, 4]);
+    expect(
+      historie.map((bewertung) => bewertung.erlebnisPositionId).toSet(),
+      hasLength(2),
+    );
+  });
 }

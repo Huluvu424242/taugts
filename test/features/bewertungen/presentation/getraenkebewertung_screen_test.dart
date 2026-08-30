@@ -137,6 +137,54 @@ void main() {
     );
     expect(await repository.ladeEntwuerfe(), hasLength(1));
   });
+
+  testWidgets('zeigt für eine Speise ausschließlich passende Kriterien', (
+    tester,
+  ) async {
+    final erlebnis = Erlebnis(
+      id: '30000000-0000-4000-8000-000000000001',
+      herkunftProfilId: profil.id,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    final produkt = Produkt(
+      id: '30000000-0000-4000-8000-000000000002',
+      name: 'Pommes',
+      produktart: Produktart.speise,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    final position = ErlebnisPosition(
+      id: '30000000-0000-4000-8000-000000000003',
+      erlebnisId: erlebnis.id,
+      produktId: produkt.id,
+      anzahl: 1,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereProdukt(produkt);
+    await repository.speichereErlebnis(erlebnis);
+    await repository.speichereErlebnisposition(position: position);
+    await _oeffneBewertung(
+      tester,
+      repository: repository,
+      erlebnis: erlebnis,
+      profil: profil,
+      erlebnisposition: ErlebnispositionMitProdukt(
+        position: position,
+        produkt: produkt,
+      ),
+    );
+
+    expect(find.text('Produktart: Speise'), findsOneWidget);
+    expect(find.text('Frische / Zubereitung'), findsWidgets);
+    expect(find.text('Aroma'), findsNothing);
+    expect(find.text('Bitterkeit'), findsNothing);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Bewertung öffnen'), findsOneWidget);
+  });
 }
 
 Future<void> _scrolleBisSichtbar(
@@ -181,6 +229,7 @@ Future<void> _oeffneBewertung(
   required SqliteBewertungsRepository repository,
   required Erlebnis erlebnis,
   required Profil profil,
+  ErlebnispositionMitProdukt? erlebnisposition,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -195,6 +244,7 @@ Future<void> _oeffneBewertung(
                     idGenerator: _TestIdGenerator(),
                     profil: profil,
                     erlebnis: erlebnis,
+                    erlebnisposition: erlebnisposition,
                   ),
                 ),
               ),

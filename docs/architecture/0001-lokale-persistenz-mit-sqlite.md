@@ -35,3 +35,6 @@ Verbindung aktiviert.
 - Schema 9 trennt Produkte als Erlebnispositionen vom Erlebnis. Preise werden
   als Preisbeobachtungen in ganzzahligen Minor Units gespeichert; Position und
   Preisänderung werden gemeinsam in einer Transaktion geschrieben.
+- Schema 10 ordnet jedes Bewertungskriterium einer stabilen Produktart zu.
+  Bewertungen referenzieren optional die konkrete Erlebnisposition; eine
+  Korrektur ersetzt nur deren Werte, weitere Erlebnisse bleiben historisch.

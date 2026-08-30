@@ -209,6 +209,16 @@ void main() {
     expect(standard, hasLength(7));
     expect(standard.first['name'], 'Gesamturteil');
     expect(standard.last['name'], 'Farbintensität');
+    expect(
+      verbindung.select("SELECT * FROM kriterien WHERE produktart = 'speise'"),
+      hasLength(6),
+    );
+    expect(
+      verbindung.select(
+        "SELECT * FROM kriterien WHERE produktart = 'sonstiges'",
+      ),
+      hasLength(1),
+    );
     datenbank.schliessen();
   });
 }
