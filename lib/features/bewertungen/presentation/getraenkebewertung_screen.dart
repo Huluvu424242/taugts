@@ -35,9 +35,7 @@ class _GetraenkebewertungScreenState extends State<GetraenkebewertungScreen> {
       widget.repository.ladeProdukt(widget.erlebnis.produktId),
       widget.repository.ladeAktiveGetraenkekriterien(),
       widget.repository.ladeBewertungenFuerErlebnis(widget.erlebnis.id),
-      ortId == null
-          ? Future<Ort?>.value()
-          : widget.repository.ladeOrt(ortId),
+      ortId == null ? Future<Ort?>.value() : widget.repository.ladeOrt(ortId),
     ]);
     final produkt = werte[0] as Produkt?;
     if (produkt == null) {
