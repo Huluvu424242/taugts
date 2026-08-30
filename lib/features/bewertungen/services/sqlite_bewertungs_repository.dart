@@ -490,8 +490,10 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   String? _optionaleZeit(DateTime? wert) =>
       wert == null ? null : _zeit(wert);
 
-  DateTime? _optionalesDatum(String? wert) =>
-      wert == null ? null : DateTime.parse(wert);
+  DateTime? _optionalesDatum(String? wert) {
+    if (wert == null) return null;
+    return DateTime.parse(wert.length == 10 ? '${wert}T00:00:00.000Z' : wert);
+  }
 
   String? _leerAlsNull(String? wert) {
     final getrimmt = wert?.trim();

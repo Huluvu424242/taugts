@@ -71,7 +71,9 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
       ),
     );
     if (gespeichert != null && mounted) {
-      setState(() => _erlebnisse = widget.repository.ladeErlebnisse());
+      setState(() {
+        _erlebnisse = widget.repository.ladeErlebnisse();
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erlebnis gespeichert.')),
       );
@@ -106,7 +108,9 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
     try {
       await widget.repository.loescheErlebnis(erlebnis.id);
       if (!mounted) return;
-      setState(() => _erlebnisse = widget.repository.ladeErlebnisse());
+      setState(() {
+        _erlebnisse = widget.repository.ladeErlebnisse();
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Entwurf verworfen.')),
       );
