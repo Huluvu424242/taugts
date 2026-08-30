@@ -672,7 +672,9 @@ void main() {
       (await repository.ladeLetztenPreis(
         produktId: produktId,
         waehrung: 'EUR',
-      ))?.betrag.minorEinheiten,
+      ))
+          ?.betrag
+          .minorEinheiten,
       349,
     );
     expect(

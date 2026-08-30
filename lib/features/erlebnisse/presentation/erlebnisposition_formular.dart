@@ -94,9 +94,8 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
     final produkt = _produkt;
     final anzahl = int.tryParse(_anzahl.text.trim());
     final preisText = _preis.text.trim();
-    final betrag = preisText.isEmpty
-        ? null
-        : Geldbetrag.ausEingabe(preisText, _waehrung);
+    final betrag =
+        preisText.isEmpty ? null : Geldbetrag.ausEingabe(preisText, _waehrung);
     final fehler = <(String, FocusNode)>[
       if (produkt == null) ('Ein Produkt ist erforderlich.', _produktFokus),
       if (anzahl == null || anzahl < 1)
@@ -148,7 +147,8 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
       if (!mounted) return;
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Die Position konnte nicht gespeichert werden.')),
+        const SnackBar(
+            content: Text('Die Position konnte nicht gespeichert werden.')),
       );
     }
   }
