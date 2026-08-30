@@ -6,6 +6,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+
+## [0.1.0+2] - 2026-08-30
+
 ### Added
 
 - Restaurantbesuche und Einkäufe lassen sich als geplante, aktive oder
