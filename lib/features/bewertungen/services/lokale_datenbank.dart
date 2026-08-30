@@ -11,7 +11,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 9;
+  static const schemaVersion = 10;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -67,10 +67,20 @@ class LokaleDatenbank {
         if (version <= 8) {
           _migriereAufSchemaV9();
         }
+        if (version <= 9) {
+          _migriereAufSchemaV10();
+        }
       }
-      _stelleStandardGetraenkekriterienBereit();
+      _stelleStandardkriterienBereit();
       verbindung.userVersion = schemaVersion;
     });
+  }
+
+  void _migriereAufSchemaV10() {
+    if (!_tabelleExistiert('kriterien')) return;
+    verbindung.execute(
+      "ALTER TABLE kriterien ADD COLUMN produktart TEXT NOT NULL DEFAULT 'bier'",
+    );
   }
 
   void _migriereAufSchemaV9() {
@@ -97,10 +107,12 @@ class LokaleDatenbank {
       WHERE produkt_id IS NOT NULL AND preis IS NOT NULL
     ''');
     if (_tabelleExistiert('bewertungen')) {
-      verbindung.execute(
-        'ALTER TABLE bewertungen ADD COLUMN erlebnis_position_id TEXT '
-        'REFERENCES erlebnispositionen(id) ON DELETE CASCADE',
-      );
+      if (!_spalteExistiert('bewertungen', 'erlebnis_position_id')) {
+        verbindung.execute(
+          'ALTER TABLE bewertungen ADD COLUMN erlebnis_position_id TEXT '
+          'REFERENCES erlebnispositionen(id) ON DELETE CASCADE',
+        );
+      }
       verbindung.execute('''
         UPDATE bewertungen
         SET erlebnis_position_id = erlebnis_id
@@ -168,16 +180,21 @@ class LokaleDatenbank {
     }
   }
 
-  void _stelleStandardGetraenkekriterienBereit() {
+  void _stelleStandardkriterienBereit() {
     if (!_tabelleExistiert('kriterien')) return;
     final zeitpunkt = DateTime.utc(2026, 8, 30);
-    for (final kriterium in StandardGetraenkekriterien.alle(zeitpunkt)) {
+    final kriterien = [
+      ...StandardGetraenkekriterien.alle(zeitpunkt),
+      ...StandardSpeisekriterien.alle(zeitpunkt),
+      StandardFallbackKriterien.gesamturteil(zeitpunkt),
+    ];
+    for (final kriterium in kriterien) {
       verbindung.execute(
         '''
           INSERT OR IGNORE INTO kriterien (
             id, name, beschreibung, eingabetyp, reihenfolge, aktiv,
-            erstellt_am, geaendert_am
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            erstellt_am, geaendert_am, produktart
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''',
         [
           kriterium.id,
@@ -188,6 +205,7 @@ class LokaleDatenbank {
           kriterium.aktiv ? 1 : 0,
           kriterium.erstelltAm.toIso8601String(),
           kriterium.geaendertAm.toIso8601String(),
+          kriterium.produktart.name,
         ],
       );
     }
@@ -281,6 +299,10 @@ class LokaleDatenbank {
         [name],
       ).isNotEmpty;
 
+  bool _spalteExistiert(String tabelle, String spalte) => verbindung
+      .select('PRAGMA table_info($tabelle)')
+      .any((zeile) => zeile['name'] == spalte);
+
   void _erstelleAktuellesSchema() {
     verbindung.execute('''
       CREATE TABLE profile (
@@ -339,7 +361,8 @@ class LokaleDatenbank {
         reihenfolge INTEGER NOT NULL DEFAULT 0,
         aktiv INTEGER NOT NULL DEFAULT 1,
         erstellt_am TEXT NOT NULL,
-        geaendert_am TEXT NOT NULL
+        geaendert_am TEXT NOT NULL,
+        produktart TEXT NOT NULL DEFAULT 'bier'
       )
     ''');
     _erstelleBewertungenTabelle();

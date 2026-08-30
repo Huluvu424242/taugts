@@ -31,11 +31,20 @@ abstract interface class BewertungsRepository {
   });
   Future<void> speichereKriterium(Bewertungskriterium kriterium);
   Future<List<Bewertungskriterium>> ladeAktiveGetraenkekriterien();
+  Future<List<Bewertungskriterium>> ladeAktiveKriterienFuerProduktart(
+    Produktart produktart,
+  );
   Future<void> speichereBewertung(Bewertung bewertung);
   Future<void> speichereGetraenkebewertung({
     required Erlebnis erlebnis,
     required List<Bewertung> bewertungen,
   });
+  Future<void> speichereProduktbewertung({
+    required Erlebnis erlebnis,
+    required ErlebnisPosition position,
+    required List<Bewertung> bewertungen,
+  });
   Future<List<Bewertung>> ladeBewertungenFuerErlebnis(String erlebnisId);
+  Future<List<Bewertung>> ladeBewertungenFuerErlebnisposition(String positionId);
   Future<List<Bewertung>> ladeBewertungenFuerProdukt(String produktId);
 }

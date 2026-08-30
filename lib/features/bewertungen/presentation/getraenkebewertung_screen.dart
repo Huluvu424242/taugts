@@ -13,6 +13,7 @@ class GetraenkebewertungScreen extends StatefulWidget {
     required this.idGenerator,
     required this.profil,
     required this.erlebnis,
+    this.erlebnisposition,
     super.key,
   });
 
@@ -20,6 +21,7 @@ class GetraenkebewertungScreen extends StatefulWidget {
   final IdGenerator idGenerator;
   final Profil profil;
   final Erlebnis erlebnis;
+  final ErlebnispositionMitProdukt? erlebnisposition;
 
   @override
   State<GetraenkebewertungScreen> createState() =>
@@ -30,15 +32,24 @@ class _GetraenkebewertungScreenState extends State<GetraenkebewertungScreen> {
   late Future<_BewertungsDaten> _laden = _datenLaden();
 
   Future<_BewertungsDaten> _datenLaden() async {
-    final produktId = widget.erlebnis.produktId;
+    final produktId =
+        widget.erlebnisposition?.position.produktId ?? widget.erlebnis.produktId;
     if (produktId == null) {
       throw StateError('Das Erlebnis enthält noch kein Produkt.');
     }
     final ortId = widget.erlebnis.wirksamerOrtId;
     final werte = await Future.wait([
       widget.repository.ladeProdukt(produktId),
-      widget.repository.ladeAktiveGetraenkekriterien(),
-      widget.repository.ladeBewertungenFuerErlebnis(widget.erlebnis.id),
+      widget.erlebnisposition == null
+          ? widget.repository.ladeAktiveGetraenkekriterien()
+          : widget.repository.ladeAktiveKriterienFuerProduktart(
+              widget.erlebnisposition!.produkt.produktart,
+            ),
+      widget.erlebnisposition == null
+          ? widget.repository.ladeBewertungenFuerErlebnis(widget.erlebnis.id)
+          : widget.repository.ladeBewertungenFuerErlebnisposition(
+              widget.erlebnisposition!.position.id,
+            ),
       ortId == null ? Future<Ort?>.value() : widget.repository.ladeOrt(ortId),
     ]);
     final produkt = werte[0] as Produkt?;
@@ -46,7 +57,7 @@ class _GetraenkebewertungScreenState extends State<GetraenkebewertungScreen> {
       throw StateError('Das Produkt des Erlebnisses wurde nicht gefunden.');
     }
     return _BewertungsDaten(
-      produkt: produkt,
+      produkt: widget.erlebnisposition?.produkt ?? produkt,
       kriterien: werte[1] as List<Bewertungskriterium>,
       bewertungen: werte[2] as List<Bewertung>,
       ort: werte[3] as Ort?,
@@ -60,7 +71,9 @@ class _GetraenkebewertungScreenState extends State<GetraenkebewertungScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: const Text('Getränk bewerten'),
+          title: Text(
+            '${widget.erlebnisposition?.produkt.anzeigetitel ?? 'Getränk'} bewerten',
+          ),
           actions: const [
             AppSupportMenu(
               contextName: SupportKontexte.getraenkBewertung,
@@ -107,6 +120,7 @@ class _GetraenkebewertungScreenState extends State<GetraenkebewertungScreen> {
                 idGenerator: widget.idGenerator,
                 profil: widget.profil,
                 erlebnis: widget.erlebnis,
+                erlebnisposition: widget.erlebnisposition,
                 daten: snapshot.data!,
               );
             },
@@ -122,6 +136,7 @@ class _BewertungsFormular extends StatefulWidget {
     required this.profil,
     required this.erlebnis,
     required this.daten,
+    this.erlebnisposition,
     super.key,
   });
 
@@ -130,6 +145,7 @@ class _BewertungsFormular extends StatefulWidget {
   final Profil profil;
   final Erlebnis erlebnis;
   final _BewertungsDaten daten;
+  final ErlebnispositionMitProdukt? erlebnisposition;
 
   @override
   State<_BewertungsFormular> createState() => _BewertungsFormularState();
@@ -205,6 +221,7 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
           Bewertung(
             id: vorhandene[eintrag.key]?.id ?? widget.idGenerator.neueId(),
             erlebnisId: widget.erlebnis.id,
+            erlebnisPositionId: widget.erlebnisposition?.position.id,
             kriteriumId: eintrag.key,
             herkunftProfilId: widget.profil.id,
             wert: eintrag.value!,
@@ -219,10 +236,19 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
     );
 
     try {
-      await widget.repository.speichereGetraenkebewertung(
-        erlebnis: erlebnis,
-        bewertungen: bewertungen,
-      );
+      final position = widget.erlebnisposition?.position;
+      if (position == null) {
+        await widget.repository.speichereGetraenkebewertung(
+          erlebnis: erlebnis,
+          bewertungen: bewertungen,
+        );
+      } else {
+        await widget.repository.speichereProduktbewertung(
+          erlebnis: erlebnis,
+          position: position,
+          bewertungen: bewertungen,
+        );
+      }
       if (!mounted) return;
       Navigator.of(context).pop(erlebnis);
     } catch (_) {
@@ -291,6 +317,9 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
                     ? 'Erlebnis vom $datum'
                     : '${widget.daten.ort!.name} · $datum',
               ),
+              Text(
+                'Produktart: ${_produktartLabel(widget.daten.produkt.produktart)}',
+              ),
               const SizedBox(height: 8),
               const Text(
                 'Alle Kriterien sind optional. Das Gesamturteil wird nicht '
@@ -357,6 +386,13 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
       ],
     );
   }
+
+  String _produktartLabel(Produktart art) => switch (art) {
+        Produktart.bier => 'Bier',
+        Produktart.getraenk => 'Getränk',
+        Produktart.speise => 'Speise',
+        Produktart.sonstiges => 'Sonstiges Produkt',
+      };
 }
 
 class _KriteriumAuswahl extends StatelessWidget {

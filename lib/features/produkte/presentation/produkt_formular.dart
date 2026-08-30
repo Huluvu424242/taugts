@@ -258,6 +258,14 @@ class _ProduktFormularState extends State<ProduktFormular> {
                     DropdownMenuItem(
                         value: Produktart.bier, child: Text('Bier')),
                     DropdownMenuItem(
+                      value: Produktart.getraenk,
+                      child: Text('Getränk'),
+                    ),
+                    DropdownMenuItem(
+                      value: Produktart.speise,
+                      child: Text('Speise'),
+                    ),
+                    DropdownMenuItem(
                       value: Produktart.sonstiges,
                       child: Text('Anderes Produkt'),
                     ),

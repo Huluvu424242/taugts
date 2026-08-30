@@ -513,14 +513,15 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       '''
         INSERT INTO kriterien (
           id, name, beschreibung, eingabetyp, reihenfolge, aktiv,
-          erstellt_am, geaendert_am
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          erstellt_am, geaendert_am, produktart
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
           name = excluded.name,
           beschreibung = excluded.beschreibung,
           eingabetyp = excluded.eingabetyp,
           reihenfolge = excluded.reihenfolge,
           aktiv = excluded.aktiv,
+          produktart = excluded.produktart,
           geaendert_am = excluded.geaendert_am
       ''',
       [
@@ -532,15 +533,29 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         kriterium.aktiv ? 1 : 0,
         _zeit(kriterium.erstelltAm),
         _zeit(kriterium.geaendertAm),
+        kriterium.produktart.name,
       ],
     );
   }
 
   @override
   Future<List<Bewertungskriterium>> ladeAktiveGetraenkekriterien() async {
+    return ladeAktiveKriterienFuerProduktart(Produktart.bier);
+  }
+
+  @override
+  Future<List<Bewertungskriterium>> ladeAktiveKriterienFuerProduktart(
+    Produktart produktart,
+  ) async {
+    final wirksameArt = switch (produktart) {
+      Produktart.bier || Produktart.getraenk => Produktart.bier,
+      Produktart.speise => Produktart.speise,
+      Produktart.sonstiges => Produktart.sonstiges,
+    };
     final rows = datenbank.verbindung.select(
-      'SELECT * FROM kriterien WHERE aktiv = 1 '
+      'SELECT * FROM kriterien WHERE aktiv = 1 AND produktart = ? '
       'ORDER BY reihenfolge, name COLLATE NOCASE',
+      [wirksameArt.name],
     );
     return rows
         .map(
@@ -553,6 +568,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
             ),
             reihenfolge: row['reihenfolge'] as int,
             aktiv: (row['aktiv'] as int) == 1,
+            produktart: Produktart.values.byName(row['produktart'] as String),
             erstelltAm: DateTime.parse(row['erstellt_am'] as String),
             geaendertAm: DateTime.parse(row['geaendert_am'] as String),
           ),
@@ -613,6 +629,31 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   }
 
   @override
+  Future<void> speichereProduktbewertung({
+    required Erlebnis erlebnis,
+    required ErlebnisPosition position,
+    required List<Bewertung> bewertungen,
+  }) async {
+    if (position.erlebnisId != erlebnis.id ||
+        bewertungen.any((bewertung) =>
+            bewertung.erlebnisId != erlebnis.id ||
+            bewertung.erlebnisPositionId != position.id ||
+            bewertung.herkunftProfilId != erlebnis.herkunftProfilId)) {
+      throw ArgumentError('Bewertungen müssen zur Erlebnisposition gehören.');
+    }
+    datenbank.transaktion(() {
+      _speichereErlebnisZeile(erlebnis);
+      datenbank.verbindung.execute(
+        'DELETE FROM bewertungen WHERE erlebnis_position_id = ?',
+        [position.id],
+      );
+      for (final bewertung in bewertungen) {
+        _speichereBewertungZeile(bewertung);
+      }
+    });
+  }
+
+  @override
   Future<List<Bewertung>> ladeBewertungenFuerErlebnis(
     String erlebnisId,
   ) async {
@@ -620,6 +661,18 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       'SELECT * FROM bewertungen WHERE erlebnis_id = ? '
       'ORDER BY erstellt_am, kriterium_id',
       [erlebnisId],
+    );
+    return rows.map(_bewertungAusZeile).toList();
+  }
+
+  @override
+  Future<List<Bewertung>> ladeBewertungenFuerErlebnisposition(
+    String positionId,
+  ) async {
+    final rows = datenbank.verbindung.select(
+      'SELECT * FROM bewertungen WHERE erlebnis_position_id = ? '
+      'ORDER BY erstellt_am, kriterium_id',
+      [positionId],
     );
     return rows.map(_bewertungAusZeile).toList();
   }

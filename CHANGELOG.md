@@ -14,6 +14,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Produkte lassen sich einem Erlebnis als Position mit ganzzahliger Anzahl und
   optionalem, korrekturfähigem Preis in EUR, USD oder GBP zuordnen. Frühere
   Preise werden ausschließlich als Orientierung angezeigt.
+- Der Bewertungsweg wählt Kriterien stabil nach Produktart: Getränke behalten
+  ihr Set, Speisen erhalten eigene Kriterien und sonstige Produkte einen
+  sicheren Fallback aus Gesamturteil und optionaler Notiz.
 
 ## [0.1.0+1] - 2026-08-30
 

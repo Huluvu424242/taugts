@@ -1,6 +1,6 @@
 enum Objektart { allgemein, produkt }
 
-enum Produktart { bier, sonstiges }
+enum Produktart { bier, getraenk, speise, sonstiges }
 
 enum Ortstyp { gastronomie, geschaeft, privat, sonstiger }
 
@@ -351,6 +351,7 @@ class Bewertungskriterium {
     this.eingabetyp = KriteriumEingabetyp.wertung,
     this.reihenfolge = 0,
     this.aktiv = true,
+    this.produktart = Produktart.bier,
   });
 
   final String id;
@@ -359,6 +360,7 @@ class Bewertungskriterium {
   final KriteriumEingabetyp eingabetyp;
   final int reihenfolge;
   final bool aktiv;
+  final Produktart produktart;
   final DateTime erstelltAm;
   final DateTime geaendertAm;
 }
@@ -432,6 +434,61 @@ abstract final class StandardGetraenkekriterien {
           geaendertAm: zeitpunkt,
         ),
       ];
+}
+
+abstract final class StandardSpeisekriterien {
+  static const gesamturteilId = 'd0000000-0000-4000-8000-000000000001';
+  static const geschmackId = 'd0000000-0000-4000-8000-000000000002';
+  static const frischeZubereitungId =
+      'd0000000-0000-4000-8000-000000000003';
+  static const konsistenzId = 'd0000000-0000-4000-8000-000000000004';
+  static const temperaturId = 'd0000000-0000-4000-8000-000000000005';
+  static const preisLeistungId = 'd0000000-0000-4000-8000-000000000006';
+
+  static List<Bewertungskriterium> alle(DateTime zeitpunkt) {
+    const namen = [
+      ('Gesamturteil', 'Unabhängige Gesamtwertung der Speise.'),
+      ('Geschmack', 'Wie gut hat die Speise geschmeckt?'),
+      ('Frische / Zubereitung', 'Wie frisch und passend zubereitet war sie?'),
+      ('Konsistenz', 'Wie passend war die Konsistenz?'),
+      ('Temperatur', 'Wie passend war die Serviertemperatur?'),
+      ('Preis-Leistung', 'Wie passend war der Preis für dieses Erlebnis?'),
+    ];
+    const ids = [
+      gesamturteilId,
+      geschmackId,
+      frischeZubereitungId,
+      konsistenzId,
+      temperaturId,
+      preisLeistungId,
+    ];
+    return [
+      for (var index = 0; index < ids.length; index++)
+        Bewertungskriterium(
+          id: ids[index],
+          name: namen[index].$1,
+          beschreibung: namen[index].$2,
+          reihenfolge: index * 10,
+          produktart: Produktart.speise,
+          erstelltAm: zeitpunkt,
+          geaendertAm: zeitpunkt,
+        ),
+    ];
+  }
+}
+
+abstract final class StandardFallbackKriterien {
+  static const gesamturteilId = 'e0000000-0000-4000-8000-000000000001';
+
+  static Bewertungskriterium gesamturteil(DateTime zeitpunkt) =>
+      Bewertungskriterium(
+        id: gesamturteilId,
+        name: 'Gesamturteil',
+        beschreibung: 'Unabhängige Gesamtwertung des Produkts.',
+        produktart: Produktart.sonstiges,
+        erstelltAm: zeitpunkt,
+        geaendertAm: zeitpunkt,
+      );
 }
 
 class Bewertung {

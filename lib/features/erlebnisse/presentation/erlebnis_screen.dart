@@ -4,6 +4,7 @@ import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
+import 'package:taugts/features/bewertungen/presentation/getraenkebewertung_screen.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/erlebnisse/presentation/erlebnisposition_formular.dart';
 import 'package:taugts/features/orte/presentation/orte_screen.dart';
@@ -344,6 +345,21 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     if (mounted) _positionenLaden();
   }
 
+  Future<void> _positionBewerten(ErlebnispositionMitProdukt eintrag) async {
+    final erlebnis = _gespeichertesErlebnis ?? _erlebnisAusEingaben();
+    await Navigator.of(context).push<Erlebnis>(
+      MaterialPageRoute(
+        builder: (_) => GetraenkebewertungScreen(
+          repository: widget.repository,
+          idGenerator: widget.idGenerator,
+          profil: widget.profil,
+          erlebnis: erlebnis,
+          erlebnisposition: eintrag,
+        ),
+      ),
+    );
+  }
+
   String _datumText(BuildContext context, DateTime? wert) => wert == null
       ? 'Nicht festgelegt'
       : MaterialLocalizations.of(context).formatFullDate(wert);
@@ -531,11 +547,22 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                             '${eintrag.preis == null ? '' : ' · ${eintrag.preis!.betrag.dezimalText} ${eintrag.preis!.betrag.waehrung}'}',
                           ),
                           onTap: () => _positionOeffnen(eintrag),
-                          trailing: IconButton(
-                            tooltip:
-                                '${eintrag.produkt.anzeigetitel} entfernen',
-                            onPressed: () => _positionLoeschen(eintrag),
-                            icon: const Icon(Icons.delete_outline),
+                          trailing: Wrap(
+                            spacing: 4,
+                            children: [
+                              IconButton(
+                                tooltip:
+                                    '${eintrag.produkt.anzeigetitel} bewerten',
+                                onPressed: () => _positionBewerten(eintrag),
+                                icon: const Icon(Icons.star_outline),
+                              ),
+                              IconButton(
+                                tooltip:
+                                    '${eintrag.produkt.anzeigetitel} entfernen',
+                                onPressed: () => _positionLoeschen(eintrag),
+                                icon: const Icon(Icons.delete_outline),
+                              ),
+                            ],
                           ),
                         ),
                     ],
