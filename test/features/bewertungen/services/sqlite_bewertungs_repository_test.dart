@@ -504,8 +504,7 @@ void main() {
       ],
     );
 
-    final historie =
-        await repository.ladeBewertungenFuerProdukt(produktId);
+    final historie = await repository.ladeBewertungenFuerProdukt(produktId);
     expect(historie.map((bewertung) => bewertung.wert), [4, 2]);
     expect(
       historie.map((bewertung) => bewertung.erlebnisId).toSet(),
