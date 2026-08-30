@@ -221,7 +221,10 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       );
 
   @override
-  Future<void> speichereErlebnis(Erlebnis erlebnis) async {
+  Future<void> speichereErlebnis(Erlebnis erlebnis) async =>
+      _speichereErlebnisZeile(erlebnis);
+
+  void _speichereErlebnisZeile(Erlebnis erlebnis) {
     datenbank.verbindung.execute(
       '''
         INSERT INTO erlebnisse (
@@ -293,14 +296,25 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   Future<void> speichereKriterium(Bewertungskriterium kriterium) async {
     datenbank.verbindung.execute(
       '''
-        INSERT INTO kriterien VALUES (?, ?, ?, ?)
+        INSERT INTO kriterien (
+          id, name, beschreibung, eingabetyp, reihenfolge, aktiv,
+          erstellt_am, geaendert_am
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
           name = excluded.name,
+          beschreibung = excluded.beschreibung,
+          eingabetyp = excluded.eingabetyp,
+          reihenfolge = excluded.reihenfolge,
+          aktiv = excluded.aktiv,
           geaendert_am = excluded.geaendert_am
       ''',
       [
         kriterium.id,
         kriterium.name,
+        _leerAlsNull(kriterium.beschreibung),
+        kriterium.eingabetyp.name,
+        kriterium.reihenfolge,
+        kriterium.aktiv ? 1 : 0,
         _zeit(kriterium.erstelltAm),
         _zeit(kriterium.geaendertAm),
       ],
@@ -308,9 +322,42 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   }
 
   @override
-  Future<void> speichereBewertung(Bewertung bewertung) async {
+  Future<List<Bewertungskriterium>>
+      ladeAktiveGetraenkekriterien() async {
+    final rows = datenbank.verbindung.select(
+      'SELECT * FROM kriterien WHERE aktiv = 1 '
+      'ORDER BY reihenfolge, name COLLATE NOCASE',
+    );
+    return rows
+        .map(
+          (row) => Bewertungskriterium(
+            id: row['id'] as String,
+            name: row['name'] as String,
+            beschreibung: row['beschreibung'] as String?,
+            eingabetyp: KriteriumEingabetyp.values.byName(
+              row['eingabetyp'] as String,
+            ),
+            reihenfolge: row['reihenfolge'] as int,
+            aktiv: (row['aktiv'] as int) == 1,
+            erstelltAm: DateTime.parse(row['erstellt_am'] as String),
+            geaendertAm: DateTime.parse(row['geaendert_am'] as String),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<void> speichereBewertung(Bewertung bewertung) async =>
+      _speichereBewertungZeile(bewertung);
+
+  void _speichereBewertungZeile(Bewertung bewertung) {
     datenbank.verbindung.execute(
-      'INSERT INTO bewertungen VALUES (?, ?, ?, ?, ?, ?, ?)',
+      '''
+        INSERT INTO bewertungen (
+          id, erlebnis_id, kriterium_id, wert, erstellt_am, geaendert_am,
+          herkunft_profil_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      ''',
       [
         bewertung.id,
         bewertung.erlebnisId,
@@ -324,24 +371,61 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   }
 
   @override
+  Future<void> speichereGetraenkebewertung({
+    required Erlebnis erlebnis,
+    required List<Bewertung> bewertungen,
+  }) async {
+    if (bewertungen.any(
+      (bewertung) =>
+          bewertung.erlebnisId != erlebnis.id ||
+          bewertung.herkunftProfilId != erlebnis.herkunftProfilId,
+    )) {
+      throw ArgumentError(
+        'Alle Bewertungen müssen zum Erlebnis und dessen Profil gehören.',
+      );
+    }
+    datenbank.transaktion(() {
+      _speichereErlebnisZeile(erlebnis);
+      datenbank.verbindung.execute(
+        'DELETE FROM bewertungen '
+        'WHERE erlebnis_id = ? AND herkunft_profil_id = ?',
+        [erlebnis.id, erlebnis.herkunftProfilId],
+      );
+      for (final bewertung in bewertungen) {
+        _speichereBewertungZeile(bewertung);
+      }
+    });
+  }
+
+  @override
+  Future<List<Bewertung>> ladeBewertungenFuerErlebnis(
+    String erlebnisId,
+  ) async {
+    final rows = datenbank.verbindung.select(
+      'SELECT * FROM bewertungen WHERE erlebnis_id = ? '
+      'ORDER BY erstellt_am, kriterium_id',
+      [erlebnisId],
+    );
+    return rows.map(_bewertungAusZeile).toList();
+  }
+
+  Bewertung _bewertungAusZeile(Map<String, Object?> row) => Bewertung(
+        id: row['id'] as String,
+        erlebnisId: row['erlebnis_id'] as String,
+        kriteriumId: row['kriterium_id'] as String,
+        herkunftProfilId: row['herkunft_profil_id'] as String,
+        wert: (row['wert'] as num).toDouble(),
+        erstelltAm: DateTime.parse(row['erstellt_am'] as String),
+        geaendertAm: DateTime.parse(row['geaendert_am'] as String),
+      );
+
+  @override
   Future<List<Bewertung>> ladeBewertungenFuerProdukt(String produktId) async {
     final rows = datenbank.verbindung.select('''
       SELECT b.* FROM bewertungen b JOIN erlebnisse e ON e.id = b.erlebnis_id
       WHERE e.produkt_id = ? ORDER BY b.erstellt_am
     ''', [produktId]);
-    return rows
-        .map(
-          (row) => Bewertung(
-            id: row['id'] as String,
-            erlebnisId: row['erlebnis_id'] as String,
-            kriteriumId: row['kriterium_id'] as String,
-            herkunftProfilId: row['herkunft_profil_id'] as String,
-            wert: row['wert'] as double,
-            erstelltAm: DateTime.parse(row['erstellt_am'] as String),
-            geaendertAm: DateTime.parse(row['geaendert_am'] as String),
-          ),
-        )
-        .toList();
+    return rows.map(_bewertungAusZeile).toList();
   }
 
   String _zeit(DateTime wert) => wert.toUtc().toIso8601String();
