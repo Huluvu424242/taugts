@@ -173,16 +173,13 @@ class Bewertungskriterium {
 }
 
 abstract final class StandardGetraenkekriterien {
-  static const gesamturteilId =
-      'c0000000-0000-4000-8000-000000000001';
+  static const gesamturteilId = 'c0000000-0000-4000-8000-000000000001';
   static const geschmackId = 'c0000000-0000-4000-8000-000000000002';
   static const aromaId = 'c0000000-0000-4000-8000-000000000003';
   static const frischeId = 'c0000000-0000-4000-8000-000000000004';
-  static const preisLeistungId =
-      'c0000000-0000-4000-8000-000000000005';
+  static const preisLeistungId = 'c0000000-0000-4000-8000-000000000005';
   static const bitterkeitId = 'c0000000-0000-4000-8000-000000000006';
-  static const farbintensitaetId =
-      'c0000000-0000-4000-8000-000000000007';
+  static const farbintensitaetId = 'c0000000-0000-4000-8000-000000000007';
 
   static List<Bewertungskriterium> alle(DateTime zeitpunkt) => [
         Bewertungskriterium(
