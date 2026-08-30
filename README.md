@@ -68,6 +68,18 @@ chmod +x tool/generate_app_icons.sh
 Herkunft, Verwendung und Lizenz sind in `ATTRIBUTIONS.md` dokumentiert.
 
 
+## Android-Release
+
+Signierte Android-APKs können mit dem ausschließlich manuell startbaren
+GitHub-Actions-Workflow **Android Release APK** gebaut und als GitHub Release
+veröffentlicht werden. Der Workflow prüft Version, Analyse und Tests und stellt
+die APK zusammen mit ihrer SHA-256-Prüfsumme bereit.
+
+Die Einrichtung des stabilen Keystores, die vier benötigten Repository-Secrets,
+der Freigabevorbehalt und der vollständige Release-Ablauf stehen in
+[docs/android-release.md](docs/android-release.md).
+
+
 ## Barrierefreiheit und Bug-Meldung
 
 Die App enthält eine offline verfügbare Barrierefreiheitserklärung und bereitet
