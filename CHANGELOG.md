@@ -8,6 +8,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Manueller GitHub-Actions-Workflow für geprüfte, stabil signierte Android-APKs mit GitHub Release und SHA-256-Prüfsumme.
+
 - Barrierefreier Getränkebewertungsbogen mit geordneten Qualitäts- und
   Intensitätskriterien, unabhängigem Gesamturteil, optionaler Notiz und
   historisch getrennten Bewertungen je Erlebnis.
