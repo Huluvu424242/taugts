@@ -11,5 +11,11 @@ Taugt’s? wird featureorientiert und offline-first entwickelt. UI, Fachlogik un
 - State Management und Navigation werden erst bei konkretem Bedarf ausgewählt.
 - Die lokale Persistenz verwendet SQLite; Entscheidung und Folgen beschreibt
   [ADR 0001](0001-lokale-persistenz-mit-sqlite.md).
+- Getränkebewertungen verwenden stabile, in SQLite konfigurierte Kriterien.
+  Qualitätswertungen und beschreibende Intensitäten bleiben getrennt; ein
+  Gesamturteil wird nicht aus Einzelwerten berechnet.
+- Das Erlebnis bildet den historischen Kontext. Das atomare Speichern
+  aktualisiert bei einer Korrektur nur die Bewertung desselben Erlebnisses;
+  ein neues Erlebnis erzeugt eine weitere historische Bewertung.
 
 Diese Zurückhaltung vermeidet Architektur auf Vorrat und hält spätere Entscheidungen offen, ohne die Plattformunterstützung zu behindern.
