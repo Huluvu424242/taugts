@@ -1,5 +1,7 @@
 # Barrierefreiheit und Bug-Meldung
 
+Stand: 30. August 2026 · vorbereitete Version: 0.1.0+1
+
 Taugt’s? stellt die gemeinsamen Grundgerüst-Funktionen für Barrierefreiheit und
 Bug-Meldungen vollständig innerhalb der App bereit.
 
@@ -21,10 +23,23 @@ erklärte Intensitätsskalen, einen fokussierbaren Fehlersammler und eine bei
 großer Schrift erreichbare Speicheraktion. Kriterien dürfen einzeln
 ausgelassen werden; das Gesamturteil bleibt unabhängig.
 
-Vor einem öffentlichen Release bleiben manuelle Prüfungen mit TalkBack, großer
-Systemschrift, einem kleinen Android-Gerät und Gestennavigation erforderlich.
-Der neue Bewertungsbogen ist ausdrücklich in diese manuelle Prüfung
-einzubeziehen.
+Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
+
+- vollständiger Kernablauf mit TalkBack auf Android,
+- große Systemschrift und erhöhte Display-Skalierung,
+- kleine Android-Bildschirmgröße,
+- Gestennavigation und Erreichbarkeit unterer Aktionen,
+- zusammenhängender Ablauf aus Produkt, Ort, Erlebnisentwurf und Bewertung,
+- Bug-Meldung und vollständige Barrierefreiheitserklärung auf einem realen
+  Gerät.
+
+Der Getränkebewertungsbogen ist ausdrücklich einzubeziehen. Die gebündelte
+Prüfung wird in
+[Story #30](https://github.com/Huluvu424242/taugts/issues/30) verfolgt. Solange
+diese Punkte offen sind, wird für Version 0.1.0+1 kein vollständig manuell
+bestätigter Barrierefreiheitsstatus behauptet. Der konkrete Freigabestand wird
+zusätzlich in der
+[Release-Checkliste](release-checklist-0.1.0+1.md) dokumentiert.
 
 ## Bug-Meldung
 
