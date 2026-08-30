@@ -124,9 +124,11 @@ void main() {
     verbindung.userVersion = 6;
 
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
-    final vorhanden = verbindung.select(
-      "SELECT * FROM kriterien WHERE id = 'alt'",
-    ).single;
+    final vorhanden = verbindung
+        .select(
+          "SELECT * FROM kriterien WHERE id = 'alt'",
+        )
+        .single;
     final standard = verbindung.select(
       "SELECT * FROM kriterien WHERE id LIKE 'c0000000-%' "
       'ORDER BY reihenfolge',
