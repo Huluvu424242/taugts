@@ -1,0 +1,147 @@
+name: Android Release APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Vollständige Flutter-Version aus pubspec.yaml, z. B. 0.1.0+1"
+        required: true
+        type: string
+      release_notes:
+        description: "Optionale Release Notes in Markdown"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-release-${{ inputs.release_version }}
+  cancel-in-progress: false
+
+jobs:
+  release-apk:
+    name: Android-APK bauen und veröffentlichen
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Releaseversion prüfen
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
+          pubspec_version="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml | head -n 1)"
+          if [ -z "${pubspec_version}" ]; then
+            echo "In pubspec.yaml wurde keine Version gefunden." >&2
+            exit 1
+          fi
+          if [ "${pubspec_version}" != "${RELEASE_VERSION}" ]; then
+            echo "release_version (${RELEASE_VERSION}) muss pubspec.yaml (${pubspec_version}) entsprechen." >&2
+            exit 1
+          fi
+          release_tag="v${RELEASE_VERSION}"
+          if git show-ref --tags --verify --quiet "refs/tags/${release_tag}"; then
+            echo "Der Release-Tag ${release_tag} existiert bereits. Zuerst die Version in pubspec.yaml erhöhen." >&2
+            exit 1
+          fi
+
+      - name: Java einrichten
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Flutter einrichten
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Abhängigkeiten laden
+        run: flutter pub get
+
+      - name: Statische Analyse
+        run: flutter analyze
+
+      - name: Tests ausführen
+        run: flutter test
+
+      - name: Android-Release-Keystore dekodieren
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ANDROID_KEYSTORE_BASE64}" ]; then
+            echo "Das Secret ANDROID_KEYSTORE_BASE64 wird für die Release-Signierung benötigt. Siehe docs/android-release.md." >&2
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/android-signing"
+          printf '%s' "${ANDROID_KEYSTORE_BASE64}" | base64 --decode > "$RUNNER_TEMP/android-signing/release.jks"
+
+      - name: Android-Release-APK bauen
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/android-signing/release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for secret_name in ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [ -z "${!secret_name}" ]; then
+              echo "Das Secret ${secret_name} wird für die Release-Signierung benötigt. Siehe docs/android-release.md." >&2
+              exit 1
+            fi
+          done
+          build_name="${RELEASE_VERSION%%+*}"
+          build_number="${RELEASE_VERSION##*+}"
+          flutter build apk --release --build-name "${build_name}" --build-number "${build_number}"
+
+      - name: Releasedateien vorbereiten
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          apk_name="taugts-${RELEASE_VERSION}.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "release/${apk_name}"
+          (cd release && sha256sum "${apk_name}" > "${apk_name}.sha256")
+
+      - name: Release Notes schreiben
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
+          notes = event.get("inputs", {}).get("release_notes", "").strip()
+          if not notes:
+              version = os.environ["RELEASE_VERSION"]
+              notes = (
+                  f"Android-Release {version}\n\n"
+                  "- Erstellt mit dem manuell gestarteten GitHub-Actions-Release-Workflow.\n"
+                  "- APK und SHA-256-Prüfsumme sind unten angehängt.\n"
+              )
+          Path("release-notes.md").write_text(notes + "\n", encoding="utf-8")
+          PY
+
+      - name: GitHub Release veröffentlichen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
+          gh release create "v${RELEASE_VERSION}" \
+            release/* \
+            --title "Taugt’s? ${RELEASE_VERSION}" \
+            --notes-file release-notes.md \
+            --latest
