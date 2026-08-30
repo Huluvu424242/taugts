@@ -6,6 +6,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+## [0.1.0+1] - 2026-08-30
+
 ### Added
 
 - Manueller GitHub-Actions-Workflow für geprüfte, stabil signierte Android-APKs mit GitHub Release und SHA-256-Prüfsumme.
@@ -34,3 +36,6 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
   Bewertungen und Bewertungskriterien einschließlich Schemaversion und Migration.
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
 - Featureorientierte Ausgangsstruktur, Startscreen und Widget-Test.
+
+[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+1...HEAD
+[0.1.0+1]: https://github.com/Huluvu424242/taugts/releases/tag/v0.1.0+1
