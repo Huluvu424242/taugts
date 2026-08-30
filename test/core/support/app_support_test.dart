@@ -182,6 +182,7 @@ void main() {
       SupportKontexte.bewertungsentwuerfe,
       SupportKontexte.bewertungErfassen,
       SupportKontexte.bewertungsentwurfBearbeiten,
+      SupportKontexte.getraenkBewertung,
       SupportKontexte.ueberDialog,
       SupportKontexte.barrierefreiheitserklaerung,
     ];
