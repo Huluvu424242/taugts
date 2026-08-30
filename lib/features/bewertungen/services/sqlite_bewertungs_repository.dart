@@ -322,8 +322,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   }
 
   @override
-  Future<List<Bewertungskriterium>>
-      ladeAktiveGetraenkekriterien() async {
+  Future<List<Bewertungskriterium>> ladeAktiveGetraenkekriterien() async {
     final rows = datenbank.verbindung.select(
       'SELECT * FROM kriterien WHERE aktiv = 1 '
       'ORDER BY reihenfolge, name COLLATE NOCASE',
