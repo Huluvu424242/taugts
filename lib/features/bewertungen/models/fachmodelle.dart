@@ -4,6 +4,8 @@ enum Produktart { bier, sonstiges }
 
 enum Ortstyp { gastronomie, geschaeft, privat, sonstiger }
 
+enum KriteriumEingabetyp { wertung, intensitaet }
+
 class BewertbaresObjekt {
   const BewertbaresObjekt({
     required this.id,
@@ -123,6 +125,27 @@ class Erlebnis {
   final DateTime erlebtAm;
   final DateTime erstelltAm;
   final DateTime geaendertAm;
+
+  Erlebnis kopiereMit({
+    String? notiz,
+    bool? istEntwurf,
+    DateTime? geaendertAm,
+  }) =>
+      Erlebnis(
+        id: id,
+        produktId: produktId,
+        herkunftProfilId: herkunftProfilId,
+        kaufortId: kaufortId,
+        konsumortId: konsumortId,
+        preis: preis,
+        menge: menge,
+        gebinde: gebinde,
+        notiz: notiz,
+        istEntwurf: istEntwurf ?? this.istEntwurf,
+        erlebtAm: erlebtAm,
+        erstelltAm: erstelltAm,
+        geaendertAm: geaendertAm ?? this.geaendertAm,
+      );
 }
 
 class Bewertungskriterium {
@@ -131,12 +154,94 @@ class Bewertungskriterium {
     required this.name,
     required this.erstelltAm,
     required this.geaendertAm,
+    this.beschreibung,
+    this.eingabetyp = KriteriumEingabetyp.wertung,
+    this.reihenfolge = 0,
+    this.aktiv = true,
   });
 
   final String id;
   final String name;
+  final String? beschreibung;
+  final KriteriumEingabetyp eingabetyp;
+  final int reihenfolge;
+  final bool aktiv;
   final DateTime erstelltAm;
   final DateTime geaendertAm;
+}
+
+abstract final class StandardGetraenkekriterien {
+  static const gesamturteilId =
+      'c0000000-0000-4000-8000-000000000001';
+  static const geschmackId = 'c0000000-0000-4000-8000-000000000002';
+  static const aromaId = 'c0000000-0000-4000-8000-000000000003';
+  static const frischeId = 'c0000000-0000-4000-8000-000000000004';
+  static const preisLeistungId =
+      'c0000000-0000-4000-8000-000000000005';
+  static const bitterkeitId = 'c0000000-0000-4000-8000-000000000006';
+  static const farbintensitaetId =
+      'c0000000-0000-4000-8000-000000000007';
+
+  static List<Bewertungskriterium> alle(DateTime zeitpunkt) => [
+        Bewertungskriterium(
+          id: gesamturteilId,
+          name: 'Gesamturteil',
+          beschreibung: 'Unabhängige Gesamtwertung des Getränks.',
+          reihenfolge: 0,
+          erstelltAm: zeitpunkt,
+          geaendertAm: zeitpunkt,
+        ),
+        Bewertungskriterium(
+          id: geschmackId,
+          name: 'Geschmack',
+          beschreibung: 'Wie gut hat das Getränk geschmeckt?',
+          reihenfolge: 10,
+          erstelltAm: zeitpunkt,
+          geaendertAm: zeitpunkt,
+        ),
+        Bewertungskriterium(
+          id: aromaId,
+          name: 'Aroma',
+          beschreibung: 'Wie angenehm war das wahrgenommene Aroma?',
+          reihenfolge: 20,
+          erstelltAm: zeitpunkt,
+          geaendertAm: zeitpunkt,
+        ),
+        Bewertungskriterium(
+          id: frischeId,
+          name: 'Frische',
+          beschreibung: 'Wie frisch wirkte das Getränk?',
+          reihenfolge: 30,
+          erstelltAm: zeitpunkt,
+          geaendertAm: zeitpunkt,
+        ),
+        Bewertungskriterium(
+          id: preisLeistungId,
+          name: 'Preis-Leistung',
+          beschreibung: 'Wie passend war der Preis für dieses Erlebnis?',
+          reihenfolge: 40,
+          erstelltAm: zeitpunkt,
+          geaendertAm: zeitpunkt,
+        ),
+        Bewertungskriterium(
+          id: bitterkeitId,
+          name: 'Bitterkeit',
+          beschreibung: 'Beschreibende Intensität, keine Qualitätswertung.',
+          eingabetyp: KriteriumEingabetyp.intensitaet,
+          reihenfolge: 50,
+          erstelltAm: zeitpunkt,
+          geaendertAm: zeitpunkt,
+        ),
+        Bewertungskriterium(
+          id: farbintensitaetId,
+          name: 'Farbintensität',
+          beschreibung: 'Beschreibende Intensität, keine Qualitätswertung.',
+          eingabetyp: KriteriumEingabetyp.intensitaet,
+          reihenfolge: 60,
+          erstelltAm: zeitpunkt,
+          geaendertAm: zeitpunkt,
+        ),
+      ];
 }
 
 class Bewertung {
