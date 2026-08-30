@@ -30,8 +30,8 @@ erledigt interpretiert werden.
 
 ## Vor Merge des Vorbereitungs-PRs
 
-- [ ] Der vorhandene freigegebene Workflow **Flutter-Prüfungen** ist für den
-  finalen Commit des PRs erfolgreich.
+- [x] Der vorhandene freigegebene Workflow **Flutter-Prüfungen** war für den
+  Release-Vorbereitungs-PR erfolgreich (Lauf #22).
 - [ ] Der PR wurde menschlich geprüft.
 - [ ] Offene Review-Diskussionen sind aufgelöst.
 - [ ] Der PR wurde nach `master` gemergt.
