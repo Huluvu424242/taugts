@@ -12,14 +12,15 @@ void main() {
   late LokaleDatenbank datenbank;
   late SqliteBewertungsRepository repository;
   final zeit = DateTime.utc(2026, 8, 30, 18);
-  const profil = Profil(
-    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-    anzeigename: 'Test',
-    erstelltAm: _testZeit,
-    geaendertAm: _testZeit,
-  );
+  late Profil profil;
 
   setUp(() async {
+    profil = Profil(
+      id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      anzeigename: 'Test',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
     datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     datenbank.verbindung.execute(
       'INSERT INTO profile VALUES (?, ?, ?, ?)',
@@ -142,7 +143,6 @@ void main() {
   });
 }
 
-const _testZeit = DateTime.utc(2026, 8, 30, 18);
 
 Future<Erlebnis> _speichereAusgangsdaten(
   SqliteBewertungsRepository repository,
