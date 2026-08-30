@@ -760,7 +760,7 @@ void main() {
             erlebnisPositionId: position.id,
             kriteriumId: StandardSpeisekriterien.gesamturteilId,
             herkunftProfilId: profilId,
-            wert: 3 + index,
+            wert: 3.0 + index,
             erstelltAm: erlebnis.erstelltAm,
             geaendertAm: erlebnis.geaendertAm,
           ),
