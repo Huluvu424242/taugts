@@ -8,6 +8,10 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Barrierefreier Getränkebewertungsbogen mit geordneten Qualitäts- und
+  Intensitätskriterien, unabhängigem Gesamturteil, optionaler Notiz und
+  historisch getrennten Bewertungen je Erlebnis.
+
 - Offline-Barrierefreiheitserklärung, app-weites Support-Menü und kontextbezogene Bug-Meldung mit installierter Releaseversion.
 - Durchsuchbare Produktliste, wiederverwendbarer zugänglicher Fehlersammler und
   sichtbare Verwendung des Taugt’s?-Logos in App und Android-Launcher.
