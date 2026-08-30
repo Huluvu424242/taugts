@@ -17,6 +17,18 @@ abstract interface class BewertungsRepository {
   Future<List<Erlebnis>> ladeErlebnisse();
   Future<List<Erlebnis>> ladeEntwuerfe();
   Future<void> loescheErlebnis(String id);
+  Future<List<ErlebnispositionMitProdukt>> ladeErlebnispositionen(
+    String erlebnisId,
+  );
+  Future<void> speichereErlebnisposition({
+    required ErlebnisPosition position,
+    Preisbeobachtung? preis,
+  });
+  Future<void> loescheErlebnisposition(String id);
+  Future<Preisbeobachtung?> ladeLetztenPreis({
+    required String produktId,
+    required String waehrung,
+  });
   Future<void> speichereKriterium(Bewertungskriterium kriterium);
   Future<List<Bewertungskriterium>> ladeAktiveGetraenkekriterien();
   Future<void> speichereBewertung(Bewertung bewertung);

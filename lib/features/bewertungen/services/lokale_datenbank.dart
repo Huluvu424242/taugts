@@ -11,7 +11,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 8;
+  static const schemaVersion = 9;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -64,10 +64,52 @@ class LokaleDatenbank {
         if (version <= 7) {
           _migriereAufSchemaV8();
         }
+        if (version <= 8) {
+          _migriereAufSchemaV9();
+        }
       }
       _stelleStandardGetraenkekriterienBereit();
       verbindung.userVersion = schemaVersion;
     });
+  }
+
+  void _migriereAufSchemaV9() {
+    if (!_tabelleExistiert('erlebnisse')) return;
+    _erstelleErlebnispositionenTabellen();
+    verbindung.execute('''
+      INSERT INTO erlebnispositionen (
+        id, erlebnis_id, produkt_id, anzahl, erstellt_am, geaendert_am
+      )
+      SELECT id, id, produkt_id, 1, erstellt_am, geaendert_am
+      FROM erlebnisse
+      WHERE produkt_id IS NOT NULL
+    ''');
+    verbindung.execute('''
+      INSERT INTO preisbeobachtungen (
+        id, erlebnis_id, erlebnis_position_id, produkt_id, ort_id,
+        beobachtet_am, betrag_minor, waehrung, erstellt_am, geaendert_am
+      )
+      SELECT id, id, id, produkt_id,
+        COALESCE(ort_id, konsumort_id, kaufort_id),
+        COALESCE(tatsaechlicher_beginn, erlebt_am, erstellt_am),
+        CAST(ROUND(preis * 100) AS INTEGER), 'EUR', erstellt_am, geaendert_am
+      FROM erlebnisse
+      WHERE produkt_id IS NOT NULL AND preis IS NOT NULL
+    ''');
+    if (_tabelleExistiert('bewertungen')) {
+      verbindung.execute(
+        'ALTER TABLE bewertungen ADD COLUMN erlebnis_position_id TEXT '
+        'REFERENCES erlebnispositionen(id) ON DELETE CASCADE',
+      );
+      verbindung.execute('''
+        UPDATE bewertungen
+        SET erlebnis_position_id = erlebnis_id
+        WHERE EXISTS (
+          SELECT 1 FROM erlebnispositionen p
+          WHERE p.id = bewertungen.erlebnis_id
+        )
+      ''');
+    }
   }
 
   void _migriereAufSchemaV8() {
@@ -80,6 +122,7 @@ class LokaleDatenbank {
     }
     verbindung.execute('ALTER TABLE erlebnisse RENAME TO erlebnisse_schema7');
     _erstelleErlebnisseTabelle();
+    _erstelleErlebnispositionenTabellen();
     verbindung.execute('''
       INSERT INTO erlebnisse (
         id, typ, status, ort_id, geplanter_tag, geplante_minute,
@@ -286,6 +329,7 @@ class LokaleDatenbank {
       )
     ''');
     _erstelleErlebnisseTabelle();
+    _erstelleErlebnispositionenTabellen();
     verbindung.execute('''
       CREATE TABLE kriterien (
         id TEXT PRIMARY KEY,
@@ -342,7 +386,37 @@ class LokaleDatenbank {
         wert REAL NOT NULL,
         erstellt_am TEXT NOT NULL,
         geaendert_am TEXT NOT NULL,
-        herkunft_profil_id TEXT NOT NULL REFERENCES profile(id)
+        herkunft_profil_id TEXT NOT NULL REFERENCES profile(id),
+        erlebnis_position_id TEXT REFERENCES erlebnispositionen(id)
+          ON DELETE CASCADE
+      )
+    ''');
+  }
+
+  void _erstelleErlebnispositionenTabellen() {
+    verbindung.execute('''
+      CREATE TABLE IF NOT EXISTS erlebnispositionen (
+        id TEXT PRIMARY KEY,
+        erlebnis_id TEXT NOT NULL REFERENCES erlebnisse(id) ON DELETE CASCADE,
+        produkt_id TEXT NOT NULL REFERENCES produkte(objekt_id),
+        anzahl INTEGER NOT NULL CHECK (anzahl >= 1),
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL
+      )
+    ''');
+    verbindung.execute('''
+      CREATE TABLE IF NOT EXISTS preisbeobachtungen (
+        id TEXT PRIMARY KEY,
+        erlebnis_id TEXT NOT NULL REFERENCES erlebnisse(id) ON DELETE CASCADE,
+        erlebnis_position_id TEXT NOT NULL UNIQUE
+          REFERENCES erlebnispositionen(id) ON DELETE CASCADE,
+        produkt_id TEXT NOT NULL REFERENCES produkte(objekt_id),
+        ort_id TEXT REFERENCES orte(id),
+        beobachtet_am TEXT NOT NULL,
+        betrag_minor INTEGER NOT NULL CHECK (betrag_minor >= 0),
+        waehrung TEXT NOT NULL,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL
       )
     ''');
   }

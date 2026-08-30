@@ -317,6 +317,169 @@ class SqliteBewertungsRepository implements BewertungsRepository {
     datenbank.verbindung.execute('DELETE FROM erlebnisse WHERE id = ?', [id]);
   }
 
+  @override
+  Future<List<ErlebnispositionMitProdukt>> ladeErlebnispositionen(
+    String erlebnisId,
+  ) async {
+    final rows = datenbank.verbindung.select('''
+      SELECT p.id AS position_id, p.erlebnis_id, p.produkt_id, p.anzahl,
+        p.erstellt_am AS position_erstellt_am,
+        p.geaendert_am AS position_geaendert_am,
+        o.*, pr.*, pb.id AS preis_id, pb.ort_id AS preis_ort_id,
+        pb.beobachtet_am, pb.betrag_minor, pb.waehrung,
+        pb.erstellt_am AS preis_erstellt_am,
+        pb.geaendert_am AS preis_geaendert_am
+      FROM erlebnispositionen p
+      JOIN objekte o ON o.id = p.produkt_id
+      JOIN produkte pr ON pr.objekt_id = o.id
+      LEFT JOIN preisbeobachtungen pb ON pb.erlebnis_position_id = p.id
+      WHERE p.erlebnis_id = ?
+      ORDER BY p.erstellt_am, p.id
+    ''', [erlebnisId]);
+    return rows.map((row) {
+      final position = ErlebnisPosition(
+        id: row['position_id'] as String,
+        erlebnisId: row['erlebnis_id'] as String,
+        produktId: row['produkt_id'] as String,
+        anzahl: row['anzahl'] as int,
+        erstelltAm: DateTime.parse(row['position_erstellt_am'] as String),
+        geaendertAm: DateTime.parse(row['position_geaendert_am'] as String),
+      );
+      final preisId = row['preis_id'] as String?;
+      return ErlebnispositionMitProdukt(
+        position: position,
+        produkt: _produktAusZeile(row),
+        preis: preisId == null
+            ? null
+            : Preisbeobachtung(
+                id: preisId,
+                erlebnisId: position.erlebnisId,
+                erlebnisPositionId: position.id,
+                produktId: position.produktId,
+                ortId: row['preis_ort_id'] as String?,
+                beobachtetAm: DateTime.parse(row['beobachtet_am'] as String),
+                betrag: Geldbetrag(
+                  minorEinheiten: row['betrag_minor'] as int,
+                  waehrung: row['waehrung'] as String,
+                ),
+                erstelltAm: DateTime.parse(row['preis_erstellt_am'] as String),
+                geaendertAm: DateTime.parse(row['preis_geaendert_am'] as String),
+              ),
+      );
+    }).toList();
+  }
+
+  @override
+  Future<void> speichereErlebnisposition({
+    required ErlebnisPosition position,
+    Preisbeobachtung? preis,
+  }) async {
+    if (position.anzahl < 1) {
+      throw ArgumentError.value(position.anzahl, 'anzahl');
+    }
+    if (preis != null &&
+        (preis.erlebnisId != position.erlebnisId ||
+            preis.erlebnisPositionId != position.id ||
+            preis.produktId != position.produktId ||
+            preis.betrag.minorEinheiten < 0)) {
+      throw ArgumentError('Preis und Erlebnisposition passen nicht zusammen.');
+    }
+    datenbank.transaktion(() {
+      datenbank.verbindung.execute(
+        '''
+          INSERT INTO erlebnispositionen (
+            id, erlebnis_id, produkt_id, anzahl, erstellt_am, geaendert_am
+          ) VALUES (?, ?, ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            produkt_id = excluded.produkt_id,
+            anzahl = excluded.anzahl,
+            geaendert_am = excluded.geaendert_am
+        ''',
+        [
+          position.id,
+          position.erlebnisId,
+          position.produktId,
+          position.anzahl,
+          _zeit(position.erstelltAm),
+          _zeit(position.geaendertAm),
+        ],
+      );
+      if (preis == null) {
+        datenbank.verbindung.execute(
+          'DELETE FROM preisbeobachtungen WHERE erlebnis_position_id = ?',
+          [position.id],
+        );
+      } else {
+        datenbank.verbindung.execute(
+          '''
+            INSERT INTO preisbeobachtungen (
+              id, erlebnis_id, erlebnis_position_id, produkt_id, ort_id,
+              beobachtet_am, betrag_minor, waehrung, erstellt_am, geaendert_am
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(erlebnis_position_id) DO UPDATE SET
+              produkt_id = excluded.produkt_id,
+              ort_id = excluded.ort_id,
+              beobachtet_am = excluded.beobachtet_am,
+              betrag_minor = excluded.betrag_minor,
+              waehrung = excluded.waehrung,
+              geaendert_am = excluded.geaendert_am
+          ''',
+          [
+            preis.id,
+            preis.erlebnisId,
+            preis.erlebnisPositionId,
+            preis.produktId,
+            preis.ortId,
+            _zeit(preis.beobachtetAm),
+            preis.betrag.minorEinheiten,
+            preis.betrag.waehrung,
+            _zeit(preis.erstelltAm),
+            _zeit(preis.geaendertAm),
+          ],
+        );
+      }
+    });
+  }
+
+  @override
+  Future<void> loescheErlebnisposition(String id) async {
+    datenbank.verbindung.execute(
+      'DELETE FROM erlebnispositionen WHERE id = ?',
+      [id],
+    );
+  }
+
+  @override
+  Future<Preisbeobachtung?> ladeLetztenPreis({
+    required String produktId,
+    required String waehrung,
+  }) async {
+    final rows = datenbank.verbindung.select(
+      '''
+        SELECT * FROM preisbeobachtungen
+        WHERE produkt_id = ? AND waehrung = ?
+        ORDER BY beobachtet_am DESC, geaendert_am DESC LIMIT 1
+      ''',
+      [produktId, waehrung],
+    );
+    if (rows.isEmpty) return null;
+    final row = rows.single;
+    return Preisbeobachtung(
+      id: row['id'] as String,
+      erlebnisId: row['erlebnis_id'] as String,
+      erlebnisPositionId: row['erlebnis_position_id'] as String,
+      produktId: row['produkt_id'] as String,
+      ortId: row['ort_id'] as String?,
+      beobachtetAm: DateTime.parse(row['beobachtet_am'] as String),
+      betrag: Geldbetrag(
+        minorEinheiten: row['betrag_minor'] as int,
+        waehrung: row['waehrung'] as String,
+      ),
+      erstelltAm: DateTime.parse(row['erstellt_am'] as String),
+      geaendertAm: DateTime.parse(row['geaendert_am'] as String),
+    );
+  }
+
   Erlebnis _erlebnisAusZeile(Map<String, Object?> row) => Erlebnis(
         id: row['id'] as String,
         typ: Erlebnistyp.values.byName(row['typ'] as String),
@@ -405,8 +568,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       '''
         INSERT INTO bewertungen (
           id, erlebnis_id, kriterium_id, wert, erstellt_am, geaendert_am,
-          herkunft_profil_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          herkunft_profil_id, erlebnis_position_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         bewertung.id,
@@ -416,6 +579,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         _zeit(bewertung.erstelltAm),
         _zeit(bewertung.geaendertAm),
         bewertung.herkunftProfilId,
+        bewertung.erlebnisPositionId,
       ],
     );
   }
@@ -464,6 +628,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         erlebnisId: row['erlebnis_id'] as String,
         kriteriumId: row['kriterium_id'] as String,
         herkunftProfilId: row['herkunft_profil_id'] as String,
+        erlebnisPositionId: row['erlebnis_position_id'] as String?,
         wert: (row['wert'] as num).toDouble(),
         erstelltAm: DateTime.parse(row['erstellt_am'] as String),
         geaendertAm: DateTime.parse(row['geaendert_am'] as String),
@@ -472,9 +637,12 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   @override
   Future<List<Bewertung>> ladeBewertungenFuerProdukt(String produktId) async {
     final rows = datenbank.verbindung.select('''
-      SELECT b.* FROM bewertungen b JOIN erlebnisse e ON e.id = b.erlebnis_id
-      WHERE e.produkt_id = ? ORDER BY b.erstellt_am
-    ''', [produktId]);
+      SELECT b.* FROM bewertungen b
+      LEFT JOIN erlebnispositionen p ON p.id = b.erlebnis_position_id
+      LEFT JOIN erlebnisse e ON e.id = b.erlebnis_id
+      WHERE p.produkt_id = ? OR (p.id IS NULL AND e.produkt_id = ?)
+      ORDER BY b.erstellt_am
+    ''', [produktId, produktId]);
     return rows.map(_bewertungAusZeile).toList();
   }
 
