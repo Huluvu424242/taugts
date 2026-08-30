@@ -1,5 +1,6 @@
 import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
+import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 
 class LokaleDatenbank {
   LokaleDatenbank._(this.verbindung);
@@ -10,7 +11,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 6;
+  static const schemaVersion = 7;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -57,9 +58,50 @@ class LokaleDatenbank {
         if (version <= 5) {
           _migriereAufSchemaV6();
         }
+        if (version <= 6) {
+          _migriereAufSchemaV7();
+        }
       }
+      _stelleStandardGetraenkekriterienBereit();
       verbindung.userVersion = schemaVersion;
     });
+  }
+
+  void _migriereAufSchemaV7() {
+    if (!_tabelleExistiert('kriterien')) return;
+    for (final definition in [
+      'beschreibung TEXT',
+      "eingabetyp TEXT NOT NULL DEFAULT 'wertung'",
+      'reihenfolge INTEGER NOT NULL DEFAULT 0',
+      'aktiv INTEGER NOT NULL DEFAULT 1',
+    ]) {
+      verbindung.execute('ALTER TABLE kriterien ADD COLUMN $definition');
+    }
+  }
+
+  void _stelleStandardGetraenkekriterienBereit() {
+    if (!_tabelleExistiert('kriterien')) return;
+    final zeitpunkt = DateTime.utc(2026, 8, 30);
+    for (final kriterium in StandardGetraenkekriterien.alle(zeitpunkt)) {
+      verbindung.execute(
+        '''
+          INSERT OR IGNORE INTO kriterien (
+            id, name, beschreibung, eingabetyp, reihenfolge, aktiv,
+            erstellt_am, geaendert_am
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''',
+        [
+          kriterium.id,
+          kriterium.name,
+          kriterium.beschreibung,
+          kriterium.eingabetyp.name,
+          kriterium.reihenfolge,
+          kriterium.aktiv ? 1 : 0,
+          kriterium.erstelltAm.toIso8601String(),
+          kriterium.geaendertAm.toIso8601String(),
+        ],
+      );
+    }
   }
 
   void _migriereAufSchemaV6() {
@@ -218,6 +260,10 @@ class LokaleDatenbank {
       CREATE TABLE kriterien (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
+        beschreibung TEXT,
+        eingabetyp TEXT NOT NULL DEFAULT 'wertung',
+        reihenfolge INTEGER NOT NULL DEFAULT 0,
+        aktiv INTEGER NOT NULL DEFAULT 1,
         erstellt_am TEXT NOT NULL,
         geaendert_am TEXT NOT NULL
       )
