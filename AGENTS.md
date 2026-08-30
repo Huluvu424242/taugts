@@ -310,6 +310,32 @@ flutter test
 - Nach Rebase Prüfungen wiederholen. Veröffentlichte Arbeitsbranches ausschließlich mit `git push --force-with-lease` aktualisieren; `git push --force` ist verboten.
 - Konflikte fachlich auflösen; bei Unsicherheit Rebase abbrechen statt Änderungen zu erraten.
 
+
+## Gestapelter Merge
+
+Der Workflow „Gestapelter Merge“ ist ein ausschließlich vom menschlichen Entwickler auslösbarer Ausnahmeprozess. Ein KI-Agent darf ihn niemals eigenmächtig beginnen, aus offenen oder vermeintlich fertigen Pull Requests ableiten, vorschlagen und zugleich ausführen oder aufgrund früherer Merge-Erlaubnisse wiederverwenden.
+
+### Erteilung und Grenzen der Berechtigung
+
+- Der menschliche Entwickler muss den Merge ausdrücklich beauftragen und die betroffene Menge eindeutig festlegen, beispielsweise durch konkrete PR-Nummern oder „alle offenen gestapelten PRs“.
+- Erst dieser Auftrag erteilt dem KI-Agenten für genau diese Ausführung die **explizite, einmalige und temporäre Berechtigung**, die benannten gestapelten Pull Requests selbständig zu mergen. Die Berechtigung umfasst ausdrücklich auch notwendige Merges in `master`.
+- Die Berechtigung gilt ausschließlich für die gezielte Durchführung des beauftragten gestapelten Merges. Sie erlaubt keine weiteren Merges, keine Änderungen außerhalb der betroffenen PR-Kette, kein Umgehen von Branchschutz, vorgeschriebenen Prüfungen oder offenen Review-Diskussionen und keine Änderungen an GitHub-Projekteinstellungen.
+- Die Berechtigung endet automatisch und vollständig, sobald die Aufgabe erfolgreich abgeschlossen wurde oder aus irgendeinem Grund fehlschlägt, abgebrochen oder blockiert wird. Sie darf weder für einen Wiederholungsversuch noch für eine spätere Aufgabe als fortbestehend angenommen werden; dafür ist ein neuer ausdrücklicher menschlicher Auftrag erforderlich.
+
+### Verbindlicher Ablauf
+
+1. Umfang, Reihenfolge, Basen, Head-SHAs, offenen Zustand, Review-Status, Mergefähigkeit und vorgeschriebene erfolgreiche Prüfungen aller benannten PRs ermitteln.
+2. Die Kette vom untersten PR zum obersten PR bearbeiten: zuerst den PR mergen, dessen Basis der geschützte Zielbranch ist.
+3. Nach jedem Merge den tatsächlichen neuen Stand von `master` beziehungsweise des Zielbranches prüfen.
+4. Den jeweils nächsten gestapelten PR auf den aktualisierten Zielbranch umstellen. Enthält sein Vergleich durch die frühere Stapelbasis bereits gemergte Änderungen erneut, den Arbeitsbranch konfliktfrei auf den aktuellen Zielbranch rebasen und ausschließlich mit einer abgesicherten Aktualisierung entsprechend `--force-with-lease` veröffentlichen.
+5. Danach erneut prüfen, dass der PR nur seinen eigenen fachlichen Umfang enthält, konfliktfrei und mergefähig ist. Für den neuen exakten Head-SHA alle vorgeschriebenen Prüfungen erneut erfolgreich ausführen.
+6. Den PR erst anschließend mit der projektüblichen Merge-Methode mergen und den Ablauf bis zum Ende der vorgegebenen Kette wiederholen.
+7. Bei Konflikten, fehlgeschlagenen Prüfungen, verändertem Head-SHA, unklarem Umfang oder einer sonstigen Blockade nicht raten, keine Schutzregel umgehen und keine zusätzlichen PRs einbeziehen. Die Ausführung anhalten; damit ist die temporäre Berechtigung erloschen.
+
+### Abschlussmeldung
+
+Am Ende jeder Ausführung gibt der KI-Agent die übliche Zusammenfassung aus. Sie zählt mindestens die bearbeiteten PRs in ihrer tatsächlichen Reihenfolge, Retargeting- beziehungsweise Rebase-Schritte, ausgeführte Prüfungen und deren Ergebnis, jeden erfolgreichen oder fehlgeschlagenen Merge sowie den erreichten Endzustand des Zielbranches auf. Bei einer unvollständigen oder fehlerhaften Ausführung werden die Blockade und die nicht gemergten PRs eindeutig benannt. Die Meldung stellt außerdem klar, dass die einmalige temporäre Merge-Berechtigung mit Abschluss der Ausführung wieder entzogen ist.
+
 ## Abschlussdefinition
 
 Eine Arbeit ist fertig, wenn Umfang und Akzeptanzkriterien erfüllt, relevante Tests erfolgreich, Formatierung und Analyse sauber, Dokumentation und Lizenzen geprüft sowie offene manuelle Prüfungen transparent benannt sind.
