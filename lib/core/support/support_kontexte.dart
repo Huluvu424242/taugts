@@ -14,6 +14,7 @@ abstract final class SupportKontexte {
   static const bewertungErfassen = 'Bewertung erfassen – Getränk in Gaststätte';
   static const bewertungsentwurfBearbeiten =
       'Bewertungsentwurf bearbeiten – Getränk in Gaststätte';
+  static const getraenkBewertung = 'Getränk bewerten';
   static const ueberDialog = 'Über-Dialog';
   static const barrierefreiheitserklaerung = 'Barrierefreiheitserklärung';
 
