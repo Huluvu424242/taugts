@@ -88,11 +88,7 @@ void main() {
       profil: profil,
     );
 
-    await tester.scrollUntilVisible(
-      find.text('Farbintensität'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await _scrolleBisSichtbar(tester, find.text('Farbintensität'));
     expect(find.text('Bitterkeit'), findsWidgets);
     expect(find.text('Farbintensität'), findsWidgets);
 
@@ -100,7 +96,7 @@ void main() {
       TextField,
       'Bewertungsnotiz (optional)',
     );
-    await tester.ensureVisible(notiz);
+    await _scrolleBisSichtbar(tester, notiz);
     await tester.enterText(notiz, 'Heute deutlich herber als früher.');
     await tester.tap(find.text('Bewertung speichern'));
     await tester.pumpAndSettle();
@@ -143,6 +139,21 @@ void main() {
   });
 }
 
+Future<void> _scrolleBisSichtbar(
+  WidgetTester tester,
+  Finder ziel,
+) async {
+  final liste = find.byType(Scrollable).first;
+  for (var versuch = 0;
+      versuch < 10 && ziel.evaluate().isEmpty;
+      versuch++) {
+    await tester.drag(liste, const Offset(0, -300));
+    await tester.pumpAndSettle();
+  }
+  expect(ziel, findsWidgets);
+  await tester.ensureVisible(ziel.first);
+  await tester.pumpAndSettle();
+}
 
 Future<Erlebnis> _speichereAusgangsdaten(
   SqliteBewertungsRepository repository,
