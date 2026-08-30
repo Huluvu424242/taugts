@@ -107,4 +107,38 @@ void main() {
     expect(zeile['ist_entwurf'], 0);
     datenbank.schliessen();
   });
+
+  test('migriert Kriterien und liefert stabile Getränkestandards aus', () {
+    final verbindung = sqlite3.openInMemory();
+    verbindung.execute('''
+      CREATE TABLE kriterien (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL
+      )
+    ''');
+    verbindung.execute(
+      "INSERT INTO kriterien VALUES ('alt', 'Vorhanden', 'x', 'x')",
+    );
+    verbindung.userVersion = 6;
+
+    final datenbank = LokaleDatenbank.oeffnen(verbindung);
+    final vorhanden = verbindung.select(
+      "SELECT * FROM kriterien WHERE id = 'alt'",
+    ).single;
+    final standard = verbindung.select(
+      "SELECT * FROM kriterien WHERE id LIKE 'c0000000-%' "
+      'ORDER BY reihenfolge',
+    );
+
+    expect(verbindung.userVersion, LokaleDatenbank.schemaVersion);
+    expect(vorhanden['name'], 'Vorhanden');
+    expect(vorhanden['eingabetyp'], 'wertung');
+    expect(vorhanden['aktiv'], 1);
+    expect(standard, hasLength(7));
+    expect(standard.first['name'], 'Gesamturteil');
+    expect(standard.last['name'], 'Farbintensität');
+    datenbank.schliessen();
+  });
 }
