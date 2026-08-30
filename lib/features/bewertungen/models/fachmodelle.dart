@@ -439,8 +439,7 @@ abstract final class StandardGetraenkekriterien {
 abstract final class StandardSpeisekriterien {
   static const gesamturteilId = 'd0000000-0000-4000-8000-000000000001';
   static const geschmackId = 'd0000000-0000-4000-8000-000000000002';
-  static const frischeZubereitungId =
-      'd0000000-0000-4000-8000-000000000003';
+  static const frischeZubereitungId = 'd0000000-0000-4000-8000-000000000003';
   static const konsistenzId = 'd0000000-0000-4000-8000-000000000004';
   static const temperaturId = 'd0000000-0000-4000-8000-000000000005';
   static const preisLeistungId = 'd0000000-0000-4000-8000-000000000006';

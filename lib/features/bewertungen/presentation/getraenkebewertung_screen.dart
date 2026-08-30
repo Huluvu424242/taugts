@@ -32,8 +32,8 @@ class _GetraenkebewertungScreenState extends State<GetraenkebewertungScreen> {
   late Future<_BewertungsDaten> _laden = _datenLaden();
 
   Future<_BewertungsDaten> _datenLaden() async {
-    final produktId =
-        widget.erlebnisposition?.position.produktId ?? widget.erlebnis.produktId;
+    final produktId = widget.erlebnisposition?.position.produktId ??
+        widget.erlebnis.produktId;
     if (produktId == null) {
       throw StateError('Das Erlebnis enthält noch kein Produkt.');
     }
