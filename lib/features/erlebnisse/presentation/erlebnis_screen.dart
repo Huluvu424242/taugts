@@ -314,7 +314,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Das Erlebnis konnte nicht vorbereitet werden.')),
+        const SnackBar(
+            content: Text('Das Erlebnis konnte nicht vorbereitet werden.')),
       );
     }
   }
@@ -324,7 +325,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Position entfernen?'),
-        content: Text('${eintrag.produkt.anzeigetitel} wird aus dem Erlebnis entfernt.'),
+        content: Text(
+            '${eintrag.produkt.anzeigetitel} wird aus dem Erlebnis entfernt.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -530,7 +532,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                           ),
                           onTap: () => _positionOeffnen(eintrag),
                           trailing: IconButton(
-                            tooltip: '${eintrag.produkt.anzeigetitel} entfernen',
+                            tooltip:
+                                '${eintrag.produkt.anzeigetitel} entfernen',
                             onPressed: () => _positionLoeschen(eintrag),
                             icon: const Icon(Icons.delete_outline),
                           ),

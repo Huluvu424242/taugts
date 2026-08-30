@@ -263,8 +263,8 @@ class Geldbetrag {
     final ganze = int.parse(treffer.group(1)!);
     final nachkomma = (treffer.group(2) ?? '').padRight(2, '0');
     return Geldbetrag(
-      minorEinheiten: ganze * 100 +
-          (nachkomma.isEmpty ? 0 : int.parse(nachkomma)),
+      minorEinheiten:
+          ganze * 100 + (nachkomma.isEmpty ? 0 : int.parse(nachkomma)),
       waehrung: waehrung,
     );
   }

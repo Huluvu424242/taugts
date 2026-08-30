@@ -363,7 +363,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
                   waehrung: row['waehrung'] as String,
                 ),
                 erstelltAm: DateTime.parse(row['preis_erstellt_am'] as String),
-                geaendertAm: DateTime.parse(row['preis_geaendert_am'] as String),
+                geaendertAm:
+                    DateTime.parse(row['preis_geaendert_am'] as String),
               ),
       );
     }).toList();
