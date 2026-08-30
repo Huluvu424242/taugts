@@ -263,9 +263,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         erlebnis.typ.name,
         erlebnis.status.name,
         erlebnis.ortId,
-        erlebnis.geplanterTag == null
-            ? null
-            : _datum(erlebnis.geplanterTag!),
+        erlebnis.geplanterTag == null ? null : _datum(erlebnis.geplanterTag!),
         erlebnis.geplanteMinute,
         erlebnis.geplanteDauerMinuten,
         _optionaleZeit(erlebnis.tatsaechlicherBeginn),
@@ -482,13 +480,11 @@ class SqliteBewertungsRepository implements BewertungsRepository {
 
   String _zeit(DateTime wert) => wert.toUtc().toIso8601String();
 
-  String _datum(DateTime wert) =>
-      '${wert.year.toString().padLeft(4, '0')}-'
+  String _datum(DateTime wert) => '${wert.year.toString().padLeft(4, '0')}-'
       '${wert.month.toString().padLeft(2, '0')}-'
       '${wert.day.toString().padLeft(2, '0')}';
 
-  String? _optionaleZeit(DateTime? wert) =>
-      wert == null ? null : _zeit(wert);
+  String? _optionaleZeit(DateTime? wert) => wert == null ? null : _zeit(wert);
 
   DateTime? _optionalesDatum(String? wert) {
     if (wert == null) return null;

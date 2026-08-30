@@ -60,7 +60,8 @@ void main() {
     expect(erlebnisse.single.geplanteMinute, isNull);
   });
 
-  testWidgets('Check-in und Checkout setzen editierbare Zeiten', (tester) async {
+  testWidgets('Check-in und Checkout setzen editierbare Zeiten',
+      (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ErlebnisScreen(

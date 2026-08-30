@@ -224,14 +224,12 @@ class Erlebnis {
         geplanteMinute: identical(geplanteMinute, _nichtGesetzt)
             ? this.geplanteMinute
             : geplanteMinute as int?,
-        geplanteDauerMinuten:
-            identical(geplanteDauerMinuten, _nichtGesetzt)
-                ? this.geplanteDauerMinuten
-                : geplanteDauerMinuten as int?,
-        tatsaechlicherBeginn:
-            identical(tatsaechlicherBeginn, _nichtGesetzt)
-                ? this.tatsaechlicherBeginn
-                : tatsaechlicherBeginn as DateTime?,
+        geplanteDauerMinuten: identical(geplanteDauerMinuten, _nichtGesetzt)
+            ? this.geplanteDauerMinuten
+            : geplanteDauerMinuten as int?,
+        tatsaechlicherBeginn: identical(tatsaechlicherBeginn, _nichtGesetzt)
+            ? this.tatsaechlicherBeginn
+            : tatsaechlicherBeginn as DateTime?,
         tatsaechlichesEnde: identical(tatsaechlichesEnde, _nichtGesetzt)
             ? this.tatsaechlichesEnde
             : tatsaechlichesEnde as DateTime?,
