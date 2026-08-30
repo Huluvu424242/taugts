@@ -16,8 +16,15 @@ Die Erklärung dokumentiert ihren Stand, den aktuellen Umsetzungsstatus,
 bekannte Barrieren und den Meldeweg. Bei relevanten UX- oder
 Barrierefreiheitsänderungen werden diese Angaben im selben Pull Request geprüft.
 
+Der Getränkebewertungsbogen bietet geordnete, beschriftete Auswahllisten,
+erklärte Intensitätsskalen, einen fokussierbaren Fehlersammler und eine bei
+großer Schrift erreichbare Speicheraktion. Kriterien dürfen einzeln
+ausgelassen werden; das Gesamturteil bleibt unabhängig.
+
 Vor einem öffentlichen Release bleiben manuelle Prüfungen mit TalkBack, großer
 Systemschrift, einem kleinen Android-Gerät und Gestennavigation erforderlich.
+Der neue Bewertungsbogen ist ausdrücklich in diese manuelle Prüfung
+einzubeziehen.
 
 ## Bug-Meldung
 
