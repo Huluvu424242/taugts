@@ -28,3 +28,7 @@ Verbindung aktiviert.
 - Schemaänderungen müssen die Schemaversion erhöhen und eine getestete,
   vorwärtsgerichtete Migration ergänzen.
 - Der direkte SQL-Zugriff bleibt auf den Servicebereich des Features begrenzt.
+- Die Migration auf Schema 8 überführt bisherige produktbezogene Erlebnisse
+  verlustfrei in allgemeine Restaurantbesuche. Der bisherige Zeitpunkt wird als
+  Planung übernommen; Produkt-, Preis-, Mengen- und Ortsbezüge bleiben bis zur
+  Einführung der Erlebnispositionen als Migrationsdaten erhalten.

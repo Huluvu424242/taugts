@@ -221,18 +221,32 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       );
 
   @override
-  Future<void> speichereErlebnis(Erlebnis erlebnis) async =>
-      _speichereErlebnisZeile(erlebnis);
+  Future<void> speichereErlebnis(Erlebnis erlebnis) async {
+    final zeitfehler = erlebnis.zeitfehler;
+    if (zeitfehler.isNotEmpty) {
+      throw ArgumentError.value(erlebnis, 'erlebnis', zeitfehler.join(' '));
+    }
+    _speichereErlebnisZeile(erlebnis);
+  }
 
   void _speichereErlebnisZeile(Erlebnis erlebnis) {
     datenbank.verbindung.execute(
       '''
         INSERT INTO erlebnisse (
-          id, produkt_id, kaufort_id, konsumort_id, erlebt_am, erstellt_am,
-          geaendert_am, herkunft_profil_id, preis, menge, gebinde, notiz,
-          ist_entwurf
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          id, typ, status, ort_id, geplanter_tag, geplante_minute,
+          geplante_dauer_minuten, tatsaechlicher_beginn, tatsaechliches_ende,
+          erstellt_am, geaendert_am, herkunft_profil_id, notiz, ist_entwurf,
+          produkt_id, kaufort_id, konsumort_id, erlebt_am, preis, menge, gebinde
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
+          typ = excluded.typ,
+          status = excluded.status,
+          ort_id = excluded.ort_id,
+          geplanter_tag = excluded.geplanter_tag,
+          geplante_minute = excluded.geplante_minute,
+          geplante_dauer_minuten = excluded.geplante_dauer_minuten,
+          tatsaechlicher_beginn = excluded.tatsaechlicher_beginn,
+          tatsaechliches_ende = excluded.tatsaechliches_ende,
           produkt_id = excluded.produkt_id,
           kaufort_id = excluded.kaufort_id,
           konsumort_id = excluded.konsumort_id,
@@ -246,21 +260,50 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       ''',
       [
         erlebnis.id,
+        erlebnis.typ.name,
+        erlebnis.status.name,
+        erlebnis.ortId,
+        erlebnis.geplanterTag == null
+            ? null
+            : _datum(erlebnis.geplanterTag!),
+        erlebnis.geplanteMinute,
+        erlebnis.geplanteDauerMinuten,
+        _optionaleZeit(erlebnis.tatsaechlicherBeginn),
+        _optionaleZeit(erlebnis.tatsaechlichesEnde),
+        _zeit(erlebnis.erstelltAm),
+        _zeit(erlebnis.geaendertAm),
+        erlebnis.herkunftProfilId,
+        _leerAlsNull(erlebnis.notiz),
+        erlebnis.istEntwurf ? 1 : 0,
         erlebnis.produktId,
         erlebnis.kaufortId,
         erlebnis.konsumortId,
         _zeit(erlebnis.erlebtAm),
-        _zeit(erlebnis.erstelltAm),
-        _zeit(erlebnis.geaendertAm),
-        erlebnis.herkunftProfilId,
         erlebnis.preis,
         erlebnis.menge,
         _leerAlsNull(erlebnis.gebinde),
-        _leerAlsNull(erlebnis.notiz),
-        erlebnis.istEntwurf ? 1 : 0,
       ],
     );
   }
+
+  @override
+  Future<Erlebnis?> ladeErlebnis(String id) async {
+    final rows = datenbank.verbindung.select(
+      'SELECT * FROM erlebnisse WHERE id = ?',
+      [id],
+    );
+    return rows.isEmpty ? null : _erlebnisAusZeile(rows.single);
+  }
+
+  @override
+  Future<List<Erlebnis>> ladeErlebnisse() async => datenbank.verbindung
+      .select(
+        'SELECT * FROM erlebnisse '
+        'ORDER BY COALESCE(tatsaechlicher_beginn, geplanter_tag, erstellt_am) '
+        'DESC, geaendert_am DESC',
+      )
+      .map(_erlebnisAusZeile)
+      .toList();
 
   @override
   Future<List<Erlebnis>> ladeEntwuerfe() async => datenbank.verbindung
@@ -278,11 +321,21 @@ class SqliteBewertungsRepository implements BewertungsRepository {
 
   Erlebnis _erlebnisAusZeile(Map<String, Object?> row) => Erlebnis(
         id: row['id'] as String,
-        produktId: row['produkt_id'] as String,
+        typ: Erlebnistyp.values.byName(row['typ'] as String),
+        status: Erlebnisstatus.values.byName(row['status'] as String),
+        ortId: row['ort_id'] as String?,
+        geplanterTag: _optionalesDatum(row['geplanter_tag'] as String?),
+        geplanteMinute: row['geplante_minute'] as int?,
+        geplanteDauerMinuten: row['geplante_dauer_minuten'] as int?,
+        tatsaechlicherBeginn:
+            _optionalesDatum(row['tatsaechlicher_beginn'] as String?),
+        tatsaechlichesEnde:
+            _optionalesDatum(row['tatsaechliches_ende'] as String?),
+        produktId: row['produkt_id'] as String?,
         kaufortId: row['kaufort_id'] as String?,
         konsumortId: row['konsumort_id'] as String?,
         herkunftProfilId: row['herkunft_profil_id'] as String,
-        erlebtAm: DateTime.parse(row['erlebt_am'] as String),
+        erlebtAm: _optionalesDatum(row['erlebt_am'] as String?),
         erstelltAm: DateTime.parse(row['erstellt_am'] as String),
         geaendertAm: DateTime.parse(row['geaendert_am'] as String),
         preis: (row['preis'] as num?)?.toDouble(),
@@ -428,6 +481,17 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   }
 
   String _zeit(DateTime wert) => wert.toUtc().toIso8601String();
+
+  String _datum(DateTime wert) =>
+      '${wert.year.toString().padLeft(4, '0')}-'
+      '${wert.month.toString().padLeft(2, '0')}-'
+      '${wert.day.toString().padLeft(2, '0')}';
+
+  String? _optionaleZeit(DateTime? wert) =>
+      wert == null ? null : _zeit(wert);
+
+  DateTime? _optionalesDatum(String? wert) =>
+      wert == null ? null : DateTime.parse(wert);
 
   String? _leerAlsNull(String? wert) {
     final getrimmt = wert?.trim();

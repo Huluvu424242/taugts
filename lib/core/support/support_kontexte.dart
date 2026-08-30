@@ -10,7 +10,7 @@ abstract final class SupportKontexte {
   static const ortAuswaehlen = 'Ort auswählen';
   static const ortErfassen = 'Ort erfassen';
   static const ortBearbeiten = 'Ort bearbeiten';
-  static const bewertungsentwuerfe = 'Bewertungsentwürfe';
+  static const bewertungsentwuerfe = 'Erlebnisse verwalten';
   static const bewertungErfassen = 'Bewertung erfassen – Getränk in Gaststätte';
   static const bewertungsentwurfBearbeiten =
       'Bewertungsentwurf bearbeiten – Getränk in Gaststätte';
@@ -32,4 +32,9 @@ abstract final class SupportKontexte {
 
   static String erlebnis({required bool entwurfBearbeiten}) =>
       entwurfBearbeiten ? bewertungsentwurfBearbeiten : bewertungErfassen;
+
+  static String erlebnisGrunddaten({
+    required String typ,
+    required bool bearbeiten,
+  }) => bearbeiten ? '$typ bearbeiten' : '$typ registrieren';
 }

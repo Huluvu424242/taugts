@@ -17,5 +17,8 @@ Taugt’s? wird featureorientiert und offline-first entwickelt. UI, Fachlogik un
 - Das Erlebnis bildet den historischen Kontext. Das atomare Speichern
   aktualisiert bei einer Korrektur nur die Bewertung desselben Erlebnisses;
   ein neues Erlebnis erzeugt eine weitere historische Bewertung.
+- Erlebnisse besitzen einen stabil gespeicherten Typ `Restaurantbesuch` oder
+  `Einkauf` und einen Status `geplant`, `aktiv` oder `beendet`. Planung,
+  tatsächlicher Beginn und tatsächliches Ende bleiben getrennte Fachwerte.
 
 Diese Zurückhaltung vermeidet Architektur auf Vorrat und hält spätere Entscheidungen offen, ohne die Plattformunterstützung zu behindern.

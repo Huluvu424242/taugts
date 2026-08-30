@@ -30,9 +30,13 @@ class _GetraenkebewertungScreenState extends State<GetraenkebewertungScreen> {
   late Future<_BewertungsDaten> _laden = _datenLaden();
 
   Future<_BewertungsDaten> _datenLaden() async {
-    final ortId = widget.erlebnis.konsumortId ?? widget.erlebnis.kaufortId;
+    final produktId = widget.erlebnis.produktId;
+    if (produktId == null) {
+      throw StateError('Das Erlebnis enthält noch kein Produkt.');
+    }
+    final ortId = widget.erlebnis.wirksamerOrtId;
     final werte = await Future.wait([
-      widget.repository.ladeProdukt(widget.erlebnis.produktId),
+      widget.repository.ladeProdukt(produktId),
       widget.repository.ladeAktiveGetraenkekriterien(),
       widget.repository.ladeBewertungenFuerErlebnis(widget.erlebnis.id),
       ortId == null ? Future<Ort?>.value() : widget.repository.ladeOrt(ortId),

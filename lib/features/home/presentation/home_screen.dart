@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _bewerten() async {
+  Future<void> _erlebnisseOeffnen() async {
     final repository = widget.bewertungsRepository;
     final idGenerator = widget.idGenerator;
     final profil = _profil;
@@ -150,9 +150,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       widget.idGenerator != null) ...[
                     const SizedBox(height: 32),
                     FilledButton.icon(
-                      onPressed: _bewerten,
-                      icon: const Icon(Icons.rate_review_outlined),
-                      label: const Text('Jetzt bewerten'),
+                      onPressed: _erlebnisseOeffnen,
+                      icon: const Icon(Icons.add_location_alt_outlined),
+                      label: const Text('Erlebnis registrieren'),
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton.icon(

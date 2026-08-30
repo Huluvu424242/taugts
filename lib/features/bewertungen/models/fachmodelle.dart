@@ -6,6 +6,10 @@ enum Ortstyp { gastronomie, geschaeft, privat, sonstiger }
 
 enum KriteriumEingabetyp { wertung, intensitaet }
 
+enum Erlebnistyp { restaurantbesuch, einkauf }
+
+enum Erlebnisstatus { geplant, aktiv, beendet }
+
 class BewertbaresObjekt {
   const BewertbaresObjekt({
     required this.id,
@@ -98,11 +102,18 @@ class Ort {
 class Erlebnis {
   const Erlebnis({
     required this.id,
-    required this.produktId,
     required this.herkunftProfilId,
-    required this.erlebtAm,
     required this.erstelltAm,
     required this.geaendertAm,
+    this.typ = Erlebnistyp.restaurantbesuch,
+    this.status = Erlebnisstatus.geplant,
+    this.ortId,
+    this.geplanterTag,
+    this.geplanteMinute,
+    this.geplanteDauerMinuten,
+    this.tatsaechlicherBeginn,
+    this.tatsaechlichesEnde,
+    this.produktId,
     this.kaufortId,
     this.konsumortId,
     this.preis,
@@ -110,11 +121,20 @@ class Erlebnis {
     this.gebinde,
     this.notiz,
     this.istEntwurf = true,
-  });
+    DateTime? erlebtAm,
+  }) : _bisherigerZeitpunkt = erlebtAm;
 
   final String id;
-  final String produktId;
   final String herkunftProfilId;
+  final Erlebnistyp typ;
+  final Erlebnisstatus status;
+  final String? ortId;
+  final DateTime? geplanterTag;
+  final int? geplanteMinute;
+  final int? geplanteDauerMinuten;
+  final DateTime? tatsaechlicherBeginn;
+  final DateTime? tatsaechlichesEnde;
+  final String? produktId;
   final String? kaufortId;
   final String? konsumortId;
   final double? preis;
@@ -122,21 +142,100 @@ class Erlebnis {
   final String? gebinde;
   final String? notiz;
   final bool istEntwurf;
-  final DateTime erlebtAm;
   final DateTime erstelltAm;
   final DateTime geaendertAm;
+  final DateTime? _bisherigerZeitpunkt;
+
+  String? get wirksamerOrtId => ortId ?? konsumortId ?? kaufortId;
+
+  DateTime get erlebtAm =>
+      tatsaechlicherBeginn ??
+      _bisherigerZeitpunkt ??
+      geplanterZeitpunkt ??
+      erstelltAm;
+
+  DateTime? get geplanterZeitpunkt {
+    final tag = geplanterTag;
+    if (tag == null) return null;
+    final minute = geplanteMinute;
+    return DateTime.utc(
+      tag.year,
+      tag.month,
+      tag.day,
+      minute == null ? 0 : minute ~/ 60,
+      minute == null ? 0 : minute % 60,
+    );
+  }
+
+  List<String> get zeitfehler {
+    final fehler = <String>[];
+    if (geplanteMinute != null && geplanterTag == null) {
+      fehler.add('Eine geplante Uhrzeit benötigt ein Datum.');
+    }
+    if (geplanteMinute != null &&
+        (geplanteMinute! < 0 || geplanteMinute! >= 24 * 60)) {
+      fehler.add('Die geplante Uhrzeit ist ungültig.');
+    }
+    if (geplanteDauerMinuten != null && geplanteDauerMinuten! <= 0) {
+      fehler.add('Die geplante Dauer muss größer als null sein.');
+    }
+    if (tatsaechlichesEnde != null && tatsaechlicherBeginn == null) {
+      fehler.add('Ein tatsächliches Ende benötigt einen Beginn.');
+    }
+    if (tatsaechlicherBeginn != null &&
+        tatsaechlichesEnde != null &&
+        tatsaechlichesEnde!.isBefore(tatsaechlicherBeginn!)) {
+      fehler.add('Das tatsächliche Ende darf nicht vor dem Beginn liegen.');
+    }
+    if (status == Erlebnisstatus.aktiv && tatsaechlicherBeginn == null) {
+      fehler.add('Ein aktives Erlebnis benötigt einen Beginn.');
+    }
+    if (status == Erlebnisstatus.beendet &&
+        (tatsaechlicherBeginn == null || tatsaechlichesEnde == null)) {
+      fehler.add('Ein beendetes Erlebnis benötigt Beginn und Ende.');
+    }
+    return fehler;
+  }
 
   static const _nichtGesetzt = Object();
 
   Erlebnis kopiereMit({
+    Erlebnistyp? typ,
+    Erlebnisstatus? status,
+    Object? ortId = _nichtGesetzt,
+    Object? geplanterTag = _nichtGesetzt,
+    Object? geplanteMinute = _nichtGesetzt,
+    Object? geplanteDauerMinuten = _nichtGesetzt,
+    Object? tatsaechlicherBeginn = _nichtGesetzt,
+    Object? tatsaechlichesEnde = _nichtGesetzt,
     Object? notiz = _nichtGesetzt,
     bool? istEntwurf,
     DateTime? geaendertAm,
   }) =>
       Erlebnis(
         id: id,
-        produktId: produktId,
         herkunftProfilId: herkunftProfilId,
+        typ: typ ?? this.typ,
+        status: status ?? this.status,
+        ortId: identical(ortId, _nichtGesetzt) ? this.ortId : ortId as String?,
+        geplanterTag: identical(geplanterTag, _nichtGesetzt)
+            ? this.geplanterTag
+            : geplanterTag as DateTime?,
+        geplanteMinute: identical(geplanteMinute, _nichtGesetzt)
+            ? this.geplanteMinute
+            : geplanteMinute as int?,
+        geplanteDauerMinuten:
+            identical(geplanteDauerMinuten, _nichtGesetzt)
+                ? this.geplanteDauerMinuten
+                : geplanteDauerMinuten as int?,
+        tatsaechlicherBeginn:
+            identical(tatsaechlicherBeginn, _nichtGesetzt)
+                ? this.tatsaechlicherBeginn
+                : tatsaechlicherBeginn as DateTime?,
+        tatsaechlichesEnde: identical(tatsaechlichesEnde, _nichtGesetzt)
+            ? this.tatsaechlichesEnde
+            : tatsaechlichesEnde as DateTime?,
+        produktId: produktId,
         kaufortId: kaufortId,
         konsumortId: konsumortId,
         preis: preis,
@@ -144,7 +243,7 @@ class Erlebnis {
         gebinde: gebinde,
         notiz: identical(notiz, _nichtGesetzt) ? this.notiz : notiz as String?,
         istEntwurf: istEntwurf ?? this.istEntwurf,
-        erlebtAm: erlebtAm,
+        erlebtAm: _bisherigerZeitpunkt,
         erstelltAm: erstelltAm,
         geaendertAm: geaendertAm ?? this.geaendertAm,
       );

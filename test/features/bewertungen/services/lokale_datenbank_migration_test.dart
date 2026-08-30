@@ -83,6 +83,61 @@ void main() {
   test('migriert Erlebnisse von Schema 5 auf Entwurfsfelder', () {
     final verbindung = sqlite3.openInMemory();
     verbindung.execute('''
+      CREATE TABLE profile (
+        id TEXT PRIMARY KEY,
+        anzeigename TEXT,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL
+      )
+    ''');
+    verbindung.execute(
+      "INSERT INTO profile VALUES ('u1', NULL, 'x', 'x')",
+    );
+    verbindung.execute('''
+      CREATE TABLE objekte (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        art TEXT NOT NULL,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL
+      )
+    ''');
+    verbindung.execute(
+      "INSERT INTO objekte VALUES ('p1', 'Alt', 'produkt', 'x', 'x')",
+    );
+    verbindung.execute('''
+      CREATE TABLE produkte (
+        objekt_id TEXT PRIMARY KEY REFERENCES objekte(id),
+        marke TEXT,
+        produktart TEXT NOT NULL DEFAULT 'bier',
+        brauerei TEXT,
+        sorte TEXT,
+        alkoholgehalt REAL,
+        herkunft TEXT,
+        gebinde TEXT,
+        fuellmenge_ml INTEGER,
+        barcode TEXT,
+        notiz TEXT
+      )
+    ''');
+    verbindung.execute(
+      "INSERT INTO produkte (objekt_id, marke) VALUES ('p1', 'Alt')",
+    );
+    verbindung.execute('''
+      CREATE TABLE orte (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        typ TEXT NOT NULL,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL,
+        adresse TEXT,
+        breitengrad REAL,
+        laengengrad REAL,
+        osm_referenz TEXT,
+        notiz TEXT
+      )
+    ''');
+    verbindung.execute('''
       CREATE TABLE erlebnisse (
         id TEXT PRIMARY KEY,
         produkt_id TEXT NOT NULL,
@@ -95,7 +150,8 @@ void main() {
       )
     ''');
     verbindung.execute(
-      "INSERT INTO erlebnisse VALUES ('e1', 'p1', NULL, NULL, 'x', 'x', 'x', 'u1')",
+      "INSERT INTO erlebnisse VALUES ('e1', 'p1', NULL, NULL, "
+      "'2026-08-28T20:15:00.000Z', 'x', 'x', 'u1')",
     );
     verbindung.userVersion = 5;
 
@@ -105,6 +161,11 @@ void main() {
     expect(zeile['preis'], isNull);
     expect(zeile['notiz'], isNull);
     expect(zeile['ist_entwurf'], 0);
+    expect(zeile['typ'], 'restaurantbesuch');
+    expect(zeile['status'], 'geplant');
+    expect(zeile['geplanter_tag'], '2026-08-28');
+    expect(zeile['geplante_minute'], 20 * 60 + 15);
+    expect(zeile['produkt_id'], 'p1');
     datenbank.schliessen();
   });
 

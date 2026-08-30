@@ -6,6 +6,12 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+### Added
+
+- Restaurantbesuche und Einkäufe lassen sich als geplante, aktive oder
+  beendete Erlebnisse mit getrennten Planungs-, Beginn- und Endezeiten lokal
+  erfassen, einchecken, auschecken und später bearbeiten.
+
 ## [0.1.0+1] - 2026-08-30
 
 ### Added
