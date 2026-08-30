@@ -393,4 +393,175 @@ void main() {
       isEmpty,
     );
   });
+
+  test('liefert aktive Getränkekriterien in definierter Reihenfolge', () async {
+    final kriterien = await repository.ladeAktiveGetraenkekriterien();
+
+    expect(
+      kriterien.map((kriterium) => kriterium.name),
+      [
+        'Gesamturteil',
+        'Geschmack',
+        'Aroma',
+        'Frische',
+        'Preis-Leistung',
+        'Bitterkeit',
+        'Farbintensität',
+      ],
+    );
+    expect(kriterien.every((kriterium) => kriterium.aktiv), isTrue);
+    expect(
+      kriterien.last.eingabetyp,
+      KriteriumEingabetyp.intensitaet,
+    );
+  });
+
+  test('speichert Korrektur und neue historische Bewertung getrennt', () async {
+    const produktId = '80000000-0000-4000-8000-000000000001';
+    final produkt = Produkt(
+      id: produktId,
+      name: 'Historisches Pils',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereProdukt(produkt);
+
+    final erstesErlebnis = Erlebnis(
+      id: '80000000-0000-4000-8000-000000000002',
+      produktId: produktId,
+      herkunftProfilId: profilId,
+      erlebtAm: zeit,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereErlebnis(erstesErlebnis);
+    final ersteBewertung = Bewertung(
+      id: '80000000-0000-4000-8000-000000000003',
+      erlebnisId: erstesErlebnis.id,
+      kriteriumId: StandardGetraenkekriterien.gesamturteilId,
+      herkunftProfilId: profilId,
+      wert: 3,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+
+    await repository.speichereGetraenkebewertung(
+      erlebnis: erstesErlebnis.kopiereMit(
+        notiz: 'Erster Eindruck',
+        istEntwurf: false,
+        geaendertAm: zeit.add(const Duration(minutes: 1)),
+      ),
+      bewertungen: [ersteBewertung],
+    );
+    expect(await repository.ladeEntwuerfe(), isEmpty);
+
+    await repository.speichereGetraenkebewertung(
+      erlebnis: erstesErlebnis.kopiereMit(
+        notiz: 'Korrigierter Eindruck',
+        istEntwurf: false,
+        geaendertAm: zeit.add(const Duration(minutes: 2)),
+      ),
+      bewertungen: [
+        Bewertung(
+          id: ersteBewertung.id,
+          erlebnisId: erstesErlebnis.id,
+          kriteriumId: ersteBewertung.kriteriumId,
+          herkunftProfilId: profilId,
+          wert: 4,
+          erstelltAm: ersteBewertung.erstelltAm,
+          geaendertAm: zeit.add(const Duration(minutes: 2)),
+        ),
+      ],
+    );
+    final korrigiert =
+        await repository.ladeBewertungenFuerErlebnis(erstesErlebnis.id);
+    expect(korrigiert, hasLength(1));
+    expect(korrigiert.single.id, ersteBewertung.id);
+    expect(korrigiert.single.wert, 4);
+
+    final spaeter = zeit.add(const Duration(days: 365));
+    final zweitesErlebnis = Erlebnis(
+      id: '80000000-0000-4000-8000-000000000004',
+      produktId: produktId,
+      herkunftProfilId: profilId,
+      erlebtAm: spaeter,
+      erstelltAm: spaeter,
+      geaendertAm: spaeter,
+      istEntwurf: false,
+    );
+    await repository.speichereGetraenkebewertung(
+      erlebnis: zweitesErlebnis,
+      bewertungen: [
+        Bewertung(
+          id: '80000000-0000-4000-8000-000000000005',
+          erlebnisId: zweitesErlebnis.id,
+          kriteriumId: StandardGetraenkekriterien.gesamturteilId,
+          herkunftProfilId: profilId,
+          wert: 2,
+          erstelltAm: spaeter,
+          geaendertAm: spaeter,
+        ),
+      ],
+    );
+
+    final historie =
+        await repository.ladeBewertungenFuerProdukt(produktId);
+    expect(historie.map((bewertung) => bewertung.wert), [4, 2]);
+    expect(
+      historie.map((bewertung) => bewertung.erlebnisId).toSet(),
+      {erstesErlebnis.id, zweitesErlebnis.id},
+    );
+  });
+
+  test('rollt Erlebnis und Bewertungen gemeinsam zurück', () async {
+    const produktId = '90000000-0000-4000-8000-000000000001';
+    final erlebnis = Erlebnis(
+      id: '90000000-0000-4000-8000-000000000002',
+      produktId: produktId,
+      herkunftProfilId: profilId,
+      erlebtAm: zeit,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+      notiz: 'Entwurf bleibt',
+    );
+    await repository.speichereProdukt(Produkt(
+      id: produktId,
+      name: 'Rollback-Pils',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+    await repository.speichereErlebnis(erlebnis);
+
+    await expectLater(
+      repository.speichereGetraenkebewertung(
+        erlebnis: erlebnis.kopiereMit(
+          notiz: 'Darf nicht bleiben',
+          istEntwurf: false,
+        ),
+        bewertungen: [
+          Bewertung(
+            id: '90000000-0000-4000-8000-000000000003',
+            erlebnisId: erlebnis.id,
+            kriteriumId: 'nicht-vorhanden',
+            herkunftProfilId: profilId,
+            wert: 5,
+            erstelltAm: zeit,
+            geaendertAm: zeit,
+          ),
+        ],
+      ),
+      throwsA(isA<SqliteException>()),
+    );
+
+    final zeile = datenbank.verbindung.select(
+      'SELECT * FROM erlebnisse WHERE id = ?',
+      [erlebnis.id],
+    ).single;
+    expect(zeile['ist_entwurf'], 1);
+    expect(zeile['notiz'], 'Entwurf bleibt');
+    expect(
+      await repository.ladeBewertungenFuerErlebnis(erlebnis.id),
+      isEmpty,
+    );
+  });
 }
