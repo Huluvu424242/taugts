@@ -442,9 +442,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
             runSpacing: 8,
             children: [
               OutlinedButton.icon(
-                onPressed: _speichert
-                    ? null
-                    : () => _persistieren(schliessen: true),
+                onPressed:
+                    _speichert ? null : () => _persistieren(schliessen: true),
                 icon: const Icon(Icons.save_outlined),
                 label: const Text('Speichern'),
               ),
@@ -462,9 +461,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                 )
               else
                 FilledButton.icon(
-                  onPressed: _speichert
-                      ? null
-                      : () => _persistieren(schliessen: true),
+                  onPressed:
+                      _speichert ? null : () => _persistieren(schliessen: true),
                   icon: const Icon(Icons.edit_outlined),
                   label: const Text('Bearbeiten speichern'),
                 ),

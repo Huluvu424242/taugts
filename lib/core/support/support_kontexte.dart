@@ -36,5 +36,6 @@ abstract final class SupportKontexte {
   static String erlebnisGrunddaten({
     required String typ,
     required bool bearbeiten,
-  }) => bearbeiten ? '$typ bearbeiten' : '$typ registrieren';
+  }) =>
+      bearbeiten ? '$typ bearbeiten' : '$typ registrieren';
 }
