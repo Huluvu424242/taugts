@@ -126,8 +126,10 @@ class Erlebnis {
   final DateTime erstelltAm;
   final DateTime geaendertAm;
 
+  static const _nichtGesetzt = Object();
+
   Erlebnis kopiereMit({
-    String? notiz,
+    Object? notiz = _nichtGesetzt,
     bool? istEntwurf,
     DateTime? geaendertAm,
   }) =>
@@ -140,7 +142,7 @@ class Erlebnis {
         preis: preis,
         menge: menge,
         gebinde: gebinde,
-        notiz: notiz,
+        notiz: identical(notiz, _nichtGesetzt) ? this.notiz : notiz as String?,
         istEntwurf: istEntwurf ?? this.istEntwurf,
         erlebtAm: erlebtAm,
         erstelltAm: erstelltAm,
