@@ -13,6 +13,8 @@ abstract interface class BewertungsRepository {
     String? ausgenommenId,
   });
   Future<void> speichereErlebnis(Erlebnis erlebnis);
+  Future<Erlebnis?> ladeErlebnis(String id);
+  Future<List<Erlebnis>> ladeErlebnisse();
   Future<List<Erlebnis>> ladeEntwuerfe();
   Future<void> loescheErlebnis(String id);
   Future<void> speichereKriterium(Bewertungskriterium kriterium);

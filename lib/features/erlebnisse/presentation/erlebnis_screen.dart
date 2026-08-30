@@ -4,10 +4,8 @@ import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
-import 'package:taugts/features/bewertungen/presentation/getraenkebewertung_screen.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/orte/presentation/orte_screen.dart';
-import 'package:taugts/features/produkte/presentation/produkte_screen.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 
 class ErlebnisScreen extends StatefulWidget {
@@ -15,13 +13,15 @@ class ErlebnisScreen extends StatefulWidget {
     required this.repository,
     required this.idGenerator,
     required this.profil,
+    this.erlebnistyp,
     this.erlebnis,
     super.key,
-  });
+  }) : assert(erlebnis != null || erlebnistyp != null);
 
   final BewertungsRepository repository;
   final IdGenerator idGenerator;
   final Profil profil;
+  final Erlebnistyp? erlebnistyp;
   final Erlebnis? erlebnis;
 
   @override
@@ -31,85 +31,74 @@ class ErlebnisScreen extends StatefulWidget {
 class _ErlebnisScreenState extends State<ErlebnisScreen> {
   final _fehlerKey = GlobalKey();
   final _fehlerFokus = FocusNode();
-  final _produktFokus = FocusNode();
-  final _preisFokus = FocusNode();
-  final _mengeFokus = FocusNode();
-  final _preis = TextEditingController();
-  final _menge = TextEditingController();
-  final _gebinde = TextEditingController();
+  final _dauerFokus = FocusNode();
+  final _beginnFokus = FocusNode();
+  final _endeFokus = FocusNode();
+  final _dauer = TextEditingController();
   final _notiz = TextEditingController();
-  Produkt? _produkt;
-  Ort? _kaufort;
-  Ort? _konsumort;
-  late DateTime _erlebtAm;
+  late final String _id;
+  late final DateTime _erstelltAm;
+  late final Erlebnistyp _typ;
+  Erlebnis? _gespeichertesErlebnis;
+  Ort? _ort;
+  DateTime? _geplanterTag;
+  int? _geplanteMinute;
+  DateTime? _tatsaechlicherBeginn;
+  DateTime? _tatsaechlichesEnde;
   var _speichert = false;
-  var _produktFehlt = false;
-  var _preisUngueltig = false;
-  var _mengeUngueltig = false;
+  var _zeitfehler = <String>[];
 
   @override
   void initState() {
     super.initState();
     final erlebnis = widget.erlebnis;
-    _erlebtAm = erlebnis?.erlebtAm.toLocal() ?? DateTime.now();
-    _preis.text = erlebnis?.preis?.toString() ?? '';
-    _menge.text = erlebnis?.menge?.toString() ?? '';
-    _gebinde.text = erlebnis?.gebinde ?? '';
+    _gespeichertesErlebnis = erlebnis;
+    _id = erlebnis?.id ?? widget.idGenerator.neueId();
+    _erstelltAm = erlebnis?.erstelltAm ?? DateTime.now().toUtc();
+    _typ = erlebnis?.typ ?? widget.erlebnistyp!;
+    _geplanterTag = erlebnis?.geplanterTag?.toLocal();
+    _geplanteMinute = erlebnis?.geplanteMinute;
+    _tatsaechlicherBeginn = erlebnis?.tatsaechlicherBeginn?.toLocal();
+    _tatsaechlichesEnde = erlebnis?.tatsaechlichesEnde?.toLocal();
+    _dauer.text = erlebnis?.geplanteDauerMinuten?.toString() ?? '';
     _notiz.text = erlebnis?.notiz ?? '';
-    _ladeReferenzen();
+    _ladeOrt();
   }
 
-  Future<void> _ladeReferenzen() async {
-    final erlebnis = widget.erlebnis;
-    if (erlebnis == null) return;
-    final werte = await Future.wait([
-      widget.repository.ladeProdukt(erlebnis.produktId),
-      erlebnis.kaufortId == null
-          ? Future<Ort?>.value()
-          : widget.repository.ladeOrt(erlebnis.kaufortId!),
-      erlebnis.konsumortId == null
-          ? Future<Ort?>.value()
-          : widget.repository.ladeOrt(erlebnis.konsumortId!),
-    ]);
+  Future<void> _ladeOrt() async {
+    final ortId = widget.erlebnis?.wirksamerOrtId;
+    if (ortId == null) return;
+    final ort = await widget.repository.ladeOrt(ortId);
     if (!mounted) return;
-    setState(() {
-      _produkt = werte[0] as Produkt?;
-      _kaufort = werte[1] as Ort?;
-      _konsumort = werte[2] as Ort?;
-    });
+    setState(() => _ort = ort);
   }
 
   @override
   void dispose() {
-    _produktFokus.dispose();
-    _preisFokus.dispose();
-    _mengeFokus.dispose();
+    _dauer.dispose();
+    _notiz.dispose();
     _fehlerFokus.dispose();
-    for (final controller in [_preis, _menge, _gebinde, _notiz]) {
-      controller.dispose();
-    }
+    _dauerFokus.dispose();
+    _beginnFokus.dispose();
+    _endeFokus.dispose();
     super.dispose();
   }
 
-  Future<void> _produktWaehlen() async {
-    final produkt = await Navigator.of(context).push<Produkt>(
-      MaterialPageRoute(
-        builder: (_) => ProdukteScreen(
-          repository: widget.repository,
-          idGenerator: widget.idGenerator,
-          zurAuswahl: true,
-        ),
-      ),
-    );
-    if (produkt != null && mounted) {
-      setState(() {
-        _produkt = produkt;
-        _produktFehlt = false;
-      });
-    }
-  }
+  String get _typLabel => switch (_typ) {
+        Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
+        Erlebnistyp.einkauf => 'Einkauf',
+      };
 
-  Future<void> _ortWaehlen(bool kauf) async {
+  String _statusLabel(Erlebnisstatus status) => switch (status) {
+        Erlebnisstatus.geplant => 'Geplant',
+        Erlebnisstatus.aktiv => 'Aktiv',
+        Erlebnisstatus.beendet => 'Beendet',
+      };
+
+  Erlebnisstatus get _aktuellerStatus =>
+      _gespeichertesErlebnis?.status ?? Erlebnisstatus.geplant;
+
+  Future<void> _ortWaehlen() async {
     final ort = await Navigator.of(context).push<Ort>(
       MaterialPageRoute(
         builder: (_) => OrteScreen(
@@ -119,43 +108,113 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         ),
       ),
     );
-    if (ort != null && mounted) {
-      setState(() => kauf ? _kaufort = ort : _konsumort = ort);
-    }
+    if (ort != null && mounted) setState(() => _ort = ort);
   }
 
-  Future<void> _zeitWaehlen() async {
+  Future<void> _geplantenTagWaehlen() async {
+    final heute = DateTime.now();
     final datum = await showDatePicker(
       context: context,
       firstDate: DateTime(2000),
-      lastDate: DateTime.now().add(const Duration(days: 1)),
-      initialDate: _erlebtAm,
+      lastDate: DateTime(2100),
+      initialDate: _geplanterTag ?? heute,
+      helpText: 'Geplantes Datum wählen',
+    );
+    if (datum != null && mounted) setState(() => _geplanterTag = datum);
+  }
+
+  Future<void> _geplanteZeitWaehlen() async {
+    final minute = _geplanteMinute;
+    final zeit = await showTimePicker(
+      context: context,
+      initialTime: minute == null
+          ? TimeOfDay.now()
+          : TimeOfDay(hour: minute ~/ 60, minute: minute % 60),
+      helpText: 'Geplante Uhrzeit wählen',
+    );
+    if (zeit != null && mounted) {
+      setState(() => _geplanteMinute = zeit.hour * 60 + zeit.minute);
+    }
+  }
+
+  Future<void> _tatsaechlicheZeitWaehlen({required bool beginn}) async {
+    final aktuell = beginn ? _tatsaechlicherBeginn : _tatsaechlichesEnde;
+    final jetzt = DateTime.now();
+    final datum = await showDatePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      initialDate: aktuell ?? jetzt,
+      helpText:
+          beginn ? 'Tatsächlichen Beginn wählen' : 'Tatsächliches Ende wählen',
     );
     if (datum == null || !mounted) return;
     final zeit = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_erlebtAm),
+      initialTime: TimeOfDay.fromDateTime(aktuell ?? jetzt),
     );
     if (zeit == null || !mounted) return;
+    final wert = DateTime(
+      datum.year,
+      datum.month,
+      datum.day,
+      zeit.hour,
+      zeit.minute,
+    );
     setState(() {
-      _erlebtAm =
-          DateTime(datum.year, datum.month, datum.day, zeit.hour, zeit.minute);
+      if (beginn) {
+        _tatsaechlicherBeginn = wert;
+      } else {
+        _tatsaechlichesEnde = wert;
+      }
     });
   }
 
-  Future<bool> _validiere() async {
-    final preisUngueltig = !_istPositiveZahlOderLeer(_preis.text);
-    final mengeUngueltig = !_istPositiveZahlOderLeer(_menge.text);
-    if (_produkt != null && !preisUngueltig && !mengeUngueltig) {
+  Erlebnis _erlebnisAusEingaben({Erlebnisstatus? status}) {
+    final dauer = int.tryParse(_dauer.text.trim());
+    final abgeleiteterStatus = status ??
+        (_tatsaechlichesEnde != null
+            ? Erlebnisstatus.beendet
+            : _tatsaechlicherBeginn != null
+                ? Erlebnisstatus.aktiv
+                : Erlebnisstatus.geplant);
+    return Erlebnis(
+      id: _id,
+      typ: _typ,
+      status: abgeleiteterStatus,
+      ortId: _ort?.id,
+      geplanterTag: _geplanterTag == null
+          ? null
+          : DateTime.utc(
+              _geplanterTag!.year,
+              _geplanterTag!.month,
+              _geplanterTag!.day,
+            ),
+      geplanteMinute: _geplanteMinute,
+      geplanteDauerMinuten: dauer,
+      tatsaechlicherBeginn: _tatsaechlicherBeginn?.toUtc(),
+      tatsaechlichesEnde: _tatsaechlichesEnde?.toUtc(),
+      herkunftProfilId: widget.profil.id,
+      notiz: _notiz.text.trim().isEmpty ? null : _notiz.text.trim(),
+      istEntwurf: false,
+      erstelltAm: _erstelltAm,
+      geaendertAm: DateTime.now().toUtc(),
+    );
+  }
+
+  Future<bool> _validiere(Erlebnis erlebnis) async {
+    final fehler = [...erlebnis.zeitfehler];
+    if (_dauer.text.trim().isNotEmpty &&
+        int.tryParse(_dauer.text.trim()) == null) {
+      fehler.add('Die geplante Dauer muss eine ganze Minutenzahl sein.');
+    }
+    if (fehler.isEmpty) {
+      setState(() => _zeitfehler = []);
       return true;
     }
-    setState(() {
-      _produktFehlt = _produkt == null;
-      _preisUngueltig = preisUngueltig;
-      _mengeUngueltig = mengeUngueltig;
-    });
+    setState(() => _zeitfehler = fehler);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bitte Eingaben prüfen.')),
+      const SnackBar(content: Text('Bitte Zeitangaben prüfen.')),
     );
     await WidgetsBinding.instance.endOfFrame;
     if (!mounted) return false;
@@ -168,177 +227,201 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     return false;
   }
 
-  Erlebnis _erlebnisAusEingaben({required bool istEntwurf}) {
-    final vorher = widget.erlebnis;
-    final jetzt = DateTime.now().toUtc();
-    return Erlebnis(
-      id: vorher?.id ?? widget.idGenerator.neueId(),
-      produktId: _produkt!.id,
-      herkunftProfilId: widget.profil.id,
-      kaufortId: _kaufort?.id,
-      konsumortId: _konsumort?.id,
-      erlebtAm: _erlebtAm.toUtc(),
-      erstelltAm: vorher?.erstelltAm ?? jetzt,
-      geaendertAm: jetzt,
-      preis: _zahl(_preis.text),
-      menge: _zahl(_menge.text),
-      gebinde: _wert(_gebinde.text),
-      notiz: _wert(_notiz.text),
-      istEntwurf: istEntwurf,
-    );
-  }
-
-  Future<void> _speichern() async {
-    if (!await _validiere() || !mounted) return;
-    setState(() => _speichert = true);
-    final erlebnis = _erlebnisAusEingaben(istEntwurf: true);
-    try {
-      await widget.repository.speichereErlebnis(erlebnis);
-      if (!mounted) return;
-      Navigator.of(context).pop(erlebnis);
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _speichert = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Der Entwurf konnte nicht gespeichert werden.'),
-        ),
-      );
+  FocusNode _fokusFuerFehler(String fehler) {
+    if (fehler.contains('Dauer') || fehler.contains('Minutenzahl')) {
+      return _dauerFokus;
     }
+    if (fehler.contains('Ende')) return _endeFokus;
+    return _beginnFokus;
   }
 
-  Future<void> _bewerten() async {
-    if (!await _validiere() || !mounted) return;
+  Future<void> _persistieren({
+    Erlebnisstatus? status,
+    required bool schliessen,
+  }) async {
+    final erlebnis = _erlebnisAusEingaben(status: status);
+    if (!await _validiere(erlebnis) || !mounted) return;
     setState(() => _speichert = true);
-    final erlebnis = _erlebnisAusEingaben(istEntwurf: true);
     try {
       await widget.repository.speichereErlebnis(erlebnis);
       if (!mounted) return;
-      final bewertet = await Navigator.of(context).push<Erlebnis>(
-        MaterialPageRoute(
-          builder: (_) => GetraenkebewertungScreen(
-            repository: widget.repository,
-            idGenerator: widget.idGenerator,
-            profil: widget.profil,
-            erlebnis: erlebnis,
-          ),
-        ),
-      );
-      if (!mounted) return;
-      if (bewertet != null) {
-        Navigator.of(context).pop(bewertet);
-      } else {
-        setState(() => _speichert = false);
+      if (schliessen) {
+        Navigator.of(context).pop(erlebnis);
+        return;
       }
+      setState(() {
+        _gespeichertesErlebnis = erlebnis;
+        _speichert = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${_statusLabel(erlebnis.status)} gespeichert.'),
+        ),
+      );
     } catch (_) {
       if (!mounted) return;
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Der Entwurf konnte nicht vorbereitet werden.'),
+          content: Text('Das Erlebnis konnte nicht gespeichert werden.'),
         ),
       );
     }
   }
 
-  double? _zahl(String text) =>
-      double.tryParse(text.trim().replaceAll(',', '.'));
-
-  bool _istPositiveZahlOderLeer(String text) {
-    if (text.trim().isEmpty) return true;
-    final zahl = _zahl(text);
-    return zahl != null && zahl > 0;
+  Future<void> _checkIn() async {
+    setState(() {
+      _tatsaechlicherBeginn ??= DateTime.now();
+      _tatsaechlichesEnde = null;
+    });
+    await _persistieren(status: Erlebnisstatus.aktiv, schliessen: false);
   }
 
-  String? _wert(String text) => text.trim().isEmpty ? null : text.trim();
+  Future<void> _checkout() async {
+    setState(() => _tatsaechlichesEnde ??= DateTime.now());
+    await _persistieren(status: Erlebnisstatus.beendet, schliessen: false);
+  }
+
+  String _datumText(BuildContext context, DateTime? wert) => wert == null
+      ? 'Nicht festgelegt'
+      : MaterialLocalizations.of(context).formatFullDate(wert);
+
+  String _zeitText(BuildContext context, int? minute) => minute == null
+      ? 'Uhrzeit offen'
+      : MaterialLocalizations.of(context).formatTimeOfDay(
+          TimeOfDay(hour: minute ~/ 60, minute: minute % 60),
+        );
+
+  String _datumZeitText(BuildContext context, DateTime? wert) {
+    if (wert == null) return 'Nicht festgelegt';
+    final lokal = wert.toLocal();
+    final lokalisierung = MaterialLocalizations.of(context);
+    final uhrzeit = lokalisierung.formatTimeOfDay(
+      TimeOfDay.fromDateTime(lokal),
+    );
+    return '${lokalisierung.formatFullDate(lokal)}, $uhrzeit';
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: const Text('Getränk in Gaststätte'),
+          title: Text(_typLabel),
           actions: [
             AppSupportMenu(
-              contextName: SupportKontexte.erlebnis(
-                entwurfBearbeiten: widget.erlebnis != null,
+              contextName: SupportKontexte.erlebnisGrunddaten(
+                typ: _typLabel,
+                bearbeiten: widget.erlebnis != null,
               ),
             ),
           ],
         ),
         body: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 104),
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
             children: [
-              if (_produktFehlt || _preisUngueltig || _mengeUngueltig)
+              if (_zeitfehler.isNotEmpty)
                 FormularFehlersammler(
                   key: _fehlerKey,
                   focusNode: _fehlerFokus,
                   fehler: [
-                    if (_produktFehlt)
-                      ('Ein Produkt ist erforderlich.', _produktFokus),
-                    if (_preisUngueltig)
-                      ('Preis muss größer als null sein.', _preisFokus),
-                    if (_mengeUngueltig)
-                      ('Menge muss größer als null sein.', _mengeFokus),
+                    for (final fehler in _zeitfehler)
+                      (fehler, _fokusFuerFehler(fehler)),
                   ],
                 ),
-              TextButton.icon(
-                focusNode: _produktFokus,
-                onPressed: _produktWaehlen,
-                icon: const Icon(Icons.inventory_2_outlined),
-                label: Text(_produkt?.anzeigetitel ?? 'Produkt auswählen *'),
-              ),
-              TextButton.icon(
-                onPressed: _zeitWaehlen,
-                icon: const Icon(Icons.schedule),
-                label: Text(
-                  '${MaterialLocalizations.of(context).formatFullDate(_erlebtAm)}, '
-                  '${MaterialLocalizations.of(context).formatTimeOfDay(
-                    TimeOfDay.fromDateTime(_erlebtAm),
-                  )}',
+              Semantics(
+                header: true,
+                child: Text(
+                  'Status: ${_statusLabel(_aktuellerStatus)}',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
+              const SizedBox(height: 16),
               TextButton.icon(
-                onPressed: () => _ortWaehlen(false),
-                icon: const Icon(Icons.restaurant_outlined),
-                label:
-                    Text(_konsumort?.name ?? 'Konsumort auswählen (optional)'),
+                onPressed: _ortWaehlen,
+                icon: Icon(
+                  _typ == Erlebnistyp.restaurantbesuch
+                      ? Icons.restaurant_outlined
+                      : Icons.shopping_bag_outlined,
+                ),
+                label: Text(_ort?.name ?? 'Ort auswählen (optional)'),
               ),
-              TextButton.icon(
-                onPressed: () => _ortWaehlen(true),
-                icon: const Icon(Icons.shopping_bag_outlined),
-                label: Text(_kaufort?.name ?? 'Kaufort auswählen (optional)'),
+              const SizedBox(height: 16),
+              Semantics(
+                header: true,
+                child: Text(
+                  'Planung',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Geplanter Tag (optional)'),
+                subtitle: Text(_datumText(context, _geplanterTag)),
+                trailing: const Icon(Icons.calendar_today_outlined),
+                onTap: _geplantenTagWaehlen,
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton.icon(
+                      onPressed:
+                          _geplanterTag == null ? null : _geplanteZeitWaehlen,
+                      icon: const Icon(Icons.schedule),
+                      label: Text(_zeitText(context, _geplanteMinute)),
+                    ),
+                  ),
+                  if (_geplanterTag != null)
+                    IconButton(
+                      tooltip: 'Planung entfernen',
+                      onPressed: () => setState(() {
+                        _geplanterTag = null;
+                        _geplanteMinute = null;
+                      }),
+                      icon: const Icon(Icons.clear),
+                    ),
+                ],
               ),
               TextField(
-                controller: _preis,
-                focusNode: _preisFokus,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                maxLength: 12,
+                controller: _dauer,
+                focusNode: _dauerFokus,
+                keyboardType: TextInputType.number,
+                maxLength: 6,
                 decoration: InputDecoration(
-                  labelText: 'Preis (optional)',
-                  errorText: _preisUngueltig
-                      ? 'Bitte eine Zahl größer als null eingeben.'
+                  labelText: 'Geplante Dauer in Minuten (optional)',
+                  errorText: _zeitfehler.any(
+                    (fehler) =>
+                        fehler.contains('Dauer') ||
+                        fehler.contains('Minutenzahl'),
+                  )
+                      ? 'Bitte eine positive ganze Zahl eingeben.'
                       : null,
                 ),
               ),
-              TextField(
-                controller: _menge,
-                focusNode: _mengeFokus,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                maxLength: 12,
-                decoration: InputDecoration(
-                  labelText: 'Menge (optional)',
-                  errorText: _mengeUngueltig
-                      ? 'Bitte eine Zahl größer als null eingeben.'
-                      : null,
+              const SizedBox(height: 16),
+              Semantics(
+                header: true,
+                child: Text(
+                  'Tatsächliche Zeiten',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-              TextField(
-                controller: _gebinde,
-                maxLength: 80,
-                decoration:
-                    const InputDecoration(labelText: 'Gebinde (optional)'),
+              ListTile(
+                key: const ValueKey('tatsaechlicher-beginn'),
+                contentPadding: EdgeInsets.zero,
+                focusNode: _beginnFokus,
+                title: const Text('Tatsächlicher Beginn (optional)'),
+                subtitle: Text(_datumZeitText(context, _tatsaechlicherBeginn)),
+                trailing: const Icon(Icons.login),
+                onTap: () => _tatsaechlicheZeitWaehlen(beginn: true),
+              ),
+              ListTile(
+                key: const ValueKey('tatsaechliches-ende'),
+                contentPadding: EdgeInsets.zero,
+                focusNode: _endeFokus,
+                title: const Text('Tatsächliches Ende (optional)'),
+                subtitle: Text(_datumZeitText(context, _tatsaechlichesEnde)),
+                trailing: const Icon(Icons.logout),
+                onTap: () => _tatsaechlicheZeitWaehlen(beginn: false),
               ),
               TextField(
                 controller: _notiz,
@@ -351,38 +434,40 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
           ),
         ),
         bottomNavigationBar: SafeArea(
+          top: false,
           minimum: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 12,
+            runSpacing: 8,
             children: [
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: _speichert ? null : _bewerten,
-                  icon: _speichert
-                      ? const SizedBox.square(
-                          dimension: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.rate_review_outlined),
-                  label: Text(
-                    _speichert
-                        ? 'Vorgang wird vorbereitet'
-                        : widget.erlebnis?.istEntwurf == false
-                            ? 'Bewertung bearbeiten'
-                            : 'Getränk bewerten',
-                  ),
-                ),
+              OutlinedButton.icon(
+                onPressed: _speichert
+                    ? null
+                    : () => _persistieren(schliessen: true),
+                icon: const Icon(Icons.save_outlined),
+                label: const Text('Speichern'),
               ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _speichert ? null : _speichern,
-                  icon: const Icon(Icons.save_outlined),
-                  label: const Text('Entwurf speichern'),
+              if (_aktuellerStatus == Erlebnisstatus.geplant)
+                FilledButton.icon(
+                  onPressed: _speichert ? null : _checkIn,
+                  icon: const Icon(Icons.login),
+                  label: const Text('Check-in'),
+                )
+              else if (_aktuellerStatus == Erlebnisstatus.aktiv)
+                FilledButton.icon(
+                  onPressed: _speichert ? null : _checkout,
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Checkout'),
+                )
+              else
+                FilledButton.icon(
+                  onPressed: _speichert
+                      ? null
+                      : () => _persistieren(schliessen: true),
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Bearbeiten speichern'),
                 ),
-              ),
             ],
           ),
         ),

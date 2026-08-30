@@ -270,6 +270,55 @@ void main() {
     expect(await repository.ladeEntwuerfe(), isEmpty);
   });
 
+  test('speichert einen geplanten Einkauf ohne Uhrzeit und Produkt', () async {
+    final erlebnis = Erlebnis(
+      id: '3d30ae97-1a64-4bb5-a8fd-1df46be78d69',
+      typ: Erlebnistyp.einkauf,
+      status: Erlebnisstatus.geplant,
+      geplanterTag: DateTime.utc(2026, 9, 5),
+      herkunftProfilId: profilId,
+      istEntwurf: false,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+
+    await repository.speichereErlebnis(erlebnis);
+
+    final geladen = await repository.ladeErlebnis(erlebnis.id);
+    expect(geladen?.typ, Erlebnistyp.einkauf);
+    expect(geladen?.status, Erlebnisstatus.geplant);
+    expect(geladen?.geplanterTag, DateTime.utc(2026, 9, 5));
+    expect(geladen?.geplanteMinute, isNull);
+    expect(geladen?.produktId, isNull);
+  });
+
+  test('validiert Statuszeiten vor dem atomaren Speichern', () async {
+    final geplant = Erlebnis(
+      id: '3d30ae97-1a64-4bb5-a8fd-1df46be78d70',
+      herkunftProfilId: profilId,
+      status: Erlebnisstatus.geplant,
+      istEntwurf: false,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereErlebnis(geplant);
+
+    await expectLater(
+      repository.speichereErlebnis(
+        geplant.kopiereMit(
+          status: Erlebnisstatus.beendet,
+          tatsaechlicherBeginn: zeit.add(const Duration(hours: 2)),
+          tatsaechlichesEnde: zeit,
+        ),
+      ),
+      throwsArgumentError,
+    );
+
+    final unveraendert = await repository.ladeErlebnis(geplant.id);
+    expect(unveraendert?.status, Erlebnisstatus.geplant);
+    expect(unveraendert?.tatsaechlicherBeginn, isNull);
+  });
+
   test('speichert, lädt und bearbeitet vollständige Ortsdaten', () async {
     final ort = Ort(
       id: '75e34e0e-fb72-450d-9db7-20d42188d229',

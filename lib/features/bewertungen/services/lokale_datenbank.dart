@@ -11,7 +11,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 7;
+  static const schemaVersion = 8;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -61,10 +61,56 @@ class LokaleDatenbank {
         if (version <= 6) {
           _migriereAufSchemaV7();
         }
+        if (version <= 7) {
+          _migriereAufSchemaV8();
+        }
       }
       _stelleStandardGetraenkekriterienBereit();
       verbindung.userVersion = schemaVersion;
     });
+  }
+
+  void _migriereAufSchemaV8() {
+    if (!_tabelleExistiert('erlebnisse')) return;
+    final hatBewertungen = _tabelleExistiert('bewertungen');
+    if (hatBewertungen) {
+      verbindung.execute(
+        'ALTER TABLE bewertungen RENAME TO bewertungen_schema7',
+      );
+    }
+    verbindung.execute('ALTER TABLE erlebnisse RENAME TO erlebnisse_schema7');
+    _erstelleErlebnisseTabelle();
+    verbindung.execute('''
+      INSERT INTO erlebnisse (
+        id, typ, status, ort_id, geplanter_tag, geplante_minute,
+        geplante_dauer_minuten, tatsaechlicher_beginn, tatsaechliches_ende,
+        erstellt_am, geaendert_am, herkunft_profil_id, notiz, ist_entwurf,
+        produkt_id, kaufort_id, konsumort_id, erlebt_am, preis, menge, gebinde
+      )
+      SELECT
+        id, 'restaurantbesuch', 'geplant',
+        COALESCE(konsumort_id, kaufort_id), SUBSTR(erlebt_am, 1, 10),
+        CAST(STRFTIME('%H', erlebt_am) AS INTEGER) * 60 +
+          CAST(STRFTIME('%M', erlebt_am) AS INTEGER),
+        NULL, NULL, NULL, erstellt_am, geaendert_am, herkunft_profil_id,
+        notiz, ist_entwurf, produkt_id, kaufort_id, konsumort_id, erlebt_am,
+        preis, menge, gebinde
+      FROM erlebnisse_schema7
+    ''');
+    if (hatBewertungen) {
+      _erstelleBewertungenTabelle();
+      verbindung.execute('''
+        INSERT INTO bewertungen (
+          id, erlebnis_id, kriterium_id, wert, erstellt_am, geaendert_am,
+          herkunft_profil_id
+        )
+        SELECT id, erlebnis_id, kriterium_id, wert, erstellt_am,
+          geaendert_am, herkunft_profil_id
+        FROM bewertungen_schema7
+      ''');
+      verbindung.execute('DROP TABLE bewertungen_schema7');
+    }
+    verbindung.execute('DROP TABLE erlebnisse_schema7');
   }
 
   void _migriereAufSchemaV7() {
@@ -239,23 +285,7 @@ class LokaleDatenbank {
         notiz TEXT
       )
     ''');
-    verbindung.execute('''
-      CREATE TABLE erlebnisse (
-        id TEXT PRIMARY KEY,
-        produkt_id TEXT NOT NULL REFERENCES produkte(objekt_id),
-        kaufort_id TEXT REFERENCES orte(id),
-        konsumort_id TEXT REFERENCES orte(id),
-        erlebt_am TEXT NOT NULL,
-        erstellt_am TEXT NOT NULL,
-        geaendert_am TEXT NOT NULL,
-        herkunft_profil_id TEXT NOT NULL REFERENCES profile(id),
-        preis REAL,
-        menge REAL,
-        gebinde TEXT,
-        notiz TEXT,
-        ist_entwurf INTEGER NOT NULL DEFAULT 0
-      )
-    ''');
+    _erstelleErlebnisseTabelle();
     verbindung.execute('''
       CREATE TABLE kriterien (
         id TEXT PRIMARY KEY,
@@ -268,6 +298,42 @@ class LokaleDatenbank {
         geaendert_am TEXT NOT NULL
       )
     ''');
+    _erstelleBewertungenTabelle();
+  }
+
+  void _erstelleErlebnisseTabelle() {
+    verbindung.execute('''
+      CREATE TABLE erlebnisse (
+        id TEXT PRIMARY KEY,
+        typ TEXT NOT NULL,
+        status TEXT NOT NULL,
+        ort_id TEXT REFERENCES orte(id),
+        geplanter_tag TEXT,
+        geplante_minute INTEGER,
+        geplante_dauer_minuten INTEGER,
+        tatsaechlicher_beginn TEXT,
+        tatsaechliches_ende TEXT,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL,
+        herkunft_profil_id TEXT NOT NULL REFERENCES profile(id),
+        notiz TEXT,
+        ist_entwurf INTEGER NOT NULL DEFAULT 0,
+        produkt_id TEXT REFERENCES produkte(objekt_id),
+        kaufort_id TEXT REFERENCES orte(id),
+        konsumort_id TEXT REFERENCES orte(id),
+        erlebt_am TEXT,
+        preis REAL,
+        menge REAL,
+        gebinde TEXT,
+        CHECK (geplante_minute IS NULL OR
+          (geplante_minute >= 0 AND geplante_minute < 1440)),
+        CHECK (geplante_dauer_minuten IS NULL OR
+          geplante_dauer_minuten > 0)
+      )
+    ''');
+  }
+
+  void _erstelleBewertungenTabelle() {
     verbindung.execute('''
       CREATE TABLE bewertungen (
         id TEXT PRIMARY KEY,

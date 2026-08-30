@@ -23,6 +23,11 @@ erklärte Intensitätsskalen, einen fokussierbaren Fehlersammler und eine bei
 großer Schrift erreichbare Speicheraktion. Kriterien dürfen einzeln
 ausgelassen werden; das Gesamturteil bleibt unabhängig.
 
+Die Erlebniserfassung benennt Typ und Status sichtbar und semantisch, verwendet
+beschriftete Planungs-, Beginn- und Endeaktionen und sammelt ungültige
+Zeitangaben zusätzlich in einem fokussierbaren Fehlersammler. Restaurantbesuch
+und Einkauf sind ohne Farbcodierung unterscheidbar.
+
 Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 
 - vollständiger Kernablauf mit TalkBack auf Android,

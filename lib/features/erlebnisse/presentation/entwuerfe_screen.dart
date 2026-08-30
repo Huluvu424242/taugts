@@ -24,27 +24,40 @@ class EntwuerfeScreen extends StatefulWidget {
 }
 
 class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
-  late Future<List<Erlebnis>> _entwuerfe = widget.repository.ladeEntwuerfe();
+  late Future<List<Erlebnis>> _erlebnisse = widget.repository.ladeErlebnisse();
 
   Future<void> _oeffnen([Erlebnis? erlebnis]) async {
+    Erlebnistyp? erlebnistyp;
     if (erlebnis == null) {
-      final einstieg = await showDialog<bool>(
+      erlebnistyp = await showDialog<Erlebnistyp>(
         context: context,
         builder: (dialogContext) => SimpleDialog(
-          title: const Text('Was möchtest du bewerten?'),
+          title: const Text('Was möchtest du registrieren?'),
           children: [
             SimpleDialogOption(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
+              onPressed: () => Navigator.of(dialogContext).pop(
+                Erlebnistyp.restaurantbesuch,
+              ),
               child: const ListTile(
-                leading: Icon(Icons.local_drink_outlined),
-                title: Text('Getränk in Gaststätte'),
-                subtitle: Text('Produkt und optionalen Ort erfassen'),
+                leading: Icon(Icons.restaurant_outlined),
+                title: Text('Restaurantbesuch'),
+                subtitle: Text('Besuch planen, beginnen oder nachtragen'),
+              ),
+            ),
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(dialogContext).pop(
+                Erlebnistyp.einkauf,
+              ),
+              child: const ListTile(
+                leading: Icon(Icons.shopping_bag_outlined),
+                title: Text('Einkauf'),
+                subtitle: Text('Einkauf planen, beginnen oder nachtragen'),
               ),
             ),
           ],
         ),
       );
-      if (einstieg != true || !mounted) return;
+      if (erlebnistyp == null || !mounted) return;
     }
     final gespeichert = await Navigator.of(context).push<Erlebnis>(
       MaterialPageRoute(
@@ -52,14 +65,15 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
           repository: widget.repository,
           idGenerator: widget.idGenerator,
           profil: widget.profil,
+          erlebnistyp: erlebnistyp,
           erlebnis: erlebnis,
         ),
       ),
     );
     if (gespeichert != null && mounted) {
-      setState(() => _entwuerfe = widget.repository.ladeEntwuerfe());
+      setState(() => _erlebnisse = widget.repository.ladeErlebnisse());
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Entwurf gespeichert.')),
+        const SnackBar(content: Text('Erlebnis gespeichert.')),
       );
     }
   }
@@ -92,7 +106,7 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
     try {
       await widget.repository.loescheErlebnis(erlebnis.id);
       if (!mounted) return;
-      setState(() => _entwuerfe = widget.repository.ladeEntwuerfe());
+      setState(() => _erlebnisse = widget.repository.ladeErlebnisse());
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Entwurf verworfen.')),
       );
@@ -114,7 +128,7 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: const Text('Bewertungsentwürfe'),
+          title: const Text('Erlebnisse'),
           actions: const [
             AppSupportMenu(contextName: SupportKontexte.bewertungsentwuerfe),
           ],
@@ -122,44 +136,44 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _oeffnen,
           icon: const Icon(Icons.add),
-          label: const Text('Jetzt bewerten'),
+          label: const Text('Erlebnis registrieren'),
         ),
         body: SafeArea(
           child: FutureBuilder<List<Erlebnis>>(
-            future: _entwuerfe,
+            future: _erlebnisse,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return Center(
                   child: FilledButton.icon(
                     onPressed: () => setState(
-                      () => _entwuerfe = widget.repository.ladeEntwuerfe(),
+                      () => _erlebnisse = widget.repository.ladeErlebnisse(),
                     ),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Entwürfe erneut laden'),
+                    label: const Text('Erlebnisse erneut laden'),
                   ),
                 );
               }
               if (!snapshot.hasData) {
                 return Center(
                   child: Semantics(
-                    label: 'Bewertungsentwürfe werden geladen',
+                    label: 'Erlebnisse werden geladen',
                     child: const CircularProgressIndicator(),
                   ),
                 );
               }
-              final entwuerfe = snapshot.data!;
-              if (entwuerfe.isEmpty) {
+              final erlebnisse = snapshot.data!;
+              if (erlebnisse.isEmpty) {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('Noch keine Bewertungsentwürfe.'),
+                        const Text('Noch keine Erlebnisse registriert.'),
                         const SizedBox(height: 16),
                         FilledButton(
                           onPressed: _oeffnen,
-                          child: const Text('Jetzt bewerten'),
+                          child: const Text('Erlebnis registrieren'),
                         ),
                       ],
                     ),
@@ -168,22 +182,20 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
               }
               return ListView.builder(
                 padding: const EdgeInsets.only(bottom: 96),
-                itemCount: entwuerfe.length,
+                itemCount: erlebnisse.length,
                 itemBuilder: (context, index) {
-                  final erlebnis = entwuerfe[index];
+                  final erlebnis = erlebnisse[index];
                   return ListTile(
-                    title: const Text('Getränk in Gaststätte'),
-                    subtitle: Text(
-                      MaterialLocalizations.of(context).formatFullDate(
-                        erlebnis.erlebtAm.toLocal(),
-                      ),
-                    ),
+                    title: Text(_typLabel(erlebnis.typ)),
+                    subtitle: Text(_erlebnisUntertitel(context, erlebnis)),
                     onTap: () => _oeffnen(erlebnis),
-                    trailing: IconButton(
-                      onPressed: () => _verwerfen(erlebnis),
-                      icon: const Icon(Icons.delete_outline),
-                      tooltip: 'Entwurf verwerfen',
-                    ),
+                    trailing: erlebnis.istEntwurf
+                        ? IconButton(
+                            onPressed: () => _verwerfen(erlebnis),
+                            icon: const Icon(Icons.delete_outline),
+                            tooltip: 'Entwurf verwerfen',
+                          )
+                        : const Icon(Icons.chevron_right),
                   );
                 },
               );
@@ -191,4 +203,23 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
           ),
         ),
       );
+
+  String _typLabel(Erlebnistyp typ) => switch (typ) {
+        Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
+        Erlebnistyp.einkauf => 'Einkauf',
+      };
+
+  String _statusLabel(Erlebnisstatus status) => switch (status) {
+        Erlebnisstatus.geplant => 'Geplant',
+        Erlebnisstatus.aktiv => 'Aktiv',
+        Erlebnisstatus.beendet => 'Beendet',
+      };
+
+  String _erlebnisUntertitel(BuildContext context, Erlebnis erlebnis) {
+    final zeit = erlebnis.tatsaechlicherBeginn ?? erlebnis.geplanterZeitpunkt;
+    final zeitText = zeit == null
+        ? 'Termin noch offen'
+        : MaterialLocalizations.of(context).formatFullDate(zeit.toLocal());
+    return '${_statusLabel(erlebnis.status)} · $zeitText';
+  }
 }

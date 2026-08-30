@@ -55,8 +55,8 @@ an.
 ## Bekannte Einschränkungen
 
 - Import und Export sind noch nicht enthalten.
-- Restaurantbesuche und Einkäufe sind noch nicht als vollständige
-  Ereignisabläufe umgesetzt.
+- Produktpositionen innerhalb von Restaurantbesuchen und Einkäufen sind noch
+  nicht umgesetzt.
 - Windows und Linux sind architektonisch berücksichtigt, aber nicht Bestandteil
   dieses Releases.
 - Die systematische manuelle Prüfung mit TalkBack, großer Systemschrift,
