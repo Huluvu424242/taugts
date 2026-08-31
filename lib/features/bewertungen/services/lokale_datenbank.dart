@@ -11,7 +11,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 10;
+  static const schemaVersion = 11;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -70,10 +70,51 @@ class LokaleDatenbank {
         if (version <= 9) {
           _migriereAufSchemaV10();
         }
+        if (version <= 10) {
+          _migriereAufSchemaV11();
+        }
       }
       _stelleStandardkriterienBereit();
       verbindung.userVersion = schemaVersion;
     });
+  }
+
+  void _migriereAufSchemaV11() {
+    final hatKriterien = _tabelleExistiert('kriterien');
+    if (hatKriterien) {
+      verbindung.execute(
+        "ALTER TABLE kriterien ADD COLUMN objektart TEXT NOT NULL DEFAULT 'getraenk'",
+      );
+      verbindung.execute(
+        'ALTER TABLE kriterien ADD COLUMN version INTEGER NOT NULL DEFAULT 1',
+      );
+      verbindung.execute(
+        "ALTER TABLE kriterien ADD COLUMN auswahlwerte TEXT NOT NULL DEFAULT ''",
+      );
+      verbindung.execute("UPDATE kriterien SET objektart = CASE produktart "
+          "WHEN 'speise' THEN 'speise' WHEN 'sonstiges' THEN 'sonstigesProdukt' "
+          "ELSE 'getraenk' END");
+    }
+    if (_tabelleExistiert('bewertungen')) {
+      for (final definition in [
+        'ort_id TEXT REFERENCES orte(id)',
+        'kriterium_name TEXT',
+        'kriterium_eingabetyp TEXT',
+        'kriterium_reihenfolge INTEGER',
+        'kriterium_version INTEGER',
+      ]) {
+        verbindung.execute('ALTER TABLE bewertungen ADD COLUMN $definition');
+      }
+      if (hatKriterien) {
+        verbindung.execute('''
+          UPDATE bewertungen SET
+            kriterium_name = (SELECT name FROM kriterien k WHERE k.id = kriterium_id),
+            kriterium_eingabetyp = (SELECT eingabetyp FROM kriterien k WHERE k.id = kriterium_id),
+            kriterium_reihenfolge = (SELECT reihenfolge FROM kriterien k WHERE k.id = kriterium_id),
+            kriterium_version = 1
+        ''');
+      }
+    }
   }
 
   void _migriereAufSchemaV10() {
@@ -187,14 +228,17 @@ class LokaleDatenbank {
       ...StandardGetraenkekriterien.alle(zeitpunkt),
       ...StandardSpeisekriterien.alle(zeitpunkt),
       StandardFallbackKriterien.gesamturteil(zeitpunkt),
+      ...StandardOrtskriterien.gastronomie(zeitpunkt),
+      ...StandardOrtskriterien.geschaeft(zeitpunkt),
     ];
     for (final kriterium in kriterien) {
       verbindung.execute(
         '''
           INSERT OR IGNORE INTO kriterien (
             id, name, beschreibung, eingabetyp, reihenfolge, aktiv,
-            erstellt_am, geaendert_am, produktart
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            erstellt_am, geaendert_am, produktart, objektart, version,
+            auswahlwerte
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''',
         [
           kriterium.id,
@@ -206,6 +250,9 @@ class LokaleDatenbank {
           kriterium.erstelltAm.toIso8601String(),
           kriterium.geaendertAm.toIso8601String(),
           kriterium.produktart.name,
+          kriterium.wirksameObjektart.name,
+          kriterium.version,
+          kriterium.auswahlwerte.join('\n'),
         ],
       );
     }
@@ -362,7 +409,10 @@ class LokaleDatenbank {
         aktiv INTEGER NOT NULL DEFAULT 1,
         erstellt_am TEXT NOT NULL,
         geaendert_am TEXT NOT NULL,
-        produktart TEXT NOT NULL DEFAULT 'bier'
+        produktart TEXT NOT NULL DEFAULT 'bier',
+        objektart TEXT NOT NULL DEFAULT 'getraenk',
+        version INTEGER NOT NULL DEFAULT 1,
+        auswahlwerte TEXT NOT NULL DEFAULT ''
       )
     ''');
     _erstelleBewertungenTabelle();
@@ -411,7 +461,12 @@ class LokaleDatenbank {
         geaendert_am TEXT NOT NULL,
         herkunft_profil_id TEXT NOT NULL REFERENCES profile(id),
         erlebnis_position_id TEXT REFERENCES erlebnispositionen(id)
-          ON DELETE CASCADE
+          ON DELETE CASCADE,
+        ort_id TEXT REFERENCES orte(id),
+        kriterium_name TEXT,
+        kriterium_eingabetyp TEXT,
+        kriterium_reihenfolge INTEGER,
+        kriterium_version INTEGER
       )
     ''');
   }

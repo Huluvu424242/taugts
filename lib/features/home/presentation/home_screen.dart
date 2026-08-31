@@ -3,6 +3,7 @@ import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/bewertungen/presentation/kriterien_screen.dart';
 import 'package:taugts/features/erlebnisse/presentation/entwuerfe_screen.dart';
 import 'package:taugts/features/orte/presentation/orte_screen.dart';
 import 'package:taugts/features/produkte/presentation/produkte_screen.dart';
@@ -76,6 +77,20 @@ class _HomeScreenState extends State<HomeScreen> {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => OrteScreen(
+          repository: repository,
+          idGenerator: idGenerator,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _kriterienOeffnen() async {
+    final repository = widget.bewertungsRepository;
+    final idGenerator = widget.idGenerator;
+    if (repository == null || idGenerator == null) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => KriterienScreen(
           repository: repository,
           idGenerator: idGenerator,
         ),
@@ -165,6 +180,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: _orteOeffnen,
                       icon: const Icon(Icons.place_outlined),
                       label: const Text('Orte verwalten'),
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton.icon(
+                      onPressed: _kriterienOeffnen,
+                      icon: const Icon(Icons.tune),
+                      label: const Text('Bewertungskriterien'),
                     ),
                   ],
                 ],
