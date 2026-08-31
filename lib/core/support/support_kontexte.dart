@@ -15,6 +15,7 @@ abstract final class SupportKontexte {
   static const bewertungsentwurfBearbeiten =
       'Bewertungsentwurf bearbeiten – Getränk in Gaststätte';
   static const getraenkBewertung = 'Getränk bewerten';
+  static const kriterienVerwalten = 'Bewertungskriterien verwalten';
   static const ueberDialog = 'Über-Dialog';
   static const barrierefreiheitserklaerung = 'Barrierefreiheitserklärung';
 

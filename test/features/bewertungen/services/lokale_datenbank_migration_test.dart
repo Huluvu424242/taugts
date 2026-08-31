@@ -219,6 +219,14 @@ void main() {
       ),
       hasLength(1),
     );
+    expect(
+      verbindung.select("SELECT * FROM kriterien WHERE objektart = 'gastronomie'"),
+      hasLength(7),
+    );
+    expect(
+      verbindung.select("SELECT * FROM kriterien WHERE objektart = 'geschaeft'"),
+      hasLength(8),
+    );
     datenbank.schliessen();
   });
 }

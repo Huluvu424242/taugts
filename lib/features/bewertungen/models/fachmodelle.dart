@@ -4,7 +4,9 @@ enum Produktart { bier, getraenk, speise, sonstiges }
 
 enum Ortstyp { gastronomie, geschaeft, privat, sonstiger }
 
-enum KriteriumEingabetyp { wertung, intensitaet }
+enum KriteriumEingabetyp { wertung, intensitaet, jaNein, zahl, auswahl, freitext }
+
+enum KriteriumObjektart { getraenk, speise, sonstigesProdukt, gastronomie, geschaeft }
 
 enum Erlebnistyp { restaurantbesuch, einkauf }
 
@@ -352,6 +354,9 @@ class Bewertungskriterium {
     this.reihenfolge = 0,
     this.aktiv = true,
     this.produktart = Produktart.bier,
+    this.objektart,
+    this.version = 1,
+    this.auswahlwerte = const [],
   });
 
   final String id;
@@ -361,8 +366,17 @@ class Bewertungskriterium {
   final int reihenfolge;
   final bool aktiv;
   final Produktart produktart;
+  final KriteriumObjektart? objektart;
+  final int version;
+  final List<String> auswahlwerte;
   final DateTime erstelltAm;
   final DateTime geaendertAm;
+
+  KriteriumObjektart get wirksameObjektart => objektart ?? switch (produktart) {
+        Produktart.bier || Produktart.getraenk => KriteriumObjektart.getraenk,
+        Produktart.speise => KriteriumObjektart.speise,
+        Produktart.sonstiges => KriteriumObjektart.sonstigesProdukt,
+      };
 }
 
 abstract final class StandardGetraenkekriterien {
@@ -490,6 +504,47 @@ abstract final class StandardFallbackKriterien {
       );
 }
 
+abstract final class StandardOrtskriterien {
+  static List<Bewertungskriterium> gastronomie(DateTime zeitpunkt) =>
+      _erstelle(
+        zeitpunkt,
+        KriteriumObjektart.gastronomie,
+        'f1',
+        const ['Gesamturteil', 'Service', 'Freundlichkeit', 'Sauberkeit', 'Atmosphäre', 'Auswahl', 'Preis-Leistung'],
+      );
+
+  static List<Bewertungskriterium> geschaeft(DateTime zeitpunkt) => _erstelle(
+        zeitpunkt,
+        KriteriumObjektart.geschaeft,
+        'f2',
+        const ['Gesamturteil', 'Andrang / Auslastung', 'Wartezeit', 'Sauberkeit', 'Auffindbarkeit', 'Sortiment', 'Verfügbarkeit', 'Service'],
+      );
+
+  static List<Bewertungskriterium> _erstelle(
+    DateTime zeitpunkt,
+    KriteriumObjektart objektart,
+    String praefix,
+    List<String> namen,
+  ) =>
+      [
+        for (var index = 0; index < namen.length; index++)
+          Bewertungskriterium(
+            id: '$praefix${index.toString().padLeft(2, '0')}0000-0000-4000-8000-000000000001',
+            name: namen[index],
+            beschreibung: 'Bewertung für ${objektart == KriteriumObjektart.gastronomie ? 'Gastronomie' : 'Geschäfte'}.',
+            eingabetyp: namen[index] == 'Andrang / Auslastung'
+                ? KriteriumEingabetyp.intensitaet
+                : namen[index] == 'Wartezeit'
+                    ? KriteriumEingabetyp.zahl
+                    : KriteriumEingabetyp.wertung,
+            reihenfolge: index * 10,
+            objektart: objektart,
+            erstelltAm: zeitpunkt,
+            geaendertAm: zeitpunkt,
+          ),
+      ];
+}
+
 class Bewertung {
   const Bewertung({
     required this.id,
@@ -500,14 +555,24 @@ class Bewertung {
     required this.erstelltAm,
     required this.geaendertAm,
     this.erlebnisPositionId,
+    this.ortId,
+    this.kriteriumName,
+    this.kriteriumEingabetyp,
+    this.kriteriumReihenfolge,
+    this.kriteriumVersion,
   });
 
   final String id;
   final String erlebnisId;
   final String? erlebnisPositionId;
+  final String? ortId;
   final String kriteriumId;
   final String herkunftProfilId;
   final double wert;
   final DateTime erstelltAm;
   final DateTime geaendertAm;
+  final String? kriteriumName;
+  final KriteriumEingabetyp? kriteriumEingabetyp;
+  final int? kriteriumReihenfolge;
+  final int? kriteriumVersion;
 }

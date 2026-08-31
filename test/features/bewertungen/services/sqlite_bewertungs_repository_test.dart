@@ -465,6 +465,45 @@ void main() {
     );
   });
 
+  test('konfiguriert Kriterien und erhält die verwendete Version historisch', () async {
+    const kriteriumId = '9ef4ace9-f038-40d4-a042-042eac68ca3f';
+    final kriterium = Bewertungskriterium(
+      id: kriteriumId,
+      name: 'Eigene Wertung',
+      objektart: KriteriumObjektart.gastronomie,
+      eingabetyp: KriteriumEingabetyp.jaNein,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereKriterium(kriterium);
+
+    final ersteVersion = (await repository.ladeKriterien())
+        .singleWhere((wert) => wert.id == kriteriumId);
+    expect(ersteVersion.version, 1);
+    expect(ersteVersion.wirksameObjektart, KriteriumObjektart.gastronomie);
+
+    await repository.speichereKriterium(Bewertungskriterium(
+      id: kriterium.id,
+      name: 'Umbenannte Wertung',
+      objektart: kriterium.objektart,
+      eingabetyp: kriterium.eingabetyp,
+      aktiv: false,
+      erstelltAm: kriterium.erstelltAm,
+      geaendertAm: zeit.add(const Duration(minutes: 1)),
+    ));
+
+    final zweiteVersion = (await repository.ladeKriterien())
+        .singleWhere((wert) => wert.id == kriteriumId);
+    expect(zweiteVersion.version, 2);
+    expect(zweiteVersion.aktiv, isFalse);
+    expect(
+      await repository.ladeAktiveKriterienFuerObjektart(
+        KriteriumObjektart.gastronomie,
+      ),
+      isNot(contains(predicate<Bewertungskriterium>((wert) => wert.id == kriteriumId))),
+    );
+  });
+
   test('speichert Korrektur und neue historische Bewertung getrennt', () async {
     const produktId = '80000000-0000-4000-8000-000000000001';
     final produkt = Produkt(

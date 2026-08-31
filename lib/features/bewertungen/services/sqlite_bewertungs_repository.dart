@@ -509,12 +509,31 @@ class SqliteBewertungsRepository implements BewertungsRepository {
 
   @override
   Future<void> speichereKriterium(Bewertungskriterium kriterium) async {
+    if (kriterium.name.trim().isEmpty) {
+      throw ArgumentError.value(kriterium.name, 'name');
+    }
+    final vorhanden = datenbank.verbindung.select(
+      'SELECT * FROM kriterien WHERE id = ?',
+      [kriterium.id],
+    );
+    final bisherigeVersion = vorhanden.isEmpty
+        ? 0
+        : (vorhanden.single['version'] as int? ?? 1);
+    final bedeutungGeaendert = vorhanden.isNotEmpty &&
+        (vorhanden.single['name'] != kriterium.name.trim() ||
+            vorhanden.single['beschreibung'] != _leerAlsNull(kriterium.beschreibung) ||
+            vorhanden.single['eingabetyp'] != kriterium.eingabetyp.name ||
+            vorhanden.single['objektart'] != kriterium.wirksameObjektart.name ||
+            vorhanden.single['auswahlwerte'] != kriterium.auswahlwerte.join('\n'));
+    final version = bedeutungGeaendert ? bisherigeVersion + 1 :
+        (bisherigeVersion == 0 ? kriterium.version : bisherigeVersion);
     datenbank.verbindung.execute(
       '''
         INSERT INTO kriterien (
           id, name, beschreibung, eingabetyp, reihenfolge, aktiv,
-          erstellt_am, geaendert_am, produktart
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          erstellt_am, geaendert_am, produktart, objektart, version,
+          auswahlwerte
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
           name = excluded.name,
           beschreibung = excluded.beschreibung,
@@ -522,6 +541,9 @@ class SqliteBewertungsRepository implements BewertungsRepository {
           reihenfolge = excluded.reihenfolge,
           aktiv = excluded.aktiv,
           produktart = excluded.produktart,
+          objektart = excluded.objektart,
+          version = excluded.version,
+          auswahlwerte = excluded.auswahlwerte,
           geaendert_am = excluded.geaendert_am
       ''',
       [
@@ -534,9 +556,56 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         _zeit(kriterium.erstelltAm),
         _zeit(kriterium.geaendertAm),
         kriterium.produktart.name,
+        kriterium.wirksameObjektart.name,
+        version,
+        kriterium.auswahlwerte.join('\n'),
       ],
     );
   }
+
+  @override
+  Future<List<Bewertungskriterium>> ladeKriterien({
+    bool nurAktive = false,
+  }) async {
+    final rows = datenbank.verbindung.select(
+      'SELECT * FROM kriterien ${nurAktive ? 'WHERE aktiv = 1' : ''} '
+      'ORDER BY objektart, reihenfolge, name COLLATE NOCASE',
+    );
+    return rows.map(_kriteriumAusZeile).toList();
+  }
+
+  @override
+  Future<List<Bewertungskriterium>> ladeAktiveKriterienFuerObjektart(
+    KriteriumObjektart objektart,
+  ) async {
+    final rows = datenbank.verbindung.select(
+      'SELECT * FROM kriterien WHERE aktiv = 1 AND objektart = ? '
+      'ORDER BY reihenfolge, name COLLATE NOCASE',
+      [objektart.name],
+    );
+    return rows.map(_kriteriumAusZeile).toList();
+  }
+
+  Bewertungskriterium _kriteriumAusZeile(Map<String, Object?> row) =>
+      Bewertungskriterium(
+        id: row['id'] as String,
+        name: row['name'] as String,
+        beschreibung: row['beschreibung'] as String?,
+        eingabetyp: KriteriumEingabetyp.values.byName(
+          row['eingabetyp'] as String,
+        ),
+        reihenfolge: row['reihenfolge'] as int,
+        aktiv: (row['aktiv'] as int) == 1,
+        produktart: Produktart.values.byName(row['produktart'] as String),
+        objektart: KriteriumObjektart.values.byName(row['objektart'] as String),
+        version: row['version'] as int,
+        auswahlwerte: (row['auswahlwerte'] as String)
+            .split('\n')
+            .where((wert) => wert.isNotEmpty)
+            .toList(),
+        erstelltAm: DateTime.parse(row['erstellt_am'] as String),
+        geaendertAm: DateTime.parse(row['geaendert_am'] as String),
+      );
 
   @override
   Future<List<Bewertungskriterium>> ladeAktiveGetraenkekriterien() async {
@@ -557,23 +626,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       'ORDER BY reihenfolge, name COLLATE NOCASE',
       [wirksameArt.name],
     );
-    return rows
-        .map(
-          (row) => Bewertungskriterium(
-            id: row['id'] as String,
-            name: row['name'] as String,
-            beschreibung: row['beschreibung'] as String?,
-            eingabetyp: KriteriumEingabetyp.values.byName(
-              row['eingabetyp'] as String,
-            ),
-            reihenfolge: row['reihenfolge'] as int,
-            aktiv: (row['aktiv'] as int) == 1,
-            produktart: Produktart.values.byName(row['produktart'] as String),
-            erstelltAm: DateTime.parse(row['erstellt_am'] as String),
-            geaendertAm: DateTime.parse(row['geaendert_am'] as String),
-          ),
-        )
-        .toList();
+    return rows.map(_kriteriumAusZeile).toList();
   }
 
   @override
@@ -581,12 +634,17 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       _speichereBewertungZeile(bewertung);
 
   void _speichereBewertungZeile(Bewertung bewertung) {
+    final kriterium = datenbank.verbindung.select(
+      'SELECT * FROM kriterien WHERE id = ?',
+      [bewertung.kriteriumId],
+    ).single;
     datenbank.verbindung.execute(
       '''
         INSERT INTO bewertungen (
           id, erlebnis_id, kriterium_id, wert, erstellt_am, geaendert_am,
-          herkunft_profil_id, erlebnis_position_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          herkunft_profil_id, erlebnis_position_id, ort_id, kriterium_name,
+          kriterium_eingabetyp, kriterium_reihenfolge, kriterium_version
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         bewertung.id,
@@ -597,6 +655,11 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         _zeit(bewertung.geaendertAm),
         bewertung.herkunftProfilId,
         bewertung.erlebnisPositionId,
+        bewertung.ortId,
+        kriterium['name'],
+        kriterium['eingabetyp'],
+        kriterium['reihenfolge'],
+        kriterium['version'],
       ],
     );
   }
@@ -683,9 +746,18 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         kriteriumId: row['kriterium_id'] as String,
         herkunftProfilId: row['herkunft_profil_id'] as String,
         erlebnisPositionId: row['erlebnis_position_id'] as String?,
+        ortId: row['ort_id'] as String?,
         wert: (row['wert'] as num).toDouble(),
         erstelltAm: DateTime.parse(row['erstellt_am'] as String),
         geaendertAm: DateTime.parse(row['geaendert_am'] as String),
+        kriteriumName: row['kriterium_name'] as String?,
+        kriteriumEingabetyp: row['kriterium_eingabetyp'] == null
+            ? null
+            : KriteriumEingabetyp.values.byName(
+                row['kriterium_eingabetyp'] as String,
+              ),
+        kriteriumReihenfolge: row['kriterium_reihenfolge'] as int?,
+        kriteriumVersion: row['kriterium_version'] as int?,
       );
 
   @override
