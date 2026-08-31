@@ -5,7 +5,7 @@ import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 
 class BewertungsverlaufScreen extends StatefulWidget {
-  const BewertungsverlaufScreen.fuerProdukt({
+  BewertungsverlaufScreen.fuerProdukt({
     required this.repository,
     required Produkt produkt,
     this.eigenesProfilId,
@@ -14,7 +14,7 @@ class BewertungsverlaufScreen extends StatefulWidget {
         objektName = produkt.anzeigetitel,
         istOrt = false;
 
-  const BewertungsverlaufScreen.fuerOrt({
+  BewertungsverlaufScreen.fuerOrt({
     required this.repository,
     required Ort ort,
     this.eigenesProfilId,
@@ -178,8 +178,12 @@ class _Verlaufskarte extends StatelessWidget {
     String zeit(DateTime wert) => lokalisierung.formatTimeOfDay(
           TimeOfDay.fromDateTime(wert.toLocal()),
         );
-    if (erlebnis.tatsaechlicherBeginn == null) return 'Zeitpunkt nicht vollständig erfasst';
-    if (erlebnis.tatsaechlichesEnde == null) return 'Beginn: ${zeit(erlebnis.tatsaechlicherBeginn!)}';
+    if (erlebnis.tatsaechlicherBeginn == null) {
+      return 'Zeitpunkt nicht vollständig erfasst';
+    }
+    if (erlebnis.tatsaechlichesEnde == null) {
+      return 'Beginn: ${zeit(erlebnis.tatsaechlicherBeginn!)}';
+    }
     return 'Zeitraum: ${zeit(erlebnis.tatsaechlicherBeginn!)}–${zeit(erlebnis.tatsaechlichesEnde!)}';
   }
 
@@ -191,7 +195,9 @@ class _Verlaufskarte extends StatelessWidget {
 
   Bewertung? _gesamtwertung(List<Bewertung> bewertungen) {
     for (final bewertung in bewertungen) {
-      if (bewertung.kriteriumName == 'Gesamturteil') return bewertung;
+      if (bewertung.kriteriumName == 'Gesamturteil') {
+        return bewertung;
+      }
     }
     return null;
   }
