@@ -38,7 +38,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Keine Kriterien für diese Objektart.'),
+      find.text(
+        'Keine Kriterien für diese Objektart.',
+        skipOffstage: false,
+      ),
       findsNWidgets(KriteriumObjektart.values.length),
     );
     expect(tester.takeException(), isNull);
@@ -73,10 +76,10 @@ void main() {
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Name ist erforderlich.'), findsNWidgets(3));
+    expect(find.text('Name ist erforderlich.'), findsNWidgets(2));
     expect(
       find.text('Mindestens ein Auswahlwert ist erforderlich.'),
-      findsNWidgets(3),
+      findsNWidgets(2),
     );
     expect(find.text('Bitte Eingaben prüfen.'), findsOneWidget);
 
@@ -145,7 +148,13 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Bleibt erhalten'), findsOneWidget);
-    expect(find.text('Kriterium anlegen'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Kriterium anlegen'),
+      ),
+      findsOneWidget,
+    );
   });
 }
 

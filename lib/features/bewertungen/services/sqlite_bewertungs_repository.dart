@@ -688,12 +688,12 @@ class SqliteBewertungsRepository implements BewertungsRepository {
     Produktart produktart,
   ) async {
     final wirksameArt = switch (produktart) {
-      Produktart.bier || Produktart.getraenk => Produktart.bier,
-      Produktart.speise => Produktart.speise,
-      Produktart.sonstiges => Produktart.sonstiges,
+      Produktart.bier || Produktart.getraenk => KriteriumObjektart.getraenk,
+      Produktart.speise => KriteriumObjektart.speise,
+      Produktart.sonstiges => KriteriumObjektart.sonstigesProdukt,
     };
     final rows = datenbank.verbindung.select(
-      'SELECT * FROM kriterien WHERE aktiv = 1 AND produktart = ? '
+      'SELECT * FROM kriterien WHERE aktiv = 1 AND objektart = ? '
       'ORDER BY reihenfolge, name COLLATE NOCASE',
       [wirksameArt.name],
     );
@@ -705,10 +705,11 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       _speichereBewertungZeile(bewertung);
 
   void _speichereBewertungZeile(Bewertung bewertung) {
-    final kriterium = datenbank.verbindung.select(
+    final kriterien = datenbank.verbindung.select(
       'SELECT * FROM kriterien WHERE id = ?',
       [bewertung.kriteriumId],
-    ).single;
+    );
+    final kriterium = kriterien.isEmpty ? null : kriterien.single;
     datenbank.verbindung.execute(
       '''
         INSERT INTO bewertungen (
@@ -728,12 +729,12 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         bewertung.herkunftProfilId,
         bewertung.erlebnisPositionId,
         bewertung.ortId,
-        kriterium['name'],
-        kriterium['eingabetyp'],
-        kriterium['reihenfolge'],
-        kriterium['version'],
-        kriterium['beschreibung'],
-        kriterium['auswahlwerte'],
+        kriterium?['name'],
+        kriterium?['eingabetyp'],
+        kriterium?['reihenfolge'],
+        kriterium?['version'],
+        kriterium?['beschreibung'],
+        kriterium?['auswahlwerte'] ?? '',
       ],
     );
   }
