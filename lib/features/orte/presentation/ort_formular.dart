@@ -5,6 +5,7 @@ import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/orte/services/standort_service.dart';
 
 class _Ortsfehler {
   const _Ortsfehler(this.text, this.fokus);
@@ -18,12 +19,14 @@ class OrtFormular extends StatefulWidget {
     required this.repository,
     required this.idGenerator,
     this.ort,
+    this.standortService = const GeolocatorStandortService(),
     super.key,
   });
 
   final BewertungsRepository repository;
   final IdGenerator idGenerator;
   final Ort? ort;
+  final StandortService standortService;
 
   @override
   State<OrtFormular> createState() => _OrtFormularState();
@@ -45,6 +48,8 @@ class _OrtFormularState extends State<OrtFormular> {
   late Ortstyp _typ;
   var _fehler = <_Ortsfehler>[];
   var _speichert = false;
+  var _ermitteltStandort = false;
+  String? _standortMeldung;
 
   @override
   void initState() {
@@ -224,6 +229,61 @@ class _OrtFormularState extends State<OrtFormular> {
   double? _kommazahl(String wert) =>
       double.tryParse(wert.trim().replaceAll(',', '.'));
 
+  Future<void> _standortUebernehmen() async {
+    setState(() {
+      _ermitteltStandort = true;
+      _standortMeldung = null;
+    });
+    try {
+      final standort =
+          await widget.standortService.aktuellenStandortErmitteln();
+      if (!mounted) return;
+      final genauigkeit = standort.genauigkeitMeter == null
+          ? 'nicht verfügbar'
+          : '${standort.genauigkeitMeter!.round()} m';
+      final bestaetigt = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Standort übernehmen?'),
+          content: Text(
+            'Breitengrad: ${standort.breitengrad.toStringAsFixed(6)}\n'
+            'Längengrad: ${standort.laengengrad.toStringAsFixed(6)}\n'
+            'Genauigkeit: $genauigkeit\n\n'
+            'Die Koordinaten können danach korrigiert oder entfernt werden.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Nicht übernehmen'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Koordinaten übernehmen'),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      if (bestaetigt == true) {
+        setState(() {
+          _breitengrad.text = standort.breitengrad.toStringAsFixed(6);
+          _laengengrad.text = standort.laengengrad.toStringAsFixed(6);
+          _standortMeldung =
+              'Standort übernommen. Koordinaten sind bearbeitbar.';
+        });
+      }
+    } catch (fehler) {
+      if (!mounted) return;
+      setState(
+        () => _standortMeldung = fehler is StandortAusnahme
+            ? fehler.nachricht
+            : 'Der aktuelle Standort konnte nicht ermittelt werden.',
+      );
+    } finally {
+      if (mounted) setState(() => _ermitteltStandort = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
@@ -281,6 +341,24 @@ class _OrtFormularState extends State<OrtFormular> {
                   validator: _namePruefen,
                 ),
                 _textfeld(_adresse, 'Adresse (optional)', maxLength: 240),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: _ermitteltStandort ? null : _standortUebernehmen,
+                  icon: const Icon(Icons.my_location),
+                  label: Text(
+                    _ermitteltStandort
+                        ? 'Standort wird ermittelt …'
+                        : 'Aktuellen Standort verwenden',
+                  ),
+                ),
+                if (_standortMeldung != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(_standortMeldung!),
+                    ),
+                  ),
                 _textfeld(
                   _breitengrad,
                   'Breitengrad (optional)',

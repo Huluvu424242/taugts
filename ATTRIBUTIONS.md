@@ -40,6 +40,11 @@ Third-Party-Notices bleiben maßgeblich.
 - [mobile_scanner](https://pub.dev/packages/mobile_scanner) – BSD-3-Clause;
   lokale Erkennung von EAN-, GTIN- und UPC-Barcodes über die Gerätekamera
 
+## Standort
+
+- [geolocator](https://pub.dev/packages/geolocator) – MIT; bewusst ausgelöste
+  Ermittlung des aktuellen Gerätestandorts ohne Hintergrund-Tracking
+
 ## Bereitstellung
 
 Diese Datei gehört zusammen mit [LICENSE](LICENSE) zur
