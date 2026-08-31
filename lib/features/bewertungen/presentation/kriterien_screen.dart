@@ -21,9 +21,13 @@ class KriterienScreen extends StatefulWidget {
 }
 
 class _KriterienScreenState extends State<KriterienScreen> {
-  late Future<List<Bewertungskriterium>> _laden = widget.repository.ladeKriterien();
+  late Future<List<Bewertungskriterium>> _laden =
+      widget.repository.ladeKriterien();
+  String? _meldung;
 
-  void _neuLaden() => setState(() => _laden = widget.repository.ladeKriterien());
+  void _neuLaden() => setState(() {
+        _laden = widget.repository.ladeKriterien();
+      });
 
   Future<void> _bearbeiten([Bewertungskriterium? kriterium]) async {
     final gespeichert = await showDialog<bool>(
@@ -34,7 +38,14 @@ class _KriterienScreenState extends State<KriterienScreen> {
         kriterium: kriterium,
       ),
     );
-    if (gespeichert == true && mounted) _neuLaden();
+    if (gespeichert == true && mounted) {
+      setState(() {
+        _meldung = kriterium == null
+            ? 'Kriterium wurde angelegt.'
+            : 'Kriterium wurde aktualisiert.';
+        _laden = widget.repository.ladeKriterien();
+      });
+    }
   }
 
   Future<void> _verschieben(
@@ -43,42 +54,83 @@ class _KriterienScreenState extends State<KriterienScreen> {
     int richtung,
   ) async {
     final ziel = index + richtung;
-    if (ziel < 0 || ziel >= kriterien.length) return;
-    final jetzt = DateTime.now().toUtc();
-    final aktuell = kriterien[index];
-    final tausch = kriterien[ziel];
-    await widget.repository.speichereKriterium(_kopiere(
-      aktuell,
-      reihenfolge: tausch.reihenfolge,
-      geaendertAm: jetzt,
-    ));
-    await widget.repository.speichereKriterium(_kopiere(
-      tausch,
-      reihenfolge: aktuell.reihenfolge,
-      geaendertAm: jetzt,
-    ));
-    if (mounted) _neuLaden();
+    if (ziel < 0 || ziel >= kriterien.length) {
+      return;
+    }
+    final sortiert = [...kriterien];
+    final aktuell = sortiert.removeAt(index);
+    sortiert.insert(ziel, aktuell);
+    try {
+      await widget.repository.sortiereKriterien(
+        sortiert.map((wert) => wert.id).toList(),
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _meldung = 'Sortierreihenfolge wurde gespeichert.';
+        _laden = widget.repository.ladeKriterien();
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Die Sortierreihenfolge konnte nicht gespeichert werden.'),
+        ),
+      );
+    }
   }
 
-  Bewertungskriterium _kopiere(
-    Bewertungskriterium wert, {
-    int? reihenfolge,
-    DateTime? geaendertAm,
-  }) =>
-      Bewertungskriterium(
-        id: wert.id,
-        name: wert.name,
-        beschreibung: wert.beschreibung,
-        eingabetyp: wert.eingabetyp,
-        reihenfolge: reihenfolge ?? wert.reihenfolge,
-        aktiv: wert.aktiv,
-        produktart: wert.produktart,
-        objektart: wert.wirksameObjektart,
-        version: wert.version,
-        auswahlwerte: wert.auswahlwerte,
-        erstelltAm: wert.erstelltAm,
-        geaendertAm: geaendertAm ?? wert.geaendertAm,
+  Future<void> _entfernen(Bewertungskriterium kriterium) async {
+    final bestaetigt = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Kriterium entfernen?'),
+        content: Text(
+          '„${kriterium.name}“ wird gelöscht, wenn es noch nicht verwendet '
+          'wurde. Verwendete Kriterien werden nur deaktiviert, damit alte '
+          'Bewertungen lesbar bleiben.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Entfernen'),
+          ),
+        ],
+      ),
+    );
+    if (bestaetigt != true || !mounted) {
+      return;
+    }
+    try {
+      final deaktiviert =
+          await widget.repository.entferneKriterium(kriterium.id);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _meldung = deaktiviert
+            ? 'Das verwendete Kriterium wurde deaktiviert.'
+            : 'Das unbenutzte Kriterium wurde gelöscht.';
+        _laden = widget.repository.ladeKriterien();
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Das Kriterium konnte nicht entfernt werden.'),
+        ),
       );
+    }
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -94,15 +146,35 @@ class _KriterienScreenState extends State<KriterienScreen> {
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return Center(
-                  child: FilledButton.icon(
-                    onPressed: _neuLaden,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Erneut versuchen'),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Semantics(
+                          liveRegion: true,
+                          child: const Text(
+                            'Die Bewertungskriterien konnten nicht geladen werden.',
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: _neuLaden,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Erneut versuchen'),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }
               if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(
+                  child: Semantics(
+                    label: 'Bewertungskriterien werden geladen',
+                    child: const CircularProgressIndicator(),
+                  ),
+                );
               }
               final alle = snapshot.data!;
               return ListView(
@@ -111,28 +183,74 @@ class _KriterienScreenState extends State<KriterienScreen> {
                   const Text(
                     'Deaktivierte oder geänderte Kriterien bleiben in alten Bewertungen in ihrer damaligen Bedeutung erhalten.',
                   ),
+                  if (_meldung != null) ...[
+                    const SizedBox(height: 12),
+                    Semantics(
+                      liveRegion: true,
+                      child: Text(_meldung!),
+                    ),
+                  ],
                   for (final art in KriteriumObjektart.values) ...[
                     const SizedBox(height: 20),
                     Semantics(
                       header: true,
                       child: Text(_objektartLabel(art), style: Theme.of(context).textTheme.titleLarge),
                     ),
-                    for (final eintrag in alle.where((wert) => wert.wirksameObjektart == art).toList().asMap().entries)
+                    if (!alle.any((wert) => wert.wirksameObjektart == art))
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: Text('Keine Kriterien für diese Objektart.'),
+                      ),
+                    for (final eintrag in alle
+                        .where((wert) => wert.wirksameObjektart == art)
+                        .toList()
+                        .asMap()
+                        .entries)
                       ListTile(
                         title: Text(eintrag.value.name),
                         subtitle: Text('${_eingabetypLabel(eintrag.value.eingabetyp)} · Version ${eintrag.value.version}${eintrag.value.aktiv ? '' : ' · deaktiviert'}'),
                         onTap: () => _bearbeiten(eintrag.value),
-                        trailing: Wrap(
-                          children: [
-                            IconButton(
-                              tooltip: '${eintrag.value.name} nach oben',
-                              onPressed: eintrag.key == 0 ? null : () => _verschieben(alle.where((wert) => wert.wirksameObjektart == art).toList(), eintrag.key, -1),
-                              icon: const Icon(Icons.arrow_upward),
+                        trailing: PopupMenuButton<_KriterienAktion>(
+                          tooltip: '${eintrag.value.name} – Aktionen',
+                          onSelected: (aktion) {
+                            final gruppe = alle
+                                .where(
+                                  (wert) => wert.wirksameObjektart == art,
+                                )
+                                .toList();
+                            switch (aktion) {
+                              case _KriterienAktion.nachOben:
+                                _verschieben(gruppe, eintrag.key, -1);
+                                break;
+                              case _KriterienAktion.nachUnten:
+                                _verschieben(gruppe, eintrag.key, 1);
+                                break;
+                              case _KriterienAktion.entfernen:
+                                _entfernen(eintrag.value);
+                                break;
+                            }
+                          },
+                          itemBuilder: (_) => [
+                            PopupMenuItem(
+                              value: _KriterienAktion.nachOben,
+                              enabled: eintrag.key > 0,
+                              child: const Text('Nach oben'),
                             ),
-                            IconButton(
-                              tooltip: '${eintrag.value.name} nach unten',
-                              onPressed: eintrag.key == alle.where((wert) => wert.wirksameObjektart == art).length - 1 ? null : () => _verschieben(alle.where((wert) => wert.wirksameObjektart == art).toList(), eintrag.key, 1),
-                              icon: const Icon(Icons.arrow_downward),
+                            PopupMenuItem(
+                              value: _KriterienAktion.nachUnten,
+                              enabled: eintrag.key <
+                                  alle
+                                          .where(
+                                            (wert) =>
+                                                wert.wirksameObjektart == art,
+                                          )
+                                          .length -
+                                      1,
+                              child: const Text('Nach unten'),
+                            ),
+                            const PopupMenuItem(
+                              value: _KriterienAktion.entfernen,
+                              child: Text('Entfernen'),
                             ),
                           ],
                         ),
@@ -151,6 +269,8 @@ class _KriterienScreenState extends State<KriterienScreen> {
       );
 }
 
+enum _KriterienAktion { nachOben, nachUnten, entfernen }
+
 class _KriteriumDialog extends StatefulWidget {
   const _KriteriumDialog({required this.repository, required this.idGenerator, this.kriterium});
 
@@ -165,6 +285,7 @@ class _KriteriumDialog extends StatefulWidget {
 class _KriteriumDialogState extends State<_KriteriumDialog> {
   final _fehlerFokus = FocusNode();
   final _nameFokus = FocusNode();
+  final _auswahlwerteFokus = FocusNode();
   late final TextEditingController _name;
   late final TextEditingController _beschreibung;
   late final TextEditingController _auswahlwerte;
@@ -172,6 +293,7 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
   late KriteriumObjektart _objektart;
   late bool _aktiv;
   var _nameFehlt = false;
+  var _auswahlwerteFehlen = false;
   var _speichert = false;
 
   @override
@@ -190,6 +312,7 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
   void dispose() {
     _fehlerFokus.dispose();
     _nameFokus.dispose();
+    _auswahlwerteFokus.dispose();
     _name.dispose();
     _beschreibung.dispose();
     _auswahlwerte.dispose();
@@ -197,8 +320,19 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
   }
 
   Future<void> _speichern() async {
-    if (_name.text.trim().isEmpty) {
-      setState(() => _nameFehlt = true);
+    final nameFehlt = _name.text.trim().isEmpty;
+    final auswahlwerteFehlen = _eingabetyp == KriteriumEingabetyp.auswahl &&
+        _auswahlwerte.text
+            .split('\n')
+            .every((wert) => wert.trim().isEmpty);
+    if (nameFehlt || auswahlwerteFehlen) {
+      setState(() {
+        _nameFehlt = nameFehlt;
+        _auswahlwerteFehlen = auswahlwerteFehlen;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bitte Eingaben prüfen.')),
+      );
       _fehlerFokus.requestFocus();
       return;
     }
@@ -219,10 +353,14 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
         erstelltAm: vorhanden?.erstelltAm ?? jetzt,
         geaendertAm: jetzt,
       ));
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       Navigator.of(context).pop(true);
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Das Kriterium konnte nicht gespeichert werden.')));
     }
@@ -230,14 +368,41 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-        title: Text(widget.kriterium == null ? 'Kriterium anlegen' : 'Kriterium bearbeiten'),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                widget.kriterium == null
+                    ? 'Kriterium anlegen'
+                    : 'Kriterium bearbeiten',
+              ),
+            ),
+            AppSupportMenu(
+              contextName: SupportKontexte.kriterium(
+                bearbeiten: widget.kriterium != null,
+              ),
+            ),
+          ],
+        ),
         content: SizedBox(
           width: 520,
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (_nameFehlt) FormularFehlersammler(focusNode: _fehlerFokus, fehler: [('Name ist erforderlich.', _nameFokus)]),
+                if (_nameFehlt || _auswahlwerteFehlen)
+                  FormularFehlersammler(
+                    focusNode: _fehlerFokus,
+                    fehler: [
+                      if (_nameFehlt)
+                        ('Name ist erforderlich.', _nameFokus),
+                      if (_auswahlwerteFehlen)
+                        (
+                          'Mindestens ein Auswahlwert ist erforderlich.',
+                          _auswahlwerteFokus,
+                        ),
+                    ],
+                  ),
                 TextField(controller: _name, focusNode: _nameFokus, maxLength: 100, decoration: InputDecoration(labelText: 'Name (Pflichtfeld)', errorText: _nameFehlt ? 'Name ist erforderlich.' : null)),
                 TextField(controller: _beschreibung, maxLength: 500, maxLines: 3, decoration: const InputDecoration(labelText: 'Beschreibung (optional)')),
                 DropdownButtonFormField<KriteriumObjektart>(
@@ -253,7 +418,18 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
                   onChanged: (wert) { if (wert != null) setState(() => _eingabetyp = wert); },
                 ),
                 if (_eingabetyp == KriteriumEingabetyp.auswahl)
-                  TextField(controller: _auswahlwerte, maxLength: 1000, maxLines: 5, decoration: const InputDecoration(labelText: 'Auswahlwerte (eine Zeile je Wert)')),
+                  TextField(
+                    controller: _auswahlwerte,
+                    focusNode: _auswahlwerteFokus,
+                    maxLength: 1000,
+                    maxLines: 5,
+                    decoration: InputDecoration(
+                      labelText: 'Auswahlwerte (eine Zeile je Wert)',
+                      errorText: _auswahlwerteFehlen
+                          ? 'Mindestens ein Auswahlwert ist erforderlich.'
+                          : null,
+                    ),
+                  ),
                 SwitchListTile(value: _aktiv, onChanged: (wert) => setState(() => _aktiv = wert), title: const Text('Aktiv')),
               ],
             ),

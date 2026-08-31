@@ -16,6 +16,8 @@ abstract final class SupportKontexte {
       'Bewertungsentwurf bearbeiten – Getränk in Gaststätte';
   static const getraenkBewertung = 'Getränk bewerten';
   static const kriterienVerwalten = 'Bewertungskriterien verwalten';
+  static const kriteriumErfassen = 'Bewertungskriterium erfassen';
+  static const kriteriumBearbeiten = 'Bewertungskriterium bearbeiten';
   static const ueberDialog = 'Über-Dialog';
   static const barrierefreiheitserklaerung = 'Barrierefreiheitserklärung';
 
@@ -33,6 +35,9 @@ abstract final class SupportKontexte {
 
   static String erlebnis({required bool entwurfBearbeiten}) =>
       entwurfBearbeiten ? bewertungsentwurfBearbeiten : bewertungErfassen;
+
+  static String kriterium({required bool bearbeiten}) =>
+      bearbeiten ? kriteriumBearbeiten : kriteriumErfassen;
 
   static String erlebnisGrunddaten({
     required String typ,
