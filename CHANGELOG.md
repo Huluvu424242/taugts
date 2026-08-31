@@ -6,6 +6,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+## [0.1.0+3] - 2026-08-31
+
 ### Added
 
 - EAN-/GTIN-Barcodes können bewusst gestartet und vollständig lokal gescannt,
@@ -27,7 +29,6 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
   Orte, Erlebniszeiten und Herkunft chronologisch dar, ohne historische
   Beobachtungen mit aktuellen Stammdaten zu vermischen.
 
-
 ## [0.1.0+2] - 2026-08-30
 
 ### Added
@@ -47,11 +48,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 ### Added
 
 - Manueller GitHub-Actions-Workflow für geprüfte, stabil signierte Android-APKs mit GitHub Release und SHA-256-Prüfsumme.
-
 - Barrierefreier Getränkebewertungsbogen mit geordneten Qualitäts- und
   Intensitätskriterien, unabhängigem Gesamturteil, optionaler Notiz und
   historisch getrennten Bewertungen je Erlebnis.
-
 - Offline-Barrierefreiheitserklärung, app-weites Support-Menü und kontextbezogene Bug-Meldung mit installierter Releaseversion.
 - Durchsuchbare Produktliste, wiederverwendbarer zugänglicher Fehlersammler und
   sichtbare Verwendung des Taugt’s?-Logos in App und Android-Launcher.
@@ -73,5 +72,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
 - Featureorientierte Ausgangsstruktur, Startscreen und Widget-Test.
 
-[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+1...HEAD
+[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+3...HEAD
+[0.1.0+3]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+2...v0.1.0+3
+[0.1.0+2]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+1...v0.1.0+2
 [0.1.0+1]: https://github.com/Huluvu424242/taugts/releases/tag/v0.1.0+1
