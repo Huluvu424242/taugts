@@ -638,7 +638,8 @@ class Ortsbewertung {
 }
 
 class OrtsbewertungMitWerten {
-  const OrtsbewertungMitWerten({required this.ortsbewertung, required this.werte});
+  const OrtsbewertungMitWerten(
+      {required this.ortsbewertung, required this.werte});
 
   final Ortsbewertung ortsbewertung;
   final List<Bewertung> werte;

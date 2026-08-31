@@ -74,7 +74,8 @@ class _GaststaettenbewertungAbschnittState
           : FutureBuilder<_Daten>(
               future: _laden,
               builder: (context, snapshot) {
-                final text = _lokalGespeichert || snapshot.data?.vorhanden != null
+                final text = _lokalGespeichert ||
+                        snapshot.data?.vorhanden != null
                     ? 'Für diesen Besuch liegt eine Bewertung vor.'
                     : snapshot.hasError
                         ? 'Der Bewertungsstatus konnte nicht geladen werden.'
@@ -88,7 +89,8 @@ class _GaststaettenbewertungAbschnittState
         if (ort == null)
           const Padding(
             padding: EdgeInsets.only(bottom: 16),
-            child: Text('Bestellung und Produktbewertungen bleiben ohne Gaststättenbewertung nutzbar.'),
+            child: Text(
+                'Bestellung und Produktbewertungen bleiben ohne Gaststättenbewertung nutzbar.'),
           )
         else
           FutureBuilder<_Daten>(
@@ -214,8 +216,7 @@ class _FormularState extends State<_Formular> {
     final bisher = widget.daten.vorhanden;
     final id = bisher?.ortsbewertung.id ?? widget.idGenerator.neueId();
     final vorhandeneWerte = {
-      for (final wert in bisher?.werte ?? <Bewertung>[])
-        wert.kriteriumId: wert,
+      for (final wert in bisher?.werte ?? <Bewertung>[]) wert.kriteriumId: wert,
     };
     try {
       await widget.repository.speichereOrtsbewertung(
@@ -226,7 +227,8 @@ class _FormularState extends State<_Formular> {
           erlebnisId: widget.erlebnis.id,
           ortId: widget.ort.id,
           herkunftProfilId: widget.erlebnis.herkunftProfilId,
-          bewertetAm: widget.erlebnis.tatsaechlicherBeginn ?? widget.erlebnis.erlebtAm,
+          bewertetAm:
+              widget.erlebnis.tatsaechlicherBeginn ?? widget.erlebnis.erlebtAm,
           notiz: _notiz.text.trim().isEmpty ? null : _notiz.text.trim(),
           erstelltAm: bisher?.ortsbewertung.erstelltAm ?? jetzt,
           geaendertAm: jetzt,
@@ -237,7 +239,8 @@ class _FormularState extends State<_Formular> {
           for (final eintrag in _werte.entries)
             if (eintrag.value != null)
               Bewertung(
-                id: vorhandeneWerte[eintrag.key]?.id ?? widget.idGenerator.neueId(),
+                id: vorhandeneWerte[eintrag.key]?.id ??
+                    widget.idGenerator.neueId(),
                 erlebnisId: widget.erlebnis.id,
                 ortId: widget.ort.id,
                 ortsbewertungId: id,
@@ -263,7 +266,9 @@ class _FormularState extends State<_Formular> {
       if (!mounted) return;
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Die Gaststättenbewertung konnte nicht gespeichert werden.')),
+        const SnackBar(
+            content: Text(
+                'Die Gaststättenbewertung konnte nicht gespeichert werden.')),
       );
     }
   }
@@ -302,9 +307,12 @@ class _FormularState extends State<_Formular> {
                   helperText: widget.daten.kriterien[index].beschreibung,
                 ),
                 items: const [
-                  DropdownMenuItem<double?>(value: null, child: Text('Nicht bewertet')),
-                  DropdownMenuItem(value: 1, child: Text('1 – taugt gar nicht')),
-                  DropdownMenuItem(value: 2, child: Text('2 – taugt eher nicht')),
+                  DropdownMenuItem<double?>(
+                      value: null, child: Text('Nicht bewertet')),
+                  DropdownMenuItem(
+                      value: 1, child: Text('1 – taugt gar nicht')),
+                  DropdownMenuItem(
+                      value: 2, child: Text('2 – taugt eher nicht')),
                   DropdownMenuItem(value: 3, child: Text('3 – teils, teils')),
                   DropdownMenuItem(value: 4, child: Text('4 – taugt eher')),
                   DropdownMenuItem(value: 5, child: Text('5 – taugt sehr')),
@@ -332,7 +340,9 @@ class _FormularState extends State<_Formular> {
             FilledButton.icon(
               onPressed: _speichert ? null : _speichern,
               icon: const Icon(Icons.save_outlined),
-              label: Text(_gespeichert ? 'Bewertung gespeichert' : 'Bewertung speichern'),
+              label: Text(_gespeichert
+                  ? 'Bewertung gespeichert'
+                  : 'Bewertung speichern'),
             ),
           ],
         ),

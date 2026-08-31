@@ -948,7 +948,8 @@ void main() {
     );
   });
 
-  test('speichert Gaststättenbewertungen je Besuch getrennt und korrigierbar', () async {
+  test('speichert Gaststättenbewertungen je Besuch getrennt und korrigierbar',
+      () async {
     final ort = Ort(
       id: '94000000-0000-4000-8000-000000000001',
       name: 'Zum Test',

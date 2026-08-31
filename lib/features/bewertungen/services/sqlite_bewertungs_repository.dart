@@ -924,7 +924,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
             bewertung.ortsbewertungId != ortsbewertung.id ||
             bewertung.herkunftProfilId != erlebnis.herkunftProfilId ||
             bewertung.erlebnisPositionId != null)) {
-      throw ArgumentError('Gaststättenbewertung und Erlebnis passen nicht zusammen.');
+      throw ArgumentError(
+          'Gaststättenbewertung und Erlebnis passen nicht zusammen.');
     }
     datenbank.transaktion(() {
       _speichereErlebnisZeile(erlebnis);
