@@ -45,6 +45,15 @@ Third-Party-Notices bleiben maßgeblich.
 - [geolocator](https://pub.dev/packages/geolocator) – MIT; bewusst ausgelöste
   Ermittlung des aktuellen Gerätestandorts ohne Hintergrund-Tracking
 
+## OpenStreetMap-Karte
+
+- [flutter_map](https://pub.dev/packages/flutter_map) – BSD-3-Clause;
+  plattformübergreifende Kartendarstellung
+- [latlong2](https://pub.dev/packages/latlong2) – Apache-2.0;
+  Koordinatenmodell und Geometrie
+- Kartendaten und Kartenkacheln: © OpenStreetMap-Mitwirkende, Open Database
+  License; die Attribution wird auf der Karte dauerhaft sichtbar angezeigt.
+
 ## Bereitstellung
 
 Diese Datei gehört zusammen mit [LICENSE](LICENSE) zur

@@ -55,6 +55,10 @@ Bestätigung. Ablehnung, ausgeschaltete Standortdienste und technische Fehler
 werden als wahrnehmbare Meldung ausgegeben; die manuelle Ortserfassung bleibt
 uneingeschränkt verfügbar.
 
+Die optionale OpenStreetMap-Karte gibt die ausgewählten Koordinaten zusätzlich
+als Text aus und bietet eine eindeutig beschriftete Übernahme. Die manuelle
+Koordinaten- und Adresseingabe bleibt die vollständig zugängliche Alternative.
+
 Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 
 - vollständiger Kernablauf mit TalkBack auf Android,
