@@ -13,6 +13,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Der aktuelle Standort kann auf ausdrückliche Nutzeraktion ermittelt, mit
   Genauigkeit geprüft und erst nach Bestätigung als bearbeitbare Koordinate
   übernommen werden; Hintergrund-Tracking findet nicht statt.
+- Ortskoordinaten können auf einer optionalen OpenStreetMap-Karte angezeigt,
+  durch Antippen korrigiert und erst nach Bestätigung übernommen werden.
 - Bewertungskriterien lassen sich nach Produkt- und Ortsart konfigurieren,
   atomar sortieren, deaktivieren und sicher entfernen; sechs Eingabetypen sowie
   historisch erhaltene Kriterienversionen, Beschreibungen und Auswahlskalen

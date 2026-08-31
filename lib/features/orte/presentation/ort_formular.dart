@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/orte/presentation/ort_karte_screen.dart';
 import 'package:taugts/features/orte/services/standort_service.dart';
+
+typedef OrtKarteOeffnen = Future<LatLng?> Function(
+  BuildContext context,
+  LatLng? ausgangsposition,
+);
 
 class _Ortsfehler {
   const _Ortsfehler(this.text, this.fokus);
@@ -20,6 +27,7 @@ class OrtFormular extends StatefulWidget {
     required this.idGenerator,
     this.ort,
     this.standortService = const GeolocatorStandortService(),
+    this.karteOeffnen,
     super.key,
   });
 
@@ -27,6 +35,7 @@ class OrtFormular extends StatefulWidget {
   final IdGenerator idGenerator;
   final Ort? ort;
   final StandortService standortService;
+  final OrtKarteOeffnen? karteOeffnen;
 
   @override
   State<OrtFormular> createState() => _OrtFormularState();
@@ -284,6 +293,30 @@ class _OrtFormularState extends State<OrtFormular> {
     }
   }
 
+  Future<void> _karteOeffnen() async {
+    final breite = _kommazahl(_breitengrad.text);
+    final laenge = _kommazahl(_laengengrad.text);
+    final ausgangsposition =
+        breite == null || laenge == null ? null : LatLng(breite, laenge);
+    final position = await (widget.karteOeffnen?.call(
+          context,
+          ausgangsposition,
+        ) ??
+        Navigator.of(context).push<LatLng>(
+          MaterialPageRoute(
+            builder: (_) => OrtKarteScreen(
+              ausgangsposition: ausgangsposition,
+            ),
+          ),
+        ));
+    if (position == null || !mounted) return;
+    setState(() {
+      _breitengrad.text = position.latitude.toStringAsFixed(6);
+      _laengengrad.text = position.longitude.toStringAsFixed(6);
+      _standortMeldung = 'Kartenposition übernommen und weiter bearbeitbar.';
+    });
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
@@ -359,6 +392,12 @@ class _OrtFormularState extends State<OrtFormular> {
                       child: Text(_standortMeldung!),
                     ),
                   ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: _karteOeffnen,
+                  icon: const Icon(Icons.map_outlined),
+                  label: const Text('Position auf OpenStreetMap auswählen'),
+                ),
                 _textfeld(
                   _breitengrad,
                   'Breitengrad (optional)',
