@@ -731,6 +731,10 @@ void main() {
       historie.map((bewertung) => bewertung.erlebnisId).toSet(),
       {erstesErlebnis.id, zweitesErlebnis.id},
     );
+    final verlauf = await repository.ladeProduktverlauf(produktId);
+    expect(verlauf, hasLength(2));
+    expect(verlauf.first.erlebnis.id, zweitesErlebnis.id);
+    expect(verlauf.last.bewertungen.single.wert, 4);
   });
 
   test('rollt Erlebnis und Bewertungen gemeinsam zurück', () async {
@@ -946,6 +950,10 @@ void main() {
       historie.map((bewertung) => bewertung.erlebnisPositionId).toSet(),
       hasLength(2),
     );
+    final verlauf = await repository.ladeProduktverlauf(produktId);
+    expect(verlauf, hasLength(2));
+    expect(verlauf.first.erlebnis.erlebtAm, zeit.add(const Duration(days: 1)));
+    expect(verlauf.first.bewertungen.single.wert, 4);
   });
 
   test('speichert Gaststättenbewertungen je Besuch getrennt und korrigierbar',
@@ -1060,6 +1068,9 @@ void main() {
           .wert,
       4,
     );
+    final verlauf = await repository.ladeOrtsverlauf(ort.id);
+    expect(verlauf, hasLength(2));
+    expect(verlauf.first.notiz, 'Besuch 1');
     expect(
       datenbank.verbindung.select(
         'SELECT * FROM ortsbewertungen WHERE ort_id = ?',

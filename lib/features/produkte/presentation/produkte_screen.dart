@@ -3,6 +3,7 @@ import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
+import 'package:taugts/features/bewertungen/presentation/bewertungsverlauf_screen.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/produkte/presentation/produkt_formular.dart';
 
@@ -11,12 +12,14 @@ class ProdukteScreen extends StatefulWidget {
     required this.repository,
     required this.idGenerator,
     this.zurAuswahl = false,
+    this.eigenesProfilId,
     super.key,
   });
 
   final BewertungsRepository repository;
   final IdGenerator idGenerator;
   final bool zurAuswahl;
+  final String? eigenesProfilId;
 
   @override
   State<ProdukteScreen> createState() => _ProdukteScreenState();
@@ -144,11 +147,21 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
                                   'Unvollständig – kann später ergänzt werden',
                                 )
                               : Text(produkt.marke ?? produkt.produktart.name),
-                          trailing: Icon(
-                            widget.zurAuswahl
-                                ? Icons.chevron_right
-                                : Icons.edit_outlined,
-                          ),
+                          trailing: widget.zurAuswahl
+                              ? const Icon(Icons.chevron_right)
+                              : IconButton(
+                                  tooltip: 'Verlauf von ${produkt.anzeigetitel}',
+                                  icon: const Icon(Icons.history),
+                                  onPressed: () => Navigator.of(context).push<void>(
+                                    MaterialPageRoute(
+                                      builder: (_) => BewertungsverlaufScreen.fuerProdukt(
+                                        repository: widget.repository,
+                                        produkt: produkt,
+                                        eigenesProfilId: widget.eigenesProfilId,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                           onTap: () => widget.zurAuswahl
                               ? Navigator.of(context).pop(produkt)
                               : _formularOeffnen(produkt),

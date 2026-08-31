@@ -40,6 +40,11 @@ Bewertungsabschnitt benennt seinen Zustand und bewahrt Eingaben beim Ein- und
 Ausklappen. Fehler werden zusätzlich in einem fokussierbaren Fehlersammler
 ausgegeben.
 
+Der chronologische Bewertungsverlauf trennt Stammdaten sichtbar von
+historischen Beobachtungen, verwendet beschriftete ausklappbare Einträge und
+kennzeichnet eigene sowie importierte Bewertungen nicht nur farblich. Lade-,
+Leer- und Fehlerzustände sind auch offline verständlich erreichbar.
+
 Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 
 - vollständiger Kernablauf mit TalkBack auf Android,
@@ -49,6 +54,7 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 - zusammenhängender Ablauf aus Produkt, Ort, Erlebnisentwurf und Bewertung,
 - Kriterienverwaltung und Gaststättenbewertung einschließlich Ein- und
   Ausklappen, großer Schrift und Persistenzfehler,
+- Produkt- und Ortsverläufe mit mehreren langen historischen Einträgen,
 - Bug-Meldung und vollständige Barrierefreiheitserklärung auf einem realen
   Gerät.
 

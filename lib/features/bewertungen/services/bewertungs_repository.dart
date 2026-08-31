@@ -63,4 +63,6 @@ abstract interface class BewertungsRepository {
     required Ortsbewertung ortsbewertung,
     required List<Bewertung> bewertungen,
   });
+  Future<List<BewertungsverlaufEintrag>> ladeProduktverlauf(String produktId);
+  Future<List<BewertungsverlaufEintrag>> ladeOrtsverlauf(String ortId);
 }
