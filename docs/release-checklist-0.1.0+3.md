@@ -30,10 +30,10 @@ erledigt interpretiert werden.
 
 ## Vor Merge des Vorbereitungs-PRs
 
-- [ ] `dart format --set-exit-if-changed lib test` war für den exakten
+- [x] `dart format --set-exit-if-changed lib test` war für den exakten
   PR-Head erfolgreich.
-- [ ] `flutter analyze` war für den exakten PR-Head erfolgreich.
-- [ ] `flutter test` war für den exakten PR-Head erfolgreich.
+- [x] `flutter analyze` war für den exakten PR-Head erfolgreich.
+- [x] `flutter test` war für den exakten PR-Head erfolgreich.
 - [ ] Der PR wurde menschlich geprüft.
 - [ ] Offene Review-Diskussionen sind aufgelöst.
 - [ ] Der PR wurde nach `master` gemergt.
