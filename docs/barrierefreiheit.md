@@ -45,6 +45,11 @@ historischen Beobachtungen, verwendet beschriftete ausklappbare Einträge und
 kennzeichnet eigene sowie importierte Bewertungen nicht nur farblich. Lade-,
 Leer- und Fehlerzustände sind auch offline verständlich erreichbar.
 
+Der Barcode-Scan wird bewusst gestartet, zeigt den erkannten Code vor der
+Übernahme und bietet bei abgelehnter oder ausgefallener Kamera weiterhin die
+manuelle Eingabe. Scanner, Bestätigung und Produktvorschlag besitzen sichtbare
+und semantische Beschriftungen.
+
 Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 
 - vollständiger Kernablauf mit TalkBack auf Android,

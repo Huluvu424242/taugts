@@ -8,6 +8,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- EAN-/GTIN-Barcodes können bewusst gestartet und vollständig lokal gescannt,
+  bestätigt und vorhandenen oder neuen Produkten zugeordnet werden.
 - Bewertungskriterien lassen sich nach Produkt- und Ortsart konfigurieren,
   atomar sortieren, deaktivieren und sicher entfernen; sechs Eingabetypen sowie
   historisch erhaltene Kriterienversionen, Beschreibungen und Auswahlskalen

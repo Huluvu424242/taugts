@@ -5,7 +5,10 @@ import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/presentation/bewertungsverlauf_screen.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/produkte/presentation/barcode_scanner_screen.dart';
 import 'package:taugts/features/produkte/presentation/produkt_formular.dart';
+
+typedef BarcodeScanStart = Future<String?> Function(BuildContext context);
 
 class ProdukteScreen extends StatefulWidget {
   const ProdukteScreen({
@@ -13,6 +16,7 @@ class ProdukteScreen extends StatefulWidget {
     required this.idGenerator,
     this.zurAuswahl = false,
     this.eigenesProfilId,
+    this.barcodeScanStart,
     super.key,
   });
 
@@ -20,6 +24,7 @@ class ProdukteScreen extends StatefulWidget {
   final IdGenerator idGenerator;
   final bool zurAuswahl;
   final String? eigenesProfilId;
+  final BarcodeScanStart? barcodeScanStart;
 
   @override
   State<ProdukteScreen> createState() => _ProdukteScreenState();
@@ -59,11 +64,88 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
     }
   }
 
+  Future<void> _barcodeScannen() async {
+    final barcode = await (widget.barcodeScanStart?.call(context) ??
+        Navigator.of(context).push<String>(
+          MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+        ));
+    if (barcode == null || !mounted) return;
+    Produkt? vorhanden;
+    try {
+      vorhanden = await widget.repository.ladeProduktMitBarcode(barcode);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Der Barcode konnte nicht gesucht werden. Die manuelle Eingabe bleibt verfügbar.',
+          ),
+        ),
+      );
+      return;
+    }
+    if (!mounted) return;
+    if (vorhanden != null) {
+      final gefunden = vorhanden;
+      final verwenden = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Produkt gefunden'),
+          content: Text(
+            '${gefunden.anzeigetitel}\nBarcode: $barcode\n\n'
+            'Dieses vorhandene Produkt verwenden?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Zurück'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Produkt verwenden'),
+            ),
+          ],
+        ),
+      );
+      if (verwenden == true && mounted) {
+        if (widget.zurAuswahl) {
+          Navigator.of(context).pop(gefunden);
+        } else {
+          await _formularOeffnen(gefunden);
+        }
+      }
+      return;
+    }
+    final produkt = await Navigator.of(context).push<Produkt>(
+      MaterialPageRoute(
+        builder: (_) => ProduktFormular(
+          repository: widget.repository,
+          idGenerator: widget.idGenerator,
+          barcodeVorgabe: barcode,
+        ),
+      ),
+    );
+    if (produkt == null || !mounted) return;
+    if (widget.zurAuswahl) {
+      Navigator.of(context).pop(produkt);
+    } else {
+      _laden();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unvollständiges Produkt gespeichert.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Text(widget.zurAuswahl ? 'Produkt auswählen' : 'Produkte'),
           actions: [
+            IconButton(
+              tooltip: 'Barcode scannen',
+              onPressed: _barcodeScannen,
+              icon: const Icon(Icons.qr_code_scanner),
+            ),
             AppSupportMenu(
               contextName: SupportKontexte.produkte(
                 zurAuswahl: widget.zurAuswahl,

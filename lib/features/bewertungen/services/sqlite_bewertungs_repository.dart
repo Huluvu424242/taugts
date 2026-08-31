@@ -96,6 +96,18 @@ class SqliteBewertungsRepository implements BewertungsRepository {
     return rows.map(_produktAusZeile).toList();
   }
 
+  @override
+  Future<Produkt?> ladeProduktMitBarcode(String barcode) async {
+    final wert = barcode.trim();
+    if (wert.isEmpty) return null;
+    final rows = datenbank.verbindung.select('''
+      SELECT o.*, p.* FROM objekte o
+      JOIN produkte p ON p.objekt_id = o.id
+      WHERE p.barcode = ? LIMIT 1
+    ''', [wert]);
+    return rows.isEmpty ? null : _produktAusZeile(rows.single);
+  }
+
   Produkt _produktAusZeile(Map<String, Object?> row) {
     return Produkt(
       id: row['id'] as String,
