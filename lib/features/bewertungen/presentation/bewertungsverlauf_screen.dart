@@ -93,19 +93,23 @@ class _BewertungsverlaufScreenState extends State<BewertungsverlaufScreen> {
                 children: [
                   Semantics(
                     header: true,
-                    child: Text(widget.objektName, style: Theme.of(context).textTheme.headlineSmall),
+                    child: Text(widget.objektName,
+                        style: Theme.of(context).textTheme.headlineSmall),
                   ),
                   const SizedBox(height: 4),
-                  const Text('Stammdaten bleiben von den folgenden historischen Beobachtungen getrennt.'),
+                  const Text(
+                      'Stammdaten bleiben von den folgenden historischen Beobachtungen getrennt.'),
                   const SizedBox(height: 20),
                   if (eintraege.isEmpty)
-                    const Text('Für dieses Objekt liegen noch keine historischen Bewertungen oder Preise vor.')
+                    const Text(
+                        'Für dieses Objekt liegen noch keine historischen Bewertungen oder Preise vor.')
                   else
-                    for (final eintrag in eintraege) _Verlaufskarte(
-                      eintrag: eintrag,
-                      istEigen: widget.eigenesProfilId == null ||
-                          eintrag.herkunftProfilId == widget.eigenesProfilId,
-                    ),
+                    for (final eintrag in eintraege)
+                      _Verlaufskarte(
+                        eintrag: eintrag,
+                        istEigen: widget.eigenesProfilId == null ||
+                            eintrag.herkunftProfilId == widget.eigenesProfilId,
+                      ),
                 ],
               );
             },
@@ -160,8 +164,10 @@ class _Verlaufskarte extends StatelessWidget {
                 for (final bewertung in eintrag.bewertungen)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(bewertung.kriteriumName ?? 'Historisches Kriterium'),
-                    subtitle: Text('Kriterienversion ${bewertung.kriteriumVersion ?? 1}'),
+                    title: Text(
+                        bewertung.kriteriumName ?? 'Historisches Kriterium'),
+                    subtitle: Text(
+                        'Kriterienversion ${bewertung.kriteriumVersion ?? 1}'),
                     trailing: Text(_wertText(bewertung)),
                   ),
                 if (eintrag.notiz != null) Text('Notiz: ${eintrag.notiz}'),
@@ -187,7 +193,8 @@ class _Verlaufskarte extends StatelessWidget {
     return 'Zeitraum: ${zeit(erlebnis.tatsaechlicherBeginn!)}–${zeit(erlebnis.tatsaechlichesEnde!)}';
   }
 
-  String _wertText(Bewertung bewertung) => switch (bewertung.kriteriumEingabetyp) {
+  String _wertText(Bewertung bewertung) =>
+      switch (bewertung.kriteriumEingabetyp) {
         KriteriumEingabetyp.jaNein => bewertung.wert == 0 ? 'Nein' : 'Ja',
         KriteriumEingabetyp.zahl => bewertung.wert.toString(),
         _ => '${bewertung.wert.toStringAsFixed(0)} / 5',

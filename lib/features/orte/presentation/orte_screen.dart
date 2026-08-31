@@ -158,9 +158,11 @@ class _OrteScreenState extends State<OrteScreen> {
                               : IconButton(
                                   tooltip: 'Verlauf von ${ort.name}',
                                   icon: const Icon(Icons.history),
-                                  onPressed: () => Navigator.of(context).push<void>(
+                                  onPressed: () =>
+                                      Navigator.of(context).push<void>(
                                     MaterialPageRoute(
-                                      builder: (_) => BewertungsverlaufScreen.fuerOrt(
+                                      builder: (_) =>
+                                          BewertungsverlaufScreen.fuerOrt(
                                         repository: widget.repository,
                                         ort: ort,
                                         eigenesProfilId: widget.eigenesProfilId,

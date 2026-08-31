@@ -150,11 +150,14 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
                           trailing: widget.zurAuswahl
                               ? const Icon(Icons.chevron_right)
                               : IconButton(
-                                  tooltip: 'Verlauf von ${produkt.anzeigetitel}',
+                                  tooltip:
+                                      'Verlauf von ${produkt.anzeigetitel}',
                                   icon: const Icon(Icons.history),
-                                  onPressed: () => Navigator.of(context).push<void>(
+                                  onPressed: () =>
+                                      Navigator.of(context).push<void>(
                                     MaterialPageRoute(
-                                      builder: (_) => BewertungsverlaufScreen.fuerProdukt(
+                                      builder: (_) =>
+                                          BewertungsverlaufScreen.fuerProdukt(
                                         repository: widget.repository,
                                         produkt: produkt,
                                         eigenesProfilId: widget.eigenesProfilId,

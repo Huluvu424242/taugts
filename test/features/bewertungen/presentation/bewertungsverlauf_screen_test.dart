@@ -35,7 +35,8 @@ void main() {
 
     expect(find.text('Historienprodukt'), findsOneWidget);
     expect(
-      find.text('Für dieses Objekt liegen noch keine historischen Bewertungen oder Preise vor.'),
+      find.text(
+          'Für dieses Objekt liegen noch keine historischen Bewertungen oder Preise vor.'),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -94,8 +95,7 @@ void main() {
           Bewertung(
             id: 'bewertung-${daten.$1}',
             erlebnisId: erlebnis.id,
-            erlebnisPositionId:
-                '98000000-0000-4000-8000-000000000013',
+            erlebnisPositionId: '98000000-0000-4000-8000-000000000013',
             kriteriumId: 'kriterium-${daten.$1}',
             kriteriumName: daten.$1,
             kriteriumVersion: 2,
