@@ -100,9 +100,9 @@ class _GaststaettenbewertungAbschnittState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Semantics(
+                      Semantics(
                         liveRegion: true,
-                        child: Text(
+                        child: const Text(
                           'Die Gaststättenbewertung konnte nicht geladen werden.',
                         ),
                       ),
