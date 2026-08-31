@@ -1,6 +1,6 @@
 # Attributions
 
-Stand der Prüfung: 30. August 2026 · vorbereitete Version: 0.1.0+1
+Stand der Prüfung: 31. August 2026 · vorbereitete Version: 0.1.0+3
 
 ## Taugt’s?-App-Logo
 
