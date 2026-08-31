@@ -11,7 +11,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 12;
+  static const schemaVersion = 13;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -76,6 +76,9 @@ class LokaleDatenbank {
         if (version <= 11) {
           _migriereAufSchemaV12();
         }
+        if (version <= 12) {
+          _migriereAufSchemaV13();
+        }
       }
       _stelleStandardkriterienBereit();
       verbindung.userVersion = schemaVersion;
@@ -100,6 +103,18 @@ class LokaleDatenbank {
             SELECT auswahlwerte FROM kriterien k WHERE k.id = kriterium_id
           ), '')
       ''');
+    }
+  }
+
+  void _migriereAufSchemaV13() {
+    if (!_tabelleExistiert('erlebnisse')) return;
+    _erstelleOrtsbewertungenTabelle();
+    if (_tabelleExistiert('bewertungen') &&
+        !_spalteExistiert('bewertungen', 'ortsbewertung_id')) {
+      verbindung.execute(
+        'ALTER TABLE bewertungen ADD COLUMN ortsbewertung_id TEXT '
+        'REFERENCES ortsbewertungen(id) ON DELETE CASCADE',
+      );
     }
   }
 
@@ -439,6 +454,7 @@ class LokaleDatenbank {
         auswahlwerte TEXT NOT NULL DEFAULT ''
       )
     ''');
+    _erstelleOrtsbewertungenTabelle();
     _erstelleBewertungenTabelle();
   }
 
@@ -492,7 +508,25 @@ class LokaleDatenbank {
         kriterium_reihenfolge INTEGER,
         kriterium_version INTEGER,
         kriterium_beschreibung TEXT,
-        kriterium_auswahlwerte TEXT NOT NULL DEFAULT ''
+        kriterium_auswahlwerte TEXT NOT NULL DEFAULT '',
+        ortsbewertung_id TEXT REFERENCES ortsbewertungen(id)
+          ON DELETE CASCADE
+      )
+    ''');
+  }
+
+  void _erstelleOrtsbewertungenTabelle() {
+    verbindung.execute('''
+      CREATE TABLE IF NOT EXISTS ortsbewertungen (
+        id TEXT PRIMARY KEY,
+        erlebnis_id TEXT NOT NULL UNIQUE
+          REFERENCES erlebnisse(id) ON DELETE CASCADE,
+        ort_id TEXT NOT NULL REFERENCES orte(id),
+        herkunft_profil_id TEXT NOT NULL REFERENCES profile(id),
+        bewertet_am TEXT NOT NULL,
+        notiz TEXT,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL
       )
     ''');
   }

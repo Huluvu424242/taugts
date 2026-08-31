@@ -12,6 +12,10 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
   atomar sortieren, deaktivieren und sicher entfernen; sechs Eingabetypen sowie
   historisch erhaltene Kriterienversionen, Beschreibungen und Auswahlskalen
   bereiten Produkt-, Gastronomie- und Geschäftsbewertungen gemeinsam vor.
+- Gaststätten lassen sich innerhalb desselben Restaurantbesuchs in einem
+  separaten optionalen Formular bewerten; wiederholte Besuche erzeugen eigene
+  historische Ortsbewertungen und verändern weder Bestellung noch
+  Produktbewertungen.
 
 
 ## [0.1.0+2] - 2026-08-30

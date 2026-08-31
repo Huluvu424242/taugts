@@ -34,6 +34,12 @@ Erfolgszustände sowie eine platzsparende Aktionsauswahl, die auch bei großer
 Systemschrift bedienbar bleibt. Verwendete Kriterien werden beim Entfernen nur
 deaktiviert, damit historische Bewertungen lesbar bleiben.
 
+Die getrennte Gaststättenbewertung verwendet sichtbare Beschriftungen,
+semantische Überschriften und Tastaturfokus. Der ausklappbare
+Bewertungsabschnitt benennt seinen Zustand und bewahrt Eingaben beim Ein- und
+Ausklappen. Fehler werden zusätzlich in einem fokussierbaren Fehlersammler
+ausgegeben.
+
 Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 
 - vollständiger Kernablauf mit TalkBack auf Android,
@@ -41,13 +47,15 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 - kleine Android-Bildschirmgröße,
 - Gestennavigation und Erreichbarkeit unterer Aktionen,
 - zusammenhängender Ablauf aus Produkt, Ort, Erlebnisentwurf und Bewertung,
+- Kriterienverwaltung und Gaststättenbewertung einschließlich Ein- und
+  Ausklappen, großer Schrift und Persistenzfehler,
 - Bug-Meldung und vollständige Barrierefreiheitserklärung auf einem realen
   Gerät.
 
 Der Getränkebewertungsbogen ist ausdrücklich einzubeziehen. Die gebündelte
 Prüfung wird in
 [Story #30](https://github.com/Huluvu424242/taugts/issues/30) verfolgt. Solange
-diese Punkte offen sind, wird für Version 0.1.0+1 kein vollständig manuell
+diese Punkte offen sind, wird für Version 0.1.0+2 kein vollständig manuell
 bestätigter Barrierefreiheitsstatus behauptet. Der konkrete Freigabestand wird
 zusätzlich in der
 [Release-Checkliste](release-checklist-0.1.0+1.md) dokumentiert.

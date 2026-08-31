@@ -54,4 +54,13 @@ abstract interface class BewertungsRepository {
   Future<List<Bewertung>> ladeBewertungenFuerErlebnisposition(
       String positionId);
   Future<List<Bewertung>> ladeBewertungenFuerProdukt(String produktId);
+  Future<OrtsbewertungMitWerten?> ladeOrtsbewertungFuerErlebnis(
+    String erlebnisId,
+  );
+  Future<void> speichereOrtsbewertung({
+    required Erlebnis erlebnis,
+    required Ort ort,
+    required Ortsbewertung ortsbewertung,
+    required List<Bewertung> bewertungen,
+  });
 }
