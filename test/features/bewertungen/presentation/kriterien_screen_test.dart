@@ -38,12 +38,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text(
-        'Keine Kriterien für diese Objektart.',
-        skipOffstage: false,
-      ),
-      findsNWidgets(KriteriumObjektart.values.length),
+      find.text('Keine Kriterien für diese Objektart.'),
+      findsWidgets,
     );
+    await tester.scrollUntilVisible(
+      find.text('Geschäfte'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Geschäfte'), findsOneWidget);
+    expect(find.text('Keine Kriterien für diese Objektart.'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
