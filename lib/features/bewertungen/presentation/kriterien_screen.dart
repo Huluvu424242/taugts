@@ -77,7 +77,8 @@ class _KriterienScreenState extends State<KriterienScreen> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Die Sortierreihenfolge konnte nicht gespeichert werden.'),
+          content:
+              Text('Die Sortierreihenfolge konnte nicht gespeichert werden.'),
         ),
       );
     }
@@ -194,7 +195,8 @@ class _KriterienScreenState extends State<KriterienScreen> {
                     const SizedBox(height: 20),
                     Semantics(
                       header: true,
-                      child: Text(_objektartLabel(art), style: Theme.of(context).textTheme.titleLarge),
+                      child: Text(_objektartLabel(art),
+                          style: Theme.of(context).textTheme.titleLarge),
                     ),
                     if (!alle.any((wert) => wert.wirksameObjektart == art))
                       const Padding(
@@ -208,7 +210,8 @@ class _KriterienScreenState extends State<KriterienScreen> {
                         .entries)
                       ListTile(
                         title: Text(eintrag.value.name),
-                        subtitle: Text('${_eingabetypLabel(eintrag.value.eingabetyp)} · Version ${eintrag.value.version}${eintrag.value.aktiv ? '' : ' · deaktiviert'}'),
+                        subtitle: Text(
+                            '${_eingabetypLabel(eintrag.value.eingabetyp)} · Version ${eintrag.value.version}${eintrag.value.aktiv ? '' : ' · deaktiviert'}'),
                         onTap: () => _bearbeiten(eintrag.value),
                         trailing: PopupMenuButton<_KriterienAktion>(
                           tooltip: '${eintrag.value.name} – Aktionen',
@@ -272,7 +275,8 @@ class _KriterienScreenState extends State<KriterienScreen> {
 enum _KriterienAktion { nachOben, nachUnten, entfernen }
 
 class _KriteriumDialog extends StatefulWidget {
-  const _KriteriumDialog({required this.repository, required this.idGenerator, this.kriterium});
+  const _KriteriumDialog(
+      {required this.repository, required this.idGenerator, this.kriterium});
 
   final BewertungsRepository repository;
   final IdGenerator idGenerator;
@@ -302,7 +306,8 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
     final kriterium = widget.kriterium;
     _name = TextEditingController(text: kriterium?.name ?? '');
     _beschreibung = TextEditingController(text: kriterium?.beschreibung ?? '');
-    _auswahlwerte = TextEditingController(text: kriterium?.auswahlwerte.join('\n') ?? '');
+    _auswahlwerte =
+        TextEditingController(text: kriterium?.auswahlwerte.join('\n') ?? '');
     _eingabetyp = kriterium?.eingabetyp ?? KriteriumEingabetyp.wertung;
     _objektart = kriterium?.wirksameObjektart ?? KriteriumObjektart.getraenk;
     _aktiv = kriterium?.aktiv ?? true;
@@ -322,9 +327,7 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
   Future<void> _speichern() async {
     final nameFehlt = _name.text.trim().isEmpty;
     final auswahlwerteFehlen = _eingabetyp == KriteriumEingabetyp.auswahl &&
-        _auswahlwerte.text
-            .split('\n')
-            .every((wert) => wert.trim().isEmpty);
+        _auswahlwerte.text.split('\n').every((wert) => wert.trim().isEmpty);
     if (nameFehlt || auswahlwerteFehlen) {
       setState(() {
         _nameFehlt = nameFehlt;
@@ -343,13 +346,19 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
       await widget.repository.speichereKriterium(Bewertungskriterium(
         id: vorhanden?.id ?? widget.idGenerator.neueId(),
         name: _name.text.trim(),
-        beschreibung: _beschreibung.text.trim().isEmpty ? null : _beschreibung.text.trim(),
+        beschreibung: _beschreibung.text.trim().isEmpty
+            ? null
+            : _beschreibung.text.trim(),
         eingabetyp: _eingabetyp,
         reihenfolge: vorhanden?.reihenfolge ?? 1000,
         aktiv: _aktiv,
         objektart: _objektart,
         version: vorhanden?.version ?? 1,
-        auswahlwerte: _auswahlwerte.text.split('\n').map((wert) => wert.trim()).where((wert) => wert.isNotEmpty).toList(),
+        auswahlwerte: _auswahlwerte.text
+            .split('\n')
+            .map((wert) => wert.trim())
+            .where((wert) => wert.isNotEmpty)
+            .toList(),
         erstelltAm: vorhanden?.erstelltAm ?? jetzt,
         geaendertAm: jetzt,
       ));
@@ -362,7 +371,8 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
         return;
       }
       setState(() => _speichert = false);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Das Kriterium konnte nicht gespeichert werden.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Das Kriterium konnte nicht gespeichert werden.')));
     }
   }
 
@@ -394,8 +404,7 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
                   FormularFehlersammler(
                     focusNode: _fehlerFokus,
                     fehler: [
-                      if (_nameFehlt)
-                        ('Name ist erforderlich.', _nameFokus),
+                      if (_nameFehlt) ('Name ist erforderlich.', _nameFokus),
                       if (_auswahlwerteFehlen)
                         (
                           'Mindestens ein Auswahlwert ist erforderlich.',
@@ -403,19 +412,43 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
                         ),
                     ],
                   ),
-                TextField(controller: _name, focusNode: _nameFokus, maxLength: 100, decoration: InputDecoration(labelText: 'Name (Pflichtfeld)', errorText: _nameFehlt ? 'Name ist erforderlich.' : null)),
-                TextField(controller: _beschreibung, maxLength: 500, maxLines: 3, decoration: const InputDecoration(labelText: 'Beschreibung (optional)')),
+                TextField(
+                    controller: _name,
+                    focusNode: _nameFokus,
+                    maxLength: 100,
+                    decoration: InputDecoration(
+                        labelText: 'Name (Pflichtfeld)',
+                        errorText:
+                            _nameFehlt ? 'Name ist erforderlich.' : null)),
+                TextField(
+                    controller: _beschreibung,
+                    maxLength: 500,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                        labelText: 'Beschreibung (optional)')),
                 DropdownButtonFormField<KriteriumObjektart>(
                   initialValue: _objektart,
                   decoration: const InputDecoration(labelText: 'Objektart'),
-                  items: [for (final wert in KriteriumObjektart.values) DropdownMenuItem(value: wert, child: Text(_objektartLabel(wert)))],
-                  onChanged: (wert) { if (wert != null) setState(() => _objektart = wert); },
+                  items: [
+                    for (final wert in KriteriumObjektart.values)
+                      DropdownMenuItem(
+                          value: wert, child: Text(_objektartLabel(wert)))
+                  ],
+                  onChanged: (wert) {
+                    if (wert != null) setState(() => _objektart = wert);
+                  },
                 ),
                 DropdownButtonFormField<KriteriumEingabetyp>(
                   initialValue: _eingabetyp,
                   decoration: const InputDecoration(labelText: 'Eingabetyp'),
-                  items: [for (final wert in KriteriumEingabetyp.values) DropdownMenuItem(value: wert, child: Text(_eingabetypLabel(wert)))],
-                  onChanged: (wert) { if (wert != null) setState(() => _eingabetyp = wert); },
+                  items: [
+                    for (final wert in KriteriumEingabetyp.values)
+                      DropdownMenuItem(
+                          value: wert, child: Text(_eingabetypLabel(wert)))
+                  ],
+                  onChanged: (wert) {
+                    if (wert != null) setState(() => _eingabetyp = wert);
+                  },
                 ),
                 if (_eingabetyp == KriteriumEingabetyp.auswahl)
                   TextField(
@@ -430,14 +463,22 @@ class _KriteriumDialogState extends State<_KriteriumDialog> {
                           : null,
                     ),
                   ),
-                SwitchListTile(value: _aktiv, onChanged: (wert) => setState(() => _aktiv = wert), title: const Text('Aktiv')),
+                SwitchListTile(
+                    value: _aktiv,
+                    onChanged: (wert) => setState(() => _aktiv = wert),
+                    title: const Text('Aktiv')),
               ],
             ),
           ),
         ),
         actions: [
-          TextButton(onPressed: _speichert ? null : () => Navigator.of(context).pop(false), child: const Text('Abbrechen')),
-          FilledButton(onPressed: _speichert ? null : _speichern, child: const Text('Speichern')),
+          TextButton(
+              onPressed:
+                  _speichert ? null : () => Navigator.of(context).pop(false),
+              child: const Text('Abbrechen')),
+          FilledButton(
+              onPressed: _speichert ? null : _speichern,
+              child: const Text('Speichern')),
         ],
       );
 }

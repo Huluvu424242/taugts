@@ -128,7 +128,8 @@ void main() {
     await tester.tap(find.text('Entfernen'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Das unbenutzte Kriterium wurde gelöscht.'), findsOneWidget);
+    expect(
+        find.text('Das unbenutzte Kriterium wurde gelöscht.'), findsOneWidget);
     expect(
       (await repository.ladeKriterien()).any((wert) => wert.id == id),
       isFalse,

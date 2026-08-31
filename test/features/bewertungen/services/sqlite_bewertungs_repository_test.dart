@@ -465,7 +465,8 @@ void main() {
     );
   });
 
-  test('konfiguriert Kriterien und erhält die verwendete Version historisch', () async {
+  test('konfiguriert Kriterien und erhält die verwendete Version historisch',
+      () async {
     const kriteriumId = '9ef4ace9-f038-40d4-a042-042eac68ca3f';
     final kriterium = Bewertungskriterium(
       id: kriteriumId,
@@ -500,7 +501,8 @@ void main() {
       await repository.ladeAktiveKriterienFuerObjektart(
         KriteriumObjektart.gastronomie,
       ),
-      isNot(contains(predicate<Bewertungskriterium>((wert) => wert.id == kriteriumId))),
+      isNot(contains(
+          predicate<Bewertungskriterium>((wert) => wert.id == kriteriumId))),
     );
   });
 
