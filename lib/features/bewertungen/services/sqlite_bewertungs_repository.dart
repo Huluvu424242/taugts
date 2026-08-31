@@ -516,15 +516,16 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       'SELECT * FROM kriterien WHERE id = ?',
       [kriterium.id],
     );
-    final bisherigeVersion = vorhanden.isEmpty
-        ? 0
-        : (vorhanden.single['version'] as int? ?? 1);
+    final bisherigeVersion =
+        vorhanden.isEmpty ? 0 : (vorhanden.single['version'] as int? ?? 1);
     final bedeutungGeaendert = vorhanden.isNotEmpty &&
         (vorhanden.single['name'] != kriterium.name.trim() ||
-            vorhanden.single['beschreibung'] != _leerAlsNull(kriterium.beschreibung) ||
+            vorhanden.single['beschreibung'] !=
+                _leerAlsNull(kriterium.beschreibung) ||
             vorhanden.single['eingabetyp'] != kriterium.eingabetyp.name ||
             vorhanden.single['objektart'] != kriterium.wirksameObjektart.name ||
-            vorhanden.single['auswahlwerte'] != kriterium.auswahlwerte.join('\n'));
+            vorhanden.single['auswahlwerte'] !=
+                kriterium.auswahlwerte.join('\n'));
     final version = bedeutungGeaendert
         ? bisherigeVersion + 1
         : (bisherigeVersion == 0 ? kriterium.version : bisherigeVersion);
