@@ -156,22 +156,22 @@ void main() {
     await tester.tap(find.text('Gaststätte bewerten'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text('Gesamturteil'),
+      find.byType(DropdownButtonFormField<double?>).first,
       200,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Gesamturteil'));
+    await tester.tap(find.byType(DropdownButtonFormField<double?>).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('5 – taugt sehr').last);
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Gaststätte bewerten'),
-      200,
-      scrollable: find.byType(Scrollable).first,
+    await tester.drag(
+      find.byType(Scrollable).first,
+      const Offset(0, 500),
     );
-    await tester.tap(find.text('Gaststätte bewerten'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Gaststätte bewerten'));
+    await tester.tap(find.byType(ExpansionTile));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ExpansionTile));
     await tester.pumpAndSettle();
     expect(find.text('5 – taugt sehr'), findsOneWidget);
   });
