@@ -92,10 +92,12 @@ void main() {
     await _pumpAbschnitt(tester, repository, ort, erlebnis);
     await tester.tap(find.text('Gaststätte bewerten'));
     await tester.pumpAndSettle();
+    await _scrollTo(tester, find.text('Gesamturteil'));
     await tester.tap(find.text('Gesamturteil'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('5 – taugt sehr').last);
     await tester.pumpAndSettle();
+    await _scrollTo(tester, find.text('Bewertung speichern'));
     await tester.tap(find.text('Bewertung speichern'));
     await tester.pumpAndSettle();
 
@@ -122,6 +124,7 @@ void main() {
     await _pumpAbschnitt(tester, fehlerhaft, ort, erlebnis);
     await tester.tap(find.text('Gaststätte bewerten'));
     await tester.pumpAndSettle();
+    await _scrollTo(tester, find.text('Bewertung speichern'));
     await tester.tap(find.text('Bewertung speichern'));
     await tester.pumpAndSettle();
 
@@ -130,11 +133,15 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Bitte Gaststättenbewertung prüfen.'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
 
+    await _scrollTo(tester, find.text('Gesamturteil'));
     await tester.tap(find.text('Gesamturteil'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('4 – taugt eher').last);
     await tester.pumpAndSettle();
+    await _scrollTo(tester, find.text('Bewertung speichern'));
     await tester.tap(find.text('Bewertung speichern'));
     await tester.pumpAndSettle();
 
@@ -147,6 +154,13 @@ void main() {
     expect(find.text('4 – taugt eher'), findsOneWidget);
   });
 }
+
+Future<void> _scrollTo(WidgetTester tester, Finder finder) =>
+    tester.scrollUntilVisible(
+      finder,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
 
 Future<void> _pumpAbschnitt(
   WidgetTester tester,
