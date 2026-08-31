@@ -525,8 +525,9 @@ class SqliteBewertungsRepository implements BewertungsRepository {
             vorhanden.single['eingabetyp'] != kriterium.eingabetyp.name ||
             vorhanden.single['objektart'] != kriterium.wirksameObjektart.name ||
             vorhanden.single['auswahlwerte'] != kriterium.auswahlwerte.join('\n'));
-    final version = bedeutungGeaendert ? bisherigeVersion + 1 :
-        (bisherigeVersion == 0 ? kriterium.version : bisherigeVersion);
+    final version = bedeutungGeaendert
+        ? bisherigeVersion + 1
+        : (bisherigeVersion == 0 ? kriterium.version : bisherigeVersion);
     datenbank.verbindung.execute(
       '''
         INSERT INTO kriterien (
@@ -561,6 +562,76 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         kriterium.auswahlwerte.join('\n'),
       ],
     );
+  }
+
+  @override
+  Future<void> sortiereKriterien(List<String> kriteriumIds) async {
+    if (kriteriumIds.isEmpty) {
+      return;
+    }
+    if (kriteriumIds.toSet().length != kriteriumIds.length) {
+      throw ArgumentError.value(kriteriumIds, 'kriteriumIds');
+    }
+    datenbank.transaktion(() {
+      final jetzt = _zeit(DateTime.now().toUtc());
+      for (var index = 0; index < kriteriumIds.length; index++) {
+        datenbank.verbindung.execute(
+          'UPDATE kriterien SET reihenfolge = ?, geaendert_am = ? WHERE id = ?',
+          [index * 10, jetzt, kriteriumIds[index]],
+        );
+      }
+      final vorhanden = datenbank.verbindung.select(
+        'SELECT id FROM kriterien WHERE id IN '
+        '(${List.filled(kriteriumIds.length, '?').join(', ')})',
+        kriteriumIds,
+      );
+      if (vorhanden.length != kriteriumIds.length) {
+        throw ArgumentError('Mindestens ein Kriterium ist unbekannt.');
+      }
+    });
+  }
+
+  @override
+  Future<bool> entferneKriterium(String kriteriumId) async {
+    var wurdeDeaktiviert = false;
+    datenbank.transaktion(() {
+      final vorhanden = datenbank.verbindung.select(
+        'SELECT id FROM kriterien WHERE id = ?',
+        [kriteriumId],
+      );
+      if (vorhanden.isEmpty) {
+        throw ArgumentError.value(kriteriumId, 'kriteriumId');
+      }
+      final verwendungen = datenbank.verbindung.select(
+        'SELECT COUNT(*) AS anzahl FROM bewertungen WHERE kriterium_id = ?',
+        [kriteriumId],
+      ).single['anzahl'] as int;
+      wurdeDeaktiviert =
+          verwendungen > 0 || _standardkriteriumIds.contains(kriteriumId);
+      if (wurdeDeaktiviert) {
+        datenbank.verbindung.execute(
+          'UPDATE kriterien SET aktiv = 0, geaendert_am = ? WHERE id = ?',
+          [_zeit(DateTime.now().toUtc()), kriteriumId],
+        );
+      } else {
+        datenbank.verbindung.execute(
+          'DELETE FROM kriterien WHERE id = ?',
+          [kriteriumId],
+        );
+      }
+    });
+    return wurdeDeaktiviert;
+  }
+
+  Set<String> get _standardkriteriumIds {
+    final zeit = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+    return {
+      ...StandardGetraenkekriterien.alle(zeit).map((wert) => wert.id),
+      ...StandardSpeisekriterien.alle(zeit).map((wert) => wert.id),
+      StandardFallbackKriterien.gesamturteil(zeit).id,
+      ...StandardOrtskriterien.gastronomie(zeit).map((wert) => wert.id),
+      ...StandardOrtskriterien.geschaeft(zeit).map((wert) => wert.id),
+    };
   }
 
   @override
@@ -643,8 +714,9 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         INSERT INTO bewertungen (
           id, erlebnis_id, kriterium_id, wert, erstellt_am, geaendert_am,
           herkunft_profil_id, erlebnis_position_id, ort_id, kriterium_name,
-          kriterium_eingabetyp, kriterium_reihenfolge, kriterium_version
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          kriterium_eingabetyp, kriterium_reihenfolge, kriterium_version,
+          kriterium_beschreibung, kriterium_auswahlwerte
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         bewertung.id,
@@ -660,6 +732,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         kriterium['eingabetyp'],
         kriterium['reihenfolge'],
         kriterium['version'],
+        kriterium['beschreibung'],
+        kriterium['auswahlwerte'],
       ],
     );
   }
@@ -751,6 +825,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         erstelltAm: DateTime.parse(row['erstellt_am'] as String),
         geaendertAm: DateTime.parse(row['geaendert_am'] as String),
         kriteriumName: row['kriterium_name'] as String?,
+        kriteriumBeschreibung: row['kriterium_beschreibung'] as String?,
         kriteriumEingabetyp: row['kriterium_eingabetyp'] == null
             ? null
             : KriteriumEingabetyp.values.byName(
@@ -758,6 +833,10 @@ class SqliteBewertungsRepository implements BewertungsRepository {
               ),
         kriteriumReihenfolge: row['kriterium_reihenfolge'] as int?,
         kriteriumVersion: row['kriterium_version'] as int?,
+        kriteriumAuswahlwerte: (row['kriterium_auswahlwerte'] as String? ?? '')
+            .split('\n')
+            .where((wert) => wert.isNotEmpty)
+            .toList(),
       );
 
   @override

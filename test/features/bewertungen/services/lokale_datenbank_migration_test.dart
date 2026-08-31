@@ -28,6 +28,8 @@ void main() {
     expect(zeile['wert'], 4.0);
     expect(zeile['geaendert_am'], zeile['erstellt_am']);
     expect(zeile['herkunft_profil_id'], profile.single['id']);
+    expect(zeile['kriterium_beschreibung'], isNull);
+    expect(zeile['kriterium_auswahlwerte'], '');
     datenbank.schliessen();
   });
 

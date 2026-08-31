@@ -504,6 +504,137 @@ void main() {
     );
   });
 
+  test('bewahrt Beschreibung und Auswahlskala historischer Bewertungen',
+      () async {
+    const kriteriumId = '9ef4ace9-f038-40d4-a042-042eac68ca40';
+    const erlebnisId = '9ef4ace9-f038-40d4-a042-042eac68ca41';
+    await repository.speichereKriterium(Bewertungskriterium(
+      id: kriteriumId,
+      name: 'Zapfart',
+      beschreibung: 'Wie wurde das Getränk gezapft?',
+      eingabetyp: KriteriumEingabetyp.auswahl,
+      auswahlwerte: const ['Direkt', 'Langsam'],
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+    await repository.speichereErlebnis(Erlebnis(
+      id: erlebnisId,
+      herkunftProfilId: profilId,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+    await repository.speichereBewertung(Bewertung(
+      id: '9ef4ace9-f038-40d4-a042-042eac68ca42',
+      erlebnisId: erlebnisId,
+      kriteriumId: kriteriumId,
+      herkunftProfilId: profilId,
+      wert: 1,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+
+    await repository.speichereKriterium(Bewertungskriterium(
+      id: kriteriumId,
+      name: 'Neue Zapfart',
+      beschreibung: 'Neue Bedeutung',
+      eingabetyp: KriteriumEingabetyp.auswahl,
+      auswahlwerte: const ['Anders'],
+      erstelltAm: zeit,
+      geaendertAm: zeit.add(const Duration(minutes: 1)),
+    ));
+
+    final historisch =
+        (await repository.ladeBewertungenFuerErlebnis(erlebnisId)).single;
+    expect(historisch.kriteriumName, 'Zapfart');
+    expect(
+      historisch.kriteriumBeschreibung,
+      'Wie wurde das Getränk gezapft?',
+    );
+    expect(historisch.kriteriumAuswahlwerte, ['Direkt', 'Langsam']);
+    expect(historisch.kriteriumVersion, 1);
+  });
+
+  test('löscht unbenutzte Kriterien und deaktiviert verwendete', () async {
+    const unbenutztId = '9ef4ace9-f038-40d4-a042-042eac68ca43';
+    const verwendetId = '9ef4ace9-f038-40d4-a042-042eac68ca44';
+    for (final id in [unbenutztId, verwendetId]) {
+      await repository.speichereKriterium(Bewertungskriterium(
+        id: id,
+        name: id == unbenutztId ? 'Unbenutzt' : 'Verwendet',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ));
+    }
+    final erlebnis = Erlebnis(
+      id: '9ef4ace9-f038-40d4-a042-042eac68ca45',
+      herkunftProfilId: profilId,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereErlebnis(erlebnis);
+    await repository.speichereBewertung(Bewertung(
+      id: '9ef4ace9-f038-40d4-a042-042eac68ca46',
+      erlebnisId: erlebnis.id,
+      kriteriumId: verwendetId,
+      herkunftProfilId: profilId,
+      wert: 4,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+
+    expect(await repository.entferneKriterium(unbenutztId), isFalse);
+    expect(await repository.entferneKriterium(verwendetId), isTrue);
+
+    final alle = await repository.ladeKriterien();
+    expect(alle.any((wert) => wert.id == unbenutztId), isFalse);
+    expect(
+      alle.singleWhere((wert) => wert.id == verwendetId).aktiv,
+      isFalse,
+    );
+    expect(
+      (await repository.ladeBewertungenFuerErlebnis(erlebnis.id))
+          .single
+          .kriteriumName,
+      'Verwendet',
+    );
+  });
+
+  test('speichert eine neue Kriterienreihenfolge atomar', () async {
+    const ids = [
+      '9ef4ace9-f038-40d4-a042-042eac68ca47',
+      '9ef4ace9-f038-40d4-a042-042eac68ca48',
+    ];
+    for (var index = 0; index < ids.length; index++) {
+      await repository.speichereKriterium(Bewertungskriterium(
+        id: ids[index],
+        name: 'Sortierung $index',
+        objektart: KriteriumObjektart.gastronomie,
+        reihenfolge: index * 10,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ));
+    }
+
+    await repository.sortiereKriterien(ids.reversed.toList());
+
+    final sortiert = (await repository.ladeAktiveKriterienFuerObjektart(
+      KriteriumObjektart.gastronomie,
+    ))
+        .where((wert) => ids.contains(wert.id))
+        .toList();
+    expect(sortiert.map((wert) => wert.id), ids.reversed);
+    await expectLater(
+      repository.sortiereKriterien([ids.first, 'unbekannt']),
+      throwsArgumentError,
+    );
+    final unveraendert = (await repository.ladeAktiveKriterienFuerObjektart(
+      KriteriumObjektart.gastronomie,
+    ))
+        .where((wert) => ids.contains(wert.id))
+        .map((wert) => wert.id);
+    expect(unveraendert, ids.reversed);
+  });
+
   test('speichert Korrektur und neue historische Bewertung getrennt', () async {
     const produktId = '80000000-0000-4000-8000-000000000001';
     final produkt = Produkt(

@@ -11,7 +11,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 11;
+  static const schemaVersion = 12;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -73,10 +73,34 @@ class LokaleDatenbank {
         if (version <= 10) {
           _migriereAufSchemaV11();
         }
+        if (version <= 11) {
+          _migriereAufSchemaV12();
+        }
       }
       _stelleStandardkriterienBereit();
       verbindung.userVersion = schemaVersion;
     });
+  }
+
+  void _migriereAufSchemaV12() {
+    if (!_tabelleExistiert('bewertungen')) return;
+    verbindung.execute(
+      'ALTER TABLE bewertungen ADD COLUMN kriterium_beschreibung TEXT',
+    );
+    verbindung.execute(
+      "ALTER TABLE bewertungen ADD COLUMN kriterium_auswahlwerte TEXT NOT NULL DEFAULT ''",
+    );
+    if (_tabelleExistiert('kriterien')) {
+      verbindung.execute('''
+        UPDATE bewertungen SET
+          kriterium_beschreibung = (
+            SELECT beschreibung FROM kriterien k WHERE k.id = kriterium_id
+          ),
+          kriterium_auswahlwerte = COALESCE((
+            SELECT auswahlwerte FROM kriterien k WHERE k.id = kriterium_id
+          ), '')
+      ''');
+    }
   }
 
   void _migriereAufSchemaV11() {
@@ -466,7 +490,9 @@ class LokaleDatenbank {
         kriterium_name TEXT,
         kriterium_eingabetyp TEXT,
         kriterium_reihenfolge INTEGER,
-        kriterium_version INTEGER
+        kriterium_version INTEGER,
+        kriterium_beschreibung TEXT,
+        kriterium_auswahlwerte TEXT NOT NULL DEFAULT ''
       )
     ''');
   }

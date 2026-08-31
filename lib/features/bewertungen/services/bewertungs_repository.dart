@@ -30,6 +30,8 @@ abstract interface class BewertungsRepository {
     required String waehrung,
   });
   Future<void> speichereKriterium(Bewertungskriterium kriterium);
+  Future<void> sortiereKriterien(List<String> kriteriumIds);
+  Future<bool> entferneKriterium(String kriteriumId);
   Future<List<Bewertungskriterium>> ladeKriterien({bool nurAktive = false});
   Future<List<Bewertungskriterium>> ladeAktiveKriterienFuerObjektart(
     KriteriumObjektart objektart,

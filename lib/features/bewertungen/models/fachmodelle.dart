@@ -557,9 +557,11 @@ class Bewertung {
     this.erlebnisPositionId,
     this.ortId,
     this.kriteriumName,
+    this.kriteriumBeschreibung,
     this.kriteriumEingabetyp,
     this.kriteriumReihenfolge,
     this.kriteriumVersion,
+    this.kriteriumAuswahlwerte = const [],
   });
 
   final String id;
@@ -572,7 +574,9 @@ class Bewertung {
   final DateTime erstelltAm;
   final DateTime geaendertAm;
   final String? kriteriumName;
+  final String? kriteriumBeschreibung;
   final KriteriumEingabetyp? kriteriumEingabetyp;
   final int? kriteriumReihenfolge;
   final int? kriteriumVersion;
+  final List<String> kriteriumAuswahlwerte;
 }

@@ -9,9 +9,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 ### Added
 
 - Bewertungskriterien lassen sich nach Produkt- und Ortsart konfigurieren,
-  sortieren und deaktivieren; sechs Eingabetypen und historisch erhaltene
-  Kriterienversionen bereiten Produkt-, Gastronomie- und Geschäftsbewertungen
-  gemeinsam vor.
+  atomar sortieren, deaktivieren und sicher entfernen; sechs Eingabetypen sowie
+  historisch erhaltene Kriterienversionen, Beschreibungen und Auswahlskalen
+  bereiten Produkt-, Gastronomie- und Geschäftsbewertungen gemeinsam vor.
 
 
 ## [0.1.0+2] - 2026-08-30
