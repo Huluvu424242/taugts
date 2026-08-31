@@ -50,6 +50,11 @@ Der Barcode-Scan wird bewusst gestartet, zeigt den erkannten Code vor der
 manuelle Eingabe. Scanner, Bestätigung und Produktvorschlag besitzen sichtbare
 und semantische Beschriftungen.
 
+Die Standortübernahme zeigt Koordinaten und verfügbare Genauigkeit vor der
+Bestätigung. Ablehnung, ausgeschaltete Standortdienste und technische Fehler
+werden als wahrnehmbare Meldung ausgegeben; die manuelle Ortserfassung bleibt
+uneingeschränkt verfügbar.
+
 Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 
 - vollständiger Kernablauf mit TalkBack auf Android,

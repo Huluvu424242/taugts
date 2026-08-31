@@ -10,6 +10,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 - EAN-/GTIN-Barcodes können bewusst gestartet und vollständig lokal gescannt,
   bestätigt und vorhandenen oder neuen Produkten zugeordnet werden.
+- Der aktuelle Standort kann auf ausdrückliche Nutzeraktion ermittelt, mit
+  Genauigkeit geprüft und erst nach Bestätigung als bearbeitbare Koordinate
+  übernommen werden; Hintergrund-Tracking findet nicht statt.
 - Bewertungskriterien lassen sich nach Produkt- und Ortsart konfigurieren,
   atomar sortieren, deaktivieren und sicher entfernen; sechs Eingabetypen sowie
   historisch erhaltene Kriterienversionen, Beschreibungen und Auswahlskalen
