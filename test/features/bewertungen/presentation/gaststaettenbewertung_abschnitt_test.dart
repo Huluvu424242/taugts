@@ -17,6 +17,11 @@ void main() {
     datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     repository = SqliteBewertungsRepository(datenbank);
     final zeit = DateTime.utc(2026, 8, 31, 18);
+    const profilId = '81000000-0000-4000-8000-000000000000';
+    datenbank.verbindung.execute(
+      'INSERT INTO profile VALUES (?, ?, ?, ?)',
+      [profilId, 'Testprofil', zeit.toIso8601String(), zeit.toIso8601String()],
+    );
     ort = Ort(
       id: '81000000-0000-4000-8000-000000000001',
       name: 'Testgaststätte',
@@ -27,9 +32,7 @@ void main() {
     erlebnis = Erlebnis(
       id: '81000000-0000-4000-8000-000000000002',
       ortId: ort.id,
-      herkunftProfilId:
-          datenbank.verbindung.select('SELECT id FROM profile').single['id']
-              as String,
+      herkunftProfilId: profilId,
       tatsaechlicherBeginn: zeit,
       erstelltAm: zeit,
       geaendertAm: zeit,

@@ -148,7 +148,11 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Gaststätte bewerten'), 300);
+    await tester.scrollUntilVisible(
+      find.text('Gaststätte bewerten'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Gaststätte bewerten'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Gesamturteil'), 200);
