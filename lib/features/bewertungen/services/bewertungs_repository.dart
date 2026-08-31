@@ -4,6 +4,7 @@ abstract interface class BewertungsRepository {
   Future<void> speichereProdukt(Produkt produkt);
   Future<Produkt?> ladeProdukt(String id);
   Future<List<Produkt>> ladeProdukte({String suchtext = ''});
+  Future<Produkt?> ladeProduktMitBarcode(String barcode);
   Future<void> speichereOrt(Ort ort);
   Future<Ort?> ladeOrt(String id);
   Future<List<Ort>> ladeOrte({String suchtext = ''});

@@ -18,12 +18,14 @@ class ProduktFormular extends StatefulWidget {
     required this.repository,
     required this.idGenerator,
     this.produkt,
+    this.barcodeVorgabe,
     super.key,
   });
 
   final BewertungsRepository repository;
   final IdGenerator idGenerator;
   final Produkt? produkt;
+  final String? barcodeVorgabe;
 
   @override
   State<ProduktFormular> createState() => _ProduktFormularState();
@@ -65,7 +67,7 @@ class _ProduktFormularState extends State<ProduktFormular> {
     _herkunft.text = produkt?.herkunft ?? '';
     _gebinde.text = produkt?.gebinde ?? '';
     _fuellmenge.text = produkt?.fuellmengeMl?.toString() ?? '';
-    _barcode.text = produkt?.barcode ?? '';
+    _barcode.text = produkt?.barcode ?? widget.barcodeVorgabe ?? '';
     _notiz.text = produkt?.notiz ?? '';
   }
 

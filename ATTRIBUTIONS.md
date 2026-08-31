@@ -35,6 +35,11 @@ Third-Party-Notices bleiben maßgeblich.
   Ermittlung des Anwendungsdatenverzeichnisses
 - [uuid](https://pub.dev/packages/uuid) – MIT; Erzeugung stabiler UUIDs
 
+## Lokale Barcode-Erkennung
+
+- [mobile_scanner](https://pub.dev/packages/mobile_scanner) – BSD-3-Clause;
+  lokale Erkennung von EAN-, GTIN- und UPC-Barcodes über die Gerätekamera
+
 ## Bereitstellung
 
 Diese Datei gehört zusammen mit [LICENSE](LICENSE) zur

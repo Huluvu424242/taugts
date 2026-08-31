@@ -12,6 +12,7 @@ class ErlebnispositionFormular extends StatefulWidget {
     required this.idGenerator,
     required this.erlebnis,
     this.vorhanden,
+    this.barcodeScanStart,
     super.key,
   });
 
@@ -19,6 +20,7 @@ class ErlebnispositionFormular extends StatefulWidget {
   final IdGenerator idGenerator;
   final Erlebnis erlebnis;
   final ErlebnispositionMitProdukt? vorhanden;
+  final BarcodeScanStart? barcodeScanStart;
 
   @override
   State<ErlebnispositionFormular> createState() =>
@@ -67,6 +69,7 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
           repository: widget.repository,
           idGenerator: widget.idGenerator,
           zurAuswahl: true,
+          barcodeScanStart: widget.barcodeScanStart,
         ),
       ),
     );
