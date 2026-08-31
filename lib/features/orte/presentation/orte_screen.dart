@@ -3,6 +3,7 @@ import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
+import 'package:taugts/features/bewertungen/presentation/bewertungsverlauf_screen.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/orte/presentation/ort_formular.dart';
 
@@ -11,12 +12,14 @@ class OrteScreen extends StatefulWidget {
     required this.repository,
     required this.idGenerator,
     this.zurAuswahl = false,
+    this.eigenesProfilId,
     super.key,
   });
 
   final BewertungsRepository repository;
   final IdGenerator idGenerator;
   final bool zurAuswahl;
+  final String? eigenesProfilId;
 
   @override
   State<OrteScreen> createState() => _OrteScreenState();
@@ -150,11 +153,21 @@ class _OrteScreenState extends State<OrteScreen> {
                                 ? _ortstyp(ort.typ)
                                 : '${_ortstyp(ort.typ)} · ${ort.adresse}',
                           ),
-                          trailing: Icon(
-                            widget.zurAuswahl
-                                ? Icons.chevron_right
-                                : Icons.edit_outlined,
-                          ),
+                          trailing: widget.zurAuswahl
+                              ? const Icon(Icons.chevron_right)
+                              : IconButton(
+                                  tooltip: 'Verlauf von ${ort.name}',
+                                  icon: const Icon(Icons.history),
+                                  onPressed: () => Navigator.of(context).push<void>(
+                                    MaterialPageRoute(
+                                      builder: (_) => BewertungsverlaufScreen.fuerOrt(
+                                        repository: widget.repository,
+                                        ort: ort,
+                                        eigenesProfilId: widget.eigenesProfilId,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                           onTap: () => _ortAntippen(ort),
                         );
                       },

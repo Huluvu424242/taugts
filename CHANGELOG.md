@@ -16,6 +16,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
   separaten optionalen Formular bewerten; wiederholte Besuche erzeugen eigene
   historische Ortsbewertungen und verändern weder Bestellung noch
   Produktbewertungen.
+- Produkt- und Ortsverläufe stellen Bewertungen, Einzelwerte, Preise, Mengen,
+  Orte, Erlebniszeiten und Herkunft chronologisch dar, ohne historische
+  Beobachtungen mit aktuellen Stammdaten zu vermischen.
 
 
 ## [0.1.0+2] - 2026-08-30

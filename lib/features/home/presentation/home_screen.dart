@@ -63,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) => ProdukteScreen(
           repository: repository,
           idGenerator: idGenerator,
+          eigenesProfilId: _profil?.id,
         ),
       ),
     );
@@ -79,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) => OrteScreen(
           repository: repository,
           idGenerator: idGenerator,
+          eigenesProfilId: _profil?.id,
         ),
       ),
     );

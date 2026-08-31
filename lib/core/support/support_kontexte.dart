@@ -18,6 +18,7 @@ abstract final class SupportKontexte {
   static const kriterienVerwalten = 'Bewertungskriterien verwalten';
   static const kriteriumErfassen = 'Bewertungskriterium erfassen';
   static const kriteriumBearbeiten = 'Bewertungskriterium bearbeiten';
+  static const bewertungsverlauf = 'Bewertungsverlauf';
   static const ueberDialog = 'Über-Dialog';
   static const barrierefreiheitserklaerung = 'Barrierefreiheitserklärung';
 

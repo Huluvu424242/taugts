@@ -644,3 +644,29 @@ class OrtsbewertungMitWerten {
   final Ortsbewertung ortsbewertung;
   final List<Bewertung> werte;
 }
+
+class BewertungsverlaufEintrag {
+  const BewertungsverlaufEintrag({
+    required this.erlebnis,
+    required this.bewertungen,
+    required this.herkunftProfilId,
+    this.ort,
+    this.position,
+    this.preis,
+    this.historischerPreis,
+    this.historischeMenge,
+    this.historischesGebinde,
+    this.notiz,
+  });
+
+  final Erlebnis erlebnis;
+  final Ort? ort;
+  final ErlebnisPosition? position;
+  final Preisbeobachtung? preis;
+  final double? historischerPreis;
+  final double? historischeMenge;
+  final String? historischesGebinde;
+  final List<Bewertung> bewertungen;
+  final String herkunftProfilId;
+  final String? notiz;
+}
