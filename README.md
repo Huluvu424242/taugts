@@ -6,18 +6,29 @@ Taugt’s? ist eine Offline-first-Flutter-App zur lokalen Erfassung und Bewertun
 von Produkten, Orten und Erlebnissen. Die Datenhaltung bleibt auf dem Gerät;
 für die Kernfunktionen sind weder Konto noch Serververbindung erforderlich.
 
-Die vorbereitete erste Android-Version ist **0.1.0+1**.
+Die vorbereitete Android-Version ist **0.1.0+3**.
 
-## Funktionsumfang von 0.1.0+1
+## Funktionsumfang von 0.1.0+3
 
-- Produkte wie Bier und andere Getränke lokal anlegen, suchen und bearbeiten
-- Orte mit Typ und optionalen Detailangaben lokal verwalten
-- Erlebnisentwürfe mit Produkt, Ort, Zeitpunkt, Preis, Menge, Gebinde und Notiz
-  erfassen
-- Getränke anhand geordneter, optionaler Qualitäts- und
-  Intensitätskriterien bewerten
-- Gesamturteil unabhängig von den Einzelkriterien vergeben
-- Bewertungen historisch je Erlebnis erhalten
+- Produkte wie Getränke, Speisen und andere Dinge lokal anlegen, suchen und
+  bearbeiten
+- Orte mit Typ, optionaler Adresse, Koordinaten, OpenStreetMap-Referenz und
+  Notiz lokal verwalten
+- Restaurantbesuche und Einkäufe planen, beginnen, beenden und nachträglich
+  bearbeiten
+- mehrere Produktpositionen mit Anzahl, Währung und optionalem Preis einem
+  Erlebnis zuordnen
+- Produkte anhand typabhängiger, lokal konfigurierbarer Kriterien bewerten
+- Gaststätten im selben Restaurantbesuch optional und getrennt von den
+  Produktbewertungen bewerten
+- Produkt- und Ortsverläufe mit historischen Bewertungen, Einzelwerten,
+  Preisen, Mengen, Orten und Erlebniszeiten anzeigen
+- EAN-, GTIN- und UPC-Barcodes bewusst starten, lokal scannen, bestätigen und
+  einem vorhandenen oder neuen Produkt zuordnen
+- den aktuellen Standort ausschließlich auf Nutzeraktion ermitteln, prüfen und
+  bestätigt in das Ortsformular übernehmen
+- Koordinaten optional auf einer OpenStreetMap-Karte kontrollieren und
+  korrigieren; die manuelle Erfassung bleibt erhalten
 - lokales Profil als Herkunftskennung verwenden
 - Offline-Barrierefreiheitserklärung und kontextbezogene Bug-Meldung nutzen
 
@@ -26,7 +37,7 @@ Die vorbereitete erste Android-Version ist **0.1.0+1**.
 Nach Veröffentlichung steht die APK unter
 [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) bereit:
 
-1. `taugts-0.1.0+1.apk` und die zugehörige
+1. `taugts-0.1.0+3.apk` und die zugehörige
    `.apk.sha256`-Datei herunterladen.
 2. Die SHA-256-Prüfsumme kontrollieren.
 3. Unter Android gegebenenfalls die Installation aus der verwendeten
@@ -36,29 +47,36 @@ Nach Veröffentlichung steht die APK unter
 Unter Windows lässt sich die Prüfsumme so ermitteln:
 
 ```powershell
-Get-FileHash .\taugts-0.1.0+1.apk -Algorithm SHA256
+Get-FileHash .\taugts-0.1.0+3.apk -Algorithm SHA256
 ```
 
 Der Hash muss mit dem Inhalt von
-`taugts-0.1.0+1.apk.sha256` übereinstimmen. Spätere APK-Updates funktionieren
-nur mit demselben Release-Signierschlüssel.
+`taugts-0.1.0+3.apk.sha256` übereinstimmen. APK-Updates funktionieren nur mit
+demselben Release-Signierschlüssel.
 
 ## Datenschutz und lokale Daten
 
 Alle fachlichen Daten werden lokal in einer SQLite-Datenbank gespeichert. Diese
 Version enthält keine Telemetrie, keine versteckte Synchronisation und keinen
-Cloud-Dienst. Ein Bugreport wird nur nach einer bewussten Nutzeraktion
-vorbereitet und anschließend zur Prüfung im Browser geöffnet. Die App sendet
-ihn nicht selbständig ab und hängt keine lokalen Nutzerdaten oder Diagnoselogs
-an.
+Cloud-Dienst. Kamera und Standort werden erst nach einer bewussten Nutzeraktion
+verwendet; es gibt kein Hintergrund-Tracking. Ein Bugreport wird nur nach einer
+bewussten Nutzeraktion vorbereitet und anschließend zur Prüfung im Browser
+geöffnet. Die App sendet ihn nicht selbständig ab und hängt keine lokalen
+Nutzerdaten oder Diagnoselogs an.
+
+Die manuelle Orts- und Koordinateneingabe funktioniert offline. Für das Laden
+der optionalen OpenStreetMap-Kartenkacheln ist eine Netzwerkverbindung
+erforderlich.
 
 ## Bekannte Einschränkungen
 
 - Import und Export sind noch nicht enthalten.
-- Produktpositionen innerhalb von Restaurantbesuchen und Einkäufen sind noch
-  nicht umgesetzt.
+- Geschäfte können innerhalb eines Einkaufs noch nicht getrennt bewertet
+  werden.
 - Windows und Linux sind architektonisch berücksichtigt, aber nicht Bestandteil
   dieses Releases.
+- Barcode, Standort und Karte müssen vor einer öffentlichen Freigabe noch auf
+  den vorgesehenen realen Zielgeräten manuell geprüft werden.
 - Die systematische manuelle Prüfung mit TalkBack, großer Systemschrift,
   Gestennavigation und einem kleinen Android-Gerät ist vor einer öffentlichen
   Freigabe noch abzuschließen; siehe
@@ -146,11 +164,11 @@ Der ausschließlich manuell startbare GitHub-Actions-Workflow
 ihrer SHA-256-Prüfsumme als GitHub Release veröffentlichen.
 
 Einrichtung, Sicherheitsvorgaben und Ablauf stehen in
-[docs/android-release.md](docs/android-release.md). Für Version 0.1.0+1 liegen
+[docs/android-release.md](docs/android-release.md). Für Version 0.1.0+3 liegen
 außerdem folgende Dokumente bereit:
 
-- [Release Notes](docs/releases/0.1.0+1.md)
-- [Release-Checkliste](docs/release-checklist-0.1.0+1.md)
+- [Release Notes](docs/releases/0.1.0+3.md)
+- [Release-Checkliste](docs/release-checklist-0.1.0+3.md)
 - [Changelog](CHANGELOG.md)
 
 Der Release-Workflow darf erst nach Einrichtung der Signing-Secrets und einer
