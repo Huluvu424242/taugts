@@ -233,4 +233,39 @@ void main() {
     );
     datenbank.schliessen();
   });
+
+  test('migriert Schema 12 auf getrennte historische Ortsbewertungen', () {
+    final verbindung = sqlite3.openInMemory();
+    verbindung.execute('''
+      CREATE TABLE erlebnisse (
+        id TEXT PRIMARY KEY
+      )
+    ''');
+    verbindung.execute('''
+      CREATE TABLE bewertungen (
+        id TEXT PRIMARY KEY,
+        kriterium_beschreibung TEXT,
+        kriterium_auswahlwerte TEXT NOT NULL DEFAULT ''
+      )
+    ''');
+    verbindung.userVersion = 12;
+
+    final datenbank = LokaleDatenbank.oeffnen(verbindung);
+
+    expect(verbindung.userVersion, 13);
+    expect(
+      verbindung.select(
+        "SELECT name FROM sqlite_master WHERE type = 'table' "
+        "AND name = 'ortsbewertungen'",
+      ),
+      hasLength(1),
+    );
+    expect(
+      verbindung
+          .select('PRAGMA table_info(bewertungen)')
+          .map((zeile) => zeile['name']),
+      contains('ortsbewertung_id'),
+    );
+    datenbank.schliessen();
+  });
 }

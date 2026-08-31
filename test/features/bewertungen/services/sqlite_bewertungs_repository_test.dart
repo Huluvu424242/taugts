@@ -731,6 +731,10 @@ void main() {
       historie.map((bewertung) => bewertung.erlebnisId).toSet(),
       {erstesErlebnis.id, zweitesErlebnis.id},
     );
+    final verlauf = await repository.ladeProduktverlauf(produktId);
+    expect(verlauf, hasLength(2));
+    expect(verlauf.first.erlebnis.id, zweitesErlebnis.id);
+    expect(verlauf.last.bewertungen.single.wert, 4);
   });
 
   test('rollt Erlebnis und Bewertungen gemeinsam zurück', () async {
@@ -944,6 +948,134 @@ void main() {
     expect(historie.map((bewertung) => bewertung.wert), [3, 4]);
     expect(
       historie.map((bewertung) => bewertung.erlebnisPositionId).toSet(),
+      hasLength(2),
+    );
+    final verlauf = await repository.ladeProduktverlauf(produktId);
+    expect(verlauf, hasLength(2));
+    expect(verlauf.first.erlebnis.erlebtAm, zeit.add(const Duration(days: 1)));
+    expect(verlauf.first.bewertungen.single.wert, 4);
+  });
+
+  test('speichert Gaststättenbewertungen je Besuch getrennt und korrigierbar',
+      () async {
+    final ort = Ort(
+      id: '94000000-0000-4000-8000-000000000001',
+      name: 'Zum Test',
+      typ: Ortstyp.gastronomie,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereOrt(ort);
+    for (var index = 0; index < 2; index++) {
+      final erlebnis = Erlebnis(
+        id: '94000000-0000-4000-8000-00000000001$index',
+        ortId: ort.id,
+        herkunftProfilId: profilId,
+        tatsaechlicherBeginn: zeit.add(Duration(days: index)),
+        erstelltAm: zeit.add(Duration(days: index)),
+        geaendertAm: zeit.add(Duration(days: index)),
+      );
+      await repository.speichereErlebnis(erlebnis);
+      final ortsbewertung = Ortsbewertung(
+        id: '94000000-0000-4000-8000-00000000002$index',
+        erlebnisId: erlebnis.id,
+        ortId: ort.id,
+        herkunftProfilId: profilId,
+        bewertetAm: erlebnis.erlebtAm,
+        notiz: 'Besuch $index',
+        erstelltAm: erlebnis.erstelltAm,
+        geaendertAm: erlebnis.geaendertAm,
+      );
+      await repository.speichereOrtsbewertung(
+        erlebnis: erlebnis,
+        ort: ort,
+        ortsbewertung: ortsbewertung,
+        bewertungen: [
+          Bewertung(
+            id: '94000000-0000-4000-8000-00000000003$index',
+            erlebnisId: erlebnis.id,
+            ortId: ort.id,
+            ortsbewertungId: ortsbewertung.id,
+            kriteriumId: StandardOrtskriterien.gastronomie(zeit).first.id,
+            herkunftProfilId: profilId,
+            wert: 3 + index.toDouble(),
+            erstelltAm: erlebnis.erstelltAm,
+            geaendertAm: erlebnis.geaendertAm,
+          ),
+        ],
+      );
+    }
+
+    final erste = await repository.ladeOrtsbewertungFuerErlebnis(
+      '94000000-0000-4000-8000-000000000010',
+    );
+    final zweite = await repository.ladeOrtsbewertungFuerErlebnis(
+      '94000000-0000-4000-8000-000000000011',
+    );
+    expect(erste?.werte.single.wert, 3);
+    expect(zweite?.werte.single.wert, 4);
+    expect(erste?.ortsbewertung.bewertetAm, zeit);
+    expect(
+      zweite?.ortsbewertung.bewertetAm,
+      zeit.add(const Duration(days: 1)),
+    );
+
+    final erstesErlebnis = (await repository.ladeErlebnis(
+      '94000000-0000-4000-8000-000000000010',
+    ))!;
+    final ersteBewertung = erste!;
+    await repository.speichereOrtsbewertung(
+      erlebnis: erstesErlebnis,
+      ort: ort,
+      ortsbewertung: Ortsbewertung(
+        id: ersteBewertung.ortsbewertung.id,
+        erlebnisId: erstesErlebnis.id,
+        ortId: ort.id,
+        herkunftProfilId: profilId,
+        bewertetAm: erstesErlebnis.erlebtAm,
+        notiz: 'Korrigierter erster Besuch',
+        erstelltAm: ersteBewertung.ortsbewertung.erstelltAm,
+        geaendertAm: zeit.add(const Duration(days: 2)),
+      ),
+      bewertungen: [
+        Bewertung(
+          id: ersteBewertung.werte.single.id,
+          erlebnisId: erstesErlebnis.id,
+          ortId: ort.id,
+          ortsbewertungId: ersteBewertung.ortsbewertung.id,
+          kriteriumId: ersteBewertung.werte.single.kriteriumId,
+          herkunftProfilId: profilId,
+          wert: 5,
+          erstelltAm: ersteBewertung.werte.single.erstelltAm,
+          geaendertAm: zeit.add(const Duration(days: 2)),
+        ),
+      ],
+    );
+
+    expect(
+      (await repository.ladeOrtsbewertungFuerErlebnis(erstesErlebnis.id))
+          ?.werte
+          .single
+          .wert,
+      5,
+    );
+    expect(
+      (await repository.ladeOrtsbewertungFuerErlebnis(
+        '94000000-0000-4000-8000-000000000011',
+      ))
+          ?.werte
+          .single
+          .wert,
+      4,
+    );
+    final verlauf = await repository.ladeOrtsverlauf(ort.id);
+    expect(verlauf, hasLength(2));
+    expect(verlauf.first.notiz, 'Besuch 1');
+    expect(
+      datenbank.verbindung.select(
+        'SELECT * FROM ortsbewertungen WHERE ort_id = ?',
+        [ort.id],
+      ),
       hasLength(2),
     );
   });

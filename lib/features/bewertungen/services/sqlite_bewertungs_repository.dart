@@ -717,8 +717,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
           id, erlebnis_id, kriterium_id, wert, erstellt_am, geaendert_am,
           herkunft_profil_id, erlebnis_position_id, ort_id, kriterium_name,
           kriterium_eingabetyp, kriterium_reihenfolge, kriterium_version,
-          kriterium_beschreibung, kriterium_auswahlwerte
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          kriterium_beschreibung, kriterium_auswahlwerte, ortsbewertung_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         bewertung.id,
@@ -736,6 +736,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         kriterium?['version'],
         kriterium?['beschreibung'],
         kriterium?['auswahlwerte'] ?? '',
+        bewertung.ortsbewertungId,
       ],
     );
   }
@@ -758,7 +759,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       _speichereErlebnisZeile(erlebnis);
       datenbank.verbindung.execute(
         'DELETE FROM bewertungen '
-        'WHERE erlebnis_id = ? AND herkunft_profil_id = ?',
+        'WHERE erlebnis_id = ? AND herkunft_profil_id = ? '
+        'AND erlebnis_position_id IS NULL AND ortsbewertung_id IS NULL',
         [erlebnis.id, erlebnis.herkunftProfilId],
       );
       for (final bewertung in bewertungen) {
@@ -823,6 +825,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         herkunftProfilId: row['herkunft_profil_id'] as String,
         erlebnisPositionId: row['erlebnis_position_id'] as String?,
         ortId: row['ort_id'] as String?,
+        ortsbewertungId: row['ortsbewertung_id'] as String?,
         wert: (row['wert'] as num).toDouble(),
         erstelltAm: DateTime.parse(row['erstellt_am'] as String),
         geaendertAm: DateTime.parse(row['geaendert_am'] as String),
@@ -851,6 +854,213 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       ORDER BY b.erstellt_am
     ''', [produktId, produktId]);
     return rows.map(_bewertungAusZeile).toList();
+  }
+
+  @override
+  Future<OrtsbewertungMitWerten?> ladeOrtsbewertungFuerErlebnis(
+    String erlebnisId,
+  ) async {
+    final rows = datenbank.verbindung.select(
+      'SELECT * FROM ortsbewertungen WHERE erlebnis_id = ?',
+      [erlebnisId],
+    );
+    if (rows.isEmpty) return null;
+    final row = rows.single;
+    final ortsbewertung = Ortsbewertung(
+      id: row['id'] as String,
+      erlebnisId: row['erlebnis_id'] as String,
+      ortId: row['ort_id'] as String,
+      herkunftProfilId: row['herkunft_profil_id'] as String,
+      bewertetAm: DateTime.parse(row['bewertet_am'] as String),
+      notiz: row['notiz'] as String?,
+      erstelltAm: DateTime.parse(row['erstellt_am'] as String),
+      geaendertAm: DateTime.parse(row['geaendert_am'] as String),
+    );
+    final werte = datenbank.verbindung
+        .select(
+          'SELECT * FROM bewertungen WHERE ortsbewertung_id = ? '
+          'ORDER BY kriterium_reihenfolge, erstellt_am',
+          [ortsbewertung.id],
+        )
+        .map(_bewertungAusZeile)
+        .toList();
+    return OrtsbewertungMitWerten(ortsbewertung: ortsbewertung, werte: werte);
+  }
+
+  @override
+  Future<void> speichereOrtsbewertung({
+    required Erlebnis erlebnis,
+    required Ort ort,
+    required Ortsbewertung ortsbewertung,
+    required List<Bewertung> bewertungen,
+  }) async {
+    final vorhandeneOrtsbewertung = datenbank.verbindung.select(
+      'SELECT id FROM ortsbewertungen WHERE erlebnis_id = ?',
+      [erlebnis.id],
+    );
+    final kriteriumIds = bewertungen.map((wert) => wert.kriteriumId).toSet();
+    final unpassendeKriterien = kriteriumIds.where((id) {
+      final rows = datenbank.verbindung.select(
+        'SELECT objektart FROM kriterien WHERE id = ?',
+        [id],
+      );
+      return rows.isEmpty ||
+          rows.single['objektart'] != KriteriumObjektart.gastronomie.name;
+    });
+    if (erlebnis.typ != Erlebnistyp.restaurantbesuch ||
+        erlebnis.wirksamerOrtId != ort.id ||
+        ort.typ != Ortstyp.gastronomie ||
+        ortsbewertung.erlebnisId != erlebnis.id ||
+        ortsbewertung.ortId != ort.id ||
+        ortsbewertung.herkunftProfilId != erlebnis.herkunftProfilId ||
+        !ortsbewertung.bewertetAm.isAtSameMomentAs(erlebnis.erlebtAm) ||
+        (bewertungen.isEmpty && _leerAlsNull(ortsbewertung.notiz) == null) ||
+        (vorhandeneOrtsbewertung.isNotEmpty &&
+            vorhandeneOrtsbewertung.single['id'] != ortsbewertung.id) ||
+        unpassendeKriterien.isNotEmpty ||
+        bewertungen.any((bewertung) =>
+            bewertung.erlebnisId != erlebnis.id ||
+            bewertung.ortId != ort.id ||
+            bewertung.ortsbewertungId != ortsbewertung.id ||
+            bewertung.herkunftProfilId != erlebnis.herkunftProfilId ||
+            bewertung.erlebnisPositionId != null)) {
+      throw ArgumentError(
+          'Gaststättenbewertung und Erlebnis passen nicht zusammen.');
+    }
+    datenbank.transaktion(() {
+      _speichereErlebnisZeile(erlebnis);
+      datenbank.verbindung.execute(
+        '''
+          INSERT INTO ortsbewertungen (
+            id, erlebnis_id, ort_id, herkunft_profil_id, bewertet_am, notiz,
+            erstellt_am, geaendert_am
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(erlebnis_id) DO UPDATE SET
+            ort_id = excluded.ort_id,
+            bewertet_am = excluded.bewertet_am,
+            notiz = excluded.notiz,
+            geaendert_am = excluded.geaendert_am
+        ''',
+        [
+          ortsbewertung.id,
+          ortsbewertung.erlebnisId,
+          ortsbewertung.ortId,
+          ortsbewertung.herkunftProfilId,
+          _zeit(ortsbewertung.bewertetAm),
+          _leerAlsNull(ortsbewertung.notiz),
+          _zeit(ortsbewertung.erstelltAm),
+          _zeit(ortsbewertung.geaendertAm),
+        ],
+      );
+      datenbank.verbindung.execute(
+        'DELETE FROM bewertungen WHERE ortsbewertung_id = ?',
+        [ortsbewertung.id],
+      );
+      for (final bewertung in bewertungen) {
+        _speichereBewertungZeile(bewertung);
+      }
+    });
+  }
+
+  @override
+  Future<List<BewertungsverlaufEintrag>> ladeProduktverlauf(
+    String produktId,
+  ) async {
+    final positionen = datenbank.verbindung.select(
+      '''
+        SELECT p.id AS position_id, p.erlebnis_id, p.produkt_id, p.anzahl,
+          p.erstellt_am AS position_erstellt_am,
+          p.geaendert_am AS position_geaendert_am
+        FROM erlebnispositionen p
+        WHERE p.produkt_id = ?
+      ''',
+      [produktId],
+    );
+    final ergebnis = <BewertungsverlaufEintrag>[];
+    final erlebnisseMitPosition = <String>{};
+    for (final row in positionen) {
+      final erlebnis = await ladeErlebnis(row['erlebnis_id'] as String);
+      if (erlebnis == null) continue;
+      erlebnisseMitPosition.add(erlebnis.id);
+      final position = ErlebnisPosition(
+        id: row['position_id'] as String,
+        erlebnisId: row['erlebnis_id'] as String,
+        produktId: row['produkt_id'] as String,
+        anzahl: row['anzahl'] as int,
+        erstelltAm: DateTime.parse(row['position_erstellt_am'] as String),
+        geaendertAm: DateTime.parse(row['position_geaendert_am'] as String),
+      );
+      ErlebnispositionMitProdukt? geladenePosition;
+      for (final wert in await ladeErlebnispositionen(erlebnis.id)) {
+        if (wert.position.id == position.id) {
+          geladenePosition = wert;
+          break;
+        }
+      }
+      final ortId = erlebnis.wirksamerOrtId;
+      ergebnis.add(BewertungsverlaufEintrag(
+        erlebnis: erlebnis,
+        ort: ortId == null ? null : await ladeOrt(ortId),
+        position: position,
+        preis: geladenePosition?.preis,
+        bewertungen: await ladeBewertungenFuerErlebnisposition(position.id),
+        herkunftProfilId: erlebnis.herkunftProfilId,
+        notiz: erlebnis.notiz,
+      ));
+    }
+    final direkteErlebnisse = datenbank.verbindung.select(
+      'SELECT id FROM erlebnisse WHERE produkt_id = ?',
+      [produktId],
+    );
+    for (final row in direkteErlebnisse) {
+      final erlebnisId = row['id'] as String;
+      if (erlebnisseMitPosition.contains(erlebnisId)) continue;
+      final erlebnis = await ladeErlebnis(erlebnisId);
+      if (erlebnis == null) continue;
+      final bewertungen = (await ladeBewertungenFuerErlebnis(erlebnis.id))
+          .where((bewertung) =>
+              bewertung.erlebnisPositionId == null &&
+              bewertung.ortsbewertungId == null)
+          .toList();
+      if (bewertungen.isEmpty && erlebnis.preis == null) continue;
+      final ortId = erlebnis.wirksamerOrtId;
+      ergebnis.add(BewertungsverlaufEintrag(
+        erlebnis: erlebnis,
+        ort: ortId == null ? null : await ladeOrt(ortId),
+        bewertungen: bewertungen,
+        herkunftProfilId: erlebnis.herkunftProfilId,
+        historischerPreis: erlebnis.preis,
+        historischeMenge: erlebnis.menge,
+        historischesGebinde: erlebnis.gebinde,
+        notiz: erlebnis.notiz,
+      ));
+    }
+    ergebnis.sort((a, b) => b.erlebnis.erlebtAm.compareTo(a.erlebnis.erlebtAm));
+    return ergebnis;
+  }
+
+  @override
+  Future<List<BewertungsverlaufEintrag>> ladeOrtsverlauf(String ortId) async {
+    final rows = datenbank.verbindung.select(
+      'SELECT * FROM ortsbewertungen WHERE ort_id = ? ORDER BY bewertet_am DESC',
+      [ortId],
+    );
+    final ort = await ladeOrt(ortId);
+    final ergebnis = <BewertungsverlaufEintrag>[];
+    for (final row in rows) {
+      final erlebnis = await ladeErlebnis(row['erlebnis_id'] as String);
+      if (erlebnis == null) continue;
+      final geladen = await ladeOrtsbewertungFuerErlebnis(erlebnis.id);
+      if (geladen == null) continue;
+      ergebnis.add(BewertungsverlaufEintrag(
+        erlebnis: erlebnis,
+        ort: ort,
+        bewertungen: geladen.werte,
+        herkunftProfilId: geladen.ortsbewertung.herkunftProfilId,
+        notiz: geladen.ortsbewertung.notiz,
+      ));
+    }
+    return ergebnis;
   }
 
   String _zeit(DateTime wert) => wert.toUtc().toIso8601String();

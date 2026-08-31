@@ -4,6 +4,7 @@ import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
+import 'package:taugts/features/bewertungen/presentation/gaststaettenbewertung_abschnitt.dart';
 import 'package:taugts/features/bewertungen/presentation/getraenkebewertung_screen.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/erlebnisse/presentation/erlebnisposition_formular.dart';
@@ -569,6 +570,16 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   );
                 },
               ),
+              if (_typ == Erlebnistyp.restaurantbesuch) ...[
+                const SizedBox(height: 24),
+                GaststaettenbewertungAbschnitt(
+                  key: ValueKey('gaststaettenbewertung-$_id-${_ort?.id}'),
+                  repository: widget.repository,
+                  idGenerator: widget.idGenerator,
+                  erlebnis: _erlebnisAusEingaben(),
+                  ort: _ort,
+                ),
+              ],
             ],
           ),
         ),

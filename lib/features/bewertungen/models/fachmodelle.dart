@@ -594,12 +594,14 @@ class Bewertung {
     this.kriteriumReihenfolge,
     this.kriteriumVersion,
     this.kriteriumAuswahlwerte = const [],
+    this.ortsbewertungId,
   });
 
   final String id;
   final String erlebnisId;
   final String? erlebnisPositionId;
   final String? ortId;
+  final String? ortsbewertungId;
   final String kriteriumId;
   final String herkunftProfilId;
   final double wert;
@@ -611,4 +613,60 @@ class Bewertung {
   final int? kriteriumReihenfolge;
   final int? kriteriumVersion;
   final List<String> kriteriumAuswahlwerte;
+}
+
+class Ortsbewertung {
+  const Ortsbewertung({
+    required this.id,
+    required this.erlebnisId,
+    required this.ortId,
+    required this.herkunftProfilId,
+    required this.bewertetAm,
+    required this.erstelltAm,
+    required this.geaendertAm,
+    this.notiz,
+  });
+
+  final String id;
+  final String erlebnisId;
+  final String ortId;
+  final String herkunftProfilId;
+  final DateTime bewertetAm;
+  final String? notiz;
+  final DateTime erstelltAm;
+  final DateTime geaendertAm;
+}
+
+class OrtsbewertungMitWerten {
+  const OrtsbewertungMitWerten(
+      {required this.ortsbewertung, required this.werte});
+
+  final Ortsbewertung ortsbewertung;
+  final List<Bewertung> werte;
+}
+
+class BewertungsverlaufEintrag {
+  const BewertungsverlaufEintrag({
+    required this.erlebnis,
+    required this.bewertungen,
+    required this.herkunftProfilId,
+    this.ort,
+    this.position,
+    this.preis,
+    this.historischerPreis,
+    this.historischeMenge,
+    this.historischesGebinde,
+    this.notiz,
+  });
+
+  final Erlebnis erlebnis;
+  final Ort? ort;
+  final ErlebnisPosition? position;
+  final Preisbeobachtung? preis;
+  final double? historischerPreis;
+  final double? historischeMenge;
+  final String? historischesGebinde;
+  final List<Bewertung> bewertungen;
+  final String herkunftProfilId;
+  final String? notiz;
 }

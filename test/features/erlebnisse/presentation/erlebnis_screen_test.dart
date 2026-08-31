@@ -120,6 +120,61 @@ void main() {
     );
     expect(await repository.ladeErlebnisse(), isEmpty);
   });
+
+  testWidgets('Gaststättenbewertung bleibt beim Ein- und Ausklappen erhalten',
+      (tester) async {
+    final ort = Ort(
+      id: '75000000-0000-4000-8000-000000000001',
+      name: 'Testgaststätte',
+      typ: Ortstyp.gastronomie,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    final erlebnis = Erlebnis(
+      id: '76000000-0000-4000-8000-000000000001',
+      ortId: ort.id,
+      herkunftProfilId: profil.id,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereOrt(ort);
+    await repository.speichereErlebnis(erlebnis);
+    await tester.pumpWidget(MaterialApp(
+      home: ErlebnisScreen(
+        repository: repository,
+        idGenerator: _TestIdGenerator(),
+        profil: profil,
+        erlebnis: erlebnis,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Gaststätte bewerten'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Gaststätte bewerten'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byType(DropdownButtonFormField<double?>).first,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byType(DropdownButtonFormField<double?>).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('5 – taugt sehr').last);
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byType(Scrollable).first,
+      const Offset(0, 500),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ExpansionTile));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ExpansionTile));
+    await tester.pumpAndSettle();
+    expect(find.text('5 – taugt sehr'), findsOneWidget);
+  });
 }
 
 class _TestIdGenerator implements IdGenerator {
