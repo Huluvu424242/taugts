@@ -1,6 +1,6 @@
 # Barrierefreiheit und Bug-Meldung
 
-Stand: 31. August 2026 · vorbereitete Version: 0.1.0+2
+Stand: 31. August 2026 · vorbereitete Version: 0.1.0+3
 
 Taugt’s? stellt die gemeinsamen Grundgerüst-Funktionen für Barrierefreiheit und
 Bug-Meldungen vollständig innerhalb der App bereit.
@@ -75,10 +75,10 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 Der Getränkebewertungsbogen ist ausdrücklich einzubeziehen. Die gebündelte
 Prüfung wird in
 [Story #30](https://github.com/Huluvu424242/taugts/issues/30) verfolgt. Solange
-diese Punkte offen sind, wird für Version 0.1.0+2 kein vollständig manuell
+diese Punkte offen sind, wird für Version 0.1.0+3 kein vollständig manuell
 bestätigter Barrierefreiheitsstatus behauptet. Der konkrete Freigabestand wird
 zusätzlich in der
-[Release-Checkliste](release-checklist-0.1.0+1.md) dokumentiert.
+[Release-Checkliste](release-checklist-0.1.0+3.md) dokumentiert.
 
 ## Bug-Meldung
 
