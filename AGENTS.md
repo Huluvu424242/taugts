@@ -128,17 +128,29 @@ lib/
 
 ## Verbindliche Grundgerüst-Funktionen
 
-Ein App-Grundgerüst ist erst fertig, wenn neben Name und Logo auch eine Barrierefreiheitserklärung und eine Funktion zum Melden von Bugs implementiert, aus der laufenden App erreichbar und getestet sind. Beide Funktionen gehören in die Initial-Story des Grundgerüsts und dürfen weder als spätere Fachstory noch als nachgelagerte Querschnittsarbeit verschoben werden.
+Ein App-Grundgerüst ist erst fertig, wenn neben Name und Logo auch eine Barrierefreiheitserklärung, eine Funktion zum Melden von Bugs, ein direkter Zugang zur Projektseite und eine öffentlich erreichbare Benutzerdokumentation vorhanden, aus der laufenden App erreichbar und soweit automatisierbar getestet sind. Diese Bestandteile gehören in die Initial-Story des Grundgerüsts und dürfen weder als spätere Fachstory noch als nachgelagerte Querschnittsarbeit verschoben werden.
 
-Die Implementierung ist vollständig innerhalb des jeweiligen App-Projekts zu dokumentieren und zu pflegen. App-Name, Repository, Issue-Vorlage, Labels, Versionsermittlung, Texte, bekannte Barrieren und fachliche Aufrufkontexte werden projektspezifisch festgelegt. Es darf keine Laufzeit-, Quellcode- oder Dokumentationsabhängigkeit zu einem anderen App-Projekt entstehen.
+Die Implementierung ist vollständig innerhalb des jeweiligen App-Projekts zu dokumentieren und zu pflegen. App-Name, Repository, Projekt-URL, URL der Benutzerdokumentation, Issue-Vorlage, Labels, Versionsermittlung, Texte, bekannte Barrieren und fachliche Aufrufkontexte werden projektspezifisch festgelegt. Es darf keine Laufzeit-, Quellcode- oder Dokumentationsabhängigkeit zu einem anderen App-Projekt entstehen.
 
 ### Gemeinsamer Zugang und technische Struktur
 
 - Jeder vollständige Screen bietet an einer konsistenten, semantisch beschrifteten Stelle ein gemeinsames App- beziehungsweise Support-Menü mit mindestens `Bug melden` und `Über`.
 - Temporäre Dialoge und fachliche Unterabläufe, in denen Fehler eigenständig auftreten können, bieten ebenfalls einen direkt erreichbaren Meldeweg oder übergeben ihren eindeutigen Kontext an die gemeinsame Meldefunktion.
-- Der Über-Dialog zeigt App-Name sowie die tatsächlich installierte Releaseversion einschließlich Buildnummer und verlinkt die Barrierefreiheitserklärung. Auch der Über-Dialog und die Barrierefreiheitserklärung bieten unmittelbar `Bug melden`.
+- Der Über-Dialog zeigt App-Name sowie die tatsächlich installierte Releaseversion einschließlich Buildnummer und verlinkt die Barrierefreiheitserklärung, die Projektseite der App und die Benutzerdokumentation. Auch der Über-Dialog und die Barrierefreiheitserklärung bieten unmittelbar `Bug melden`.
+- Die Links auf Projektseite und Benutzerdokumentation besitzen verständliche sichtbare und semantische Bezeichnungen; ihr externes Öffnen folgt denselben testbaren Plattformabstraktionen und Fehlerbehandlungen wie andere externe Ziele der Support-Oberfläche.
 - Die Support-Oberfläche, die Ermittlung der installierten App-Version und das Öffnen externer Ziele werden getrennt. Plattformzugriffe liegen hinter kleinen injizierbaren Schnittstellen, damit Widgettests Fakes verwenden und keine realen Browser, Paketinformationen oder Netzverbindungen benötigen.
-- Alle asynchronen Übergänge beachten die Lebenszyklusregeln dieser Datei. Fehler beim Laden der Version oder Öffnen des Meldewegs werden verständlich und als Live-Region ausgegeben; der Dialog schließt sich bei einem Fehler nicht und bereits eingegebene Daten bleiben erhalten.
+- Alle asynchronen Übergänge beachten die Lebenszyklusregeln dieser Datei. Fehler beim Laden der Version oder Öffnen eines externen Ziels werden verständlich und als Live-Region ausgegeben; der Dialog schließt sich bei einem Fehler nicht und bereits eingegebene Daten bleiben erhalten.
+
+### Projektseite und Benutzerdokumentation
+
+- Jedes App-Projekt besitzt eine eindeutig festgelegte Projektseite. Bei einem GitHub-Projekt ist dies die kanonische Repository-Seite. Die Seite `Über` verlinkt dieses Ziel direkt.
+- Für **Taugt’s?** ist die Projektseite verbindlich `https://github.com/Huluvu424242/taugts`.
+- Jedes App-Projekt enthält eine für Endnutzer geschriebene Benutzerdokumentation unter `docs/`. Sie wird neben Architektur- und Entwicklerdokumentation als eigener Dokumentationsbereich gepflegt und beschreibt mindestens Installation beziehungsweise Bezug der App, grundlegende Bedienung, zentrale Funktionen, Datenhaltung und Datenaustausch soweit vorhanden, bekannte Einschränkungen sowie Hilfe- und Meldewege.
+- Die Benutzerdokumentation wird von Anfang an so strukturiert, dass sie als statische Website veröffentlicht werden kann. Interne Entwicklerdetails dürfen auf weiterführende Dokumente verweisen, gehören aber nicht ungefiltert in die Benutzerdokumentation.
+- Die Benutzerdokumentation wird über GitHub Pages der Projektseite frei im Web zugänglich gemacht. Die kanonische veröffentlichte URL wird projektspezifisch dokumentiert und von der Seite `Über` aus direkt geöffnet.
+- Für **Taugt’s?** ist die kanonische Benutzerdokumentation verbindlich `https://huluvu424242.github.io/taugts/`.
+- Fachliche oder UX-relevante Änderungen, die das Nutzerverhalten, sichtbare Funktionen, Einschränkungen, Datenhaltung oder Bedienabläufe verändern, prüfen und aktualisieren die Benutzerdokumentation im selben Pull Request.
+- Projektseite und Benutzerdokumentation müssen vor dem ersten öffentlichen Release erreichbar sein. Ist die Veröffentlichung technisch noch nicht eingerichtet, ist das Grundgerüst in diesem Punkt nicht vollständig abgeschlossen.
 
 ### Barrierefreiheitserklärung
 
@@ -171,8 +183,9 @@ Die Implementierung ist vollständig innerhalb des jeweiligen App-Projekts zu do
 
 Mindestens durch Widget- und Unit-Tests nachzuweisen sind:
 
-- Erreichbarkeit von `Bug melden`, `Über` und Barrierefreiheitserklärung über alle vorgesehenen Einstiege,
+- Erreichbarkeit von `Bug melden`, `Über`, Barrierefreiheitserklärung, Projektseite und Benutzerdokumentation über alle vorgesehenen Einstiege,
 - Anzeige der installierten Release- und Buildversion sowie verständliche Behandlung eines Ladefehlers,
+- korrekte projektspezifische Ziele für Projektseite und Benutzerdokumentation sowie verständliche Fehlerzustände beim externen Öffnen,
 - Offline-Anzeige, Scrollbarkeit, Semantik und Meldeweg der Barrierefreiheitserklärung,
 - unterschiedliche erwartete Aufrufkontexte für sämtliche Screens, Dialoge und fachlichen Varianten,
 - Pflichtfeldvalidierung, Fehlersammler, Fokus- und Scrollverhalten sowie Erhalt der Eingaben,
@@ -297,8 +310,10 @@ flutter test
 ## Dokumentation und Lizenzen
 
 - `README.md` enthält Zweck, Voraussetzungen, Setup, Start und Tests.
+- Unter `docs/` werden Architektur-, Entwickler- und Benutzerdokumentation als klar getrennte, gepflegte Dokumentationsbereiche geführt.
 - Architekturentscheidungen mit aktuellem Nutzen werden unter `docs/` als Markdown dokumentiert; Diagramme bevorzugt als Mermaid und Architekturübersichten nach C4.
-- Änderungen an Architektur, Persistenz, Import/Export oder Plattformintegration aktualisieren die Dokumentation im selben PR.
+- Die Benutzerdokumentation ist für Endnutzer verständlich formuliert, bildet die tatsächlich ausgelieferte Bedienung ab und ist über die projektspezifische GitHub-Pages-URL öffentlich zugänglich.
+- Änderungen an Architektur, Persistenz, Import/Export oder Plattformintegration aktualisieren die technische Dokumentation im selben PR; Änderungen am Nutzerverhalten oder an sichtbaren Funktionen aktualisieren die Benutzerdokumentation im selben PR.
 - Lizenzrelevante ausgelieferte Frameworks, Laufzeitabhängigkeiten, Logos, Bilder, Schriften und Assets werden mit Herkunft, Rechteinhaber, Lizenz und Verwendung in `ATTRIBUTIONS.md` dokumentiert, sobald sie hinzukommen.
 - `CHANGELOG.md` wird nach Keep a Changelog gepflegt.
 
