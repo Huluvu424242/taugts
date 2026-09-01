@@ -239,20 +239,22 @@ Future<void> zeigeUeberDialog(
                 ),
                 child: const Text('Barrierefreiheitserklärung'),
               ),
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Stack(
-                  key: Key('ueber-schliessen-mit-logo'),
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.center,
-                  children: [
-                    Text('Schließen'),
-                    Positioned(
-                      left: -16,
-                      child: AppLogo(size: 14),
+              Stack(
+                key: const Key('ueber-schliessen-mit-logo'),
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child: const Text('Schließen'),
+                  ),
+                  const Positioned.fill(
+                    child: IgnorePointer(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: AppLogo(size: 14),
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           );
