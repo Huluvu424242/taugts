@@ -96,7 +96,8 @@ class _ProduktErneutBewertenScreenState
     if (_oeffnet) return;
     setState(() => _oeffnet = true);
     try {
-      var positionen = await widget.repository.ladeErlebnispositionen(erlebnis.id);
+      var positionen =
+          await widget.repository.ladeErlebnispositionen(erlebnis.id);
       if (!mounted) return;
       ErlebnispositionMitProdukt? position;
       for (final eintrag in positionen) {
@@ -118,7 +119,8 @@ class _ProduktErneutBewertenScreenState
           ),
         );
         if (gespeichert != true || !mounted) return;
-        positionen = await widget.repository.ladeErlebnispositionen(erlebnis.id);
+        positionen =
+            await widget.repository.ladeErlebnispositionen(erlebnis.id);
         if (!mounted) return;
         for (final eintrag in positionen) {
           if (eintrag.produkt.id == widget.produkt.id) {
@@ -132,7 +134,8 @@ class _ProduktErneutBewertenScreenState
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Die Produktposition konnte nicht vorbereitet werden.'),
+              content:
+                  Text('Die Produktposition konnte nicht vorbereitet werden.'),
             ),
           );
         }
@@ -157,7 +160,8 @@ class _ProduktErneutBewertenScreenState
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Die erneute Bewertung konnte nicht vorbereitet werden.'),
+          content:
+              Text('Die erneute Bewertung konnte nicht vorbereitet werden.'),
         ),
       );
     } finally {
@@ -196,11 +200,13 @@ class _ProduktErneutBewertenScreenState
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('Die Erlebnisse konnten nicht geladen werden.'),
+                        const Text(
+                            'Die Erlebnisse konnten nicht geladen werden.'),
                         const SizedBox(height: 16),
                         FilledButton.icon(
                           onPressed: () => setState(
-                            () => _erlebnisse = widget.repository.ladeErlebnisse(),
+                            () => _erlebnisse =
+                                widget.repository.ladeErlebnisse(),
                           ),
                           icon: const Icon(Icons.refresh),
                           label: const Text('Erneut versuchen'),
