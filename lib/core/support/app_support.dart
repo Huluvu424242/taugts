@@ -153,6 +153,7 @@ Future<void> zeigeUeberDialog(
           }
 
           return AlertDialog(
+            scrollable: true,
             title: const Text('Über Taugt’s?'),
             content: FutureBuilder<AppInfo>(
               future: gateway.laden(),
