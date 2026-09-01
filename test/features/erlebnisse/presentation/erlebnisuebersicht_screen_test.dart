@@ -36,7 +36,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Noch keine Erlebnisse'), findsOneWidget);
-    expect(find.textContaining('Restaurantbesuch oder Einkauf'), findsOneWidget);
+    expect(
+        find.textContaining('Restaurantbesuch oder Einkauf'), findsOneWidget);
     expect(find.text('Erlebnis registrieren'), findsWidgets);
   });
 
@@ -87,7 +88,8 @@ void main() {
   });
 }
 
-Widget _app(SqliteBewertungsRepository repository, Profil profil) => MaterialApp(
+Widget _app(SqliteBewertungsRepository repository, Profil profil) =>
+    MaterialApp(
       home: EntwuerfeScreen(
         repository: repository,
         idGenerator: _TestIdGenerator(),
