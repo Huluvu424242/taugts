@@ -4,7 +4,8 @@ import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/features/home/presentation/home_screen.dart';
 
 void main() {
-  testWidgets('Hauptmenü zeigt kleines Logo ohne höhere App-Bar', (tester) async {
+  testWidgets('Hauptmenü zeigt kleines Logo ohne höhere App-Bar',
+      (tester) async {
     await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
     final logoFinder = find.byKey(const Key('hauptmenue-logo'));
