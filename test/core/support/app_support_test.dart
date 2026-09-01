@@ -37,10 +37,17 @@ void main() {
     );
     expect(logoFinder, findsOneWidget);
     expect(tester.widget<AppLogo>(logoFinder).size, 14);
+    final actionRect = tester.getRect(schliessenMitLogo);
+    final logoRect = tester.getRect(logoFinder);
+    expect(actionRect.contains(logoRect.topLeft), isTrue);
+    expect(actionRect.contains(logoRect.bottomRight), isTrue);
     expect(
-      tester.getSize(schliessenMitLogo),
-      tester.getSize(find.text('Schließen')),
-      reason: 'Das Logo darf den Layout-Footprint der Aktion nicht vergrößern.',
+      find.descendant(
+        of: schliessenMitLogo,
+        matching: find.widgetWithText(TextButton, 'Schließen'),
+      ),
+      findsOneWidget,
+      reason: 'Das Logo bleibt innerhalb der bestehenden Schließen-Aktion.',
     );
     expect(
       tester
