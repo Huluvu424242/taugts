@@ -8,6 +8,37 @@ import 'package:taugts/core/support/support_kontexte.dart';
 const _appRepository = 'Huluvu424242/taugts';
 const _projektseiteUrl = 'https://github.com/Huluvu424242/taugts';
 const _projektdokumentationUrl = 'https://huluvu424242.github.io/taugts/';
+const appLogoAsset = 'assets/icons/app_icon_source.png';
+
+class AppLogo extends StatelessWidget {
+  const AppLogo({
+    required this.size,
+    this.semanticLabel,
+    super.key,
+  });
+
+  final double size;
+  final String? semanticLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final logo = Image.asset(
+      appLogoAsset,
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+    );
+    final label = semanticLabel;
+    if (label == null) {
+      return ExcludeSemantics(child: logo);
+    }
+    return Semantics(
+      image: true,
+      label: label,
+      child: ExcludeSemantics(child: logo),
+    );
+  }
+}
 
 class AppSupportMenu extends StatelessWidget {
   const AppSupportMenu({
@@ -210,7 +241,18 @@ Future<void> zeigeUeberDialog(
               ),
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Schließen'),
+                child: const Stack(
+                  key: Key('ueber-schliessen-mit-logo'),
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    Text('Schließen'),
+                    Positioned(
+                      left: -16,
+                      child: AppLogo(size: 14),
+                    ),
+                  ],
+                ),
               ),
             ],
           );
