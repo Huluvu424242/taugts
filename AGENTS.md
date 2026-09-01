@@ -146,6 +146,10 @@ Die Implementierung ist vollständig innerhalb des jeweiligen App-Projekts zu do
 - Jedes App-Projekt besitzt eine eindeutig festgelegte Projektseite. Bei einem GitHub-Projekt ist dies die kanonische Repository-Seite. Die Seite `Über` verlinkt dieses Ziel direkt.
 - Für **Taugt’s?** ist die Projektseite verbindlich `https://github.com/Huluvu424242/taugts`.
 - Jedes App-Projekt enthält eine für Endnutzer geschriebene Benutzerdokumentation unter `docs/`. Sie wird neben Architektur- und Entwicklerdokumentation als eigener Dokumentationsbereich gepflegt und beschreibt mindestens Installation beziehungsweise Bezug der App, grundlegende Bedienung, zentrale Funktionen, Datenhaltung und Datenaustausch soweit vorhanden, bekannte Einschränkungen sowie Hilfe- und Meldewege.
+- Die Dokumentation wird ausschließlich im Markdown-Format unter `docs/` fachlich gepflegt. Manuell gepflegte HTML-Kopien sind unzulässig; generiertes HTML ist ausschließlich ein Build-Artefakt.
+- **MkDocs** ist der verbindliche Generator für die veröffentlichte Dokumentationswebsite eines App-Grundgerüsts. Die MkDocs-Konfiguration liegt reproduzierbar im Repository; Benutzer-, Entwickler- und Architekturdokumentation werden über dieselbe Website zugänglich gemacht.
+- Die GitHub-Pages-Erzeugung und -Veröffentlichung erfolgt in jedem App-Grundgerüst über den einheitlich benannten Workflow `.github/workflows/ghpage-generator.yml`. Abweichende Workflow-Dateinamen sind für diese Grundgerüst-Funktion nicht zulässig.
+- Der Workflow `ghpage-generator.yml` baut ausschließlich die Dokumentation und veröffentlicht das statische Ergebnis auf GitHub Pages. Er erzeugt keine Codeänderungen oder Commits und folgt vollständig dem Erlaubnisvorbehalt und den Sicherheitsanforderungen für GitHub Actions dieser Datei.
 - Die Benutzerdokumentation wird von Anfang an so strukturiert, dass sie als statische Website veröffentlicht werden kann. Interne Entwicklerdetails dürfen auf weiterführende Dokumente verweisen, gehören aber nicht ungefiltert in die Benutzerdokumentation.
 - Die Benutzerdokumentation wird über GitHub Pages der Projektseite frei im Web zugänglich gemacht. Die kanonische veröffentlichte URL wird projektspezifisch dokumentiert und von der Seite `Über` aus direkt geöffnet.
 - Für **Taugt’s?** ist die kanonische Benutzerdokumentation verbindlich `https://huluvu424242.github.io/taugts/`.
@@ -311,6 +315,9 @@ flutter test
 
 - `README.md` enthält Zweck, Voraussetzungen, Setup, Start und Tests.
 - Unter `docs/` werden Architektur-, Entwickler- und Benutzerdokumentation als klar getrennte, gepflegte Dokumentationsbereiche geführt.
+- Die Dokumentation unter `docs/` bleibt Markdown als einzige fachlich gepflegte Quelle. MkDocs erzeugt daraus die statische HTML-Dokumentationswebsite; generiertes HTML wird nicht eingecheckt oder separat gepflegt.
+- Die MkDocs-Konfiguration und ihre Build-Abhängigkeiten werden reproduzierbar im Repository versioniert. Die veröffentlichte Website bietet nachvollziehbare Einstiege in Benutzer-, Entwickler- und Architekturdokumentation.
+- Für die GitHub-Pages-Erzeugung und -Veröffentlichung wird verbindlich `.github/workflows/ghpage-generator.yml` verwendet. Der Workflow unterliegt den Sicherheits- und Freigaberegeln für Werkzeugketten dieser Datei.
 - Architekturentscheidungen mit aktuellem Nutzen werden unter `docs/` als Markdown dokumentiert; Diagramme bevorzugt als Mermaid und Architekturübersichten nach C4.
 - Die Benutzerdokumentation ist für Endnutzer verständlich formuliert, bildet die tatsächlich ausgelieferte Bedienung ab und ist über die projektspezifische GitHub-Pages-URL öffentlich zugänglich.
 - Änderungen an Architektur, Persistenz, Import/Export oder Plattformintegration aktualisieren die technische Dokumentation im selben PR; Änderungen am Nutzerverhalten oder an sichtbaren Funktionen aktualisieren die Benutzerdokumentation im selben PR.
