@@ -31,6 +31,16 @@ class _GaststaettenbewertungAbschnittState
   late Future<_Daten> _laden;
   var _lokalGespeichert = false;
 
+  bool get _istGeschaeft => widget.erlebnis.typ == Erlebnistyp.einkauf;
+
+  String get _bezeichnung => _istGeschaeft ? 'Geschäft' : 'Gaststätte';
+
+  String get _kontext => _istGeschaeft ? 'Einkauf' : 'Besuch';
+
+  KriteriumObjektart get _objektart => _istGeschaeft
+      ? KriteriumObjektart.geschaeft
+      : KriteriumObjektart.gastronomie;
+
   @override
   void initState() {
     super.initState();
@@ -39,9 +49,7 @@ class _GaststaettenbewertungAbschnittState
 
   Future<_Daten> _ladeDaten() async {
     final werte = await Future.wait([
-      widget.repository.ladeAktiveKriterienFuerObjektart(
-        KriteriumObjektart.gastronomie,
-      ),
+      widget.repository.ladeAktiveKriterienFuerObjektart(_objektart),
       widget.repository.ladeOrtsbewertungFuerErlebnis(widget.erlebnis.id),
     ]);
     return _Daten(
@@ -68,29 +76,29 @@ class _GaststaettenbewertungAbschnittState
     final ort = widget.ort;
     return ExpansionTile(
       maintainState: true,
-      title: const Text('Gaststätte bewerten'),
+      title: Text('$_bezeichnung bewerten'),
       subtitle: ort == null
-          ? const Text('Bitte zuerst eine Gaststätte auswählen.')
+          ? Text('Bitte zuerst ${_istGeschaeft ? 'ein Geschäft' : 'eine Gaststätte'} auswählen.')
           : FutureBuilder<_Daten>(
               future: _laden,
               builder: (context, snapshot) {
-                final text = _lokalGespeichert ||
-                        snapshot.data?.vorhanden != null
-                    ? 'Für diesen Besuch liegt eine Bewertung vor.'
+                final text = _lokalGespeichert || snapshot.data?.vorhanden != null
+                    ? 'Für diesen $_kontext liegt eine Bewertung vor.'
                     : snapshot.hasError
                         ? 'Der Bewertungsstatus konnte nicht geladen werden.'
                         : snapshot.hasData
-                            ? 'Noch keine Bewertung für diesen Besuch.'
+                            ? 'Noch keine Bewertung für diesen $_kontext.'
                             : 'Bewertungsstatus wird geladen.';
                 return Text(text);
               },
             ),
       children: [
         if (ort == null)
-          const Padding(
-            padding: EdgeInsets.only(bottom: 16),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
             child: Text(
-                'Bestellung und Produktbewertungen bleiben ohne Gaststättenbewertung nutzbar.'),
+              '${_istGeschaeft ? 'Einkaufsliste' : 'Bestellung'} und Produktbewertungen bleiben ohne ${_istGeschaeft ? 'Geschäftsbewertung' : 'Gaststättenbewertung'} nutzbar.',
+            ),
           )
         else
           FutureBuilder<_Daten>(
@@ -104,8 +112,8 @@ class _GaststaettenbewertungAbschnittState
                     children: [
                       Semantics(
                         liveRegion: true,
-                        child: const Text(
-                          'Die Gaststättenbewertung konnte nicht geladen werden.',
+                        child: Text(
+                          'Die ${_istGeschaeft ? 'Geschäftsbewertung' : 'Gaststättenbewertung'} konnte nicht geladen werden.',
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -122,7 +130,8 @@ class _GaststaettenbewertungAbschnittState
                 return Padding(
                   padding: const EdgeInsets.all(16),
                   child: Semantics(
-                    label: 'Gaststättenbewertung wird geladen',
+                    label:
+                        '${_istGeschaeft ? 'Geschäftsbewertung' : 'Gaststättenbewertung'} wird geladen',
                     child: const LinearProgressIndicator(),
                   ),
                 );
@@ -133,6 +142,7 @@ class _GaststaettenbewertungAbschnittState
                 erlebnis: widget.erlebnis,
                 ort: ort,
                 daten: snapshot.data!,
+                istGeschaeft: _istGeschaeft,
                 fehlerFokus: _fehlerFokus,
                 ersterWertFokus: _ersterWertFokus,
                 notizFokus: _notizFokus,
@@ -152,6 +162,7 @@ class _Formular extends StatefulWidget {
     required this.erlebnis,
     required this.ort,
     required this.daten,
+    required this.istGeschaeft,
     required this.fehlerFokus,
     required this.ersterWertFokus,
     required this.notizFokus,
@@ -163,6 +174,7 @@ class _Formular extends StatefulWidget {
   final Erlebnis erlebnis;
   final Ort ort;
   final _Daten daten;
+  final bool istGeschaeft;
   final FocusNode fehlerFokus;
   final FocusNode ersterWertFokus;
   final FocusNode notizFokus;
@@ -178,6 +190,9 @@ class _FormularState extends State<_Formular> {
   var _eingabeFehlt = false;
   var _speichert = false;
   var _gespeichert = false;
+
+  String get _bezeichnung =>
+      widget.istGeschaeft ? 'Geschäftsbewertung' : 'Gaststättenbewertung';
 
   @override
   void initState() {
@@ -206,7 +221,7 @@ class _FormularState extends State<_Formular> {
         _notiz.text.trim().isEmpty) {
       setState(() => _eingabeFehlt = true);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bitte Gaststättenbewertung prüfen.')),
+        SnackBar(content: Text('Bitte $_bezeichnung prüfen.')),
       );
       widget.fehlerFokus.requestFocus();
       return;
@@ -260,15 +275,15 @@ class _FormularState extends State<_Formular> {
       });
       widget.onGespeichert();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gaststättenbewertung gespeichert.')),
+        SnackBar(content: Text('$_bezeichnung gespeichert.')),
       );
     } catch (_) {
       if (!mounted) return;
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(
-                'Die Gaststättenbewertung konnte nicht gespeichert werden.')),
+        SnackBar(
+          content: Text('Die $_bezeichnung konnte nicht gespeichert werden.'),
+        ),
       );
     }
   }
@@ -292,10 +307,10 @@ class _FormularState extends State<_Formular> {
                 ],
               ),
             if (widget.daten.kriterien.isEmpty)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 12),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
                 child: Text(
-                  'Keine aktiven Gaststättenkriterien. Eine Notiz kann dennoch gespeichert werden.',
+                  'Keine aktiven ${widget.istGeschaeft ? 'Geschäfts' : 'Gaststätten'}kriterien. Eine Notiz kann dennoch gespeichert werden.',
                 ),
               ),
             for (var index = 0; index < widget.daten.kriterien.length; index++)
@@ -308,14 +323,29 @@ class _FormularState extends State<_Formular> {
                 ),
                 items: const [
                   DropdownMenuItem<double?>(
-                      value: null, child: Text('Nicht bewertet')),
+                    value: null,
+                    child: Text('Nicht bewertet'),
+                  ),
                   DropdownMenuItem(
-                      value: 1, child: Text('1 – taugt gar nicht')),
+                    value: 1,
+                    child: Text('1 – taugt gar nicht'),
+                  ),
                   DropdownMenuItem(
-                      value: 2, child: Text('2 – taugt eher nicht')),
-                  DropdownMenuItem(value: 3, child: Text('3 – teils, teils')),
-                  DropdownMenuItem(value: 4, child: Text('4 – taugt eher')),
-                  DropdownMenuItem(value: 5, child: Text('5 – taugt sehr')),
+                    value: 2,
+                    child: Text('2 – taugt eher nicht'),
+                  ),
+                  DropdownMenuItem(
+                    value: 3,
+                    child: Text('3 – teils, teils'),
+                  ),
+                  DropdownMenuItem(
+                    value: 4,
+                    child: Text('4 – taugt eher'),
+                  ),
+                  DropdownMenuItem(
+                    value: 5,
+                    child: Text('5 – taugt sehr'),
+                  ),
                 ],
                 onChanged: _speichert
                     ? null
@@ -340,9 +370,9 @@ class _FormularState extends State<_Formular> {
             FilledButton.icon(
               onPressed: _speichert ? null : _speichern,
               icon: const Icon(Icons.save_outlined),
-              label: Text(_gespeichert
-                  ? 'Bewertung gespeichert'
-                  : 'Bewertung speichern'),
+              label: Text(
+                _gespeichert ? 'Bewertung gespeichert' : 'Bewertung speichern',
+              ),
             ),
           ],
         ),
