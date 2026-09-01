@@ -1,0 +1,49 @@
+site_name: Taugt’s? Dokumentation
+site_description: Benutzer-, Entwickler- und Architekturdokumentation für Taugt’s?
+site_url: https://huluvu424242.github.io/taugts/
+repo_url: https://github.com/Huluvu424242/taugts
+repo_name: Huluvu424242/taugts
+edit_uri: edit/master/docs/
+docs_dir: docs
+site_dir: site
+strict: true
+
+theme:
+  name: material
+  language: de
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+
+plugins:
+  - search:
+      lang: de
+
+nav:
+  - Start: index.md
+  - Benutzerdokumentation:
+      - Überblick: benutzer/index.md
+      - Installation und Updates: benutzer/installation.md
+      - Bedienung und Funktionen: benutzer/bedienung.md
+      - Datenschutz und Datenhaltung: benutzer/datenhaltung.md
+      - Bekannte Einschränkungen und Hilfe: benutzer/hilfe.md
+      - Barrierefreiheit: barrierefreiheit.md
+  - Entwicklerdokumentation:
+      - Überblick: entwicklung/index.md
+      - Dokumentationswerkzeugkette: entwicklung/dokumentationswerkzeugkette.md
+      - Android-Release: android-release.md
+      - OpenStreetMap: openstreetmap.md
+      - Fachliche Anforderungen: fachliche_anforderungen.md
+  - Architektur:
+      - Überblick: architecture/README.md
+      - ADR 0001 – Lokale Persistenz mit SQLite: architecture/0001-lokale-persistenz-mit-sqlite.md
+  - Projekt auf GitHub: https://github.com/Huluvu424242/taugts
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - toc:
+      permalink: true
