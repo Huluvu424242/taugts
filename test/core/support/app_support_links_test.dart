@@ -7,7 +7,8 @@ import 'package:taugts/core/support/external_url_service.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 
 void main() {
-  testWidgets('Über öffnet Projektseite und Projektdokumentation', (tester) async {
+  testWidgets('Über öffnet Projektseite und Projektdokumentation',
+      (tester) async {
     final urlGateway = _FakeExternalUrlGateway();
     await tester.pumpWidget(
       _testApp(
