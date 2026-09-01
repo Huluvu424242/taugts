@@ -36,18 +36,22 @@ void main() {
       matching: find.byType(AppLogo),
     );
     expect(logoFinder, findsOneWidget);
-    expect(tester.widget<AppLogo>(logoFinder).size, 14);
+    expect(tester.widget<AppLogo>(logoFinder).size, 48);
+    final schliessenButton = find.descendant(
+      of: schliessenMitLogo,
+      matching: find.widgetWithText(TextButton, 'Schließen'),
+    );
+    expect(schliessenButton, findsOneWidget);
     final actionRect = tester.getRect(schliessenMitLogo);
     final logoRect = tester.getRect(logoFinder);
+    final schliessenRect = tester.getRect(schliessenButton);
     expect(actionRect.contains(logoRect.topLeft), isTrue);
     expect(actionRect.contains(logoRect.bottomRight), isTrue);
+    expect(logoRect.right <= schliessenRect.left, isTrue);
     expect(
-      find.descendant(
-        of: schliessenMitLogo,
-        matching: find.widgetWithText(TextButton, 'Schließen'),
-      ),
-      findsOneWidget,
-      reason: 'Das Logo bleibt innerhalb der bestehenden Schließen-Aktion.',
+      tester.getSize(schliessenMitLogo).height,
+      tester.getSize(schliessenButton).height,
+      reason: 'Das größere Logo darf die Aktionszeile nicht höher machen.',
     );
     expect(
       tester
