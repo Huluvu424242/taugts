@@ -8,7 +8,7 @@ import 'package:taugts/core/support/support_kontexte.dart';
 const _appRepository = 'Huluvu424242/taugts';
 const _projektseiteUrl = 'https://github.com/Huluvu424242/taugts';
 const _projektdokumentationUrl = 'https://huluvu424242.github.io/taugts/';
-const appLogoAsset = 'assets/icons/app_icon_source.png';
+const appLogoAsset = 'assets/badges/powered_by_ki.png';
 
 class AppLogo extends StatelessWidget {
   const AppLogo({
