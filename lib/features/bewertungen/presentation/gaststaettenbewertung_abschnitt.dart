@@ -78,11 +78,13 @@ class _GaststaettenbewertungAbschnittState
       maintainState: true,
       title: Text('$_bezeichnung bewerten'),
       subtitle: ort == null
-          ? Text('Bitte zuerst ${_istGeschaeft ? 'ein Geschäft' : 'eine Gaststätte'} auswählen.')
+          ? Text(
+              'Bitte zuerst ${_istGeschaeft ? 'ein Geschäft' : 'eine Gaststätte'} auswählen.')
           : FutureBuilder<_Daten>(
               future: _laden,
               builder: (context, snapshot) {
-                final text = _lokalGespeichert || snapshot.data?.vorhanden != null
+                final text = _lokalGespeichert ||
+                        snapshot.data?.vorhanden != null
                     ? 'Für diesen $_kontext liegt eine Bewertung vor.'
                     : snapshot.hasError
                         ? 'Der Bewertungsstatus konnte nicht geladen werden.'
