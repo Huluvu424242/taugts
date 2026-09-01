@@ -8,8 +8,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Das Taugt’s?-Logo erscheint zusätzlich klein im Hauptmenü direkt hinter dem App-Namen sowie im Über-Dialog unmittelbar links neben „Schließen“, ohne die bisherigen Höhen beziehungsweise Aktionsabstände zu vergrößern.
 - Der Über-Dialog verlinkt die Projektseite und die veröffentlichte Projektdokumentation direkt über die vorhandene testbare Browser-Abstraktion und zeigt Öffnungsfehler im Dialog an.
-- Bekannte Produkte können aus Produktliste, Produktdetails und Bewertungsverlauf erneut bewertet werden; dabei wird ein vorhandenes oder neues Erlebnis gewählt, das Produkt als bestehender Stammdatensatz wiederverwendet und anschließend der bestehende Positions- und Bewertungsweg genutzt.
+- Bekannte Produkte können aus Produktliste, Produktdetails und Bewertungsverlauf erneut bewertet werden; dabei wird ein vorhandenes oder neues Erlebnis gewählt, das Produkt als bestehenden Stammdatensatz wiederverwendet und anschließend der bestehende Positions- und Bewertungsweg genutzt.
 - Produkt- und Ortsverläufe nennen den konkreten Erlebniszusammenhang sowie Bewertungs- und Preisbeobachtungszeitpunkte, damalige Anzahl und damaligen Preis ausdrücklich.
 - Geschäfte lassen sich innerhalb desselben Einkaufs in einem eigenen ausklappbaren Abschnitt mit Geschäftskriterien getrennt von Einkaufsliste und Produktbewertungen bewerten.
 - Die Erlebnisübersicht gruppiert laufende, geplante und vergangene Restaurantbesuche und Einkäufe, zeigt Zeitkontext, Ort und Positionsanzahl und führt zum selben bearbeitbaren Erlebnis zurück.
