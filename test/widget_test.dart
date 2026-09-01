@@ -11,6 +11,13 @@ void main() {
     expect(find.text('Dinge'), findsOneWidget);
     expect(find.text('Orte'), findsOneWidget);
     expect(find.text('Bewertungen'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Alle Erlebnisse'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+
     expect(find.text('Suche'), findsOneWidget);
     expect(find.text('Import/Export'), findsOneWidget);
     expect(find.text('Einstellungen'), findsOneWidget);
