@@ -39,6 +39,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   final _endeFokus = FocusNode();
   final _dauer = TextEditingController();
   final _notiz = TextEditingController();
+  final _positionenInBearbeitung = <String>{};
   late final String _id;
   late final DateTime _erstelltAm;
   late final Erlebnistyp _typ;
@@ -88,6 +89,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     _endeFokus.dispose();
     super.dispose();
   }
+
+  bool get _istRestaurant => _typ == Erlebnistyp.restaurantbesuch;
 
   String get _typLabel => switch (_typ) {
         Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
@@ -260,8 +263,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${_statusLabel(erlebnis.status)} gespeichert.'),
-        ),
+            content: Text('${_statusLabel(erlebnis.status)} gespeichert.')),
       );
     } catch (_) {
       if (!mounted) return;
@@ -317,7 +319,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Das Erlebnis konnte nicht vorbereitet werden.')),
+          content: Text('Das Erlebnis konnte nicht vorbereitet werden.'),
+        ),
       );
     }
   }
@@ -328,7 +331,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Position entfernen?'),
         content: Text(
-            '${eintrag.produkt.anzeigetitel} wird aus dem Erlebnis entfernt.'),
+          '${eintrag.produkt.anzeigetitel} wird aus dem Erlebnis entfernt.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -342,8 +346,49 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       ),
     );
     if (bestaetigt != true) return;
-    await widget.repository.loescheErlebnisposition(eintrag.position.id);
-    if (mounted) _positionenLaden();
+    try {
+      await widget.repository.loescheErlebnisposition(eintrag.position.id);
+      if (!mounted) return;
+      _positionenLaden();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Die Position konnte nicht entfernt werden.')),
+      );
+    }
+  }
+
+  Future<void> _anzahlAendern(
+    ErlebnispositionMitProdukt eintrag,
+    int delta,
+  ) async {
+    final id = eintrag.position.id;
+    if (_positionenInBearbeitung.contains(id)) return;
+    final neu = eintrag.position.anzahl + delta;
+    if (neu < 1) return;
+    setState(() => _positionenInBearbeitung.add(id));
+    try {
+      await widget.repository.speichereErlebnisposition(
+        position: eintrag.position.mitAnzahl(neu, DateTime.now().toUtc()),
+        preis: eintrag.preis,
+      );
+      if (!mounted) return;
+      _positionenLaden();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Die Anzahl für ${eintrag.produkt.anzeigetitel} konnte nicht gespeichert werden.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _positionenInBearbeitung.remove(id));
+      }
+    }
   }
 
   Future<void> _positionBewerten(ErlebnispositionMitProdukt eintrag) async {
@@ -359,6 +404,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         ),
       ),
     );
+    if (mounted) _positionenLaden();
   }
 
   String _datumText(BuildContext context, DateTime? wert) => wert == null
@@ -380,6 +426,131 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     );
     return '${lokalisierung.formatFullDate(lokal)}, $uhrzeit';
   }
+
+  String _restaurantStatusText(BuildContext context) {
+    if (!_istRestaurant || _aktuellerStatus != Erlebnisstatus.aktiv) return '';
+    final beginn = _tatsaechlicherBeginn;
+    if (beginn == null) return '';
+    final zeit = MaterialLocalizations.of(context).formatTimeOfDay(
+      TimeOfDay.fromDateTime(beginn),
+    );
+    return 'Aktiv seit $zeit';
+  }
+
+  Widget _bestellposition(ErlebnispositionMitProdukt eintrag) {
+    final name = eintrag.produkt.anzeigetitel;
+    final preis = eintrag.preis;
+    final busy = _positionenInBearbeitung.contains(eintrag.position.id);
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(name, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              preis == null
+                  ? 'Preis nicht erfasst'
+                  : '${preis.betrag.dezimalText} ${preis.betrag.waehrung} je Einheit',
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 4,
+              runSpacing: 4,
+              children: [
+                IconButton(
+                  tooltip:
+                      '$name Anzahl verringern, aktuell ${eintrag.position.anzahl}',
+                  onPressed: busy || eintrag.position.anzahl <= 1
+                      ? null
+                      : () => _anzahlAendern(eintrag, -1),
+                  icon: const Icon(Icons.remove),
+                ),
+                Semantics(
+                  label: '$name, Anzahl ${eintrag.position.anzahl}',
+                  child: SizedBox(
+                    width: 48,
+                    child: Text(
+                      '${eintrag.position.anzahl}',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip:
+                      '$name Anzahl erhöhen, aktuell ${eintrag.position.anzahl}',
+                  onPressed: busy ? null : () => _anzahlAendern(eintrag, 1),
+                  icon: const Icon(Icons.add),
+                ),
+                FutureBuilder<List<Bewertung>>(
+                  future: widget.repository.ladeBewertungenFuerErlebnisposition(
+                    eintrag.position.id,
+                  ),
+                  builder: (context, snapshot) {
+                    final bewertet =
+                        snapshot.hasData && snapshot.data!.isNotEmpty;
+                    final status =
+                        bewertet ? 'Bewertet' : 'Noch nicht bewertet';
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(status),
+                        const SizedBox(width: 4),
+                        _ProduktBewertungsButton(
+                          produktname: name,
+                          bewertet: bewertet,
+                          onPressed: () => _positionBewerten(eintrag),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                IconButton(
+                  tooltip: '$name bearbeiten',
+                  onPressed: busy ? null : () => _positionOeffnen(eintrag),
+                  icon: const Icon(Icons.edit_outlined),
+                ),
+                IconButton(
+                  tooltip: '$name entfernen',
+                  onPressed: busy ? null : () => _positionLoeschen(eintrag),
+                  icon: const Icon(Icons.delete_outline),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _allgemeinePosition(ErlebnispositionMitProdukt eintrag) => ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(eintrag.produkt.anzeigetitel),
+        subtitle: Text(
+          '${eintrag.position.anzahl} ×'
+          '${eintrag.preis == null ? '' : ' · ${eintrag.preis!.betrag.dezimalText} ${eintrag.preis!.betrag.waehrung}'}',
+        ),
+        onTap: () => _positionOeffnen(eintrag),
+        trailing: Wrap(
+          spacing: 4,
+          children: [
+            IconButton(
+              tooltip: '${eintrag.produkt.anzeigetitel} bewerten',
+              onPressed: () => _positionBewerten(eintrag),
+              icon: const Icon(Icons.star_outline),
+            ),
+            IconButton(
+              tooltip: '${eintrag.produkt.anzeigetitel} entfernen',
+              onPressed: () => _positionLoeschen(eintrag),
+              icon: const Icon(Icons.delete_outline),
+            ),
+          ],
+        ),
+      );
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -414,11 +585,15 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
+              if (_restaurantStatusText(context).isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(_restaurantStatusText(context)),
+              ],
               const SizedBox(height: 16),
               TextButton.icon(
                 onPressed: _ortWaehlen,
                 icon: Icon(
-                  _typ == Erlebnistyp.restaurantbesuch
+                  _istRestaurant
                       ? Icons.restaurant_outlined
                       : Icons.shopping_bag_outlined,
                 ),
@@ -516,7 +691,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                     child: Semantics(
                       header: true,
                       child: Text(
-                        'Erlebnispositionen',
+                        _istRestaurant ? 'Bestellung' : 'Erlebnispositionen',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
@@ -524,53 +699,75 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   TextButton.icon(
                     onPressed: _speichert ? null : _positionOeffnen,
                     icon: const Icon(Icons.add),
-                    label: const Text('Hinzufügen'),
+                    label: Text(
+                      _istRestaurant ? 'Produkt hinzufügen' : 'Hinzufügen',
+                    ),
                   ),
                 ],
               ),
               FutureBuilder<List<ErlebnispositionMitProdukt>>(
                 future: _positionen,
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const LinearProgressIndicator();
+                  if (snapshot.hasError) {
+                    return Semantics(
+                      liveRegion: true,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _istRestaurant
+                                  ? 'Die Bestellung konnte nicht geladen werden.'
+                                  : 'Die Positionen konnten nicht geladen werden.',
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: _positionenLaden,
+                            child: const Text('Erneut versuchen'),
+                          ),
+                        ],
+                      ),
+                    );
                   }
-                  if (snapshot.data!.isEmpty) {
-                    return const Text('Noch keine Produkte erfasst.');
+                  if (!snapshot.hasData) {
+                    return Semantics(
+                      label: _istRestaurant
+                          ? 'Bestellung wird geladen'
+                          : 'Erlebnispositionen werden geladen',
+                      child: const LinearProgressIndicator(),
+                    );
+                  }
+                  final eintraege = snapshot.data!;
+                  if (eintraege.isEmpty) {
+                    return Text(
+                      _istRestaurant
+                          ? 'Noch keine Produkte bestellt. Produkt hinzufügen, um die Bestellung zu beginnen.'
+                          : 'Noch keine Produkte erfasst.',
+                    );
                   }
                   return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      for (final eintrag in snapshot.data!)
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(eintrag.produkt.anzeigetitel),
-                          subtitle: Text(
-                            '${eintrag.position.anzahl} ×'
-                            '${eintrag.preis == null ? '' : ' · ${eintrag.preis!.betrag.dezimalText} ${eintrag.preis!.betrag.waehrung}'}',
-                          ),
-                          onTap: () => _positionOeffnen(eintrag),
-                          trailing: Wrap(
-                            spacing: 4,
-                            children: [
-                              IconButton(
-                                tooltip:
-                                    '${eintrag.produkt.anzeigetitel} bewerten',
-                                onPressed: () => _positionBewerten(eintrag),
-                                icon: const Icon(Icons.star_outline),
-                              ),
-                              IconButton(
-                                tooltip:
-                                    '${eintrag.produkt.anzeigetitel} entfernen',
-                                onPressed: () => _positionLoeschen(eintrag),
-                                icon: const Icon(Icons.delete_outline),
-                              ),
-                            ],
-                          ),
+                      if (_istRestaurant) ...[
+                        for (final eintrag in eintraege)
+                          _bestellposition(eintrag),
+                        const SizedBox(height: 8),
+                        Text(
+                          eintraege
+                              .map(
+                                (e) =>
+                                    '${e.position.anzahl} × ${e.produkt.anzeigetitel}',
+                              )
+                              .join(' · '),
+                          key: const ValueKey('bestellungs-zusammenfassung'),
                         ),
+                      ] else
+                        for (final eintrag in eintraege)
+                          _allgemeinePosition(eintrag),
                     ],
                   );
                 },
               ),
-              if (_typ == Erlebnistyp.restaurantbesuch) ...[
+              if (_istRestaurant) ...[
                 const SizedBox(height: 24),
                 GaststaettenbewertungAbschnitt(
                   key: ValueKey('gaststaettenbewertung-$_id-${_ort?.id}'),
@@ -620,4 +817,52 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
           ),
         ),
       );
+}
+
+class _ProduktBewertungsButton extends StatelessWidget {
+  const _ProduktBewertungsButton({
+    required this.produktname,
+    required this.bewertet,
+    required this.onPressed,
+  });
+
+  final String produktname;
+  final bool bewertet;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final beschriftung = '$produktname bewerten';
+    return Semantics(
+      button: true,
+      label: beschriftung,
+      value: bewertet ? 'Bewertet' : 'Noch nicht bewertet',
+      child: Tooltip(
+        message: beschriftung,
+        child: InkResponse(
+          onTap: onPressed,
+          radius: 28,
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Stack(
+              alignment: Alignment.center,
+              children: const [
+                Positioned(
+                  left: 7,
+                  bottom: 7,
+                  child: Icon(Icons.thumb_down_alt_outlined, size: 22),
+                ),
+                Positioned(
+                  right: 7,
+                  top: 7,
+                  child: Icon(Icons.thumb_up_alt_outlined, size: 22),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

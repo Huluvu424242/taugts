@@ -11,6 +11,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Die mobile Startseite bietet eine responsive, semantisch beschriftete Navigation zu Dinge, Orte, Bewertungen, Suche, Import/Export und Einstellungen sowie die zentralen Aktionen „Jetzt bewerten“, „Erlebnis registrieren“ und „Alle Erlebnisse“.
 - Genau ein aktives Erlebnis kann direkt von der Startseite fortgesetzt werden; bei mehreren aktiven Erlebnissen wird keine Auswahl vorweggenommen.
 - Noch nicht umgesetzte Zielbereiche führen zu verständlichen Informationsseiten statt zu funktionslosen Aktionen.
+- Restaurantbesuche führen ihre Produkte als sichtbare Bestellung mit direkter Mengenänderung, Einzelpreis, kompakter Zusammenfassung und eindeutigem Bewertungsstatus.
+- Produktbewertungen sind in der Bestellung über eine barrierefrei beschriftete kombinierte Downlike-/Uplike-Aktion erreichbar; der Zustand „Bewertet“ beziehungsweise „Noch nicht bewertet“ bleibt zusätzlich textlich sichtbar.
 
 ## [0.1.0+3] - 2026-08-31
 
