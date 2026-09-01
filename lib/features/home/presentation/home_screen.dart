@@ -190,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: 4),
             AppLogo(
               key: Key('hauptmenue-logo'),
-              size: 20,
+              size: 32,
             ),
           ],
         ),
