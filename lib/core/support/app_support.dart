@@ -245,7 +245,7 @@ Future<void> zeigeUeberDialog(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const AppLogo(
-                    size: 48,
+                    size: 32,
                     semanticLabel: 'Powered by KI',
                   ),
                   const SizedBox(width: 8),
