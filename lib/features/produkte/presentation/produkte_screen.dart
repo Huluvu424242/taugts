@@ -6,7 +6,9 @@ import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/presentation/bewertungsverlauf_screen.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/produkte/presentation/barcode_scanner_screen.dart';
+import 'package:taugts/features/produkte/presentation/produkt_erneut_bewerten_screen.dart';
 import 'package:taugts/features/produkte/presentation/produkt_formular.dart';
+import 'package:taugts/features/profil/models/profil.dart';
 
 typedef BarcodeScanStart = Future<String?> Function(BuildContext context);
 
@@ -16,6 +18,7 @@ class ProdukteScreen extends StatefulWidget {
     required this.idGenerator,
     this.zurAuswahl = false,
     this.eigenesProfilId,
+    this.profil,
     this.barcodeScanStart,
     super.key,
   });
@@ -24,6 +27,7 @@ class ProdukteScreen extends StatefulWidget {
   final IdGenerator idGenerator;
   final bool zurAuswahl;
   final String? eigenesProfilId;
+  final Profil? profil;
   final BarcodeScanStart? barcodeScanStart;
 
   @override
@@ -33,6 +37,17 @@ class ProdukteScreen extends StatefulWidget {
 class _ProdukteScreenState extends State<ProdukteScreen> {
   final _suche = TextEditingController();
   late Future<List<Produkt>> _produkte = widget.repository.ladeProdukte();
+
+  String? get _profilId => widget.profil?.id ?? widget.eigenesProfilId;
+
+  Profil? get _profilFuerBewertung {
+    final vorhandenesProfil = widget.profil;
+    if (vorhandenesProfil != null) return vorhandenesProfil;
+    final id = widget.eigenesProfilId;
+    if (id == null) return null;
+    final jetzt = DateTime.now().toUtc();
+    return Profil(id: id, erstelltAm: jetzt, geaendertAm: jetzt);
+  }
 
   @override
   void dispose() {
@@ -46,6 +61,28 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
     });
   }
 
+  Future<void> _erneutBewerten(Produkt produkt) async {
+    final profil = _profilFuerBewertung;
+    if (profil == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Für eine Bewertung muss das eigene Profil geladen sein.'),
+        ),
+      );
+      return;
+    }
+    await Navigator.of(context).push<Erlebnis>(
+      MaterialPageRoute(
+        builder: (_) => ProduktErneutBewertenScreen(
+          repository: widget.repository,
+          idGenerator: widget.idGenerator,
+          profil: profil,
+          produkt: produkt,
+        ),
+      ),
+    );
+  }
+
   Future<void> _formularOeffnen([Produkt? produkt]) async {
     final gespeichert = await Navigator.of(context).push<Produkt>(
       MaterialPageRoute(
@@ -53,6 +90,10 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
           repository: widget.repository,
           idGenerator: widget.idGenerator,
           produkt: produkt,
+          onErneutBewerten:
+              produkt == null || _profilFuerBewertung == null
+                  ? null
+                  : () => _erneutBewerten(produkt),
         ),
       ),
     );
@@ -231,21 +272,39 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
                               : Text(produkt.marke ?? produkt.produktart.name),
                           trailing: widget.zurAuswahl
                               ? const Icon(Icons.chevron_right)
-                              : IconButton(
-                                  tooltip:
-                                      'Verlauf von ${produkt.anzeigetitel}',
-                                  icon: const Icon(Icons.history),
-                                  onPressed: () =>
-                                      Navigator.of(context).push<void>(
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          BewertungsverlaufScreen.fuerProdukt(
-                                        repository: widget.repository,
-                                        produkt: produkt,
-                                        eigenesProfilId: widget.eigenesProfilId,
+                              : Wrap(
+                                  spacing: 4,
+                                  children: [
+                                    IconButton(
+                                      tooltip:
+                                          '${produkt.anzeigetitel} erneut bewerten',
+                                      onPressed: _profilFuerBewertung == null
+                                          ? null
+                                          : () => _erneutBewerten(produkt),
+                                      icon: const Icon(Icons.rate_review_outlined),
+                                    ),
+                                    IconButton(
+                                      tooltip:
+                                          'Verlauf von ${produkt.anzeigetitel}',
+                                      icon: const Icon(Icons.history),
+                                      onPressed: () =>
+                                          Navigator.of(context).push<void>(
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              BewertungsverlaufScreen.fuerProdukt(
+                                            repository: widget.repository,
+                                            produkt: produkt,
+                                            eigenesProfilId: _profilId,
+                                            onErneutBewerten:
+                                                _profilFuerBewertung == null
+                                                    ? null
+                                                    : () =>
+                                                        _erneutBewerten(produkt),
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                           onTap: () => widget.zurAuswahl
                               ? Navigator.of(context).pop(produkt)

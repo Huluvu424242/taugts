@@ -9,6 +9,7 @@ class BewertungsverlaufScreen extends StatefulWidget {
     required this.repository,
     required Produkt produkt,
     this.eigenesProfilId,
+    this.onErneutBewerten,
     super.key,
   })  : objektId = produkt.id,
         objektName = produkt.anzeigetitel,
@@ -21,12 +22,14 @@ class BewertungsverlaufScreen extends StatefulWidget {
     super.key,
   })  : objektId = ort.id,
         objektName = ort.name,
+        onErneutBewerten = null,
         istOrt = true;
 
   final BewertungsRepository repository;
   final String objektId;
   final String objektName;
   final String? eigenesProfilId;
+  final VoidCallback? onErneutBewerten;
   final bool istOrt;
 
   @override
@@ -102,6 +105,14 @@ class _BewertungsverlaufScreenState extends State<BewertungsverlaufScreen> {
                   const Text(
                     'Stammdaten bleiben von den folgenden historischen Beobachtungen getrennt.',
                   ),
+                  if (widget.onErneutBewerten != null) ...[
+                    const SizedBox(height: 12),
+                    FilledButton.icon(
+                      onPressed: widget.onErneutBewerten,
+                      icon: const Icon(Icons.rate_review_outlined),
+                      label: const Text('Erneut bewerten'),
+                    ),
+                  ],
                   const SizedBox(height: 20),
                   if (eintraege.isEmpty)
                     const Text(
