@@ -183,7 +183,17 @@ class _HomeScreenState extends State<HomeScreen> {
         profil != null;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Taugt’s?'),
+        title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Taugt’s?'),
+            SizedBox(width: 4),
+            AppLogo(
+              key: Key('hauptmenue-logo'),
+              size: 20,
+            ),
+          ],
+        ),
         actions: [
           if (profil != null && widget.profilRepository != null)
             IconButton(
