@@ -800,10 +800,10 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   );
                 },
               ),
-              if (_istRestaurant) ...[
+              if (_istRestaurant || _istEinkauf) ...[
                 const SizedBox(height: 24),
                 GaststaettenbewertungAbschnitt(
-                  key: ValueKey('gaststaettenbewertung-$_id-${_ort?.id}'),
+                  key: ValueKey('ortsbewertung-$_id-${_ort?.id}'),
                   repository: widget.repository,
                   idGenerator: widget.idGenerator,
                   erlebnis: _erlebnisAusEingaben(),
