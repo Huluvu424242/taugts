@@ -6,6 +6,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+## [0.1.0+4] - 2026-09-01
+
 ### Changed
 
 - Das „Powered by KI“-Hinweislogo in der App Bar des Hauptmenüs wird nun mit 32 × 32 Pixeln statt 20 × 20 Pixeln dargestellt, ohne die Standardhöhe der App Bar zu verändern.
@@ -92,7 +94,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
 - Featureorientierte Ausgangsstruktur, Startscreen und Widget-Test.
 
-[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+3...HEAD
+[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+4...HEAD
+[0.1.0+4]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+3...v0.1.0+4
 [0.1.0+3]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+2...v0.1.0+3
 [0.1.0+2]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+1...v0.1.0+2
 [0.1.0+1]: https://github.com/Huluvu424242/taugts/releases/tag/v0.1.0+1
