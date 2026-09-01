@@ -6,6 +6,8 @@ import 'package:taugts/core/support/external_url_service.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 
 const _appRepository = 'Huluvu424242/taugts';
+const _projektseiteUrl = 'https://github.com/Huluvu424242/taugts';
+const _projektdokumentationUrl = 'https://huluvu424242.github.io/taugts/';
 
 class AppSupportMenu extends StatelessWidget {
   const AppSupportMenu({
@@ -85,60 +87,136 @@ Future<void> zeigeUeberDialog(
   ExternalUrlGateway? externalUrlGateway,
 }) async {
   final gateway = appInfoGateway ?? AppInfoService();
+  final urlGateway = externalUrlGateway ?? ExternalUrlService();
   await showDialog<void>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: const Text('Über Taugt’s?'),
-      content: FutureBuilder<AppInfo>(
-        future: gateway.laden(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Semantics(
-              liveRegion: true,
-              child: Text(
-                'Releaseversion konnte nicht geladen werden: ${snapshot.error}',
-              ),
-            );
+    builder: (dialogContext) {
+      String? linkFehler;
+      bool oeffnetLink = false;
+
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          Future<void> oeffneExternesZiel({
+            required String url,
+            required String zielName,
+          }) async {
+            setDialogState(() {
+              oeffnetLink = true;
+              linkFehler = null;
+            });
+            try {
+              await urlGateway.oeffnen(url);
+              if (!context.mounted) {
+                return;
+              }
+              setDialogState(() => oeffnetLink = false);
+            } catch (error) {
+              if (!context.mounted) {
+                return;
+              }
+              setDialogState(() {
+                oeffnetLink = false;
+                linkFehler = '$zielName konnte nicht geöffnet werden: $error';
+              });
+            }
           }
-          if (!snapshot.hasData) {
-            return Center(
-              child: Semantics(
-                label: 'Releaseversion wird geladen',
-                child: const CircularProgressIndicator(),
+
+          return AlertDialog(
+            title: const Text('Über Taugt’s?'),
+            content: FutureBuilder<AppInfo>(
+              future: gateway.laden(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      'Releaseversion konnte nicht geladen werden: ${snapshot.error}',
+                    ),
+                  );
+                }
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: Semantics(
+                      label: 'Releaseversion wird geladen',
+                      child: const CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Taugt’s?'),
+                    const SizedBox(height: 8),
+                    Text('Releaseversion ${snapshot.data!.displayVersion}'),
+                    const SizedBox(height: 16),
+                    Semantics(
+                      button: true,
+                      label: 'Projektseite extern öffnen',
+                      child: TextButton.icon(
+                        onPressed: oeffnetLink
+                            ? null
+                            : () => oeffneExternesZiel(
+                                  url: _projektseiteUrl,
+                                  zielName: 'Projektseite',
+                                ),
+                        icon: const Icon(Icons.open_in_new),
+                        label: const Text('Projektseite'),
+                      ),
+                    ),
+                    Semantics(
+                      button: true,
+                      label: 'Projektdokumentation extern öffnen',
+                      child: TextButton.icon(
+                        onPressed: oeffnetLink
+                            ? null
+                            : () => oeffneExternesZiel(
+                                  url: _projektdokumentationUrl,
+                                  zielName: 'Projektdokumentation',
+                                ),
+                        icon: const Icon(Icons.open_in_new),
+                        label: const Text('Projektdokumentation'),
+                      ),
+                    ),
+                    if (linkFehler != null) ...[
+                      const SizedBox(height: 8),
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          linkFehler!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
+            actions: [
+              BugMeldenButton(
+                contextName: SupportKontexte.ueberDialog,
+                appInfoGateway: gateway,
+                externalUrlGateway: externalUrlGateway,
               ),
-            );
-          }
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Taugt’s?'),
-              const SizedBox(height: 8),
-              Text('Releaseversion ${snapshot.data!.displayVersion}'),
+              TextButton(
+                onPressed: () => zeigeBarrierefreiheitserklaerung(
+                  dialogContext,
+                  appInfoGateway: gateway,
+                  externalUrlGateway: externalUrlGateway,
+                ),
+                child: const Text('Barrierefreiheitserklärung'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Schließen'),
+              ),
             ],
           );
         },
-      ),
-      actions: [
-        BugMeldenButton(
-          contextName: SupportKontexte.ueberDialog,
-          appInfoGateway: gateway,
-          externalUrlGateway: externalUrlGateway,
-        ),
-        TextButton(
-          onPressed: () => zeigeBarrierefreiheitserklaerung(
-            dialogContext,
-            appInfoGateway: gateway,
-            externalUrlGateway: externalUrlGateway,
-          ),
-          child: const Text('Barrierefreiheitserklärung'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(),
-          child: const Text('Schließen'),
-        ),
-      ],
-    ),
+      );
+    },
   );
 }
 
