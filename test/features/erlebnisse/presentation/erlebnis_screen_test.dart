@@ -164,14 +164,15 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('5 – taugt sehr').last);
     await tester.pumpAndSettle();
-    await tester.drag(
-      find.byType(Scrollable).first,
-      const Offset(0, 500),
-    );
+
+    final expansionTile = find.byType(ExpansionTile);
+    await tester.ensureVisible(expansionTile);
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(ExpansionTile));
+    await tester.tap(expansionTile);
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(ExpansionTile));
+    await tester.ensureVisible(expansionTile);
+    await tester.pumpAndSettle();
+    await tester.tap(expansionTile);
     await tester.pumpAndSettle();
     expect(find.text('5 – taugt sehr'), findsOneWidget);
   });
