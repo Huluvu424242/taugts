@@ -49,8 +49,11 @@ fokussierbaren Fehlersammler ausgegeben.
 
 Der chronologische Bewertungsverlauf trennt Stammdaten sichtbar von
 historischen Beobachtungen, verwendet beschriftete ausklappbare Einträge und
-kennzeichnet eigene sowie importierte Bewertungen nicht nur farblich. Lade-,
-Leer- und Fehlerzustände sind auch offline verständlich erreichbar.
+kennzeichnet eigene sowie importierte Bewertungen nicht nur farblich. Im
+aufgeklappten Eintrag werden der konkrete Erlebnisart-Kontext, Beginn und Ende,
+Bewertungs- und Preisbeobachtungszeitpunkte sowie damalige Anzahl und Preis als
+Text ausgegeben. Einzelwerte und Notizen bleiben getrennt lesbar. Lade-, Leer-
+und Fehlerzustände sind auch offline verständlich erreichbar.
 
 Der Barcode-Scan wird bewusst gestartet, zeigt den erkannten Code vor der
 Übernahme und bietet bei abgelehnter oder ausgefallener Kamera weiterhin die
@@ -78,6 +81,7 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 - Kriterienverwaltung sowie Gaststätten- und Geschäftsbewertung einschließlich
   Ein- und Ausklappen, großer Schrift und Persistenzfehler,
 - Produkt- und Ortsverläufe mit mehreren langen historischen Einträgen,
+  unterschiedlichen Erlebnisarten und getrennten Bewertungs-/Preiszeitpunkten,
 - Bug-Meldung und vollständige Barrierefreiheitserklärung auf einem realen
   Gerät.
 
