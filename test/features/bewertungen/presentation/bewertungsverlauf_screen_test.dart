@@ -21,22 +21,25 @@ void main() {
     );
     await repository.speichereProdukt(produkt);
 
-    await tester.pumpWidget(MaterialApp(
-      home: MediaQuery(
-        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
-        child: BewertungsverlaufScreen.fuerProdukt(
-          repository: repository,
-          produkt: produkt,
-          eigenesProfilId: 'eigen',
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: BewertungsverlaufScreen.fuerProdukt(
+            repository: repository,
+            produkt: produkt,
+            eigenesProfilId: 'eigen',
+          ),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Historienprodukt'), findsOneWidget);
     expect(
       find.text(
-          'Für dieses Objekt liegen noch keine historischen Bewertungen oder Preise vor.'),
+        'Für dieses Objekt liegen noch keine historischen Bewertungen oder Preise vor.',
+      ),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -85,7 +88,7 @@ void main() {
         erlebnisId: erlebnis.id,
         erlebnisPositionId: '98000000-0000-4000-8000-000000000013',
         produktId: produkt.id,
-        beobachtetAm: zeit,
+        beobachtetAm: zeit.add(const Duration(minutes: 5)),
         betrag: const Geldbetrag(minorEinheiten: 399),
         erstelltAm: zeit,
         geaendertAm: zeit,
@@ -101,8 +104,8 @@ void main() {
             kriteriumVersion: 2,
             herkunftProfilId: 'importiert',
             wert: daten.$2,
-            erstelltAm: zeit,
-            geaendertAm: zeit,
+            erstelltAm: zeit.add(const Duration(minutes: 10)),
+            geaendertAm: zeit.add(const Duration(minutes: 10)),
           ),
       ],
       herkunftProfilId: 'importiert',
@@ -110,16 +113,18 @@ void main() {
     );
     final repository = _VerlaufRepository(datenbank, [eintrag]);
 
-    await tester.pumpWidget(MaterialApp(
-      home: MediaQuery(
-        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
-        child: BewertungsverlaufScreen.fuerProdukt(
-          repository: repository,
-          produkt: produkt,
-          eigenesProfilId: 'eigen',
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: BewertungsverlaufScreen.fuerProdukt(
+            repository: repository,
+            produkt: produkt,
+            eigenesProfilId: 'eigen',
+          ),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Gesamtwertung: 4 / 5'), findsOneWidget);
@@ -128,9 +133,77 @@ void main() {
     expect(find.textContaining('Importierte Bewertung'), findsOneWidget);
     await tester.tap(find.byType(ExpansionTile));
     await tester.pumpAndSettle();
+    expect(find.text('Erlebnis: Restaurantbesuch'), findsOneWidget);
+    expect(find.textContaining('Bewertung erfasst:'), findsOneWidget);
+    expect(find.textContaining('Preis beobachtet:'), findsOneWidget);
+    expect(find.text('Damals erfasste Anzahl: 2'), findsOneWidget);
+    expect(find.text('Damals erfasster Preis: 3,99 EUR'), findsOneWidget);
     expect(find.text('Aroma'), findsOneWidget);
     expect(find.text('Notiz: Historische Notiz'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Ortsverlauf zeigt Einkauf mit Beginn und Ende', (tester) async {
+    final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+    addTearDown(datenbank.schliessen);
+    final zeit = DateTime.utc(2026, 9, 1, 8, 30);
+    final ort = Ort(
+      id: '98000000-0000-4000-8000-000000000030',
+      name: 'Historischer Markt',
+      typ: Ortstyp.geschaeft,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    final erlebnis = Erlebnis(
+      id: '98000000-0000-4000-8000-000000000031',
+      typ: Erlebnistyp.einkauf,
+      status: Erlebnisstatus.beendet,
+      ortId: ort.id,
+      herkunftProfilId: 'eigen',
+      tatsaechlicherBeginn: zeit,
+      tatsaechlichesEnde: zeit.add(const Duration(minutes: 45)),
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    final eintrag = BewertungsverlaufEintrag(
+      erlebnis: erlebnis,
+      ort: ort,
+      bewertungen: [
+        Bewertung(
+          id: '98000000-0000-4000-8000-000000000032',
+          erlebnisId: erlebnis.id,
+          ortId: ort.id,
+          ortsbewertungId: '98000000-0000-4000-8000-000000000033',
+          kriteriumId: 'gesamt',
+          kriteriumName: 'Gesamturteil',
+          herkunftProfilId: 'eigen',
+          wert: 3,
+          erstelltAm: zeit.add(const Duration(minutes: 45)),
+          geaendertAm: zeit.add(const Duration(minutes: 45)),
+        ),
+      ],
+      herkunftProfilId: 'eigen',
+    );
+    final repository = _OrtsverlaufRepository(datenbank, [eintrag]);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BewertungsverlaufScreen.fuerOrt(
+          repository: repository,
+          ort: ort,
+          eigenesProfilId: 'eigen',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Gesamtwertung: 3 / 5'), findsOneWidget);
+    expect(find.textContaining('Eigene Bewertung'), findsOneWidget);
+    await tester.tap(find.byType(ExpansionTile));
+    await tester.pumpAndSettle();
+    expect(find.text('Erlebnis: Einkauf'), findsOneWidget);
+    expect(find.textContaining('Zeitraum:'), findsOneWidget);
+    expect(find.textContaining('Bewertung erfasst:'), findsOneWidget);
   });
 
   testWidgets('zeigt einen verständlichen Ladefehler mit Wiederholung',
@@ -138,17 +211,19 @@ void main() {
     final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     addTearDown(datenbank.schliessen);
     final zeit = DateTime.utc(2026, 8, 31);
-    await tester.pumpWidget(MaterialApp(
-      home: BewertungsverlaufScreen.fuerProdukt(
-        repository: _LadefehlerRepository(datenbank),
-        produkt: Produkt(
-          id: '98000000-0000-4000-8000-000000000020',
-          name: 'Fehlerprodukt',
-          erstelltAm: zeit,
-          geaendertAm: zeit,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BewertungsverlaufScreen.fuerProdukt(
+          repository: _LadefehlerRepository(datenbank),
+          produkt: Produkt(
+            id: '98000000-0000-4000-8000-000000000020',
+            name: 'Fehlerprodukt',
+            erstelltAm: zeit,
+            geaendertAm: zeit,
+          ),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     expect(
@@ -168,6 +243,16 @@ class _VerlaufRepository extends SqliteBewertungsRepository {
   Future<List<BewertungsverlaufEintrag>> ladeProduktverlauf(
     String produktId,
   ) async =>
+      eintraege;
+}
+
+class _OrtsverlaufRepository extends SqliteBewertungsRepository {
+  _OrtsverlaufRepository(super.datenbank, this.eintraege);
+
+  final List<BewertungsverlaufEintrag> eintraege;
+
+  @override
+  Future<List<BewertungsverlaufEintrag>> ladeOrtsverlauf(String ortId) async =>
       eintraege;
 }
 
