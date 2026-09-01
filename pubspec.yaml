@@ -27,3 +27,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/app_icon_source.png
+    - assets/icons/app_support_logo.png
