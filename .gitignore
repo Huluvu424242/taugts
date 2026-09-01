@@ -8,6 +8,9 @@
 build/
 coverage/
 
+# Dokumentations-Build
+site/
+
 # IDEs
 .idea/
 *.iml
