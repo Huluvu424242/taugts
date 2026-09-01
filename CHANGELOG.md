@@ -8,7 +8,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
-- Das Taugt’s?-Logo erscheint zusätzlich klein im Hauptmenü direkt hinter dem App-Namen sowie im Über-Dialog unmittelbar links neben „Schließen“, ohne die bisherigen Höhen beziehungsweise Aktionsabstände zu vergrößern.
+- Ein zusätzliches „Powered by KI“-Hinweislogo kennzeichnet die KI-unterstützte Entwicklung im Hauptmenü direkt hinter dem App-Namen sowie im Über-Dialog unmittelbar links neben „Schließen“, ohne das eigentliche App-Logo oder die bisherigen Höhen beziehungsweise Aktionsabstände zu verändern.
 - Der Über-Dialog verlinkt die Projektseite und die veröffentlichte Projektdokumentation direkt über die vorhandene testbare Browser-Abstraktion und zeigt Öffnungsfehler im Dialog an.
 - Bekannte Produkte können aus Produktliste, Produktdetails und Bewertungsverlauf erneut bewertet werden; dabei wird ein vorhandenes oder neues Erlebnis gewählt, das Produkt als bestehenden Stammdatensatz wiederverwendet und anschließend der bestehende Positions- und Bewertungsweg genutzt.
 - Produkt- und Ortsverläufe nennen den konkreten Erlebniszusammenhang sowie Bewertungs- und Preisbeobachtungszeitpunkte, damalige Anzahl und damaligen Preis ausdrücklich.
