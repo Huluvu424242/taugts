@@ -66,7 +66,8 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
     if (profil == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Für eine Bewertung muss das eigene Profil geladen sein.'),
+          content:
+              Text('Für eine Bewertung muss das eigene Profil geladen sein.'),
         ),
       );
       return;
@@ -90,10 +91,9 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
           repository: widget.repository,
           idGenerator: widget.idGenerator,
           produkt: produkt,
-          onErneutBewerten:
-              produkt == null || _profilFuerBewertung == null
-                  ? null
-                  : () => _erneutBewerten(produkt),
+          onErneutBewerten: produkt == null || _profilFuerBewertung == null
+              ? null
+              : () => _erneutBewerten(produkt),
         ),
       ),
     );
@@ -281,7 +281,8 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
                                       onPressed: _profilFuerBewertung == null
                                           ? null
                                           : () => _erneutBewerten(produkt),
-                                      icon: const Icon(Icons.rate_review_outlined),
+                                      icon: const Icon(
+                                          Icons.rate_review_outlined),
                                     ),
                                     IconButton(
                                       tooltip:
@@ -291,15 +292,16 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
                                           Navigator.of(context).push<void>(
                                         MaterialPageRoute(
                                           builder: (_) =>
-                                              BewertungsverlaufScreen.fuerProdukt(
+                                              BewertungsverlaufScreen
+                                                  .fuerProdukt(
                                             repository: widget.repository,
                                             produkt: produkt,
                                             eigenesProfilId: _profilId,
                                             onErneutBewerten:
                                                 _profilFuerBewertung == null
                                                     ? null
-                                                    : () =>
-                                                        _erneutBewerten(produkt),
+                                                    : () => _erneutBewerten(
+                                                        produkt),
                                           ),
                                         ),
                                       ),
