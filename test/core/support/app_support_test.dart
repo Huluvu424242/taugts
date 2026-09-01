@@ -36,7 +36,7 @@ void main() {
       matching: find.byType(AppLogo),
     );
     expect(logoFinder, findsOneWidget);
-    expect(tester.widget<AppLogo>(logoFinder).size, 48);
+    expect(tester.widget<AppLogo>(logoFinder).size, 32);
     final schliessenButton = find.descendant(
       of: schliessenMitLogo,
       matching: find.widgetWithText(TextButton, 'Schließen'),
