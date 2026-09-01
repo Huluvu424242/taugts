@@ -4,10 +4,10 @@
 
 Nach Veröffentlichung wird die APK über die [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) des Projekts bereitgestellt.
 
-Für Version 0.1.0+3 werden die APK und eine zugehörige SHA-256-Prüfsummendatei bereitgestellt. Vor der Installation sollte die Prüfsumme kontrolliert werden. Unter Windows kann dies beispielsweise mit folgendem Befehl erfolgen:
+Für Version 0.1.0+4 werden die APK und eine zugehörige SHA-256-Prüfsummendatei bereitgestellt. Vor der Installation sollte die Prüfsumme kontrolliert werden. Unter Windows kann dies beispielsweise mit folgendem Befehl erfolgen:
 
 ```powershell
-Get-FileHash .\taugts-0.1.0+3.apk -Algorithm SHA256
+Get-FileHash .\taugts-0.1.0+4.apk -Algorithm SHA256
 ```
 
 Der ermittelte Hash muss mit dem Inhalt der bereitgestellten `.apk.sha256`-Datei übereinstimmen.
@@ -16,7 +16,7 @@ Android kann bei einer manuellen APK-Installation verlangen, die Installation au
 
 ## Updates
 
-APK-Updates können über eine vorhandene Installation installiert werden, wenn sie mit demselben Release-Signierschlüssel signiert wurden. Vor einer Neuinstallation oder einem Wechsel des Signierschlüssels ist zu beachten, dass die derzeitige Version noch keinen Exportweg für die lokal gespeicherten Fachdaten besitzt.
+APK-Updates können über eine vorhandene Installation installiert werden, wenn sie mit demselben Release-Signierschlüssel signiert wurden. Vor einer Neuinstallation oder einem Wechsel des Signierschlüssels ist zu beachten, dass Version 0.1.0+4 noch keinen Exportweg für die lokal gespeicherten Fachdaten besitzt.
 
 ## Weitere Plattformen
 
