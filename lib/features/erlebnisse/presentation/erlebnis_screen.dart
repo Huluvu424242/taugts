@@ -91,6 +91,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   }
 
   bool get _istRestaurant => _typ == Erlebnistyp.restaurantbesuch;
+  bool get _istEinkauf => _typ == Erlebnistyp.einkauf;
 
   String get _typLabel => switch (_typ) {
         Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
@@ -427,17 +428,17 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     return '${lokalisierung.formatFullDate(lokal)}, $uhrzeit';
   }
 
-  String _restaurantStatusText(BuildContext context) {
-    if (!_istRestaurant || _aktuellerStatus != Erlebnisstatus.aktiv) return '';
+  String _laufenderStatusText(BuildContext context) {
+    if (_aktuellerStatus != Erlebnisstatus.aktiv) return '';
     final beginn = _tatsaechlicherBeginn;
     if (beginn == null) return '';
     final zeit = MaterialLocalizations.of(context).formatTimeOfDay(
       TimeOfDay.fromDateTime(beginn),
     );
-    return 'Aktiv seit $zeit';
+    return _istEinkauf ? 'Einkauf läuft seit $zeit' : 'Aktiv seit $zeit';
   }
 
-  Widget _bestellposition(ErlebnispositionMitProdukt eintrag) {
+  Widget _produktposition(ErlebnispositionMitProdukt eintrag) {
     final name = eintrag.produkt.anzeigetitel;
     final preis = eintrag.preis;
     final busy = _positionenInBearbeitung.contains(eintrag.position.id);
@@ -527,30 +528,60 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     );
   }
 
-  Widget _allgemeinePosition(ErlebnispositionMitProdukt eintrag) => ListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(eintrag.produkt.anzeigetitel),
-        subtitle: Text(
-          '${eintrag.position.anzahl} ×'
-          '${eintrag.preis == null ? '' : ' · ${eintrag.preis!.betrag.dezimalText} ${eintrag.preis!.betrag.waehrung}'}',
-        ),
-        onTap: () => _positionOeffnen(eintrag),
-        trailing: Wrap(
-          spacing: 4,
-          children: [
-            IconButton(
-              tooltip: '${eintrag.produkt.anzeigetitel} bewerten',
-              onPressed: () => _positionBewerten(eintrag),
-              icon: const Icon(Icons.star_outline),
-            ),
-            IconButton(
-              tooltip: '${eintrag.produkt.anzeigetitel} entfernen',
-              onPressed: () => _positionLoeschen(eintrag),
-              icon: const Icon(Icons.delete_outline),
-            ),
-          ],
-        ),
+  String _positionsZusammenfassung(
+    List<ErlebnispositionMitProdukt> eintraege,
+  ) =>
+      eintraege
+          .map((e) => '${e.position.anzahl} × ${e.produkt.anzeigetitel}')
+          .join(' · ');
+
+  Widget _einkaufssumme(List<ErlebnispositionMitProdukt> eintraege) {
+    final mitPreis = eintraege.where((e) => e.preis != null).toList();
+    final ohnePreis = eintraege.length - mitPreis.length;
+    final waehrungen = mitPreis.map((e) => e.preis!.betrag.waehrung).toSet();
+    if (mitPreis.isEmpty) {
+      return const Text(
+          'Summe nicht verfügbar · für alle Positionen fehlt ein Preis.');
+    }
+    if (waehrungen.length != 1) {
+      return Text(
+        'Summe nicht verfügbar · mehrere Währungen erfasst'
+        '${ohnePreis == 0 ? '.' : ' · $ohnePreis Position(en) ohne Preis.'}',
       );
+    }
+    final summeMinor = mitPreis.fold<int>(
+      0,
+      (summe, eintrag) =>
+          summe +
+          eintrag.preis!.betrag.minorEinheiten * eintrag.position.anzahl,
+    );
+    final betrag = Geldbetrag(
+      minorEinheiten: summeMinor,
+      waehrung: waehrungen.single,
+    );
+    final fehlend = ohnePreis == 0
+        ? 'Alle Positionen mit Preis.'
+        : '$ohnePreis Position(en) ohne Preis; nicht als 0 eingerechnet.';
+    return Semantics(
+      label:
+          'Summe aus erfassten Preisen ${betrag.dezimalText} ${betrag.waehrung}. $fehlend',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Summe aus erfassten Preisen',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          Text(
+            '${betrag.dezimalText} ${betrag.waehrung}',
+            key: const ValueKey('einkaufssumme'),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          Text(fehlend),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -585,9 +616,9 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-              if (_restaurantStatusText(context).isNotEmpty) ...[
+              if (_laufenderStatusText(context).isNotEmpty) ...[
                 const SizedBox(height: 4),
-                Text(_restaurantStatusText(context)),
+                Text(_laufenderStatusText(context)),
               ],
               const SizedBox(height: 16),
               TextButton.icon(
@@ -597,7 +628,12 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                       ? Icons.restaurant_outlined
                       : Icons.shopping_bag_outlined,
                 ),
-                label: Text(_ort?.name ?? 'Ort auswählen (optional)'),
+                label: Text(
+                  _ort?.name ??
+                      (_istEinkauf
+                          ? 'Geschäft auswählen (optional)'
+                          : 'Ort auswählen (optional)'),
+                ),
               ),
               const SizedBox(height: 16),
               Semantics(
@@ -691,7 +727,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                     child: Semantics(
                       header: true,
                       child: Text(
-                        _istRestaurant ? 'Bestellung' : 'Erlebnispositionen',
+                        _istEinkauf ? 'Einkaufsliste' : 'Bestellung',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
@@ -699,9 +735,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   TextButton.icon(
                     onPressed: _speichert ? null : _positionOeffnen,
                     icon: const Icon(Icons.add),
-                    label: Text(
-                      _istRestaurant ? 'Produkt hinzufügen' : 'Hinzufügen',
-                    ),
+                    label: const Text('Produkt hinzufügen'),
                   ),
                 ],
               ),
@@ -715,9 +749,9 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              _istRestaurant
-                                  ? 'Die Bestellung konnte nicht geladen werden.'
-                                  : 'Die Positionen konnten nicht geladen werden.',
+                              _istEinkauf
+                                  ? 'Die Einkaufsliste konnte nicht geladen werden.'
+                                  : 'Die Bestellung konnte nicht geladen werden.',
                             ),
                           ),
                           TextButton(
@@ -730,39 +764,38 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   }
                   if (!snapshot.hasData) {
                     return Semantics(
-                      label: _istRestaurant
-                          ? 'Bestellung wird geladen'
-                          : 'Erlebnispositionen werden geladen',
+                      label: _istEinkauf
+                          ? 'Einkaufsliste wird geladen'
+                          : 'Bestellung wird geladen',
                       child: const LinearProgressIndicator(),
                     );
                   }
                   final eintraege = snapshot.data!;
                   if (eintraege.isEmpty) {
                     return Text(
-                      _istRestaurant
-                          ? 'Noch keine Produkte bestellt. Produkt hinzufügen, um die Bestellung zu beginnen.'
-                          : 'Noch keine Produkte erfasst.',
+                      _istEinkauf
+                          ? 'Die Einkaufsliste ist leer. Produkte können auch ohne Termin vorab hinzugefügt werden.'
+                          : 'Noch keine Produkte bestellt. Produkt hinzufügen, um die Bestellung zu beginnen.',
                     );
                   }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (_istRestaurant) ...[
-                        for (final eintrag in eintraege)
-                          _bestellposition(eintrag),
-                        const SizedBox(height: 8),
-                        Text(
-                          eintraege
-                              .map(
-                                (e) =>
-                                    '${e.position.anzahl} × ${e.produkt.anzeigetitel}',
-                              )
-                              .join(' · '),
-                          key: const ValueKey('bestellungs-zusammenfassung'),
+                      for (final eintrag in eintraege)
+                        _produktposition(eintrag),
+                      const SizedBox(height: 8),
+                      Text(
+                        _positionsZusammenfassung(eintraege),
+                        key: ValueKey(
+                          _istEinkauf
+                              ? 'einkaufslisten-zusammenfassung'
+                              : 'bestellungs-zusammenfassung',
                         ),
-                      ] else
-                        for (final eintrag in eintraege)
-                          _allgemeinePosition(eintrag),
+                      ),
+                      if (_istEinkauf) ...[
+                        const SizedBox(height: 16),
+                        _einkaufssumme(eintraege),
+                      ],
                     ],
                   );
                 },
@@ -798,13 +831,13 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                 FilledButton.icon(
                   onPressed: _speichert ? null : _checkIn,
                   icon: const Icon(Icons.login),
-                  label: const Text('Check-in'),
+                  label: Text(_istEinkauf ? 'Einkauf beginnen' : 'Check-in'),
                 )
               else if (_aktuellerStatus == Erlebnisstatus.aktiv)
                 FilledButton.icon(
                   onPressed: _speichert ? null : _checkout,
                   icon: const Icon(Icons.logout),
-                  label: const Text('Checkout'),
+                  label: Text(_istEinkauf ? 'Einkauf beenden' : 'Checkout'),
                 )
               else
                 FilledButton.icon(
