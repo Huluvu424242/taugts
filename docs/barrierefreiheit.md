@@ -28,6 +28,12 @@ beschriftete Planungs-, Beginn- und Endeaktionen und sammelt ungültige
 Zeitangaben zusätzlich in einem fokussierbaren Fehlersammler. Restaurantbesuch
 und Einkauf sind ohne Farbcodierung unterscheidbar.
 
+Die Erlebnisübersicht gruppiert aktive, geplante und vergangene Erlebnisse mit
+semantisch erkennbaren Überschriften. Erlebnistyp, Zeitangabe, optionaler Ort
+und Positionsanzahl werden als Text ausgegeben; ein fehlender Planungstermin
+wird ausdrücklich als „Termin noch offen“ dargestellt. Lade-, Leer- und
+Fehlerzustände bleiben wahrnehmbar und bieten eine beschriftete Folgeaktion.
+
 Die Verwaltung der Bewertungskriterien bietet semantisch beschriftete Aktionen,
 einen fokussierbaren Fehlersammler, wahrnehmbare Lade-, Leer-, Fehler- und
 Erfolgszustände sowie eine platzsparende Aktionsauswahl, die auch bei großer
@@ -67,6 +73,8 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 - kleine Android-Bildschirmgröße,
 - Gestennavigation und Erreichbarkeit unterer Aktionen,
 - zusammenhängender Ablauf aus Produkt, Ort, Erlebnisentwurf und Bewertung,
+- Erlebnisübersicht mit mehreren aktiven, geplanten und vergangenen Einträgen,
+  fehlenden Terminen, langen Ortsnamen und großer Schrift,
 - Kriterienverwaltung sowie Gaststätten- und Geschäftsbewertung einschließlich
   Ein- und Ausklappen, großer Schrift und Persistenzfehler,
 - Produkt- und Ortsverläufe mit mehreren langen historischen Einträgen,
