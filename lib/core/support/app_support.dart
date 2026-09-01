@@ -240,20 +240,18 @@ Future<void> zeigeUeberDialog(
                 ),
                 child: const Text('Barrierefreiheitserklärung'),
               ),
-              Stack(
+              Row(
                 key: const Key('ueber-schliessen-mit-logo'),
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  const AppLogo(
+                    size: 48,
+                    semanticLabel: 'Powered by KI',
+                  ),
+                  const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => Navigator.of(dialogContext).pop(),
                     child: const Text('Schließen'),
-                  ),
-                  const Positioned.fill(
-                    child: IgnorePointer(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: AppLogo(size: 14),
-                      ),
-                    ),
                   ),
                 ],
               ),
