@@ -41,9 +41,9 @@ void main() {
     );
     expect(imageFinder, findsOneWidget);
     final image = tester.widget<Image>(imageFinder);
-    expect(image.width, 48);
-    expect(image.height, 48);
-    expect(tester.getSize(imageFinder), const Size.square(48));
+    expect(image.width, 32);
+    expect(image.height, 32);
+    expect(tester.getSize(imageFinder), const Size.square(32));
   });
 
   test('KI-Hinweislogo ist ein vollständig dekodierbares quadratisches PNG',
