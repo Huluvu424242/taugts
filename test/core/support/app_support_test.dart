@@ -27,6 +27,21 @@ void main() {
 
     expect(find.text('Über Taugt’s?'), findsOneWidget);
     expect(find.text('Releaseversion 1.2.3+45'), findsOneWidget);
+    final schliessenMitLogo = find.byKey(
+      const Key('ueber-schliessen-mit-logo'),
+    );
+    expect(schliessenMitLogo, findsOneWidget);
+    final logoFinder = find.descendant(
+      of: schliessenMitLogo,
+      matching: find.byType(AppLogo),
+    );
+    expect(logoFinder, findsOneWidget);
+    expect(tester.widget<AppLogo>(logoFinder).size, 14);
+    expect(
+      tester.getSize(schliessenMitLogo),
+      tester.getSize(find.text('Schließen')),
+      reason: 'Das Logo darf den Layout-Footprint der Aktion nicht vergrößern.',
+    );
     expect(
       tester
           .widgetList<BugMeldenButton>(find.byType(BugMeldenButton))
