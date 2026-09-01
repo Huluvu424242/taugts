@@ -1,6 +1,6 @@
 # Barrierefreiheit und Bug-Meldung
 
-Stand: 31. August 2026 · vorbereitete Version: 0.1.0+3
+Stand: 1. September 2026 · vorbereitete Version: 0.1.0+3
 
 Taugt’s? stellt die gemeinsamen Grundgerüst-Funktionen für Barrierefreiheit und
 Bug-Meldungen vollständig innerhalb der App bereit.
@@ -34,11 +34,12 @@ Erfolgszustände sowie eine platzsparende Aktionsauswahl, die auch bei großer
 Systemschrift bedienbar bleibt. Verwendete Kriterien werden beim Entfernen nur
 deaktiviert, damit historische Bewertungen lesbar bleiben.
 
-Die getrennte Gaststättenbewertung verwendet sichtbare Beschriftungen,
-semantische Überschriften und Tastaturfokus. Der ausklappbare
-Bewertungsabschnitt benennt seinen Zustand und bewahrt Eingaben beim Ein- und
-Ausklappen. Fehler werden zusätzlich in einem fokussierbaren Fehlersammler
-ausgegeben.
+Die getrennte Ortsbewertung verwendet sichtbare Beschriftungen, semantische
+Überschriften und Tastaturfokus. Im Restaurant wird sie als „Gaststätte
+bewerten“, im Einkauf als „Geschäft bewerten“ bezeichnet und lädt jeweils die
+passenden Kriterien. Der ausklappbare Bewertungsabschnitt benennt seinen Zustand
+und bewahrt Eingaben beim Ein- und Ausklappen. Fehler werden zusätzlich in einem
+fokussierbaren Fehlersammler ausgegeben.
 
 Der chronologische Bewertungsverlauf trennt Stammdaten sichtbar von
 historischen Beobachtungen, verwendet beschriftete ausklappbare Einträge und
@@ -66,8 +67,8 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 - kleine Android-Bildschirmgröße,
 - Gestennavigation und Erreichbarkeit unterer Aktionen,
 - zusammenhängender Ablauf aus Produkt, Ort, Erlebnisentwurf und Bewertung,
-- Kriterienverwaltung und Gaststättenbewertung einschließlich Ein- und
-  Ausklappen, großer Schrift und Persistenzfehler,
+- Kriterienverwaltung sowie Gaststätten- und Geschäftsbewertung einschließlich
+  Ein- und Ausklappen, großer Schrift und Persistenzfehler,
 - Produkt- und Ortsverläufe mit mehreren langen historischen Einträgen,
 - Bug-Meldung und vollständige Barrierefreiheitserklärung auf einem realen
   Gerät.
