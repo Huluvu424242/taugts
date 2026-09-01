@@ -19,6 +19,7 @@ class ProduktFormular extends StatefulWidget {
     required this.idGenerator,
     this.produkt,
     this.barcodeVorgabe,
+    this.onErneutBewerten,
     super.key,
   });
 
@@ -26,6 +27,7 @@ class ProduktFormular extends StatefulWidget {
   final IdGenerator idGenerator;
   final Produkt? produkt;
   final String? barcodeVorgabe;
+  final Future<void> Function()? onErneutBewerten;
 
   @override
   State<ProduktFormular> createState() => _ProduktFormularState();
@@ -253,6 +255,19 @@ class _ProduktFormularState extends State<ProduktFormular> {
                         )
                       : const SizedBox.shrink(),
                 ),
+                if (widget.produkt != null && widget.onErneutBewerten != null) ...[
+                  FilledButton.icon(
+                    onPressed: _speichert ? null : widget.onErneutBewerten,
+                    icon: const Icon(Icons.rate_review_outlined),
+                    label: const Text('Erneut bewerten'),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Die erneute Bewertung legt einen neuen historischen Datensatz an. '
+                    'Änderungen hier bearbeiten dagegen die Produktstammdaten.',
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 DropdownButtonFormField<Produktart>(
                   initialValue: _produktart,
                   decoration: const InputDecoration(labelText: 'Produktart'),

@@ -12,6 +12,7 @@ class ErlebnispositionFormular extends StatefulWidget {
     required this.idGenerator,
     required this.erlebnis,
     this.vorhanden,
+    this.produktVorgabe,
     this.barcodeScanStart,
     super.key,
   });
@@ -20,6 +21,7 @@ class ErlebnispositionFormular extends StatefulWidget {
   final IdGenerator idGenerator;
   final Erlebnis erlebnis;
   final ErlebnispositionMitProdukt? vorhanden;
+  final Produkt? produktVorgabe;
   final BarcodeScanStart? barcodeScanStart;
 
   @override
@@ -44,7 +46,7 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
   void initState() {
     super.initState();
     final vorhanden = widget.vorhanden;
-    _produkt = vorhanden?.produkt;
+    _produkt = vorhanden?.produkt ?? widget.produktVorgabe;
     _anzahl.text = (vorhanden?.position.anzahl ?? 1).toString();
     _waehrung = vorhanden?.preis?.betrag.waehrung ?? 'EUR';
     _preis.text = vorhanden?.preis?.betrag.dezimalText ?? '';

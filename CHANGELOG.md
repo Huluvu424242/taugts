@@ -8,6 +8,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Bekannte Produkte können aus Produktliste, Produktdetails und Bewertungsverlauf erneut bewertet werden; dabei wird ein vorhandenes oder neues Erlebnis gewählt, das Produkt als bestehender Stammdatensatz wiederverwendet und anschließend der bestehende Positions- und Bewertungsweg genutzt.
 - Produkt- und Ortsverläufe nennen den konkreten Erlebniszusammenhang sowie Bewertungs- und Preisbeobachtungszeitpunkte, damalige Anzahl und damaligen Preis ausdrücklich.
 - Geschäfte lassen sich innerhalb desselben Einkaufs in einem eigenen ausklappbaren Abschnitt mit Geschäftskriterien getrennt von Einkaufsliste und Produktbewertungen bewerten.
 - Die Erlebnisübersicht gruppiert laufende, geplante und vergangene Restaurantbesuche und Einkäufe, zeigt Zeitkontext, Ort und Positionsanzahl und führt zum selben bearbeitbaren Erlebnis zurück.
