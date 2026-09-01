@@ -270,15 +270,15 @@ Folgende Freigabe ist erteilt:
 
 - **Repository:** `Huluvu424242/taugts`
 - **Workflow:** `Flutter-Prüfungen`
-- **Datei und freigegebene Version:** `.github/workflows/flutter-ci.yml`, Git-Blob-SHA `24a879f05efe8ef44a89701a1200aa949f4df564`
+- **Datei und freigegebene Version:** `.github/workflows/kiagent-check-ci.yml`, Git-Blob-SHA `8b771813664c515a4410d8a1d6a9c77acc4ae211`
 - **Geltung:** dauerhaft bis zum Widerruf oder bis zu einer Änderung der unten genannten Gültigkeitsmerkmale
-- **Erlaubte selbständige Ausführung:** automatische Ausführung über die in dieser Version vorhandenen `pull_request`- und `push`-Trigger für `master` und `release/**` sowie bedarfsweises erneutes Ausführen eines zu dieser freigegebenen Version gehörenden Workflow-Laufs
+- **Erlaubte selbständige Ausführung:** automatische Ausführung über den in dieser Version vorhandenen `push`-Trigger auf allen Branches sowie den `pull_request`-Trigger für Zielbranches `master` und `release/**`; außerdem bedarfsweise manuelle Ausführung über `workflow_dispatch` und erneutes Ausführen eines zu dieser freigegebenen Version gehörenden Workflow-Laufs
 - **Zweck:** Abhängigkeiten laden, Dart-Code formatieren, statische Flutter-Analyse ausführen, Flutter-Tests ausführen und unbeabsichtigte Formatierungsänderungen erkennen
 - **Berechtigungen und Datenzugriff:** ausschließlich `contents: read`; Eingaben sind Repositoryinhalt und öffentlich beziehungsweise regulär auflösbare Projektabhängigkeiten; es sind keine Secrets und keine schreibenden Repositoryberechtigungen freigegeben
 - **Ausgaben:** GitHub-Actions-Status und Laufprotokolle; keine Artefakte und keine durch den Workflow erzeugten Commits oder Codeänderungen
-- **Freigabe erteilt:** 30. August 2026 durch den Projektverantwortlichen
+- **Freigabe erteilt:** 1. September 2026 durch den Projektverantwortlichen
 
-Diese Freigabe gilt ausschließlich für die oben bezeichnete Version. Jede Änderung an `flutter-ci.yml`, an einer anderen Action- oder Workflow-Datei oder an den von diesem Workflow verwendeten Actions, Triggern, Berechtigungen, Inputs, Outputs, Secrets, Datenzugriffen, Artefakten, Runnern oder Zwecken erfolgt weiterhin ausschließlich über eine vorherige Story, einen eigenen Branch und einen Pull Request. Die geänderte oder neu hinzugefügte Action ist bis zu einer erneuten ausdrücklichen Freigabe nicht zur selbständigen Ausführung zugelassen. Andere Workflows oder externe Werkzeugketten sind nicht freigegeben.
+Diese Freigabe gilt ausschließlich für die oben bezeichnete Version. Jede Änderung an `kiagent-check-ci.yml`, an einer anderen Action- oder Workflow-Datei oder an den von diesem Workflow verwendeten Actions, Triggern, Berechtigungen, Inputs, Outputs, Secrets, Datenzugriffen, Artefakten, Runnern oder Zwecken erfolgt weiterhin ausschließlich über eine vorherige Story, einen eigenen Branch und einen Pull Request. Die geänderte oder neu hinzugefügte Action ist bis zu einer erneuten ausdrücklichen Freigabe nicht zur selbständigen Ausführung zugelassen. Andere Workflows oder externe Werkzeugketten sind nicht freigegeben.
 
 - Eine temporäre Ausnahme für Änderungen an GitHub-Projekteinstellungen gilt ausschließlich, wenn der KI-Assistent zuvor wörtlich gefragt hat: `Darf ich die Settings auf github selbst anpassen?` Erst ein darauf folgendes eindeutiges `Ja` erteilt die Erlaubnis für die konkret beauftragte Änderung. Ohne diese Abfolge liegt keine Erlaubnis vor.
 - Secrets, Tokens, Passwörter, Schlüssel und echte personenbezogene Testdaten niemals hardcodieren, einchecken, protokollieren oder in Screenshots und Fehlertexte übernehmen.
