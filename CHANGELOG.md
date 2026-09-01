@@ -6,6 +6,10 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+### Changed
+
+- Das „Powered by KI“-Hinweislogo in der App Bar des Hauptmenüs wird nun mit 32 × 32 Pixeln statt 20 × 20 Pixeln dargestellt, ohne die Standardhöhe der App Bar zu verändern.
+
 ### Added
 
 - Ein zusätzliches „Powered by KI“-Hinweislogo kennzeichnet die KI-unterstützte Entwicklung im Hauptmenü direkt hinter dem App-Namen sowie im Über-Dialog unmittelbar links neben „Schließen“, ohne das eigentliche App-Logo oder die bisherigen Höhen beziehungsweise Aktionsabstände zu verändern.
