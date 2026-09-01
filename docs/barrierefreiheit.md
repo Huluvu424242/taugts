@@ -40,11 +40,12 @@ Erfolgszustände sowie eine platzsparende Aktionsauswahl, die auch bei großer
 Systemschrift bedienbar bleibt. Verwendete Kriterien werden beim Entfernen nur
 deaktiviert, damit historische Bewertungen lesbar bleiben.
 
-Die getrennte Gaststättenbewertung verwendet sichtbare Beschriftungen,
-semantische Überschriften und Tastaturfokus. Der ausklappbare
-Bewertungsabschnitt benennt seinen Zustand und bewahrt Eingaben beim Ein- und
-Ausklappen. Fehler werden zusätzlich in einem fokussierbaren Fehlersammler
-ausgegeben.
+Die getrennte Ortsbewertung verwendet sichtbare Beschriftungen, semantische
+Überschriften und Tastaturfokus. Im Restaurant wird sie als „Gaststätte
+bewerten“, im Einkauf als „Geschäft bewerten“ bezeichnet und lädt jeweils die
+passenden Kriterien. Der ausklappbare Bewertungsabschnitt benennt seinen Zustand
+und bewahrt Eingaben beim Ein- und Ausklappen. Fehler werden zusätzlich in einem
+fokussierbaren Fehlersammler ausgegeben.
 
 Der chronologische Bewertungsverlauf trennt Stammdaten sichtbar von
 historischen Beobachtungen, verwendet beschriftete ausklappbare Einträge und
@@ -74,8 +75,8 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 - zusammenhängender Ablauf aus Produkt, Ort, Erlebnisentwurf und Bewertung,
 - Erlebnisübersicht mit mehreren aktiven, geplanten und vergangenen Einträgen,
   fehlenden Terminen, langen Ortsnamen und großer Schrift,
-- Kriterienverwaltung und Gaststättenbewertung einschließlich Ein- und
-  Ausklappen, großer Schrift und Persistenzfehler,
+- Kriterienverwaltung sowie Gaststätten- und Geschäftsbewertung einschließlich
+  Ein- und Ausklappen, großer Schrift und Persistenzfehler,
 - Produkt- und Ortsverläufe mit mehreren langen historischen Einträgen,
 - Bug-Meldung und vollständige Barrierefreiheitserklärung auf einem realen
   Gerät.
