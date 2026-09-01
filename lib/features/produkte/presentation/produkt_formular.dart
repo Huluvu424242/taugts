@@ -255,7 +255,8 @@ class _ProduktFormularState extends State<ProduktFormular> {
                         )
                       : const SizedBox.shrink(),
                 ),
-                if (widget.produkt != null && widget.onErneutBewerten != null) ...[
+                if (widget.produkt != null &&
+                    widget.onErneutBewerten != null) ...[
                   FilledButton.icon(
                     onPressed: _speichert ? null : widget.onErneutBewerten,
                     icon: const Icon(Icons.rate_review_outlined),
