@@ -1,6 +1,6 @@
 # Barrierefreiheit und Bug-Meldung
 
-Stand: 1. September 2026 · vorbereitete Version: 0.1.0+3
+Stand: 1. September 2026 · vorbereitete Version: 0.1.0+4
 
 Taugt’s? stellt die gemeinsamen Grundgerüst-Funktionen für Barrierefreiheit und
 Bug-Meldungen vollständig innerhalb der App bereit.
@@ -10,7 +10,8 @@ Bug-Meldungen vollständig innerhalb der App bereit.
 Das gemeinsame App-Menü ist am App-Start und auf allen vollständigen fachlichen
 Screens verfügbar. Es bietet **Bug melden** und **Über**. Der Über-Dialog zeigt
 die tatsächlich installierte Releaseversion einschließlich Buildnummer und
-führt zur offline enthaltenen Barrierefreiheitserklärung.
+führt zur offline enthaltenen Barrierefreiheitserklärung sowie zu Projektseite
+und veröffentlichter Dokumentation.
 
 ## Barrierefreiheitserklärung
 
@@ -69,29 +70,38 @@ Die optionale OpenStreetMap-Karte gibt die ausgewählten Koordinaten zusätzlich
 als Text aus und bietet eine eindeutig beschriftete Übernahme. Die manuelle
 Koordinaten- und Adresseingabe bleibt die vollständig zugängliche Alternative.
 
+Die mobile Startseite verwendet semantisch beschriftete zentrale Aktionen und
+eine responsive App Bar. Die sichtbare KI-Kennzeichnung ist vom App-Logo
+getrennt; App-Bar-Aktionen bleiben auch auf kleinen Bildschirmbreiten innerhalb
+des verfügbaren Bereichs.
+
 Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 
 - vollständiger Kernablauf mit TalkBack auf Android,
 - große Systemschrift und erhöhte Display-Skalierung,
-- kleine Android-Bildschirmgröße,
+- kleine Android-Bildschirmgröße einschließlich App Bar,
 - Gestennavigation und Erreichbarkeit unterer Aktionen,
 - zusammenhängender Ablauf aus Produkt, Ort, Erlebnisentwurf und Bewertung,
 - Erlebnisübersicht mit mehreren aktiven, geplanten und vergangenen Einträgen,
   fehlenden Terminen, langen Ortsnamen und großer Schrift,
+- Restaurantbestellung und Einkaufsliste mit Mengen-, Preis- und
+  Bewertungsaktionen bei großer Schrift,
+- erneute Bewertung eines bekannten Produkts aus den vorgesehenen Einstiegen,
 - Kriterienverwaltung sowie Gaststätten- und Geschäftsbewertung einschließlich
   Ein- und Ausklappen, großer Schrift und Persistenzfehler,
 - Produkt- und Ortsverläufe mit mehreren langen historischen Einträgen,
   unterschiedlichen Erlebnisarten und getrennten Bewertungs-/Preiszeitpunkten,
+- externe Projekt- und Dokumentationslinks einschließlich Öffnungsfehler,
 - Bug-Meldung und vollständige Barrierefreiheitserklärung auf einem realen
   Gerät.
 
 Der Getränkebewertungsbogen ist ausdrücklich einzubeziehen. Die gebündelte
 Prüfung wird in
 [Story #30](https://github.com/Huluvu424242/taugts/issues/30) verfolgt. Solange
-diese Punkte offen sind, wird für Version 0.1.0+3 kein vollständig manuell
+diese Punkte offen sind, wird für Version 0.1.0+4 kein vollständig manuell
 bestätigter Barrierefreiheitsstatus behauptet. Der konkrete Freigabestand wird
 zusätzlich in der
-[Release-Checkliste](release-checklist-0.1.0+3.md) dokumentiert.
+[Release-Checkliste](release-checklist-0.1.0+4.md) dokumentiert.
 
 ## Bug-Meldung
 
