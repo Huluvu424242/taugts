@@ -924,7 +924,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         'SELECT objektart FROM kriterien WHERE id = ?',
         [id],
       );
-      return rows.isEmpty || rows.single['objektart'] != erwarteteObjektart.name;
+      return rows.isEmpty ||
+          rows.single['objektart'] != erwarteteObjektart.name;
     });
     if (erlebnis.wirksamerOrtId != ort.id ||
         ort.typ != erwarteterOrtstyp ||
