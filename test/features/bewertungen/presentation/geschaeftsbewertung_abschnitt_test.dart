@@ -48,7 +48,8 @@ void main() {
     await _pumpAbschnitt(tester, repository, ort, erlebnis);
 
     expect(find.text('Geschäft bewerten'), findsOneWidget);
-    expect(find.text('Noch keine Bewertung für diesen Einkauf.'), findsOneWidget);
+    expect(
+        find.text('Noch keine Bewertung für diesen Einkauf.'), findsOneWidget);
 
     await tester.tap(find.text('Geschäft bewerten'));
     await tester.pumpAndSettle();
