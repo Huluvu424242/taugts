@@ -1,6 +1,6 @@
 # Barrierefreiheit und Bug-Meldung
 
-Stand: 31. August 2026 · vorbereitete Version: 0.1.0+3
+Stand: 1. September 2026 · vorbereitete Version: 0.1.0+3
 
 Taugt’s? stellt die gemeinsamen Grundgerüst-Funktionen für Barrierefreiheit und
 Bug-Meldungen vollständig innerhalb der App bereit.
@@ -27,6 +27,12 @@ Die Erlebniserfassung benennt Typ und Status sichtbar und semantisch, verwendet
 beschriftete Planungs-, Beginn- und Endeaktionen und sammelt ungültige
 Zeitangaben zusätzlich in einem fokussierbaren Fehlersammler. Restaurantbesuch
 und Einkauf sind ohne Farbcodierung unterscheidbar.
+
+Die Erlebnisübersicht gruppiert aktive, geplante und vergangene Erlebnisse mit
+semantisch erkennbaren Überschriften. Erlebnistyp, Zeitangabe, optionaler Ort
+und Positionsanzahl werden als Text ausgegeben; ein fehlender Planungstermin
+wird ausdrücklich als „Termin noch offen“ dargestellt. Lade-, Leer- und
+Fehlerzustände bleiben wahrnehmbar und bieten eine beschriftete Folgeaktion.
 
 Die Verwaltung der Bewertungskriterien bietet semantisch beschriftete Aktionen,
 einen fokussierbaren Fehlersammler, wahrnehmbare Lade-, Leer-, Fehler- und
@@ -66,6 +72,8 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 - kleine Android-Bildschirmgröße,
 - Gestennavigation und Erreichbarkeit unterer Aktionen,
 - zusammenhängender Ablauf aus Produkt, Ort, Erlebnisentwurf und Bewertung,
+- Erlebnisübersicht mit mehreren aktiven, geplanten und vergangenen Einträgen,
+  fehlenden Terminen, langen Ortsnamen und großer Schrift,
 - Kriterienverwaltung und Gaststättenbewertung einschließlich Ein- und
   Ausklappen, großer Schrift und Persistenzfehler,
 - Produkt- und Ortsverläufe mit mehreren langen historischen Einträgen,
