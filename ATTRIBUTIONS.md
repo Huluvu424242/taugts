@@ -12,6 +12,14 @@ Stand der Prüfung: 31. August 2026 · vorbereitete Version: 0.1.0+3
 - Lizenz: [CC0 1.0 Universell](https://creativecommons.org/publicdomain/zero/1.0/deed.de);
   das Logo darf ohne Namensnennung verwendet werden
 
+## „Powered by KI“-Hinweislogo
+
+- Datei: `assets/badges/powered_by_ki.png`
+- Verwendung: zusätzlicher sichtbarer Hinweis auf die KI-unterstützte Entwicklung;
+  ausdrücklich kein App- oder Launcher-Logo
+- Bereitstellung: durch den Projektverantwortlichen für dieses Projekt
+- Lizenz: CC0 / Public Domain; Verwendung ohne Namensnennung zulässig
+
 ## Flutter und Dart
 
 - [Flutter](https://github.com/flutter/flutter) – Copyright The Flutter Authors,
