@@ -184,9 +184,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Taugt’s?'),
+            Flexible(
+              fit: FlexFit.loose,
+              child: Text(
+                'Taugt’s?',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             SizedBox(width: 4),
             AppLogo(
               key: Key('hauptmenue-logo'),
