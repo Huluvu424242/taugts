@@ -162,7 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
     required IconData icon,
     required String label,
     required VoidCallback? onPressed,
-  }) => SizedBox(
+  }) =>
+      SizedBox(
         width: width,
         child: OutlinedButton.icon(
           onPressed: onPressed,
