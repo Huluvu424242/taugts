@@ -906,6 +906,14 @@ class SqliteBewertungsRepository implements BewertungsRepository {
     required Ortsbewertung ortsbewertung,
     required List<Bewertung> bewertungen,
   }) async {
+    final erwarteteObjektart = switch (erlebnis.typ) {
+      Erlebnistyp.restaurantbesuch => KriteriumObjektart.gastronomie,
+      Erlebnistyp.einkauf => KriteriumObjektart.geschaeft,
+    };
+    final erwarteterOrtstyp = switch (erlebnis.typ) {
+      Erlebnistyp.restaurantbesuch => Ortstyp.gastronomie,
+      Erlebnistyp.einkauf => Ortstyp.geschaeft,
+    };
     final vorhandeneOrtsbewertung = datenbank.verbindung.select(
       'SELECT id FROM ortsbewertungen WHERE erlebnis_id = ?',
       [erlebnis.id],
@@ -916,12 +924,10 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         'SELECT objektart FROM kriterien WHERE id = ?',
         [id],
       );
-      return rows.isEmpty ||
-          rows.single['objektart'] != KriteriumObjektart.gastronomie.name;
+      return rows.isEmpty || rows.single['objektart'] != erwarteteObjektart.name;
     });
-    if (erlebnis.typ != Erlebnistyp.restaurantbesuch ||
-        erlebnis.wirksamerOrtId != ort.id ||
-        ort.typ != Ortstyp.gastronomie ||
+    if (erlebnis.wirksamerOrtId != ort.id ||
+        ort.typ != erwarteterOrtstyp ||
         ortsbewertung.erlebnisId != erlebnis.id ||
         ortsbewertung.ortId != ort.id ||
         ortsbewertung.herkunftProfilId != erlebnis.herkunftProfilId ||
@@ -937,7 +943,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
             bewertung.herkunftProfilId != erlebnis.herkunftProfilId ||
             bewertung.erlebnisPositionId != null)) {
       throw ArgumentError(
-          'Gaststättenbewertung und Erlebnis passen nicht zusammen.');
+        'Ortsbewertung, Ort, Kriterien und Erlebnis passen nicht zusammen.',
+      );
     }
     datenbank.transaktion(() {
       _speichereErlebnisZeile(erlebnis);
