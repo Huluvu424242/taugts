@@ -93,16 +93,20 @@ class _BewertungsverlaufScreenState extends State<BewertungsverlaufScreen> {
                 children: [
                   Semantics(
                     header: true,
-                    child: Text(widget.objektName,
-                        style: Theme.of(context).textTheme.headlineSmall),
+                    child: Text(
+                      widget.objektName,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                      'Stammdaten bleiben von den folgenden historischen Beobachtungen getrennt.'),
+                    'Stammdaten bleiben von den folgenden historischen Beobachtungen getrennt.',
+                  ),
                   const SizedBox(height: 20),
                   if (eintraege.isEmpty)
                     const Text(
-                        'Für dieses Objekt liegen noch keine historischen Bewertungen oder Preise vor.')
+                      'Für dieses Objekt liegen noch keine historischen Bewertungen oder Preise vor.',
+                    )
                   else
                     for (final eintrag in eintraege)
                       _Verlaufskarte(
@@ -155,7 +159,14 @@ class _Verlaufskarte extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Text('Erlebnis: ${_erlebnistyp(eintrag.erlebnis.typ)}'),
                 Text(_zeitraum(context, eintrag.erlebnis)),
+                for (final zeitpunkt in _beobachtungszeitpunkte(context))
+                  Text(zeitpunkt),
+                if (eintrag.position != null)
+                  Text('Damals erfasste Anzahl: ${eintrag.position!.anzahl}'),
+                if (preisText != null)
+                  Text('Damals erfasster Preis: $preisText'),
                 if (eintrag.bewertungen.isEmpty && eintrag.notiz == null)
                   const Padding(
                     padding: EdgeInsets.only(top: 8),
@@ -165,9 +176,11 @@ class _Verlaufskarte extends StatelessWidget {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(
-                        bewertung.kriteriumName ?? 'Historisches Kriterium'),
+                      bewertung.kriteriumName ?? 'Historisches Kriterium',
+                    ),
                     subtitle: Text(
-                        'Kriterienversion ${bewertung.kriteriumVersion ?? 1}'),
+                      'Kriterienversion ${bewertung.kriteriumVersion ?? 1}',
+                    ),
                     trailing: Text(_wertText(bewertung)),
                   ),
                 if (eintrag.notiz != null) Text('Notiz: ${eintrag.notiz}'),
@@ -177,6 +190,37 @@ class _Verlaufskarte extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  List<String> _beobachtungszeitpunkte(BuildContext context) {
+    final ergebnis = <String>[];
+    if (eintrag.bewertungen.isNotEmpty) {
+      final zeiten = eintrag.bewertungen.map((wert) => wert.erstelltAm).toList()
+        ..sort();
+      ergebnis.add(
+        'Bewertung erfasst: ${_datumZeit(context, zeiten.first)}',
+      );
+    }
+    final preis = eintrag.preis;
+    if (preis != null) {
+      ergebnis.add(
+        'Preis beobachtet: ${_datumZeit(context, preis.beobachtetAm)}',
+      );
+    }
+    if (ergebnis.isEmpty) {
+      ergebnis.add(
+        'Beobachtungszeitpunkt: ${_datumZeit(context, eintrag.erlebnis.erlebtAm)}',
+      );
+    }
+    return ergebnis;
+  }
+
+  String _datumZeit(BuildContext context, DateTime wert) {
+    final lokal = wert.toLocal();
+    final lokalisierung = MaterialLocalizations.of(context);
+    final datum = lokalisierung.formatFullDate(lokal);
+    final zeit = lokalisierung.formatTimeOfDay(TimeOfDay.fromDateTime(lokal));
+    return '$datum, $zeit';
   }
 
   String _zeitraum(BuildContext context, Erlebnis erlebnis) {
