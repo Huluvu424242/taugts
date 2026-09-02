@@ -7,6 +7,7 @@ import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/orte/presentation/ort_karte_screen.dart';
+import 'package:taugts/features/orte/services/geocoding_service.dart';
 import 'package:taugts/features/orte/services/standort_service.dart';
 
 typedef OrtKarteOeffnen = Future<LatLng?> Function(
@@ -27,6 +28,7 @@ class OrtFormular extends StatefulWidget {
     required this.idGenerator,
     this.ort,
     this.standortService = const GeolocatorStandortService(),
+    this.geocodingService = const NominatimGeocodingService(),
     this.karteOeffnen,
     super.key,
   });
@@ -35,6 +37,7 @@ class OrtFormular extends StatefulWidget {
   final IdGenerator idGenerator;
   final Ort? ort;
   final StandortService standortService;
+  final GeocodingService geocodingService;
   final OrtKarteOeffnen? karteOeffnen;
 
   @override
@@ -58,6 +61,7 @@ class _OrtFormularState extends State<OrtFormular> {
   var _fehler = <_Ortsfehler>[];
   var _speichert = false;
   var _ermitteltStandort = false;
+  var _ermitteltAdresse = false;
   String? _standortMeldung;
 
   @override
@@ -112,12 +116,8 @@ class _OrtFormularState extends State<OrtFormular> {
     String gegenstueck,
   ) {
     final eingabe = wert?.trim() ?? '';
-    if (eingabe.isEmpty && gegenstueck.trim().isEmpty) {
-      return null;
-    }
-    if (eingabe.isEmpty) {
-      return 'Beide Koordinaten sind erforderlich.';
-    }
+    if (eingabe.isEmpty && gegenstueck.trim().isEmpty) return null;
+    if (eingabe.isEmpty) return 'Beide Koordinaten sind erforderlich.';
     final zahl = _kommazahl(eingabe);
     if (zahl == null || zahl < minimum || zahl > maximum) {
       return 'Wert muss zwischen $minimum und $maximum liegen.';
@@ -133,16 +133,12 @@ class _OrtFormularState extends State<OrtFormular> {
         const SnackBar(content: Text('Bitte Eingaben prüfen.')),
       );
       await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       final fehlerContext = _fehlerKey.currentContext;
       if (fehlerContext != null && fehlerContext.mounted) {
         await Scrollable.ensureVisible(fehlerContext);
       }
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       _fehlerFokus.requestFocus();
       return;
     }
@@ -152,9 +148,7 @@ class _OrtFormularState extends State<OrtFormular> {
       adresse: _wert(_adresse),
       ausgenommenId: widget.ort?.id,
     );
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
     if (dubletten.isNotEmpty) {
       final fortfahren = await showDialog<bool>(
         context: context,
@@ -176,9 +170,7 @@ class _OrtFormularState extends State<OrtFormular> {
           ],
         ),
       );
-      if (fortfahren != true || !mounted) {
-        return;
-      }
+      if (fortfahren != true || !mounted) return;
     }
 
     setState(() => _speichert = true);
@@ -198,17 +190,12 @@ class _OrtFormularState extends State<OrtFormular> {
     );
     try {
       await widget.repository.speichereOrt(ort);
-      if (mounted) {
-        Navigator.of(context).pop(ort);
-      }
+      if (mounted) Navigator.of(context).pop(ort);
     } catch (_) {
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Der Ort konnte nicht gespeichert werden.')),
+        const SnackBar(content: Text('Der Ort konnte nicht gespeichert werden.')),
       );
     }
   }
@@ -216,9 +203,7 @@ class _OrtFormularState extends State<OrtFormular> {
   List<_Ortsfehler> _validierungsfehler() {
     final fehler = <_Ortsfehler>[];
     final nameFehler = _namePruefen(_name.text);
-    if (nameFehler != null) {
-      fehler.add(_Ortsfehler(nameFehler, _nameFokus));
-    }
+    if (nameFehler != null) fehler.add(_Ortsfehler(nameFehler, _nameFokus));
     final breiteFehler = _breitengradPruefen(_breitengrad.text);
     if (breiteFehler != null) {
       fehler.add(_Ortsfehler(breiteFehler, _breitengradFokus));
@@ -244,8 +229,7 @@ class _OrtFormularState extends State<OrtFormular> {
       _standortMeldung = null;
     });
     try {
-      final standort =
-          await widget.standortService.aktuellenStandortErmitteln();
+      final standort = await widget.standortService.aktuellenStandortErmitteln();
       if (!mounted) return;
       final genauigkeit = standort.genauigkeitMeter == null
           ? 'nicht verfügbar'
@@ -277,8 +261,7 @@ class _OrtFormularState extends State<OrtFormular> {
         setState(() {
           _breitengrad.text = standort.breitengrad.toStringAsFixed(6);
           _laengengrad.text = standort.laengengrad.toStringAsFixed(6);
-          _standortMeldung =
-              'Standort übernommen. Koordinaten sind bearbeitbar.';
+          _standortMeldung = 'Standort übernommen. Koordinaten sind bearbeitbar.';
         });
       }
     } catch (fehler) {
@@ -293,20 +276,88 @@ class _OrtFormularState extends State<OrtFormular> {
     }
   }
 
+  Future<void> _adresseVorschlagen() async {
+    final breite = _kommazahl(_breitengrad.text);
+    final laenge = _kommazahl(_laengengrad.text);
+    if (breite == null || laenge == null ||
+        breite < -90 || breite > 90 || laenge < -180 || laenge > 180) {
+      setState(() => _standortMeldung =
+          'Für einen Adressvorschlag sind gültige Koordinaten erforderlich.');
+      return;
+    }
+    if (_typ == Ortstyp.privat) {
+      setState(() => _standortMeldung =
+          'Für private Orte werden exakte Koordinaten nicht an den Adressdienst übertragen.');
+      return;
+    }
+    setState(() {
+      _ermitteltAdresse = true;
+      _standortMeldung = null;
+    });
+    try {
+      final vorschlag = await widget.geocodingService.adresseVorschlagen(
+        breitengrad: breite,
+        laengengrad: laenge,
+      );
+      if (!mounted) return;
+      if (vorschlag == null) {
+        setState(() => _standortMeldung =
+            'Zu diesen Koordinaten wurde kein Adressvorschlag gefunden.');
+        return;
+      }
+      final nameVorschlag = vorschlag.name;
+      final bestaetigt = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Adressvorschlag übernehmen?'),
+          content: Text(
+            '${nameVorschlag == null ? '' : 'Name: $nameVorschlag\n'}'
+            'Adresse: ${vorschlag.adresse}\n\n'
+            'Der Vorschlag stammt aus OpenStreetMap/Nominatim. '
+            'Bitte vor dem Speichern prüfen und bei Bedarf korrigieren.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Nicht übernehmen'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Vorschlag übernehmen'),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      if (bestaetigt == true) {
+        setState(() {
+          _adresse.text = vorschlag.adresse;
+          if (_name.text.trim().isEmpty && nameVorschlag != null) {
+            _name.text = nameVorschlag;
+          }
+          _standortMeldung =
+              'Adressvorschlag übernommen. Bitte Angaben vor dem Speichern prüfen.';
+        });
+      }
+    } catch (fehler) {
+      if (!mounted) return;
+      setState(() => _standortMeldung = fehler is GeocodingAusnahme
+          ? fehler.nachricht
+          : 'Der Adressvorschlag konnte nicht ermittelt werden. Der Ort kann trotzdem gespeichert werden.');
+    } finally {
+      if (mounted) setState(() => _ermitteltAdresse = false);
+    }
+  }
+
   Future<void> _karteOeffnen() async {
     final breite = _kommazahl(_breitengrad.text);
     final laenge = _kommazahl(_laengengrad.text);
     final ausgangsposition =
         breite == null || laenge == null ? null : LatLng(breite, laenge);
-    final position = await (widget.karteOeffnen?.call(
-          context,
-          ausgangsposition,
-        ) ??
+    final position = await (widget.karteOeffnen?.call(context, ausgangsposition) ??
         Navigator.of(context).push<LatLng>(
           MaterialPageRoute(
-            builder: (_) => OrtKarteScreen(
-              ausgangsposition: ausgangsposition,
-            ),
+            builder: (_) => OrtKarteScreen(ausgangsposition: ausgangsposition),
           ),
         ));
     if (position == null || !mounted) return;
@@ -347,22 +398,10 @@ class _OrtFormularState extends State<OrtFormular> {
                   initialValue: _typ,
                   decoration: const InputDecoration(labelText: 'Ortstyp'),
                   items: const [
-                    DropdownMenuItem(
-                      value: Ortstyp.gastronomie,
-                      child: Text('Gastronomie'),
-                    ),
-                    DropdownMenuItem(
-                      value: Ortstyp.geschaeft,
-                      child: Text('Geschäft'),
-                    ),
-                    DropdownMenuItem(
-                      value: Ortstyp.privat,
-                      child: Text('Privater Ort'),
-                    ),
-                    DropdownMenuItem(
-                      value: Ortstyp.sonstiger,
-                      child: Text('Sonstiger Ort'),
-                    ),
+                    DropdownMenuItem(value: Ortstyp.gastronomie, child: Text('Gastronomie')),
+                    DropdownMenuItem(value: Ortstyp.geschaeft, child: Text('Geschäft')),
+                    DropdownMenuItem(value: Ortstyp.privat, child: Text('Privater Ort')),
+                    DropdownMenuItem(value: Ortstyp.sonstiger, child: Text('Sonstiger Ort')),
                   ],
                   onChanged: (wert) => setState(() => _typ = wert!),
                 ),
@@ -378,11 +417,9 @@ class _OrtFormularState extends State<OrtFormular> {
                 OutlinedButton.icon(
                   onPressed: _ermitteltStandort ? null : _standortUebernehmen,
                   icon: const Icon(Icons.my_location),
-                  label: Text(
-                    _ermitteltStandort
-                        ? 'Standort wird ermittelt …'
-                        : 'Aktuellen Standort verwenden',
-                  ),
+                  label: Text(_ermitteltStandort
+                      ? 'Standort wird ermittelt …'
+                      : 'Aktuellen Standort verwenden'),
                 ),
                 if (_standortMeldung != null)
                   Padding(
@@ -404,10 +441,7 @@ class _OrtFormularState extends State<OrtFormular> {
                   maxLength: 16,
                   focusNode: _breitengradFokus,
                   validator: _breitengradPruefen,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                    signed: true,
-                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
                 ),
                 _textfeld(
                   _laengengrad,
@@ -415,22 +449,24 @@ class _OrtFormularState extends State<OrtFormular> {
                   maxLength: 16,
                   focusNode: _laengengradFokus,
                   validator: _laengengradPruefen,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                    signed: true,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: _ermitteltAdresse ? null : _adresseVorschlagen,
+                  icon: const Icon(Icons.location_on_outlined),
+                  label: Text(_ermitteltAdresse
+                      ? 'Adressvorschlag wird ermittelt …'
+                      : 'Adresse aus Koordinaten vorschlagen'),
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Online-Anreicherung über OpenStreetMap/Nominatim. Nur nach Betätigung werden die eingegebenen Koordinaten übertragen.',
                   ),
                 ),
-                _textfeld(
-                  _osmReferenz,
-                  'OSM-Referenz (optional)',
-                  maxLength: 160,
-                ),
-                _textfeld(
-                  _notiz,
-                  'Notiz (optional)',
-                  maxLength: 1000,
-                  maxLines: 4,
-                ),
+                _textfeld(_osmReferenz, 'OSM-Referenz (optional)', maxLength: 160),
+                _textfeld(_notiz, 'Notiz (optional)', maxLength: 1000, maxLines: 4),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: _speichert ? null : _speichern,
