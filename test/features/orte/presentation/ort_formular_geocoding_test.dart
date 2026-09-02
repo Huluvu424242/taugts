@@ -62,7 +62,11 @@ void main() {
       find.widgetWithText(TextFormField, 'Längengrad (optional)'),
       '12.9253',
     );
-    await tester.ensureVisible(find.text('Adresse aus Koordinaten vorschlagen'));
+    await tester.scrollUntilVisible(
+      find.text('Adresse aus Koordinaten vorschlagen'),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
   }
 
   testWidgets('ruft Geocoding ausschließlich nach Nutzeraktion auf', (tester) async {
@@ -126,7 +130,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Privater Ort').last);
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Adresse aus Koordinaten vorschlagen'));
+    await tester.scrollUntilVisible(
+      find.text('Adresse aus Koordinaten vorschlagen'),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Adresse aus Koordinaten vorschlagen'));
     await tester.pumpAndSettle();
 
