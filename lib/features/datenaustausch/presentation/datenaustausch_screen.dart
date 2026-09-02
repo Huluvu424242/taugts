@@ -59,8 +59,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   }
 
   Future<void> _importPruefen() async {
-    final quelle = widget.importQuelleService;
-    if (quelle == null) return;
+    final quelle = widget.importQuelleService ?? SystemImportQuelleService();
     setState(() {
       _laeuft = true;
       _status = null;
@@ -141,7 +140,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
               const SizedBox(height: 8),
               const Text('Wähle eine Taugt’s?-Exportdatei aus. Sie wird validiert und mit deinen lokalen Daten verglichen. Vor einer späteren ausdrücklichen Importbestätigung wird nichts gespeichert.'),
               const SizedBox(height: 16),
-              FilledButton.tonalIcon(onPressed: _laeuft || widget.importQuelleService == null ? null : _importPruefen, icon: const Icon(Icons.fact_check_outlined), label: const Text('Importdatei auswählen und prüfen')),
+              FilledButton.tonalIcon(onPressed: _laeuft ? null : _importPruefen, icon: const Icon(Icons.fact_check_outlined), label: const Text('Importdatei auswählen und prüfen')),
               if (_laeuft) ...[
                 const SizedBox(height: 20),
                 Semantics(label: 'Datenaustausch wird vorbereitet', child: const LinearProgressIndicator()),
