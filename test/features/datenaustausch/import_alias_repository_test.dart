@@ -38,7 +38,8 @@ void main() {
     }
   });
 
-  test('bekannter Produktalias normalisiert Stammdaten und Historienbezüge', () {
+  test('bekannter Produktalias normalisiert Stammdaten und Historienbezüge',
+      () {
     final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     addTearDown(datenbank.schliessen);
     repository.speichere(
@@ -65,7 +66,8 @@ void main() {
       ],
     });
 
-    expect(((normalisiert['objekte'] as List).single as Map)['id'], 'produkt-neu');
+    expect(
+        ((normalisiert['objekte'] as List).single as Map)['id'], 'produkt-neu');
     expect(
       ((normalisiert['erlebnisPositionen'] as List).single as Map)['produktId'],
       'produkt-neu',
