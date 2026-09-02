@@ -5,7 +5,9 @@ import 'package:taugts/features/datenaustausch/services/import_konfliktentscheid
 void main() {
   const service = ImportKonfliktentscheidungService();
 
-  test('Versionskonflikt zeigt Feldunterschiede und erlaubt keine Dublettenaktionen', () {
+  test(
+      'Versionskonflikt zeigt Feldunterschiede und erlaubt keine Dublettenaktionen',
+      () {
     final konflikte = service.ermittle(
       importDokument: {
         'objekte': [
@@ -29,11 +31,15 @@ void main() {
     final konflikt = konflikte.single;
     expect(konflikt.art, ImportKonfliktArt.versionskonflikt);
     expect(konflikt.unterschiede.single.feld, 'name');
-    expect(konflikt.erlaubteAktionen, isNot(contains(ImportKonfliktAktion.beideBehalten)));
-    expect(konflikt.erlaubteAktionen, isNot(contains(ImportKonfliktAktion.zusammenfuehren)));
+    expect(konflikt.erlaubteAktionen,
+        isNot(contains(ImportKonfliktAktion.beideBehalten)));
+    expect(konflikt.erlaubteAktionen,
+        isNot(contains(ImportKonfliktAktion.zusammenfuehren)));
   });
 
-  test('Historischer Identitätskonflikt zeigt Objekt Erlebnis Ort und Zeitpunkt', () {
+  test(
+      'Historischer Identitätskonflikt zeigt Objekt Erlebnis Ort und Zeitpunkt',
+      () {
     final konflikte = service.ermittle(
       importDokument: {
         'bewertungen': [
@@ -73,7 +79,8 @@ void main() {
     expect(konflikt.kontext.erlebnisId, 'erlebnis-a');
     expect(konflikt.kontext.ortId, 'ort-a');
     expect(konflikt.kontext.zeitpunkt, '2026-09-02T18:00:00Z');
-    expect(konflikt.erlaubteAktionen, isNot(contains(ImportKonfliktAktion.beideBehalten)));
+    expect(konflikt.erlaubteAktionen,
+        isNot(contains(ImportKonfliktAktion.beideBehalten)));
   });
 
   test('Fachliche Dublette darf beide behalten oder zusammenführen', () {
@@ -105,11 +112,14 @@ void main() {
 
     final konflikt = konflikte.single;
     expect(konflikt.art, ImportKonfliktArt.fachlicheDublette);
-    expect(konflikt.erlaubteAktionen, contains(ImportKonfliktAktion.beideBehalten));
-    expect(konflikt.erlaubteAktionen, contains(ImportKonfliktAktion.zusammenfuehren));
+    expect(konflikt.erlaubteAktionen,
+        contains(ImportKonfliktAktion.beideBehalten));
+    expect(konflikt.erlaubteAktionen,
+        contains(ImportKonfliktAktion.zusammenfuehren));
   });
 
-  test('Entscheidung kann auf weitere Konflikte desselben Typs angewendet werden', () {
+  test('Entscheidung kann auf weitere Konflikte desselben Typs angewendet werden',
+      () {
     const erster = ImportEinzelKonflikt(
       schluessel: 'objekte|1|1',
       art: ImportKonfliktArt.versionskonflikt,
