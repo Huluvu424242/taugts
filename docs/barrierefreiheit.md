@@ -1,6 +1,6 @@
 # Barrierefreiheit und Bug-Meldung
 
-Stand: 1. September 2026 · vorbereitete Version: 0.1.0+4
+Stand: 2. September 2026 · vorbereitete Version: 0.1.0+5
 
 Taugt’s? stellt die gemeinsamen Grundgerüst-Funktionen für Barrierefreiheit und
 Bug-Meldungen vollständig innerhalb der App bereit.
@@ -70,6 +70,19 @@ Die optionale OpenStreetMap-Karte gibt die ausgewählten Koordinaten zusätzlich
 als Text aus und bietet eine eindeutig beschriftete Übernahme. Die manuelle
 Koordinaten- und Adresseingabe bleibt die vollständig zugängliche Alternative.
 
+Das optionale Reverse Geocoding wird ausschließlich über die sichtbare Aktion
+**Adresse aus Koordinaten vorschlagen** gestartet. Vorschlags-, Lade- und
+Fehlerzustände ersetzen die manuelle Eingabe nicht; Name und Adresse bleiben vor
+dem Speichern bearbeitbar. Für private Orte steht die Übertragung exakter
+Koordinaten an den Geocoding-Dienst nicht zur Verfügung.
+
+Der Bereich **Import/Export** verwendet beschriftete Aktionen und verständliche
+Status-, Vorschau-, Konflikt-, Erfolgs- und Fehlertexte. Die gewählte
+Importstrategie, Auswirkungen sowie Konfliktentscheidungen werden nicht allein
+durch Farbe oder Position vermittelt. Während der verbindlichen
+Importausführung werden konkurrierende Import- und Exportaktionen gesperrt; ein
+Fehler weist ausdrücklich auf den Rollback hin.
+
 Die mobile Startseite verwendet semantisch beschriftete zentrale Aktionen und
 eine responsive App Bar. Die sichtbare KI-Kennzeichnung ist vom App-Logo
 getrennt; App-Bar-Aktionen bleiben auch auf kleinen Bildschirmbreiten innerhalb
@@ -91,6 +104,10 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
   Ein- und Ausklappen, großer Schrift und Persistenzfehler,
 - Produkt- und Ortsverläufe mit mehreren langen historischen Einträgen,
   unterschiedlichen Erlebnisarten und getrennten Bewertungs-/Preiszeitpunkten,
+- Reverse Geocoding mit Erfolg, Fehler und privatem Ort einschließlich großer
+  Schrift und Screenreader,
+- Import/Export mit langer Vorschau, Konfliktentscheidungen, Dubletten-Merge,
+  Ausführung, Erfolg und Rollback einschließlich großer Schrift und TalkBack,
 - externe Projekt- und Dokumentationslinks einschließlich Öffnungsfehler,
 - Bug-Meldung und vollständige Barrierefreiheitserklärung auf einem realen
   Gerät.
@@ -98,10 +115,10 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 Der Getränkebewertungsbogen ist ausdrücklich einzubeziehen. Die gebündelte
 Prüfung wird in
 [Story #30](https://github.com/Huluvu424242/taugts/issues/30) verfolgt. Solange
-diese Punkte offen sind, wird für Version 0.1.0+4 kein vollständig manuell
+diese Punkte offen sind, wird für Version 0.1.0+5 kein vollständig manuell
 bestätigter Barrierefreiheitsstatus behauptet. Der konkrete Freigabestand wird
 zusätzlich in der
-[Release-Checkliste](release-checklist-0.1.0+4.md) dokumentiert.
+[Release-Checkliste](release-checklist-0.1.0+5.md) dokumentiert.
 
 ## Bug-Meldung
 
