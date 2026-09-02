@@ -24,7 +24,9 @@ void main() {
     expect(ergebnis.fehler, isEmpty);
   });
 
-  test('eigenständige historische Datensätze werden nicht als Duplikat abgewiesen', () {
+  test(
+      'eigenständige historische Datensätze werden nicht als Duplikat abgewiesen',
+      () {
     final dokument = _dokument('taugts-export-v1-gueltig.json');
     final preise = dokument['preisbeobachtungen'] as List<Object?>;
     final bewertungen = dokument['bewertungen'] as List<Object?>;
