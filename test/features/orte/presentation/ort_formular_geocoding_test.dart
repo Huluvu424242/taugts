@@ -76,7 +76,8 @@ void main() {
     );
   }
 
-  testWidgets('ruft Geocoding ausschließlich nach Nutzeraktion auf', (tester) async {
+  testWidgets('ruft Geocoding ausschließlich nach Nutzeraktion auf',
+      (tester) async {
     final service = _GeocodingService(
       ergebnis: const Adressvorschlag(
         name: 'Testgaststätte',
@@ -115,7 +116,8 @@ void main() {
       -120,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(tester.widget<TextFormField>(name).controller!.text, 'Testgaststätte');
+    expect(
+        tester.widget<TextFormField>(name).controller!.text, 'Testgaststätte');
     await tester.scrollUntilVisible(
       adresse,
       120,
@@ -150,7 +152,8 @@ void main() {
     expect(find.text('Ort speichern'), findsOneWidget);
   });
 
-  testWidgets('private Orte übertragen keine exakten Koordinaten', (tester) async {
+  testWidgets('private Orte übertragen keine exakten Koordinaten',
+      (tester) async {
     final service = _GeocodingService();
     await formularAnzeigen(tester, service, privat: true);
     await tester.tap(find.text('Adresse aus Koordinaten vorschlagen'));
