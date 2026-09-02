@@ -13,7 +13,8 @@ void main() {
 
   Map<String, Object?> leeresDokument({
     List<Map<String, Object?>> profile = const [],
-  }) => {
+  }) =>
+      {
         'profile': profile,
         'objekte': <Object?>[],
         'orte': <Object?>[],
@@ -166,7 +167,9 @@ void main() {
         ],
       };
 
-  test('importiert alle historischen Entitäten anhand stabiler IDs genau einmal', () {
+  test(
+      'importiert alle historischen Entitäten anhand stabiler IDs genau einmal',
+      () {
     final import = vollstaendigesDokument();
 
     final erstes = service.ausfuehren(
@@ -342,7 +345,8 @@ void main() {
     }
   });
 
-  test('weist zusammengeführte Datensätze getrennt von Aktualisierungen aus', () {
+  test('weist zusammengeführte Datensätze getrennt von Aktualisierungen aus',
+      () {
     final import = leeresDokument(profile: [
       {
         'id': 'profil-1',
