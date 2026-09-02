@@ -6,8 +6,11 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+## [0.1.0+5] - 2026-09-02
+
 ### Added
 
+- Ortsformulare können nach ausdrücklicher Nutzeraktion aus vorhandenen Koordinaten über OpenStreetMap/Nominatim einen bearbeitbaren Vorschlag für Name und Adresse ermitteln; private Orte übertragen dabei keine exakten Koordinaten und fehlendes Netz oder Providerfehler blockieren die manuelle Erfassung nicht.
 - Geprüfte Importe können nach Vorschau und Konfliktentscheidung ausdrücklich atomar ausgeführt werden; Erfolg und Rollback werden lokal datensparsam protokolliert, Wiederholungsimporte bewahren stabile Historien-IDs ohne technische Dubletten und das Ergebnis weist Erlebnisse, Positionen, Preisbeobachtungen sowie Produkt- und Ortsbewertungen getrennt aus.
 - Fachliche Produkt- und Ortsdubletten können kontrolliert zusammengeführt werden: Die lokale UUID bleibt kanonisch, widersprüchliche Stammdaten werden feldweise ausgewählt, alle betroffenen Importreferenzen werden auf die kanonische ID umgebogen und die frühere Import-UUID wird persistent als Alias gespeichert und bei späteren Importen vor der Konfliktanalyse wiedererkannt, ohne historische Preise oder Bewertungen zu verändern.
 - Importkonflikte können einzeln mit Gegenüberstellung der abweichenden Felder entschieden werden; Entscheidungen lassen sich auf weitere Konflikte derselben Art und Sammlung anwenden, während unzulässige Aktionen wie „Beide behalten“ bei Identitätswidersprüchen nicht angeboten werden.
@@ -16,11 +19,14 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Importdateien werden vor jeder späteren Übernahme vollständig und ohne Datenbankänderung auf JSON-Syntax, Formatkennung, Schemaversion, Pflichtfelder, Datentypen, fachliche Regeln und referenzielle Konsistenz geprüft; Größen-, Tiefen- und Knotengrenzen schützen zusätzlich vor unangemessenen Eingaben.
 - Eine getestete Vorwärtsmigration übernimmt die unterstützte Vorab-Schemaversion 0 in Version 1; unbekannte neuere Schemaversionen werden ausdrücklich abgewiesen.
 - Ein versioniertes, datenbankunabhängiges JSON-Austauschformat `taugts-export` mit JSON Schema sowie gültigen und ungültigen Fixtures bildet Profile, Objekte, Orte, Erlebnisse, historische Preise und Bewertungen, Kriterien und Kategorien stabil über UUID-Beziehungen ab.
+- Der vollständige lokale Datenbestand kann als versionierte JSON-Datei exportiert, über den Systemdialog gespeichert und unter Android über den System-Teilen-Dialog weitergegeben werden.
 
 ### Fixed
 
 - Die Importausführung verhindert nun auch auf Service-Ebene eine zweite gleichzeitige beziehungsweise reentrante Ausführung für dieselbe lokale Datenbank und gibt die Sperre nach Erfolg oder Fehler zuverlässig wieder frei.
 - Importvorschau und Importausführung verwenden nun konsistent `erlebnisPositionen` und berücksichtigen Ortsbewertungen, sodass dieselben historischen Sammlungen geplant und tatsächlich verarbeitet werden.
+- Persistente Aliasreferenzen aus dem Dubletten-Merge werden nun auch nach App-Neustart wiedererkannt und atomar mit dem Import gespeichert beziehungsweise bei Fehlern zurückgerollt.
+- Reverse-Geocoding-Widgettests scrollen lazy aufgebaute Formularinhalte korrekt in den Widgetbaum; die betroffenen Dateien entsprechen wieder der erwarteten Dart-Formatierung.
 
 ## [0.1.0+4] - 2026-09-01
 
@@ -99,7 +105,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
   gespeichert, fortgesetzt und nach Bestätigung verworfen werden.
 - Vollständig lokale Ortsverwaltung mit Ortstyp, optionaler Adresse,
   Koordinaten, OSM-Referenz und Notiz sowie Suche, Auswahlmodus und
-  nicht blockierender Dublettenwarnung.
+  nicht blockiernder Dublettenwarnung.
 - Offline-Produktverwaltung für Bier und andere Produkte mit optionalen
   Stammdaten, barrierefreier Validierung und Kennzeichnung unvollständiger
   Einträge.
@@ -110,7 +116,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
 - Featureorientierte Ausgangsstruktur, Startscreen und Widget-Test.
 
-[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+4...HEAD
+[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+5...HEAD
+[0.1.0+5]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+4...v0.1.0+5
 [0.1.0+4]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+3...v0.1.0+4
 [0.1.0+3]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+2...v0.1.0+3
 [0.1.0+2]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+1...v0.1.0+2
