@@ -8,7 +8,8 @@ void main() {
     List<Map<String, Object?>> objekte = const [],
     List<Map<String, Object?>> erlebnisse = const [],
     List<Map<String, Object?>> bewertungen = const [],
-  }) => {
+  }) =>
+      {
         'objekte': objekte,
         'erlebnisse': erlebnisse,
         'bewertungen': bewertungen,
@@ -30,7 +31,9 @@ void main() {
     expect(objekte.entfernen, 1);
   });
 
-  test('Import bevorzugen aktualisiert identische UUID und behält lokalen Zusatz', () {
+  test(
+      'Import bevorzugen aktualisiert identische UUID und behält lokalen Zusatz',
+      () {
     final plan = service.plane(
       strategie: ImportStrategie.importBevorzugen,
       importDokument: dokument(objekte: [
@@ -66,24 +69,39 @@ void main() {
     expect(objekte.behalten, 1);
   });
 
-  test('historische Datensätze mit verschiedenen IDs bleiben zusätzlich erhalten', () {
+  test(
+      'historische Datensätze mit verschiedenen IDs bleiben zusätzlich erhalten',
+      () {
     final plan = service.plane(
       strategie: ImportStrategie.importBevorzugen,
       importDokument: dokument(bewertungen: [
-        {'id': 'bew-import', 'objektId': 'bier', 'zeitpunkt': '2026-08-02', 'wert': 4},
+        {
+          'id': 'bew-import',
+          'objektId': 'bier',
+          'zeitpunkt': '2026-08-02',
+          'wert': 4
+        },
       ]),
       lokalesDokument: dokument(bewertungen: [
-        {'id': 'bew-lokal', 'objektId': 'bier', 'zeitpunkt': '2026-08-01', 'wert': 3},
+        {
+          'id': 'bew-lokal',
+          'objektId': 'bier',
+          'zeitpunkt': '2026-08-01',
+          'wert': 3
+        },
       ]),
     );
 
-    final bewertungen = plan.sammlungen.singleWhere((e) => e.name == 'bewertungen');
+    final bewertungen =
+        plan.sammlungen.singleWhere((e) => e.name == 'bewertungen');
     expect(bewertungen.hinzufuegen, 1);
     expect(bewertungen.behalten, 1);
     expect(bewertungen.entfernen, 0);
   });
 
-  test('gleiche historische ID mit anderem Kontext wird als Identitätskonflikt markiert', () {
+  test(
+      'gleiche historische ID mit anderem Kontext wird als Identitätskonflikt markiert',
+      () {
     final plan = service.plane(
       strategie: ImportStrategie.importBevorzugen,
       importDokument: dokument(erlebnisse: [
@@ -98,13 +116,16 @@ void main() {
     expect(plan.identitaetsKonflikte.single.id, 'e1');
   });
 
-  test('fachliche Dubletten werden nur ausgewiesen und nicht still zusammengeführt', () {
+  test(
+      'fachliche Dubletten werden nur ausgewiesen und nicht still zusammengeführt',
+      () {
     final plan = service.plane(
       strategie: ImportStrategie.importBevorzugen,
       importDokument: dokument(),
       lokalesDokument: dokument(),
       fachlicheDubletten: const [
-        FachlicheDubletteHinweis(sammlung: 'objekte', importId: 'i', lokaleId: 'l'),
+        FachlicheDubletteHinweis(
+            sammlung: 'objekte', importId: 'i', lokaleId: 'l'),
       ],
     );
 
