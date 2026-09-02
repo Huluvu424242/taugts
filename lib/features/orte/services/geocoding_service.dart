@@ -72,7 +72,13 @@ class NominatimGeocodingService implements GeocodingService {
       final details = json['address'];
       String? name;
       if (details is Map<String, dynamic>) {
-        for (final key in ['amenity', 'shop', 'tourism', 'leisure', 'building']) {
+        for (final key in [
+          'amenity',
+          'shop',
+          'tourism',
+          'leisure',
+          'building'
+        ]) {
           final value = details[key];
           if (value is String && value.trim().isNotEmpty) {
             name = value.trim();
@@ -81,7 +87,9 @@ class NominatimGeocodingService implements GeocodingService {
         }
       }
       final displayName = json['name'];
-      if (name == null && displayName is String && displayName.trim().isNotEmpty) {
+      if (name == null &&
+          displayName is String &&
+          displayName.trim().isNotEmpty) {
         name = displayName.trim();
       }
       return Adressvorschlag(name: name, adresse: adresse);
