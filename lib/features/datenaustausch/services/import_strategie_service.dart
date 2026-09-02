@@ -66,8 +66,9 @@ class ImportStrategieService {
     'kategorien',
     'bewertungskriterien',
     'erlebnisse',
-    'erlebnispositionen',
+    'erlebnisPositionen',
     'preisbeobachtungen',
+    'ortsbewertungen',
     'bewertungen',
   ];
 
@@ -121,13 +122,15 @@ class ImportStrategieService {
         }
       }
 
-      ergebnisse.add(ImportStrategieSammlung(
-        name: sammlung,
-        hinzufuegen: hinzufuegen,
-        aktualisieren: aktualisieren,
-        behalten: behalten,
-        entfernen: entfernen,
-      ));
+      ergebnisse.add(
+        ImportStrategieSammlung(
+          name: sammlung,
+          hinzufuegen: hinzufuegen,
+          aktualisieren: aktualisieren,
+          behalten: behalten,
+          entfernen: entfernen,
+        ),
+      );
     }
 
     return ImportStrategiePlan(
@@ -150,36 +153,53 @@ class ImportStrategieService {
     return ImportIdentitaetsKonflikt(
       sammlung: sammlung,
       id: importWert['id'] as String,
-      nachricht: 'Dieselbe stabile ID verweist auf einen anderen historischen Kontext.',
+      nachricht:
+          'Dieselbe stabile ID verweist auf einen anderen historischen Kontext.',
     );
   }
 
   bool _historischeSammlung(String sammlung) =>
       sammlung == 'erlebnisse' ||
-      sammlung == 'erlebnispositionen' ||
+      sammlung == 'erlebnisPositionen' ||
       sammlung == 'preisbeobachtungen' ||
+      sammlung == 'ortsbewertungen' ||
       sammlung == 'bewertungen';
 
-  Map<String, Object?> _historischerBezug(String sammlung, Map<String, Object?> wert) {
+  Map<String, Object?> _historischerBezug(
+    String sammlung,
+    Map<String, Object?> wert,
+  ) {
     const schluessel = <String>[
       'objektId',
+      'produktId',
       'ortId',
       'erlebnisId',
-      'erlebnispositionId',
-      'bewertungskriteriumId',
-      'zeitpunkt',
-      'begonnenAm',
-      'beendetAm',
+      'erlebnisPositionId',
+      'ortsbewertungId',
+      'herkunftProfilId',
+      'bewertetAm',
+      'beobachtetAm',
+      'tatsaechlicherBeginn',
+      'tatsaechlichesEnde',
+      'geplanterTag',
     ];
-    return {for (final key in schluessel) if (wert.containsKey(key)) key: wert[key]};
+    return {
+      for (final key in schluessel)
+        if (wert.containsKey(key)) key: wert[key],
+    };
   }
 
-  Map<String, Map<String, Object?>> _nachId(List<Map<String, Object?>> werte) => {
+  Map<String, Map<String, Object?>> _nachId(
+    List<Map<String, Object?>> werte,
+  ) => {
         for (final wert in werte)
           if (wert['id'] is String) wert['id'] as String: wert,
       };
 
-  List<Map<String, Object?>> _liste(Map<String, Object?> dokument, String name) =>
+  List<Map<String, Object?>> _liste(
+    Map<String, Object?> dokument,
+    String name,
+  ) =>
       ((dokument[name] as List?) ?? const [])
           .whereType<Map>()
           .map((e) => Map<String, Object?>.from(e))
