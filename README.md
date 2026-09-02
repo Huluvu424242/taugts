@@ -6,14 +6,17 @@ Taugt’s? ist eine Offline-first-Flutter-App zur lokalen Erfassung und Bewertun
 von Produkten, Orten und Erlebnissen. Die Datenhaltung bleibt auf dem Gerät;
 für die Kernfunktionen sind weder Konto noch Serververbindung erforderlich.
 
-Die vorbereitete Android-Version ist **0.1.0+4**.
+Die vorbereitete Android-Version ist **0.1.0+5**.
 
-## Funktionsumfang von 0.1.0+4
+## Funktionsumfang von 0.1.0+5
 
 - Produkte wie Getränke, Speisen und andere Dinge lokal anlegen, suchen,
   bearbeiten und erneut bewerten, ohne Stammdaten neu anzulegen
 - Orte mit Typ, optionaler Adresse, Koordinaten, OpenStreetMap-Referenz und
   Notiz lokal verwalten
+- für nicht private Orte nach ausdrücklicher Nutzeraktion aus vorhandenen
+  Koordinaten einen bearbeitbaren Namens- und Adressvorschlag über
+  OpenStreetMap/Nominatim abrufen
 - Restaurantbesuche und Einkäufe planen, beginnen, beenden, in einer
   Erlebnisübersicht wiederfinden und nachträglich bearbeiten
 - Restaurantbestellungen und Einkaufslisten mit mehreren Positionen, Anzahl,
@@ -30,6 +33,17 @@ Die vorbereitete Android-Version ist **0.1.0+4**.
   bestätigt in das Ortsformular übernehmen
 - Koordinaten optional auf einer OpenStreetMap-Karte kontrollieren und
   korrigieren; die manuelle Erfassung bleibt erhalten
+- den vollständigen lokalen Datenbestand als versionierte JSON-Datei
+  exportieren, speichern und unter Android über den Systemdialog teilen
+- Importdateien vollständig validieren, ihre Auswirkungen vorab analysieren
+  und zwischen „Bestand ersetzen“, „Import bevorzugen“ und „Lokalen Bestand
+  bevorzugen“ wählen
+- Importkonflikte einzeln entscheiden und fachliche Produkt- oder Ortsdubletten
+  kontrolliert zusammenführen; persistente Aliasreferenzen sorgen bei späteren
+  Importen für die Wiedererkennung bereits zusammengeführter Identitäten
+- geprüfte Importe ausdrücklich und atomar ausführen; Fehler rollen den
+  Importversuch vollständig zurück und ein lokales datensparsames Protokoll
+  hält nur Status, Strategie und Ergebniszähler fest
 - responsive mobile Startseite mit zentralen Aktionen und Navigation zu den
   fachlichen Bereichen nutzen
 - Projektseite und veröffentlichte Dokumentation direkt aus dem Über-Dialog
@@ -42,7 +56,7 @@ Die vorbereitete Android-Version ist **0.1.0+4**.
 Nach Veröffentlichung steht die APK unter
 [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) bereit:
 
-1. `taugts-0.1.0+4.apk` und die zugehörige
+1. `taugts-0.1.0+5.apk` und die zugehörige
    `.apk.sha256`-Datei herunterladen.
 2. Die SHA-256-Prüfsumme kontrollieren.
 3. Unter Android gegebenenfalls die Installation aus der verwendeten
@@ -52,11 +66,11 @@ Nach Veröffentlichung steht die APK unter
 Unter Windows lässt sich die Prüfsumme so ermitteln:
 
 ```powershell
-Get-FileHash .\taugts-0.1.0+4.apk -Algorithm SHA256
+Get-FileHash .\taugts-0.1.0+5.apk -Algorithm SHA256
 ```
 
 Der Hash muss mit dem Inhalt von
-`taugts-0.1.0+4.apk.sha256` übereinstimmen. APK-Updates funktionieren nur mit
+`taugts-0.1.0+5.apk.sha256` übereinstimmen. APK-Updates funktionieren nur mit
 demselben Release-Signierschlüssel.
 
 ## Datenschutz und lokale Daten
@@ -69,23 +83,32 @@ bewussten Nutzeraktion vorbereitet und anschließend zur Prüfung im Browser
 geöffnet. Die App sendet ihn nicht selbständig ab und hängt keine lokalen
 Nutzerdaten oder Diagnoselogs an.
 
+Import und Export sind ebenfalls ausdrücklich nutzerinitiierte lokale
+Dateiaktionen. Importdateien werden vor jeder Übernahme geprüft; der eigentliche
+Import erfolgt atomar, sodass ein Fehler den vorherigen fachlichen Datenbestand
+erhält. Das lokale Importprotokoll speichert keine importierten Namen, Notizen,
+Preise oder Bewertungswerte.
+
 Die manuelle Orts- und Koordinateneingabe funktioniert offline. Für das Laden
-der optionalen OpenStreetMap-Kartenkacheln sowie für das Öffnen externer
-Projekt- und Dokumentationslinks ist eine Netzwerkverbindung erforderlich.
+der optionalen OpenStreetMap-Kartenkacheln, das ausdrücklich gestartete Reverse
+Geocoding für nicht private Orte sowie für das Öffnen externer Projekt- und
+Dokumentationslinks ist eine Netzwerkverbindung erforderlich. Für Orte vom Typ
+**Privater Ort** werden keine exakten Koordinaten an den Geocoding-Dienst
+übertragen.
 
 ## Bekannte Einschränkungen
 
-- Import und Export sind noch nicht enthalten.
 - Windows und Linux sind architektonisch berücksichtigt, aber nicht Bestandteil
   dieses Releases.
-- Barcode, Standort und Karte müssen vor einer öffentlichen Freigabe noch auf
-  den vorgesehenen realen Zielgeräten manuell geprüft werden.
+- Barcode, Standort, Karte und Reverse Geocoding müssen vor einer öffentlichen
+  Freigabe noch auf den vorgesehenen realen Zielgeräten manuell geprüft werden.
+- Import und Export müssen vor Veröffentlichung zusätzlich mit realistischen
+  Datenbeständen sowie Abbruch-, Fehler-, Wiederholungs- und Rollbackfällen auf
+  einem realen Android-Gerät geprüft werden.
 - Die systematische manuelle Prüfung mit TalkBack, großer Systemschrift,
   Gestennavigation und einem kleinen Android-Gerät ist vor einer öffentlichen
   Freigabe noch abzuschließen; siehe
   [Story #30](https://github.com/Huluvu424242/taugts/issues/30).
-- Vor Neuinstallation oder Wechsel des Signierschlüssels gibt es noch keinen
-  Exportweg für die lokal gespeicherten Daten.
 
 ## Zielplattformen
 
@@ -167,11 +190,11 @@ Der ausschließlich manuell startbare GitHub-Actions-Workflow
 ihrer SHA-256-Prüfsumme als GitHub Release veröffentlichen.
 
 Einrichtung, Sicherheitsvorgaben und Ablauf stehen in
-[docs/android-release.md](docs/android-release.md). Für Version 0.1.0+4 liegen
+[docs/android-release.md](docs/android-release.md). Für Version 0.1.0+5 liegen
 außerdem folgende Dokumente bereit:
 
-- [Release Notes](docs/releases/0.1.0+4.md)
-- [Release-Checkliste](docs/release-checklist-0.1.0+4.md)
+- [Release Notes](docs/releases/0.1.0+5.md)
+- [Release-Checkliste](docs/release-checklist-0.1.0+5.md)
 - [Changelog](CHANGELOG.md)
 
 Der Release-Workflow darf erst nach Einrichtung der Signing-Secrets und einer
