@@ -1,4 +1,6 @@
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
+import 'package:taugts/features/datenaustausch/services/import_alias_repository.dart';
+import 'package:taugts/features/datenaustausch/services/import_dubletten_merge_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_protokoll_repository.dart';
 import 'package:taugts/features/datenaustausch/services/import_strategie_service.dart';
@@ -54,9 +56,11 @@ class ImportAusfuehrungsErgebnis {
 class ImportAusfuehrungService {
   const ImportAusfuehrungService({
     this.protokollRepository = const ImportProtokollRepository(),
+    this.aliasRepository = const ImportAliasRepository(),
   });
 
   final ImportProtokollRepository protokollRepository;
+  final ImportAliasRepository aliasRepository;
 
   static const _reihenfolge = <String>[
     'profile',
@@ -70,6 +74,12 @@ class ImportAusfuehrungService {
     'bewertungen',
   ];
 
+  Map<String, Object?> normalisiereBekannteAliase(
+    LokaleDatenbank datenbank,
+    Map<String, Object?> importDokument,
+  ) =>
+      aliasRepository.normalisiereDokument(datenbank, importDokument);
+
   ImportAusfuehrungsErgebnis ausfuehren({
     required LokaleDatenbank datenbank,
     required Map<String, Object?> importDokument,
@@ -77,6 +87,7 @@ class ImportAusfuehrungService {
     ImportKonfliktEntscheidungsStand entscheidungen =
         const ImportKonfliktEntscheidungsStand(),
     Map<String, String> mergeAliase = const {},
+    List<ImportAliasReferenz> aliase = const [],
     Map<String, int> zusammengefuehrtNachSammlung = const {},
     DateTime? ausgefuehrtAm,
   }) {
@@ -85,6 +96,7 @@ class ImportAusfuehrungService {
 
     try {
       datenbank.transaktion(() {
+        aliasRepository.stelleTabelleBereit(datenbank);
         if (strategie == ImportStrategie.bestandErsetzen) {
           _ersetzeBestand(datenbank);
         }
@@ -131,6 +143,13 @@ class ImportAusfuehrungService {
                 : zaehler.plus(hinzugefuegt: 1);
           }
           ergebnis[sammlung] = zaehler;
+        }
+        for (final alias in aliase) {
+          aliasRepository.speichere(
+            datenbank,
+            alias,
+            erstelltAm: zeitpunkt,
+          );
         }
       });
     } catch (_) {
