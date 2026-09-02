@@ -6,6 +6,10 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+### Added
+
+- Ein versioniertes, datenbankunabhängiges JSON-Austauschformat `taugts-export` mit JSON Schema sowie gültigen und ungültigen Fixtures bildet Profile, Objekte, Orte, Erlebnisse, historische Preise und Bewertungen, Kriterien und Kategorien stabil über UUID-Beziehungen ab.
+
 ## [0.1.0+4] - 2026-09-01
 
 ### Changed
