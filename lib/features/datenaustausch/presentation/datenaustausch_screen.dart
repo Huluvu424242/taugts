@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_dubletten_merge_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_konfliktanalyse_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_quelle_service.dart';
@@ -19,6 +20,7 @@ class DatenaustauschScreen extends StatefulWidget {
     this.importKonfliktanalyseService = const ImportKonfliktanalyseService(),
     this.importStrategieService = const ImportStrategieService(),
     this.importKonfliktentscheidungService = const ImportKonfliktentscheidungService(),
+    this.importDublettenMergeService = const ImportDublettenMergeService(),
     super.key,
   });
 
@@ -29,6 +31,7 @@ class DatenaustauschScreen extends StatefulWidget {
   final ImportKonfliktanalyseService importKonfliktanalyseService;
   final ImportStrategieService importStrategieService;
   final ImportKonfliktentscheidungService importKonfliktentscheidungService;
+  final ImportDublettenMergeService importDublettenMergeService;
 
   @override
   State<DatenaustauschScreen> createState() => _DatenaustauschScreenState();
@@ -48,6 +51,8 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   ImportKonfliktEntscheidungsStand _entscheidungsStand =
       const ImportKonfliktEntscheidungsStand();
   final Set<String> _aufTypAnwenden = <String>{};
+  final Map<String, Map<String, DublettenFeldQuelle>> _mergeFeldauswahl = {};
+  final Map<String, ImportDublettenMergeErgebnis> _mergePlaene = {};
   bool _konflikteBearbeiten = false;
 
   String _dateiname() {
@@ -106,6 +111,8 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       _konflikte = const [];
       _entscheidungsStand = const ImportKonfliktEntscheidungsStand();
       _aufTypAnwenden.clear();
+      _mergeFeldauswahl.clear();
+      _mergePlaene.clear();
       _konflikteBearbeiten = false;
     });
     try {
@@ -179,6 +186,29 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
     });
   }
 
+  bool _kannZusammenfuehren(ImportEinzelKonflikt konflikt) =>
+      konflikt.art == ImportKonfliktArt.fachlicheDublette &&
+      (konflikt.sammlung == 'objekte' || konflikt.sammlung == 'orte');
+
+  bool _istStammdatenFeld(String feld) =>
+      feld != 'id' && feld != 'erstelltAm' && feld != 'geaendertAm';
+
+  void _mergePlanAktualisieren(ImportEinzelKonflikt konflikt) {
+    if (!_kannZusammenfuehren(konflikt) ||
+        _importDokument == null ||
+        _lokalesDokument == null) {
+      return;
+    }
+    _mergePlaene[konflikt.schluessel] = widget.importDublettenMergeService.plane(
+      sammlung: konflikt.sammlung,
+      importId: konflikt.importId,
+      lokaleId: konflikt.lokaleId,
+      importDokument: _importDokument!,
+      lokalesDokument: _lokalesDokument!,
+      feldauswahl: _mergeFeldauswahl[konflikt.schluessel] ?? const {},
+    );
+  }
+
   void _entscheidungAendern(
     ImportEinzelKonflikt konflikt,
     ImportKonfliktAktion? aktion,
@@ -192,6 +222,29 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         alleKonflikte: _konflikte,
         aufGleichenTypAnwenden: _aufTypAnwenden.contains(konflikt.schluessel),
       );
+      if (aktion == ImportKonfliktAktion.zusammenfuehren &&
+          _kannZusammenfuehren(konflikt)) {
+        _mergeFeldauswahl.putIfAbsent(konflikt.schluessel, () => {});
+        _mergePlanAktualisieren(konflikt);
+      } else {
+        _mergePlaene.remove(konflikt.schluessel);
+      }
+    });
+  }
+
+  void _mergeFeldAendern(
+    ImportEinzelKonflikt konflikt,
+    String feld,
+    DublettenFeldQuelle? quelle,
+  ) {
+    if (quelle == null) return;
+    setState(() {
+      final auswahl = _mergeFeldauswahl.putIfAbsent(
+        konflikt.schluessel,
+        () => <String, DublettenFeldQuelle>{},
+      );
+      auswahl[feld] = quelle;
+      _mergePlanAktualisieren(konflikt);
     });
   }
 
@@ -417,6 +470,11 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                 decoration: const InputDecoration(labelText: 'Entscheidung'),
                 hint: const Text('Bitte auswählen'),
                 items: konflikt.erlaubteAktionen
+                    .where(
+                      (aktion) =>
+                          aktion != ImportKonfliktAktion.zusammenfuehren ||
+                          _kannZusammenfuehren(konflikt),
+                    )
                     .map(
                       (aktion) => DropdownMenuItem(
                         value: aktion,
@@ -426,6 +484,49 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                     .toList(),
                 onChanged: (aktion) => _entscheidungAendern(konflikt, aktion),
               ),
+              if (entscheidung == ImportKonfliktAktion.zusammenfuehren &&
+                  _kannZusammenfuehren(konflikt)) ...[
+                const SizedBox(height: 12),
+                Text(
+                  'Stammdaten für das kanonische Objekt',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Die lokale UUID bleibt erhalten. Wähle für abweichende Stammdaten den gewünschten Wert.',
+                ),
+                const SizedBox(height: 8),
+                for (final unterschied
+                    in konflikt.unterschiede.where((u) => _istStammdatenFeld(u.feld)))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: DropdownButtonFormField<DublettenFeldQuelle>(
+                      key: ValueKey('merge-${konflikt.schluessel}-${unterschied.feld}'),
+                      initialValue: _mergeFeldauswahl[konflikt.schluessel]?[unterschied.feld] ??
+                          DublettenFeldQuelle.lokal,
+                      decoration: InputDecoration(labelText: unterschied.feld),
+                      items: [
+                        DropdownMenuItem(
+                          value: DublettenFeldQuelle.lokal,
+                          child: Text('Lokal: ${_wertText(unterschied.lokal)}'),
+                        ),
+                        DropdownMenuItem(
+                          value: DublettenFeldQuelle.import,
+                          child: Text('Import: ${_wertText(unterschied.import)}'),
+                        ),
+                      ],
+                      onChanged: (quelle) =>
+                          _mergeFeldAendern(konflikt, unterschied.feld, quelle),
+                    ),
+                  ),
+                if (_mergePlaene.containsKey(konflikt.schluessel))
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      'Merge geplant: Import-ID ${konflikt.importId} bleibt als Alias für ${konflikt.lokaleId} erhalten.',
+                    ),
+                  ),
+              ],
               const SizedBox(height: 4),
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
