@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_ausfuehrung_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_dubletten_merge_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_konfliktanalyse_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_protokoll_repository.dart';
 import 'package:taugts/features/datenaustausch/services/import_quelle_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_strategie_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_validierungs_service.dart';
@@ -19,8 +21,10 @@ class DatenaustauschScreen extends StatefulWidget {
     this.importValidierungsService = const ImportValidierungsService(),
     this.importKonfliktanalyseService = const ImportKonfliktanalyseService(),
     this.importStrategieService = const ImportStrategieService(),
-    this.importKonfliktentscheidungService = const ImportKonfliktentscheidungService(),
+    this.importKonfliktentscheidungService =
+        const ImportKonfliktentscheidungService(),
     this.importDublettenMergeService = const ImportDublettenMergeService(),
+    this.importAusfuehrungService = const ImportAusfuehrungService(),
     super.key,
   });
 
@@ -32,6 +36,7 @@ class DatenaustauschScreen extends StatefulWidget {
   final ImportStrategieService importStrategieService;
   final ImportKonfliktentscheidungService importKonfliktentscheidungService;
   final ImportDublettenMergeService importDublettenMergeService;
+  final ImportAusfuehrungService importAusfuehrungService;
 
   @override
   State<DatenaustauschScreen> createState() => _DatenaustauschScreenState();
@@ -54,6 +59,16 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   final Map<String, Map<String, DublettenFeldQuelle>> _mergeFeldauswahl = {};
   final Map<String, ImportDublettenMergeErgebnis> _mergePlaene = {};
   bool _konflikteBearbeiten = false;
+  ImportAusfuehrungsErgebnis? _importErgebnis;
+  List<ImportProtokollEintrag> _importProtokoll = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _importProtokoll = widget.importAusfuehrungService.ladeProtokoll(
+      widget.exportService.datenbank,
+    );
+  }
 
   String _dateiname() {
     final jetzt = DateTime.now().toUtc();
@@ -62,7 +77,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   }
 
   Future<void> _speichern() async {
-    await _ausfuehren(() async {
+    await _exportAusfuehren(() async {
       final dateiname = _dateiname();
       final pfad = await widget.exportZielService.speichern(
         dateiname: dateiname,
@@ -74,7 +89,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   }
 
   Future<void> _teilen() async {
-    await _ausfuehren(() async {
+    await _exportAusfuehren(() async {
       final dateiname = _dateiname();
       await widget.exportZielService.teilen(
         dateiname: dateiname,
@@ -85,7 +100,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   }
 
   Future<void> _sicherungExportieren() async {
-    await _ausfuehren(() async {
+    await _exportAusfuehren(() async {
       final dateiname = 'sicherung-${_dateiname()}';
       final pfad = await widget.exportZielService.speichern(
         dateiname: dateiname,
@@ -114,6 +129,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       _mergeFeldauswahl.clear();
       _mergePlaene.clear();
       _konflikteBearbeiten = false;
+      _importErgebnis = null;
     });
     try {
       final inhalt = await quelle.dateiAuswaehlen();
@@ -248,7 +264,110 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
     });
   }
 
-  Future<void> _ausfuehren(Future<String> Function() aktion) async {
+  bool get _alleKonflikteEntschieden =>
+      _entscheidungsStand.entscheidungen.length >= _konflikte.length;
+
+  Future<void> _importBestaetigen() async {
+    if (_laeuft || _importDokument == null || _lokalesDokument == null) return;
+    if (!_alleKonflikteEntschieden) {
+      setState(() {
+        _istFehler = true;
+        _status =
+            'Vor dem Import müssen alle Konflikte ausdrücklich entschieden werden.';
+      });
+      return;
+    }
+
+    setState(() {
+      _laeuft = true;
+      _istFehler = false;
+      _status = 'Import wird atomar ausgeführt …';
+    });
+
+    try {
+      var dokument = _tiefeKopie(_importDokument!);
+      final mergesNachSammlung = <String, int>{};
+      for (final konflikt in _konflikte) {
+        if (_entscheidungsStand.fuer(konflikt) !=
+                ImportKonfliktAktion.zusammenfuehren ||
+            !_kannZusammenfuehren(konflikt)) {
+          continue;
+        }
+        final merge = widget.importDublettenMergeService.plane(
+          sammlung: konflikt.sammlung,
+          importId: konflikt.importId,
+          lokaleId: konflikt.lokaleId,
+          importDokument: dokument,
+          lokalesDokument: _lokalesDokument!,
+          feldauswahl: _mergeFeldauswahl[konflikt.schluessel] ?? const {},
+        );
+        dokument = merge.dokument;
+        mergesNachSammlung.update(
+          konflikt.sammlung,
+          (wert) => wert + 1,
+          ifAbsent: () => 1,
+        );
+      }
+
+      final ergebnis = widget.importAusfuehrungService.ausfuehren(
+        datenbank: widget.exportService.datenbank,
+        importDokument: dokument,
+        strategie: _strategie,
+        entscheidungen: _entscheidungsStand,
+        zusammengefuehrtNachSammlung: mergesNachSammlung,
+      );
+      final protokoll = widget.importAusfuehrungService.ladeProtokoll(
+        widget.exportService.datenbank,
+      );
+      if (!mounted) return;
+      setState(() {
+        _importErgebnis = ergebnis;
+        _importProtokoll = protokoll;
+        _status = 'Import erfolgreich abgeschlossen.';
+        _importDokument = null;
+        _lokalesDokument = null;
+        _analyse = null;
+        _strategiePlan = null;
+        _konflikte = const [];
+        _entscheidungsStand = const ImportKonfliktEntscheidungsStand();
+        _mergePlaene.clear();
+        _mergeFeldauswahl.clear();
+        _konflikteBearbeiten = false;
+      });
+    } catch (_) {
+      final protokoll = widget.importAusfuehrungService.ladeProtokoll(
+        widget.exportService.datenbank,
+      );
+      if (!mounted) return;
+      setState(() {
+        _istFehler = true;
+        _importProtokoll = protokoll;
+        _status =
+            'Import fehlgeschlagen. Alle fachlichen Änderungen wurden zurückgerollt.';
+      });
+    } finally {
+      if (mounted) setState(() => _laeuft = false);
+    }
+  }
+
+  Map<String, Object?> _tiefeKopie(Map<String, Object?> dokument) => {
+        for (final eintrag in dokument.entries)
+          eintrag.key: _kopiereWert(eintrag.value),
+      };
+
+  Object? _kopiereWert(Object? wert) {
+    if (wert is Map) {
+      return {
+        for (final eintrag in wert.entries)
+          eintrag.key.toString(): _kopiereWert(eintrag.value),
+      };
+    }
+    if (wert is List) return wert.map(_kopiereWert).toList();
+    return wert;
+  }
+
+  Future<void> _exportAusfuehren(Future<String> Function() aktion) async {
+    if (_laeuft) return;
     setState(() {
       _laeuft = true;
       _status = null;
@@ -312,7 +431,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         ),
         const SizedBox(height: 8),
         const Text(
-          'Noch nicht importiert. Wähle, wie vorhandene Daten bei einer späteren Bestätigung behandelt werden sollen.',
+          'Noch nicht importiert. Prüfe Strategie und Konflikte und bestätige den Import anschließend ausdrücklich.',
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<ImportStrategie>(
@@ -326,14 +445,14 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                 ),
               )
               .toList(),
-          onChanged: _strategieAendern,
+          onChanged: _laeuft ? null : _strategieAendern,
         ),
         if (_strategie == ImportStrategie.bestandErsetzen) ...[
           const SizedBox(height: 12),
           Semantics(
             liveRegion: true,
             child: Text(
-              'Warnung: Nicht in der Importdatei enthaltene lokale Datensätze würden gelöscht.',
+              'Warnung: Nicht in der Importdatei enthaltene lokale Datensätze werden gelöscht.',
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
@@ -365,14 +484,30 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
           Semantics(
             liveRegion: true,
             child: Text(
-              '${_konflikte.length} Konflikt${_konflikte.length == 1 ? '' : 'e'} benötigen eine Einzelentscheidung.',
+              '${_entscheidungsStand.entscheidungen.length} von ${_konflikte.length} Konflikten entschieden.',
             ),
           ),
           const SizedBox(height: 8),
           FilledButton.tonalIcon(
-            onPressed: () => setState(() => _konflikteBearbeiten = true),
+            onPressed: _laeuft
+                ? null
+                : () => setState(() => _konflikteBearbeiten = true),
             icon: const Icon(Icons.rule_outlined),
             label: const Text('Konflikte einzeln entscheiden'),
+          ),
+        ],
+        const SizedBox(height: 20),
+        FilledButton.icon(
+          onPressed: _laeuft || !_alleKonflikteEntschieden
+              ? null
+              : _importBestaetigen,
+          icon: const Icon(Icons.download_done_outlined),
+          label: const Text('Import verbindlich ausführen'),
+        ),
+        if (!_alleKonflikteEntschieden) ...[
+          const SizedBox(height: 8),
+          const Text(
+            'Der Import kann erst ausgeführt werden, wenn alle Konflikte entschieden sind.',
           ),
         ],
       ],
@@ -392,16 +527,19 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Diese Entscheidungen sind nur Teil der Vorschau. Solange der Import nicht ausdrücklich bestätigt wird, werden keine lokalen Daten verändert.',
+            'Diese Entscheidungen sind Teil der Vorschau. Erst die ausdrückliche Importbestätigung verändert lokale Daten.',
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
-            onPressed: () => setState(() => _konflikteBearbeiten = false),
+            onPressed: _laeuft
+                ? null
+                : () => setState(() => _konflikteBearbeiten = false),
             icon: const Icon(Icons.arrow_back),
             label: const Text('Zurück zur Importvorschau'),
           ),
           const SizedBox(height: 16),
-          for (final konflikt in _konflikte) _buildKonfliktKarte(context, konflikt),
+          for (final konflikt in _konflikte)
+            _buildKonfliktKarte(context, konflikt),
           Semantics(
             liveRegion: true,
             child: Text(
@@ -439,7 +577,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 4),
-              Text('${konflikt.sammlung} · Import ${konflikt.importId} · lokal ${konflikt.lokaleId}'),
+              Text(
+                '${konflikt.sammlung} · Import ${konflikt.importId} · lokal ${konflikt.lokaleId}',
+              ),
               if (kontextTeile.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(kontextTeile.join(' · ')),
@@ -453,7 +593,10 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
               ],
               if (konflikt.unterschiede.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                Text('Unterschiede', style: Theme.of(context).textTheme.labelLarge),
+                Text(
+                  'Unterschiede',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
                 const SizedBox(height: 6),
                 for (final unterschied in konflikt.unterschiede)
                   Padding(
@@ -465,7 +608,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
               ],
               const SizedBox(height: 8),
               DropdownButtonFormField<ImportKonfliktAktion>(
-                key: ValueKey('entscheidung-${konflikt.schluessel}-$entscheidung'),
+                key: ValueKey(
+                  'entscheidung-${konflikt.schluessel}-$entscheidung',
+                ),
                 initialValue: entscheidung,
                 decoration: const InputDecoration(labelText: 'Entscheidung'),
                 hint: const Text('Bitte auswählen'),
@@ -482,7 +627,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                       ),
                     )
                     .toList(),
-                onChanged: (aktion) => _entscheidungAendern(konflikt, aktion),
+                onChanged: _laeuft
+                    ? null
+                    : (aktion) => _entscheidungAendern(konflikt, aktion),
               ),
               if (entscheidung == ImportKonfliktAktion.zusammenfuehren &&
                   _kannZusammenfuehren(konflikt)) ...[
@@ -496,51 +643,68 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                   'Die lokale UUID bleibt erhalten. Wähle für abweichende Stammdaten den gewünschten Wert.',
                 ),
                 const SizedBox(height: 8),
-                for (final unterschied
-                    in konflikt.unterschiede.where((u) => _istStammdatenFeld(u.feld)))
+                for (final unterschied in konflikt.unterschiede.where(
+                  (u) => _istStammdatenFeld(u.feld),
+                ))
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: DropdownButtonFormField<DublettenFeldQuelle>(
-                      key: ValueKey('merge-${konflikt.schluessel}-${unterschied.feld}'),
-                      initialValue: _mergeFeldauswahl[konflikt.schluessel]?[unterschied.feld] ??
-                          DublettenFeldQuelle.lokal,
+                      key: ValueKey(
+                        'merge-${konflikt.schluessel}-${unterschied.feld}',
+                      ),
+                      initialValue:
+                          _mergeFeldauswahl[konflikt.schluessel]?[unterschied.feld] ??
+                              DublettenFeldQuelle.lokal,
                       decoration: InputDecoration(labelText: unterschied.feld),
                       items: [
                         DropdownMenuItem(
                           value: DublettenFeldQuelle.lokal,
-                          child: Text('Lokal: ${_wertText(unterschied.lokal)}'),
+                          child: Text(
+                            'Lokal: ${_wertText(unterschied.lokal)}',
+                          ),
                         ),
                         DropdownMenuItem(
                           value: DublettenFeldQuelle.import,
-                          child: Text('Import: ${_wertText(unterschied.import)}'),
+                          child: Text(
+                            'Import: ${_wertText(unterschied.import)}',
+                          ),
                         ),
                       ],
-                      onChanged: (quelle) =>
-                          _mergeFeldAendern(konflikt, unterschied.feld, quelle),
+                      onChanged: _laeuft
+                          ? null
+                          : (quelle) => _mergeFeldAendern(
+                                konflikt,
+                                unterschied.feld,
+                                quelle,
+                              ),
                     ),
                   ),
                 if (_mergePlaene.containsKey(konflikt.schluessel))
                   Semantics(
                     liveRegion: true,
                     child: Text(
-                      'Merge geplant: Import-ID ${konflikt.importId} bleibt als Alias für ${konflikt.lokaleId} erhalten.',
+                      'Merge geplant: Import-ID ${konflikt.importId} wird mit ${konflikt.lokaleId} zusammengeführt.',
                     ),
                   ),
               ],
               const SizedBox(height: 4),
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Auf weitere Konflikte dieses Typs anwenden'),
+                title: const Text(
+                  'Auf weitere Konflikte dieses Typs anwenden',
+                ),
                 value: _aufTypAnwenden.contains(konflikt.schluessel),
-                onChanged: (wert) {
-                  setState(() {
-                    if (wert ?? false) {
-                      _aufTypAnwenden.add(konflikt.schluessel);
-                    } else {
-                      _aufTypAnwenden.remove(konflikt.schluessel);
-                    }
-                  });
-                },
+                onChanged: _laeuft
+                    ? null
+                    : (wert) {
+                        setState(() {
+                          if (wert ?? false) {
+                            _aufTypAnwenden.add(konflikt.schluessel);
+                          } else {
+                            _aufTypAnwenden.remove(konflikt.schluessel);
+                          }
+                        });
+                      },
               ),
             ],
           ),
@@ -548,6 +712,93 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       ),
     );
   }
+
+  Widget _buildImportErgebnis(BuildContext context) {
+    final ergebnis = _importErgebnis;
+    if (ergebnis == null) return const SizedBox.shrink();
+    const historischeSammlungen = <String, String>{
+      'erlebnisse': 'Erlebnisse',
+      'erlebnisPositionen': 'Positionen',
+      'preisbeobachtungen': 'Preisbeobachtungen',
+      'bewertungen': 'Produktbewertungen',
+      'ortsbewertungen': 'Ortsbewertungen',
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 28),
+        Semantics(
+          header: true,
+          child: Text(
+            'Letztes Importergebnis',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ),
+        const SizedBox(height: 8),
+        for (final eintrag in historischeSammlungen.entries)
+          _ergebnisKarte(
+            eintrag.value,
+            ergebnis.nachSammlung[eintrag.key] ??
+                const ImportErgebnisZaehler(),
+          ),
+        const SizedBox(height: 8),
+        Text(
+          'Gesamt: ${_zaehlerText(ergebnis.gesamt)}',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+      ],
+    );
+  }
+
+  Widget _ergebnisKarte(String titel, ImportErgebnisZaehler zaehler) => Card(
+        child: ListTile(
+          title: Text(titel),
+          subtitle: Text(_zaehlerText(zaehler)),
+        ),
+      );
+
+  String _zaehlerText(ImportErgebnisZaehler zaehler) =>
+      '${zaehler.hinzugefuegt} hinzugefügt · ${zaehler.aktualisiert} aktualisiert · ${zaehler.uebersprungen} übersprungen · ${zaehler.zusammengefuehrt} zusammengeführt · ${zaehler.fehlerhaft} fehlerhaft';
+
+  Widget _buildImportProtokoll(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 28),
+          Semantics(
+            header: true,
+            child: Text(
+              'Importprotokoll',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Das Protokoll bleibt ausschließlich lokal und enthält nur Zeitpunkt, Status, Strategie und Zähler – keine importierten Fachinhalte.',
+          ),
+          const SizedBox(height: 8),
+          if (_importProtokoll.isEmpty)
+            const Text('Noch keine Importausführung protokolliert.')
+          else
+            for (final eintrag in _importProtokoll.take(10))
+              Card(
+                child: ListTile(
+                  leading: Icon(
+                    eintrag.erfolgreich
+                        ? Icons.check_circle_outline
+                        : Icons.error_outline,
+                  ),
+                  title: Text(
+                    eintrag.erfolgreich
+                        ? 'Import erfolgreich'
+                        : 'Import zurückgerollt',
+                  ),
+                  subtitle: Text(
+                    '${eintrag.ausgefuehrtAm.toLocal()} · ${_strategieName(eintrag.strategie)}\n${eintrag.hinzugefuegt} hinzugefügt · ${eintrag.aktualisiert} aktualisiert · ${eintrag.uebersprungen} übersprungen · ${eintrag.zusammengefuehrt} zusammengeführt · ${eintrag.fehlerhaft} fehlerhaft',
+                  ),
+                ),
+              ),
+        ],
+      );
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -592,7 +843,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Wähle eine Taugt’s?-Exportdatei aus. Sie wird validiert und mit deinen lokalen Daten verglichen. Vor einer späteren ausdrücklichen Importbestätigung wird nichts gespeichert.',
+                'Wähle eine Taugt’s?-Exportdatei aus. Sie wird validiert und mit deinen lokalen Daten verglichen. Erst die ausdrückliche Importbestätigung speichert Daten.',
               ),
               const SizedBox(height: 16),
               FilledButton.tonalIcon(
@@ -603,7 +854,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
               if (_laeuft) ...[
                 const SizedBox(height: 20),
                 Semantics(
-                  label: 'Datenaustausch wird vorbereitet',
+                  label: 'Datenaustausch wird ausgeführt',
                   child: const LinearProgressIndicator(),
                 ),
               ],
@@ -629,6 +880,8 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                   _buildKonfliktBearbeitung(context)
                 else
                   _buildImportVorschau(context),
+              _buildImportErgebnis(context),
+              _buildImportProtokoll(context),
             ],
           ),
         ),
