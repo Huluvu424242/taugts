@@ -56,12 +56,7 @@ void main() {
       ),
     );
     if (privat) {
-      await tester.scrollUntilVisible(
-        find.byType(DropdownButtonFormField),
-        100,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.tap(find.byType(DropdownButtonFormField).first);
+      await tester.tap(find.text('Gastronomie'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Privater Ort').last);
       await tester.pumpAndSettle();
