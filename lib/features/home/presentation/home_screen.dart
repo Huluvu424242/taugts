@@ -267,7 +267,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         children: [
                           const Expanded(
-                            child: Text('Aktive Erlebnisse konnten nicht geladen werden.'),
+                            child: Text(
+                                'Aktive Erlebnisse konnten nicht geladen werden.'),
                           ),
                           TextButton(
                             onPressed: () => setState(_erlebnisseNeuLaden),
@@ -334,7 +335,10 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 24),
             Semantics(
               header: true,
-              child: Text('Bereiche', style: Theme.of(context).textTheme.titleMedium),
+              child: Text(
+                'Bereiche',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ),
             const SizedBox(height: 12),
             LayoutBuilder(
@@ -351,7 +355,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.inventory_2_outlined,
                       label: 'Dinge',
-                      onPressed: widget.bewertungsRepository != null && widget.idGenerator != null
+                      onPressed: widget.bewertungsRepository != null &&
+                              widget.idGenerator != null
                           ? _produkteOeffnen
                           : null,
                     ),
@@ -359,7 +364,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.place_outlined,
                       label: 'Orte',
-                      onPressed: widget.bewertungsRepository != null && widget.idGenerator != null
+                      onPressed: widget.bewertungsRepository != null &&
+                              widget.idGenerator != null
                           ? _orteOeffnen
                           : null,
                     ),
@@ -385,7 +391,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.import_export,
                       label: 'Import/Export',
-                      onPressed: widget.exportService != null && widget.exportZielService != null
+                      onPressed: widget.exportService != null &&
+                              widget.exportZielService != null
                           ? _datenaustauschOeffnen
                           : null,
                     ),
@@ -393,7 +400,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.settings_outlined,
                       label: 'Einstellungen',
-                      onPressed: widget.bewertungsRepository != null && widget.idGenerator != null
+                      onPressed: widget.bewertungsRepository != null &&
+                              widget.idGenerator != null
                           ? _kriterienOeffnen
                           : () => _infoOeffnen(
                                 'Einstellungen',
