@@ -215,7 +215,8 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         _lokalesDokument == null) {
       return;
     }
-    _mergePlaene[konflikt.schluessel] = widget.importDublettenMergeService.plane(
+    _mergePlaene[konflikt.schluessel] =
+        widget.importDublettenMergeService.plane(
       sammlung: konflikt.sammlung,
       importId: konflikt.importId,
       lokaleId: konflikt.lokaleId,
@@ -498,9 +499,8 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         ],
         const SizedBox(height: 20),
         FilledButton.icon(
-          onPressed: _laeuft || !_alleKonflikteEntschieden
-              ? null
-              : _importBestaetigen,
+          onPressed:
+              _laeuft || !_alleKonflikteEntschieden ? null : _importBestaetigen,
           icon: const Icon(Icons.download_done_outlined),
           label: const Text('Import verbindlich ausführen'),
         ),
@@ -652,9 +652,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                       key: ValueKey(
                         'merge-${konflikt.schluessel}-${unterschied.feld}',
                       ),
-                      initialValue:
-                          _mergeFeldauswahl[konflikt.schluessel]?[unterschied.feld] ??
-                              DublettenFeldQuelle.lokal,
+                      initialValue: _mergeFeldauswahl[konflikt.schluessel]
+                              ?[unterschied.feld] ??
+                          DublettenFeldQuelle.lokal,
                       decoration: InputDecoration(labelText: unterschied.feld),
                       items: [
                         DropdownMenuItem(
@@ -738,8 +738,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         for (final eintrag in historischeSammlungen.entries)
           _ergebnisKarte(
             eintrag.value,
-            ergebnis.nachSammlung[eintrag.key] ??
-                const ImportErgebnisZaehler(),
+            ergebnis.nachSammlung[eintrag.key] ?? const ImportErgebnisZaehler(),
           ),
         const SizedBox(height: 8),
         Text(
