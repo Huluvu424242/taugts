@@ -191,7 +191,8 @@ class ImportStrategieService {
 
   Map<String, Map<String, Object?>> _nachId(
     List<Map<String, Object?>> werte,
-  ) => {
+  ) =>
+      {
         for (final wert in werte)
           if (wert['id'] is String) wert['id'] as String: wert,
       };
