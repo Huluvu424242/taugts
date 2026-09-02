@@ -57,21 +57,29 @@ class ImportValidierungsService {
   static const aktuelleSchemaVersion = 1;
   static const aeltesteUnterstuetzteSchemaVersion = 0;
 
+  static const _sammlungsNamen = [
+    'profile',
+    'objekte',
+    'orte',
+    'erlebnisse',
+    'erlebnisPositionen',
+    'preisbeobachtungen',
+    'bewertungskriterien',
+    'bewertungen',
+    'ortsbewertungen',
+    'kategorien',
+    'kategorieZuordnungen',
+  ];
+
   final ImportValidierungsGrenzen grenzen;
 
   ImportValidierungsErgebnis validiere(String inhalt) {
-    final fehler = <ImportValidierungsFehler>[];
     if (utf8.encode(inhalt).length > grenzen.maxBytes) {
-      return ImportValidierungsErgebnis(
-        fehler: [
-          ImportValidierungsFehler(
-            code: 'datei_zu_gross',
-            pfad: r'$',
-            nachricht:
-                'Die Importdatei überschreitet die erlaubte Größe von '
-                '${grenzen.maxBytes} Bytes.',
-          ),
-        ],
+      return _ungueltig(
+        'datei_zu_gross',
+        r'$',
+        'Die Importdatei überschreitet die erlaubte Größe von '
+            '${grenzen.maxBytes} Bytes.',
       );
     }
 
@@ -79,14 +87,10 @@ class ImportValidierungsService {
     try {
       dekodiert = jsonDecode(inhalt);
     } on FormatException {
-      return const ImportValidierungsErgebnis(
-        fehler: [
-          ImportValidierungsFehler(
-            code: 'ungueltiges_json',
-            pfad: r'$',
-            nachricht: 'Die Datei enthält kein gültiges JSON.',
-          ),
-        ],
+      return _ungueltig(
+        'ungueltiges_json',
+        r'$',
+        'Die Datei enthält kein gültiges JSON.',
       );
     }
 
@@ -95,123 +99,115 @@ class ImportValidierungsService {
       return ImportValidierungsErgebnis(fehler: [strukturFehler]);
     }
     if (dekodiert is! Map) {
-      return const ImportValidierungsErgebnis(
-        fehler: [
-          ImportValidierungsFehler(
-            code: 'wurzel_ungueltig',
-            pfad: r'$',
-            nachricht: 'Die Importdatei muss ein JSON-Objekt enthalten.',
-          ),
-        ],
+      return _ungueltig(
+        'wurzel_ungueltig',
+        r'$',
+        'Die Importdatei muss ein JSON-Objekt enthalten.',
       );
     }
 
-    final wurzel = <String, Object?>{};
-    for (final eintrag in dekodiert.entries) {
-      if (eintrag.key is! String) {
-        fehler.add(
-          const ImportValidierungsFehler(
-            code: 'schluessel_ungueltig',
-            pfad: r'$',
-            nachricht: 'JSON-Objektschlüssel müssen Zeichenketten sein.',
-          ),
-        );
-        continue;
-      }
-      wurzel[eintrag.key as String] = eintrag.value;
-    }
-
-    if (wurzel['format'] != 'taugts-export') {
-      fehler.add(
-        const ImportValidierungsFehler(
-          code: 'format_ungueltig',
-          pfad: r'$.format',
-          nachricht: 'Die Datei ist kein Taugt’s?-Export.',
-        ),
+    final dokument = _map(dekodiert);
+    final fehler = <ImportValidierungsFehler>[];
+    if (dokument['format'] != 'taugts-export') {
+      _fehler(
+        fehler,
+        'format_ungueltig',
+        r'$.format',
+        'Die Datei ist kein Taugt’s?-Export.',
       );
     }
 
-    final version = wurzel['schemaVersion'];
+    final version = dokument['schemaVersion'];
     if (version is! int) {
-      fehler.add(
-        const ImportValidierungsFehler(
-          code: 'schema_version_ungueltig',
-          pfad: r'$.schemaVersion',
-          nachricht: 'Die Schemaversion fehlt oder ist keine Ganzzahl.',
-        ),
+      _fehler(
+        fehler,
+        'schema_version_ungueltig',
+        r'$.schemaVersion',
+        'Die Schemaversion fehlt oder ist keine Ganzzahl.',
       );
       return ImportValidierungsErgebnis(fehler: fehler);
     }
     if (version > aktuelleSchemaVersion) {
-      fehler.add(
-        ImportValidierungsFehler(
-          code: 'schema_version_zu_neu',
-          pfad: r'$.schemaVersion',
-          nachricht:
-              'Schemaversion $version wird von dieser App noch nicht '
-              'unterstützt.',
-        ),
-      );
-      return ImportValidierungsErgebnis(
-        fehler: fehler,
-        urspruenglicheSchemaVersion: version,
+      return _versionsFehler(
+        fehler,
+        version,
+        'schema_version_zu_neu',
+        'Schemaversion $version wird von dieser App noch nicht unterstützt.',
       );
     }
     if (version < aeltesteUnterstuetzteSchemaVersion) {
-      fehler.add(
-        ImportValidierungsFehler(
-          code: 'schema_version_zu_alt',
-          pfad: r'$.schemaVersion',
-          nachricht: 'Schemaversion $version wird nicht mehr unterstützt.',
-        ),
-      );
-      return ImportValidierungsErgebnis(
-        fehler: fehler,
-        urspruenglicheSchemaVersion: version,
+      return _versionsFehler(
+        fehler,
+        version,
+        'schema_version_zu_alt',
+        'Schemaversion $version wird nicht mehr unterstützt.',
       );
     }
 
-    final migriert = _migriere(wurzel, version, fehler);
-    if (migriert == null) {
-      return ImportValidierungsErgebnis(
-        fehler: fehler,
-        urspruenglicheSchemaVersion: version,
-      );
+    final normalisiert = _migriere(dokument, version);
+    _validiereSchema(normalisiert, fehler);
+    if (fehler.isEmpty) {
+      _validiereReferenzen(normalisiert, fehler);
     }
 
-    _validiereDokument(migriert, fehler);
     return ImportValidierungsErgebnis(
       fehler: List.unmodifiable(fehler),
-      dokument: fehler.isEmpty ? Map.unmodifiable(migriert) : null,
+      dokument: fehler.isEmpty ? Map.unmodifiable(normalisiert) : null,
       urspruenglicheSchemaVersion: version,
       schemaVersion: fehler.isEmpty ? aktuelleSchemaVersion : null,
     );
   }
 
+  ImportValidierungsErgebnis _versionsFehler(
+    List<ImportValidierungsFehler> bisherigeFehler,
+    int version,
+    String code,
+    String nachricht,
+  ) {
+    _fehler(bisherigeFehler, code, r'$.schemaVersion', nachricht);
+    return ImportValidierungsErgebnis(
+      fehler: List.unmodifiable(bisherigeFehler),
+      urspruenglicheSchemaVersion: version,
+    );
+  }
+
+  ImportValidierungsErgebnis _ungueltig(
+    String code,
+    String pfad,
+    String nachricht,
+  ) =>
+      ImportValidierungsErgebnis(
+        fehler: [
+          ImportValidierungsFehler(
+            code: code,
+            pfad: pfad,
+            nachricht: nachricht,
+          ),
+        ],
+      );
+
   ImportValidierungsFehler? _pruefeStrukturgrenzen(Object? wurzel) {
     var knoten = 0;
-    ImportValidierungsFehler? fehler;
+    ImportValidierungsFehler? gefunden;
 
     void besuchen(Object? wert, int tiefe, String pfad) {
-      if (fehler != null) return;
+      if (gefunden != null) return;
       knoten++;
       if (knoten > grenzen.maxKnoten) {
-        fehler = ImportValidierungsFehler(
+        gefunden = ImportValidierungsFehler(
           code: 'zu_viele_knoten',
           pfad: pfad,
-          nachricht:
-              'Die Importdatei enthält zu viele Werte. Erlaubt sind höchstens '
-              '${grenzen.maxKnoten}.',
+          nachricht: 'Die Importdatei enthält mehr als '
+              '${grenzen.maxKnoten} JSON-Werte.',
         );
         return;
       }
       if (tiefe > grenzen.maxTiefe) {
-        fehler = ImportValidierungsFehler(
+        gefunden = ImportValidierungsFehler(
           code: 'zu_tief_verschachtelt',
           pfad: pfad,
-          nachricht:
-              'Die Importdatei ist tiefer als ${grenzen.maxTiefe} Ebenen '
-              'verschachtelt.',
+          nachricht: 'Die Importdatei ist tiefer als '
+              '${grenzen.maxTiefe} Ebenen verschachtelt.',
         );
         return;
       }
@@ -227,117 +223,72 @@ class ImportValidierungsService {
     }
 
     besuchen(wurzel, 0, r'$');
-    return fehler;
+    return gefunden;
   }
 
-  Map<String, Object?>? _migriere(
+  Map<String, Object?> _migriere(
     Map<String, Object?> dokument,
     int version,
-    List<ImportValidierungsFehler> fehler,
   ) {
-    var aktuell = Map<String, Object?>.from(dokument);
-    var aktuelleVersion = version;
-    while (aktuelleVersion < aktuelleSchemaVersion) {
-      switch (aktuelleVersion) {
-        case 0:
-          aktuell = _migriereV0NachV1(aktuell);
-          aktuelleVersion = 1;
-        default:
-          if (aktuelleVersion < aktuelleSchemaVersion) {
-            fehler.add(
-              ImportValidierungsFehler(
-                code: 'migration_fehlend',
-                pfad: r'$.schemaVersion',
-                nachricht:
-                    'Für Schemaversion $aktuelleVersion ist keine sichere '
-                    'Migration verfügbar.',
-              ),
-            );
-            return null;
-          }
-      }
-    }
-    return aktuell;
-  }
-
-  Map<String, Object?> _migriereV0NachV1(Map<String, Object?> dokument) {
     final migriert = Map<String, Object?>.from(dokument);
-    migriert['schemaVersion'] = 1;
-    migriert.putIfAbsent('kategorien', () => <Object?>[]);
-    migriert.putIfAbsent('kategorieZuordnungen', () => <Object?>[]);
+    if (version == 0) {
+      migriert['schemaVersion'] = 1;
+      migriert.putIfAbsent('kategorien', () => <Object?>[]);
+      migriert.putIfAbsent('kategorieZuordnungen', () => <Object?>[]);
+    }
     return migriert;
   }
 
-  void _validiereDokument(
+  void _validiereSchema(
     Map<String, Object?> dokument,
     List<ImportValidierungsFehler> fehler,
   ) {
-    _text(dokument, 'format', r'$.format', fehler, erforderlich: true);
-    _ganzzahl(
-      dokument,
-      'schemaVersion',
-      r'$.schemaVersion',
-      fehler,
-      erforderlich: true,
-    );
+    _text(dokument, 'format', r'$.format', fehler, nichtLeer: true);
+    _ganzzahl(dokument, 'schemaVersion', r'$.schemaVersion', fehler);
     _utcZeit(dokument, 'exportiertAm', r'$.exportiertAm', fehler);
-    _text(dokument, 'appVersion', r'$.appVersion', fehler, erforderlich: true);
+    _text(dokument, 'appVersion', r'$.appVersion', fehler, nichtLeer: true);
 
-    const sammlungen = [
-      'profile',
-      'objekte',
-      'orte',
-      'erlebnisse',
-      'erlebnisPositionen',
-      'preisbeobachtungen',
-      'bewertungskriterien',
-      'bewertungen',
-      'ortsbewertungen',
-      'kategorien',
-      'kategorieZuordnungen',
-    ];
-    for (final name in sammlungen) {
-      _sammlung(dokument, name, fehler);
+    for (final name in _sammlungsNamen) {
+      final wert = dokument[name];
+      if (wert is! List) {
+        _fehler(
+          fehler,
+          'sammlung_ungueltig',
+          r'$.' '$name',
+          'Die erforderliche Sammlung „$name“ fehlt oder ist kein Array.',
+        );
+      } else if (wert.length > grenzen.maxEintraegeProSammlung) {
+        _fehler(
+          fehler,
+          'sammlung_zu_gross',
+          r'$.' '$name',
+          'Die Sammlung „$name“ enthält mehr als '
+              '${grenzen.maxEintraegeProSammlung} Einträge.',
+        );
+      } else if (wert.any((eintrag) => eintrag is! Map)) {
+        _fehler(
+          fehler,
+          'datensatz_ungueltig',
+          r'$.' '$name',
+          'Die Sammlung „$name“ enthält einen Eintrag, der kein Objekt ist.',
+        );
+      }
     }
     if (fehler.isNotEmpty) return;
 
-    final profile = _objektListe(dokument['profile']!);
-    final objekte = _objektListe(dokument['objekte']!);
-    final orte = _objektListe(dokument['orte']!);
-    final erlebnisse = _objektListe(dokument['erlebnisse']!);
-    final positionen = _objektListe(dokument['erlebnisPositionen']!);
-    final preise = _objektListe(dokument['preisbeobachtungen']!);
-    final kriterien = _objektListe(dokument['bewertungskriterien']!);
-    final bewertungen = _objektListe(dokument['bewertungen']!);
-    final ortsbewertungen = _objektListe(dokument['ortsbewertungen']!);
-    final kategorien = _objektListe(dokument['kategorien']!);
-    final zuordnungen = _objektListe(dokument['kategorieZuordnungen']!);
-
-    _validiereProfile(profile, fehler);
-    _validiereObjekte(objekte, fehler);
-    _validiereOrte(orte, fehler);
-    _validiereErlebnisse(erlebnisse, fehler);
-    _validierePositionen(positionen, fehler);
-    _validierePreise(preise, fehler);
-    _validiereKriterien(kriterien, fehler);
-    _validiereOrtsbewertungen(ortsbewertungen, fehler);
-    _validiereBewertungen(bewertungen, fehler);
-    _validiereKategorien(kategorien, zuordnungen, fehler);
-    if (fehler.isNotEmpty) return;
-
-    _validiereReferenzen(
-      profile: profile,
-      objekte: objekte,
-      orte: orte,
-      erlebnisse: erlebnisse,
-      positionen: positionen,
-      preise: preise,
-      kriterien: kriterien,
-      bewertungen: bewertungen,
-      ortsbewertungen: ortsbewertungen,
-      kategorien: kategorien,
-      zuordnungen: zuordnungen,
-      fehler: fehler,
+    _validiereProfile(_liste(dokument, 'profile'), fehler);
+    _validiereObjekte(_liste(dokument, 'objekte'), fehler);
+    _validiereOrte(_liste(dokument, 'orte'), fehler);
+    _validiereErlebnisse(_liste(dokument, 'erlebnisse'), fehler);
+    _validierePositionen(_liste(dokument, 'erlebnisPositionen'), fehler);
+    _validierePreise(_liste(dokument, 'preisbeobachtungen'), fehler);
+    _validiereKriterien(_liste(dokument, 'bewertungskriterien'), fehler);
+    _validiereBewertungen(_liste(dokument, 'bewertungen'), fehler);
+    _validiereOrtsbewertungen(_liste(dokument, 'ortsbewertungen'), fehler);
+    _validiereKategorien(
+      _liste(dokument, 'kategorien'),
+      _liste(dokument, 'kategorieZuordnungen'),
+      fehler,
     );
   }
 
@@ -347,11 +298,10 @@ class ImportValidierungsService {
   ) {
     _eindeutigeIds('profile', werte, fehler);
     for (var i = 0; i < werte.length; i++) {
-      final wert = werte[i];
       final pfad = r'$.profile[' '$i]';
-      _uuid(wert, 'id', '$pfad.id', fehler);
-      _optionalerText(wert, 'anzeigename', '$pfad.anzeigename', fehler);
-      _zeitstempel(wert, pfad, fehler);
+      _uuid(werte[i], 'id', '$pfad.id', fehler);
+      _optionalerText(werte[i], 'anzeigename', '$pfad.anzeigename', fehler);
+      _zeitstempel(werte[i], pfad, fehler);
     }
   }
 
@@ -360,19 +310,17 @@ class ImportValidierungsService {
     List<ImportValidierungsFehler> fehler,
   ) {
     _eindeutigeIds('objekte', werte, fehler);
-    const arten = {'allgemein', 'produkt'};
-    const produktarten = {'bier', 'getraenk', 'speise', 'sonstiges'};
     for (var i = 0; i < werte.length; i++) {
       final wert = werte[i];
       final pfad = r'$.objekte[' '$i]';
       _uuid(wert, 'id', '$pfad.id', fehler);
-      _text(wert, 'name', '$pfad.name', fehler, erforderlich: true);
-      _enumWert(wert, 'art', arten, '$pfad.art', fehler);
+      _text(wert, 'name', '$pfad.name', fehler);
+      _enumWert(wert, 'art', {'allgemein', 'produkt'}, '$pfad.art', fehler);
       if (wert['art'] == 'produkt') {
         _enumWert(
           wert,
           'produktart',
-          produktarten,
+          {'bier', 'getraenk', 'speise', 'sonstiges'},
           '$pfad.produktart',
           fehler,
         );
@@ -399,13 +347,18 @@ class ImportValidierungsService {
     List<ImportValidierungsFehler> fehler,
   ) {
     _eindeutigeIds('orte', werte, fehler);
-    const typen = {'gastronomie', 'geschaeft', 'privat', 'sonstiger'};
     for (var i = 0; i < werte.length; i++) {
       final wert = werte[i];
       final pfad = r'$.orte[' '$i]';
       _uuid(wert, 'id', '$pfad.id', fehler);
-      _text(wert, 'name', '$pfad.name', fehler, erforderlich: true);
-      _enumWert(wert, 'typ', typen, '$pfad.typ', fehler);
+      _text(wert, 'name', '$pfad.name', fehler, nichtLeer: true);
+      _enumWert(
+        wert,
+        'typ',
+        {'gastronomie', 'geschaeft', 'privat', 'sonstiger'},
+        '$pfad.typ',
+        fehler,
+      );
       _optionaleDezimalzahl(wert, 'breitengrad', '$pfad.breitengrad', fehler);
       _optionaleDezimalzahl(wert, 'laengengrad', '$pfad.laengengrad', fehler);
       _zeitstempel(wert, pfad, fehler);
@@ -417,16 +370,26 @@ class ImportValidierungsService {
     List<ImportValidierungsFehler> fehler,
   ) {
     _eindeutigeIds('erlebnisse', werte, fehler);
-    const typen = {'restaurantbesuch', 'einkauf'};
-    const statussen = {'geplant', 'aktiv', 'beendet'};
     for (var i = 0; i < werte.length; i++) {
       final wert = werte[i];
       final pfad = r'$.erlebnisse[' '$i]';
       _uuid(wert, 'id', '$pfad.id', fehler);
       _uuid(wert, 'herkunftProfilId', '$pfad.herkunftProfilId', fehler);
       _optionaleUuid(wert, 'ortId', '$pfad.ortId', fehler);
-      _enumWert(wert, 'typ', typen, '$pfad.typ', fehler);
-      _enumWert(wert, 'status', statussen, '$pfad.status', fehler);
+      _enumWert(
+        wert,
+        'typ',
+        {'restaurantbesuch', 'einkauf'},
+        '$pfad.typ',
+        fehler,
+      );
+      _enumWert(
+        wert,
+        'status',
+        {'geplant', 'aktiv', 'beendet'},
+        '$pfad.status',
+        fehler,
+      );
       _bool(wert, 'istEntwurf', '$pfad.istEntwurf', fehler);
       _optionalesDatum(wert, 'geplanterTag', '$pfad.geplanterTag', fehler);
       _optionaleGanzzahl(
@@ -457,49 +420,56 @@ class ImportValidierungsService {
         fehler,
       );
       _zeitstempel(wert, pfad, fehler);
+      _validiereErlebnisZeiten(wert, pfad, fehler);
+    }
+  }
 
-      if (wert['geplanteMinute'] != null && wert['geplanterTag'] == null) {
-        _fehler(
-          fehler,
-          'zeitkombination_ungueltig',
-          '$pfad.geplanteMinute',
-          'Eine geplante Uhrzeit benötigt einen geplanten Tag.',
-        );
-      }
-      final beginn = _parseUtc(wert['tatsaechlicherBeginn']);
-      final ende = _parseUtc(wert['tatsaechlichesEnde']);
-      if (ende != null && beginn == null) {
-        _fehler(
-          fehler,
-          'zeitkombination_ungueltig',
-          '$pfad.tatsaechlichesEnde',
-          'Ein tatsächliches Ende benötigt einen Beginn.',
-        );
-      }
-      if (beginn != null && ende != null && ende.isBefore(beginn)) {
-        _fehler(
-          fehler,
-          'zeitreihenfolge_ungueltig',
-          '$pfad.tatsaechlichesEnde',
-          'Das tatsächliche Ende darf nicht vor dem Beginn liegen.',
-        );
-      }
-      if (wert['status'] == 'aktiv' && beginn == null) {
-        _fehler(
-          fehler,
-          'status_ungueltig',
-          '$pfad.status',
-          'Ein aktives Erlebnis benötigt einen tatsächlichen Beginn.',
-        );
-      }
-      if (wert['status'] == 'beendet' && (beginn == null || ende == null)) {
-        _fehler(
-          fehler,
-          'status_ungueltig',
-          '$pfad.status',
-          'Ein beendetes Erlebnis benötigt tatsächlichen Beginn und Ende.',
-        );
-      }
+  void _validiereErlebnisZeiten(
+    Map<String, Object?> wert,
+    String pfad,
+    List<ImportValidierungsFehler> fehler,
+  ) {
+    if (wert['geplanteMinute'] != null && wert['geplanterTag'] == null) {
+      _fehler(
+        fehler,
+        'zeitkombination_ungueltig',
+        '$pfad.geplanteMinute',
+        'Eine geplante Uhrzeit benötigt einen geplanten Tag.',
+      );
+    }
+    final beginn = _parseUtc(wert['tatsaechlicherBeginn']);
+    final ende = _parseUtc(wert['tatsaechlichesEnde']);
+    if (ende != null && beginn == null) {
+      _fehler(
+        fehler,
+        'zeitkombination_ungueltig',
+        '$pfad.tatsaechlichesEnde',
+        'Ein tatsächliches Ende benötigt einen Beginn.',
+      );
+    }
+    if (beginn != null && ende != null && ende.isBefore(beginn)) {
+      _fehler(
+        fehler,
+        'zeitreihenfolge_ungueltig',
+        '$pfad.tatsaechlichesEnde',
+        'Das tatsächliche Ende darf nicht vor dem Beginn liegen.',
+      );
+    }
+    if (wert['status'] == 'aktiv' && beginn == null) {
+      _fehler(
+        fehler,
+        'status_ungueltig',
+        '$pfad.status',
+        'Ein aktives Erlebnis benötigt einen tatsächlichen Beginn.',
+      );
+    }
+    if (wert['status'] == 'beendet' && (beginn == null || ende == null)) {
+      _fehler(
+        fehler,
+        'status_ungueltig',
+        '$pfad.status',
+        'Ein beendetes Erlebnis benötigt tatsächlichen Beginn und Ende.',
+      );
     }
   }
 
@@ -514,14 +484,7 @@ class ImportValidierungsService {
       _uuid(wert, 'id', '$pfad.id', fehler);
       _uuid(wert, 'erlebnisId', '$pfad.erlebnisId', fehler);
       _uuid(wert, 'produktId', '$pfad.produktId', fehler);
-      _ganzzahl(
-        wert,
-        'anzahl',
-        '$pfad.anzahl',
-        fehler,
-        erforderlich: true,
-        minimum: 1,
-      );
+      _ganzzahl(wert, 'anzahl', '$pfad.anzahl', fehler, minimum: 1);
       _zeitstempel(wert, pfad, fehler);
     }
   }
@@ -544,7 +507,6 @@ class ImportValidierungsService {
         'betragMinor',
         '$pfad.betragMinor',
         fehler,
-        erforderlich: true,
         minimum: 0,
       );
       _waehrung(wert, 'waehrung', '$pfad.waehrung', fehler);
@@ -577,7 +539,7 @@ class ImportValidierungsService {
       final wert = werte[i];
       final pfad = r'$.bewertungskriterien[' '$i]';
       _uuid(wert, 'id', '$pfad.id', fehler);
-      _text(wert, 'name', '$pfad.name', fehler, erforderlich: true);
+      _text(wert, 'name', '$pfad.name', fehler, nichtLeer: true);
       _enumWert(
         wert,
         'eingabetyp',
@@ -592,21 +554,8 @@ class ImportValidierungsService {
         '$pfad.objektart',
         fehler,
       );
-      _ganzzahl(
-        wert,
-        'reihenfolge',
-        '$pfad.reihenfolge',
-        fehler,
-        erforderlich: true,
-      );
-      _ganzzahl(
-        wert,
-        'version',
-        '$pfad.version',
-        fehler,
-        erforderlich: true,
-        minimum: 1,
-      );
+      _ganzzahl(wert, 'reihenfolge', '$pfad.reihenfolge', fehler);
+      _ganzzahl(wert, 'version', '$pfad.version', fehler, minimum: 1);
       _bool(wert, 'aktiv', '$pfad.aktiv', fehler);
       _textListe(wert, 'auswahlwerte', '$pfad.auswahlwerte', fehler);
       _zeitstempel(wert, pfad, fehler);
@@ -618,12 +567,19 @@ class ImportValidierungsService {
     List<ImportValidierungsFehler> fehler,
   ) {
     _eindeutigeIds('bewertungen', werte, fehler);
-    const zielarten = {'produkt', 'ort'};
+    const eingabetypen = {
+      'wertung',
+      'intensitaet',
+      'jaNein',
+      'zahl',
+      'auswahl',
+      'freitext',
+    };
     for (var i = 0; i < werte.length; i++) {
       final wert = werte[i];
       final pfad = r'$.bewertungen[' '$i]';
       _uuid(wert, 'id', '$pfad.id', fehler);
-      _enumWert(wert, 'zielart', zielarten, '$pfad.zielart', fehler);
+      _enumWert(wert, 'zielart', {'produkt', 'ort'}, '$pfad.zielart', fehler);
       _uuid(wert, 'objektId', '$pfad.objektId', fehler);
       _uuid(wert, 'erlebnisId', '$pfad.erlebnisId', fehler);
       _optionaleUuid(
@@ -643,6 +599,7 @@ class ImportValidierungsService {
       _utcZeit(wert, 'bewertetAm', '$pfad.bewertetAm', fehler);
       _dezimalzahl(wert, 'wert', '$pfad.wert', fehler);
       _zeitstempel(wert, pfad, fehler);
+
       final snapshot = wert['kriterium'];
       if (snapshot is! Map) {
         _fehler(
@@ -653,39 +610,31 @@ class ImportValidierungsService {
         );
         continue;
       }
-      final map = Map<String, Object?>.from(snapshot);
-      _uuid(map, 'id', '$pfad.kriterium.id', fehler);
-      _text(
-        map,
-        'name',
-        '$pfad.kriterium.name',
-        fehler,
-        erforderlich: true,
-      );
-      _text(
-        map,
+      final kriterium = _map(snapshot);
+      _uuid(kriterium, 'id', '$pfad.kriterium.id', fehler);
+      _text(kriterium, 'name', '$pfad.kriterium.name', fehler, nichtLeer: true);
+      _enumWert(
+        kriterium,
         'eingabetyp',
+        eingabetypen,
         '$pfad.kriterium.eingabetyp',
         fehler,
-        erforderlich: true,
       );
       _ganzzahl(
-        map,
+        kriterium,
         'reihenfolge',
         '$pfad.kriterium.reihenfolge',
         fehler,
-        erforderlich: true,
       );
       _ganzzahl(
-        map,
+        kriterium,
         'version',
         '$pfad.kriterium.version',
         fehler,
-        erforderlich: true,
         minimum: 1,
       );
       _textListe(
-        map,
+        kriterium,
         'auswahlwerte',
         '$pfad.kriterium.auswahlwerte',
         fehler,
@@ -726,13 +675,12 @@ class ImportValidierungsService {
     List<ImportValidierungsFehler> fehler,
   ) {
     _eindeutigeIds('kategorien', kategorien, fehler);
-    const zielarten = {'objekt', 'ort'};
     for (var i = 0; i < kategorien.length; i++) {
       final wert = kategorien[i];
       final pfad = r'$.kategorien[' '$i]';
       _uuid(wert, 'id', '$pfad.id', fehler);
-      _text(wert, 'name', '$pfad.name', fehler, erforderlich: true);
-      _enumWert(wert, 'zielart', zielarten, '$pfad.zielart', fehler);
+      _text(wert, 'name', '$pfad.name', fehler, nichtLeer: true);
+      _enumWert(wert, 'zielart', {'objekt', 'ort'}, '$pfad.zielart', fehler);
       _optionaleUuid(
         wert,
         'elternKategorieId',
@@ -742,27 +690,28 @@ class ImportValidierungsService {
       _zeitstempel(wert, pfad, fehler);
     }
     for (var i = 0; i < zuordnungen.length; i++) {
-      final wert = zuordnungen[i];
       final pfad = r'$.kategorieZuordnungen[' '$i]';
-      _uuid(wert, 'kategorieId', '$pfad.kategorieId', fehler);
-      _uuid(wert, 'zielId', '$pfad.zielId', fehler);
+      _uuid(zuordnungen[i], 'kategorieId', '$pfad.kategorieId', fehler);
+      _uuid(zuordnungen[i], 'zielId', '$pfad.zielId', fehler);
     }
   }
 
-  void _validiereReferenzen({
-    required List<Map<String, Object?>> profile,
-    required List<Map<String, Object?>> objekte,
-    required List<Map<String, Object?>> orte,
-    required List<Map<String, Object?>> erlebnisse,
-    required List<Map<String, Object?>> positionen,
-    required List<Map<String, Object?>> preise,
-    required List<Map<String, Object?>> kriterien,
-    required List<Map<String, Object?>> bewertungen,
-    required List<Map<String, Object?>> ortsbewertungen,
-    required List<Map<String, Object?>> kategorien,
-    required List<Map<String, Object?>> zuordnungen,
-    required List<ImportValidierungsFehler> fehler,
-  }) {
+  void _validiereReferenzen(
+    Map<String, Object?> dokument,
+    List<ImportValidierungsFehler> fehler,
+  ) {
+    final profile = _liste(dokument, 'profile');
+    final objekte = _liste(dokument, 'objekte');
+    final orte = _liste(dokument, 'orte');
+    final erlebnisse = _liste(dokument, 'erlebnisse');
+    final positionen = _liste(dokument, 'erlebnisPositionen');
+    final preise = _liste(dokument, 'preisbeobachtungen');
+    final kriterien = _liste(dokument, 'bewertungskriterien');
+    final bewertungen = _liste(dokument, 'bewertungen');
+    final ortsbewertungen = _liste(dokument, 'ortsbewertungen');
+    final kategorien = _liste(dokument, 'kategorien');
+    final zuordnungen = _liste(dokument, 'kategorieZuordnungen');
+
     final profilIds = _ids(profile);
     final objektIds = _ids(objekte);
     final produktIds = objekte
@@ -772,15 +721,13 @@ class ImportValidierungsService {
     final ortIds = _ids(orte);
     final erlebnisIds = _ids(erlebnisse);
     final positionsIds = _ids(positionen);
-    final kriterienIds = _ids(kriterien);
+    final kriteriumIds = _ids(kriterien);
     final ortsbewertungsIds = _ids(ortsbewertungen);
     final kategorieIds = _ids(kategorien);
-    final positionNachId = {
-      for (final wert in positionen) wert['id'] as String: wert,
-    };
-    final ortsbewertungNachId = {
-      for (final wert in ortsbewertungen) wert['id'] as String: wert,
-    };
+    final positionNachId = _nachId(positionen);
+    final ortsbewertungNachId = _nachId(ortsbewertungen);
+    final kriteriumNachId = _nachId(kriterien);
+    final kategorieNachId = _nachId(kategorien);
 
     for (var i = 0; i < erlebnisse.length; i++) {
       final wert = erlebnisse[i];
@@ -847,8 +794,7 @@ class ImportValidierungsService {
           fehler,
           'preis_position_widerspruch',
           pfad,
-          'Preisbeobachtung, Erlebnisposition, Erlebnis und Produkt passen '
-              'nicht zusammen.',
+          'Preisbeobachtung und Erlebnisposition passen nicht zusammen.',
         );
       }
     }
@@ -874,96 +820,21 @@ class ImportValidierungsService {
     }
 
     for (var i = 0; i < bewertungen.length; i++) {
-      final wert = bewertungen[i];
-      final pfad = r'$.bewertungen[' '$i]';
-      _referenz(
-        wert['erlebnisId'],
-        erlebnisIds,
-        '$pfad.erlebnisId',
-        'Erlebnis',
-        fehler,
-      );
-      _referenz(
-        wert['herkunftProfilId'],
+      _validiereBewertungsReferenzen(
+        bewertungen[i],
+        i,
         profilIds,
-        '$pfad.herkunftProfilId',
-        'Profil',
+        produktIds,
+        ortIds,
+        erlebnisIds,
+        positionsIds,
+        kriteriumIds,
+        ortsbewertungsIds,
+        positionNachId,
+        kriteriumNachId,
+        ortsbewertungNachId,
         fehler,
       );
-      final snapshot = Map<String, Object?>.from(wert['kriterium'] as Map);
-      _referenz(
-        snapshot['id'],
-        kriterienIds,
-        '$pfad.kriterium.id',
-        'Bewertungskriterium',
-        fehler,
-      );
-      final kriterium = kriterien.firstWhere(
-        (eintrag) => eintrag['id'] == snapshot['id'],
-        orElse: () => const <String, Object?>{},
-      );
-      if (kriterium.isNotEmpty &&
-          kriterium['version'] is int &&
-          snapshot['version'] is int &&
-          (snapshot['version'] as int) > (kriterium['version'] as int)) {
-        _fehler(
-          fehler,
-          'kriterium_version_ungueltig',
-          '$pfad.kriterium.version',
-          'Die historische Kriterienversion ist neuer als das zugehörige '
-              'exportierte Kriterium.',
-        );
-      }
-
-      if (wert['zielart'] == 'produkt') {
-        _referenz(
-          wert['objektId'],
-          produktIds,
-          '$pfad.objektId',
-          'Produkt',
-          fehler,
-        );
-        _referenz(
-          wert['erlebnisPositionId'],
-          positionsIds,
-          '$pfad.erlebnisPositionId',
-          'Erlebnisposition',
-          fehler,
-        );
-        final position = positionNachId[wert['erlebnisPositionId']];
-        if (position != null &&
-            (position['erlebnisId'] != wert['erlebnisId'] ||
-                position['produktId'] != wert['objektId'])) {
-          _fehler(
-            fehler,
-            'bewertung_position_widerspruch',
-            pfad,
-            'Produktbewertung und Erlebnisposition passen nicht zusammen.',
-          );
-        }
-      } else if (wert['zielart'] == 'ort') {
-        _referenz(wert['objektId'], ortIds, '$pfad.objektId', 'Ort', fehler);
-        _referenz(
-          wert['ortsbewertungId'],
-          ortsbewertungsIds,
-          '$pfad.ortsbewertungId',
-          'Ortsbewertung',
-          fehler,
-        );
-        final ortsbewertung = ortsbewertungNachId[wert['ortsbewertungId']];
-        if (ortsbewertung != null &&
-            (ortsbewertung['erlebnisId'] != wert['erlebnisId'] ||
-                ortsbewertung['ortId'] != wert['objektId'])) {
-          _fehler(
-            fehler,
-            'ortsbewertung_widerspruch',
-            pfad,
-            'Ortsbewertung, Erlebnis und bewerteter Ort passen nicht '
-                'zusammen.',
-          );
-        }
-      }
-      _optionaleReferenz(wert['ortId'], ortIds, '$pfad.ortId', 'Ort', fehler);
     }
 
     for (var i = 0; i < kategorien.length; i++) {
@@ -986,9 +857,6 @@ class ImportValidierungsService {
       }
     }
 
-    final kategorieNachId = {
-      for (final wert in kategorien) wert['id'] as String: wert,
-    };
     for (var i = 0; i < zuordnungen.length; i++) {
       final wert = zuordnungen[i];
       final pfad = r'$.kategorieZuordnungen[' '$i]';
@@ -1001,55 +869,126 @@ class ImportValidierungsService {
       );
       final kategorie = kategorieNachId[wert['kategorieId']];
       if (kategorie != null) {
-        final ziele = kategorie['zielart'] == 'ort' ? ortIds : objektIds;
-        _referenz(wert['zielId'], ziele, '$pfad.zielId', 'Ziel', fehler);
+        final zielIds = kategorie['zielart'] == 'ort' ? ortIds : objektIds;
+        _referenz(wert['zielId'], zielIds, '$pfad.zielId', 'Ziel', fehler);
       }
     }
   }
 
-  void _sammlung(
-    Map<String, Object?> dokument,
-    String name,
+  void _validiereBewertungsReferenzen(
+    Map<String, Object?> wert,
+    int index,
+    Set<String> profilIds,
+    Set<String> produktIds,
+    Set<String> ortIds,
+    Set<String> erlebnisIds,
+    Set<String> positionsIds,
+    Set<String> kriteriumIds,
+    Set<String> ortsbewertungsIds,
+    Map<Object?, Map<String, Object?>> positionNachId,
+    Map<Object?, Map<String, Object?>> kriteriumNachId,
+    Map<Object?, Map<String, Object?>> ortsbewertungNachId,
     List<ImportValidierungsFehler> fehler,
   ) {
-    final wert = dokument[name];
-    if (wert is! List) {
+    final pfad = r'$.bewertungen[' '$index]';
+    _referenz(
+      wert['erlebnisId'],
+      erlebnisIds,
+      '$pfad.erlebnisId',
+      'Erlebnis',
+      fehler,
+    );
+    _referenz(
+      wert['herkunftProfilId'],
+      profilIds,
+      '$pfad.herkunftProfilId',
+      'Profil',
+      fehler,
+    );
+    _optionaleReferenz(wert['ortId'], ortIds, '$pfad.ortId', 'Ort', fehler);
+
+    final snapshot = _map(wert['kriterium'] as Map);
+    _referenz(
+      snapshot['id'],
+      kriteriumIds,
+      '$pfad.kriterium.id',
+      'Bewertungskriterium',
+      fehler,
+    );
+    final aktivesKriterium = kriteriumNachId[snapshot['id']];
+    if (aktivesKriterium != null &&
+        snapshot['version'] is int &&
+        aktivesKriterium['version'] is int &&
+        (snapshot['version'] as int) > (aktivesKriterium['version'] as int)) {
       _fehler(
         fehler,
-        'sammlung_ungueltig',
-        r'$.' + name,
-        'Die erforderliche Sammlung „$name“ fehlt oder ist kein Array.',
+        'kriterium_version_ungueltig',
+        '$pfad.kriterium.version',
+        'Die historische Kriterienversion ist neuer als das exportierte '
+            'Kriterium.',
       );
-      return;
     }
-    if (wert.length > grenzen.maxEintraegeProSammlung) {
-      _fehler(
+
+    if (wert['zielart'] == 'produkt') {
+      _referenz(wert['objektId'], produktIds, '$pfad.objektId', 'Produkt', fehler);
+      _referenz(
+        wert['erlebnisPositionId'],
+        positionsIds,
+        '$pfad.erlebnisPositionId',
+        'Erlebnisposition',
         fehler,
-        'sammlung_zu_gross',
-        r'$.' + name,
-        'Die Sammlung „$name“ enthält mehr als '
-            '${grenzen.maxEintraegeProSammlung} Einträge.',
       );
-      return;
-    }
-    for (var i = 0; i < wert.length; i++) {
-      if (wert[i] is! Map) {
+      final position = positionNachId[wert['erlebnisPositionId']];
+      if (position != null &&
+          (position['erlebnisId'] != wert['erlebnisId'] ||
+              position['produktId'] != wert['objektId'])) {
         _fehler(
           fehler,
-          'datensatz_ungueltig',
-          r'$.' + name + '[$i]',
-          'Der Eintrag ist kein JSON-Objekt.',
+          'bewertung_position_widerspruch',
+          pfad,
+          'Produktbewertung und Erlebnisposition passen nicht zusammen.',
         );
       }
+      return;
+    }
+
+    _referenz(wert['objektId'], ortIds, '$pfad.objektId', 'Ort', fehler);
+    _referenz(
+      wert['ortsbewertungId'],
+      ortsbewertungsIds,
+      '$pfad.ortsbewertungId',
+      'Ortsbewertung',
+      fehler,
+    );
+    final ortsbewertung = ortsbewertungNachId[wert['ortsbewertungId']];
+    if (ortsbewertung != null &&
+        (ortsbewertung['erlebnisId'] != wert['erlebnisId'] ||
+            ortsbewertung['ortId'] != wert['objektId'])) {
+      _fehler(
+        fehler,
+        'ortsbewertung_widerspruch',
+        pfad,
+        'Ortsbewertung, Erlebnis und bewerteter Ort passen nicht zusammen.',
+      );
     }
   }
 
-  List<Map<String, Object?>> _objektListe(Object wert) => (wert as List)
-      .map((eintrag) => Map<String, Object?>.from(eintrag as Map))
-      .toList();
+  List<Map<String, Object?>> _liste(
+    Map<String, Object?> dokument,
+    String name,
+  ) =>
+      (dokument[name] as List).map((wert) => _map(wert as Map)).toList();
+
+  Map<String, Object?> _map(Map wert) =>
+      wert.map((schluessel, inhalt) => MapEntry(schluessel as String, inhalt));
 
   Set<String> _ids(List<Map<String, Object?>> werte) =>
       werte.map((wert) => wert['id'] as String).toSet();
+
+  Map<Object?, Map<String, Object?>> _nachId(
+    List<Map<String, Object?>> werte,
+  ) =>
+      {for (final wert in werte) wert['id']: wert};
 
   void _eindeutigeIds(
     String sammlung,
@@ -1063,7 +1002,7 @@ class ImportValidierungsService {
         _fehler(
           fehler,
           'id_mehrfach',
-          r'$.' + sammlung + '[$i].id',
+          r'$.' '$sammlung[$i].id',
           'Die ID „$id“ kommt in derselben Sammlung mehrfach vor.',
         );
       }
@@ -1102,8 +1041,7 @@ class ImportValidierungsService {
     String pfad,
     List<ImportValidierungsFehler> fehler,
   ) {
-    if (wert[feld] == null) return;
-    _uuid(wert, feld, pfad, fehler);
+    if (wert[feld] != null) _uuid(wert, feld, pfad, fehler);
   }
 
   void _text(
@@ -1111,16 +1049,15 @@ class ImportValidierungsService {
     String feld,
     String pfad,
     List<ImportValidierungsFehler> fehler, {
-    bool erforderlich = false,
+    bool nichtLeer = false,
   }) {
     final inhalt = wert[feld];
-    if (inhalt is! String || (erforderlich && inhalt.isEmpty)) {
+    if (inhalt is! String || (nichtLeer && inhalt.isEmpty)) {
       _fehler(
         fehler,
         'text_ungueltig',
         pfad,
-        'Das Feld „$feld“ muss eine${erforderlich ? ' nicht leere' : ''} '
-            'Zeichenkette sein.',
+        'Das Feld „$feld“ muss eine gültige Zeichenkette sein.',
       );
     }
   }
@@ -1148,8 +1085,7 @@ class ImportValidierungsService {
     String pfad,
     List<ImportValidierungsFehler> fehler,
   ) {
-    final inhalt = wert[feld];
-    if (inhalt is! String || !erlaubt.contains(inhalt)) {
+    if (wert[feld] is! String || !erlaubt.contains(wert[feld])) {
       _fehler(
         fehler,
         'wert_unbekannt',
@@ -1180,12 +1116,10 @@ class ImportValidierungsService {
     String feld,
     String pfad,
     List<ImportValidierungsFehler> fehler, {
-    required bool erforderlich,
     int? minimum,
     int? maximum,
   }) {
     final inhalt = wert[feld];
-    if (inhalt == null && !erforderlich) return;
     if (inhalt is! int ||
         (minimum != null && inhalt < minimum) ||
         (maximum != null && inhalt > maximum)) {
@@ -1205,16 +1139,17 @@ class ImportValidierungsService {
     List<ImportValidierungsFehler> fehler, {
     int? minimum,
     int? maximum,
-  }) =>
-      _ganzzahl(
-        wert,
-        feld,
-        pfad,
-        fehler,
-        erforderlich: false,
-        minimum: minimum,
-        maximum: maximum,
-      );
+  }) {
+    if (wert[feld] == null) return;
+    _ganzzahl(
+      wert,
+      feld,
+      pfad,
+      fehler,
+      minimum: minimum,
+      maximum: maximum,
+    );
+  }
 
   void _dezimalzahl(
     Map<String, Object?> wert,
@@ -1222,14 +1157,12 @@ class ImportValidierungsService {
     String pfad,
     List<ImportValidierungsFehler> fehler,
   ) {
-    final inhalt = wert[feld];
-    if (inhalt is! String || !_dezimalRegExp.hasMatch(inhalt)) {
+    if (wert[feld] is! String || !_dezimalRegExp.hasMatch(wert[feld] as String)) {
       _fehler(
         fehler,
         'dezimalzahl_ungueltig',
         pfad,
-        'Das Feld „$feld“ muss eine kanonische Dezimalzahl mit Punkt '
-            'enthalten.',
+        'Das Feld „$feld“ muss eine kanonische Dezimalzahl mit Punkt enthalten.',
       );
     }
   }
@@ -1240,8 +1173,7 @@ class ImportValidierungsService {
     String pfad,
     List<ImportValidierungsFehler> fehler,
   ) {
-    if (wert[feld] == null) return;
-    _dezimalzahl(wert, feld, pfad, fehler);
+    if (wert[feld] != null) _dezimalzahl(wert, feld, pfad, fehler);
   }
 
   void _waehrung(
@@ -1250,8 +1182,8 @@ class ImportValidierungsService {
     String pfad,
     List<ImportValidierungsFehler> fehler,
   ) {
-    final inhalt = wert[feld];
-    if (inhalt is! String || !_waehrungRegExp.hasMatch(inhalt)) {
+    if (wert[feld] is! String ||
+        !_waehrungRegExp.hasMatch(wert[feld] as String)) {
       _fehler(
         fehler,
         'waehrung_ungueltig',
@@ -1267,8 +1199,7 @@ class ImportValidierungsService {
     String pfad,
     List<ImportValidierungsFehler> fehler,
   ) {
-    final inhalt = wert[feld];
-    if (_parseUtc(inhalt) == null) {
+    if (_parseUtc(wert[feld]) == null) {
       _fehler(
         fehler,
         'zeitstempel_ungueltig',
@@ -1284,8 +1215,7 @@ class ImportValidierungsService {
     String pfad,
     List<ImportValidierungsFehler> fehler,
   ) {
-    if (wert[feld] == null) return;
-    _utcZeit(wert, feld, pfad, fehler);
+    if (wert[feld] != null) _utcZeit(wert, feld, pfad, fehler);
   }
 
   DateTime? _parseUtc(Object? wert) {
@@ -1365,8 +1295,7 @@ class ImportValidierungsService {
     String ziel,
     List<ImportValidierungsFehler> fehler,
   ) {
-    if (id == null) return;
-    _referenz(id, erlaubteIds, pfad, ziel, fehler);
+    if (id != null) _referenz(id, erlaubteIds, pfad, ziel, fehler);
   }
 
   void _fehler(
