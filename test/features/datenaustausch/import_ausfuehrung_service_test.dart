@@ -228,8 +228,15 @@ void main() {
             .single['n'],
     };
     final import = vollstaendigesDokument();
-    final importOrte = (import['orte']! as List).cast<Map<String, Object?>>();
-    importOrte.single['name'] = null;
+    import['orte'] = [
+      <String, Object?>{
+        'id': 'ort-defekt',
+        'name': null,
+        'typ': 'gastronomie',
+        'erstelltAm': '2026-09-01T10:00:00.000Z',
+        'geaendertAm': '2026-09-01T10:00:00.000Z',
+      },
+    ];
 
     expect(
       () => service.ausfuehren(
