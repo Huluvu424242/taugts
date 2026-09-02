@@ -145,8 +145,7 @@ class ExportService {
           })
       .toList();
 
-  List<Map<String, Object?>> _bewertungen() =>
-      _zeilen('bewertungen').map((z) {
+  List<Map<String, Object?>> _bewertungen() => _zeilen('bewertungen').map((z) {
         final istOrt = z['ortsbewertung_id'] != null;
         return {
           'id': z['id'],
@@ -174,19 +173,18 @@ class ExportService {
         };
       }).toList();
 
-  List<Map<String, Object?>> _ortsbewertungen() =>
-      _zeilen('ortsbewertungen')
-          .map((z) => {
-                'id': z['id'],
-                'erlebnisId': z['erlebnis_id'],
-                'ortId': z['ort_id'],
-                'herkunftProfilId': z['herkunft_profil_id'],
-                'bewertetAm': z['bewertet_am'],
-                'notiz': z['notiz'],
-                'erstelltAm': z['erstellt_am'],
-                'geaendertAm': z['geaendert_am'],
-              })
-          .toList();
+  List<Map<String, Object?>> _ortsbewertungen() => _zeilen('ortsbewertungen')
+      .map((z) => {
+            'id': z['id'],
+            'erlebnisId': z['erlebnis_id'],
+            'ortId': z['ort_id'],
+            'herkunftProfilId': z['herkunft_profil_id'],
+            'bewertetAm': z['bewertet_am'],
+            'notiz': z['notiz'],
+            'erstelltAm': z['erstellt_am'],
+            'geaendertAm': z['geaendert_am'],
+          })
+      .toList();
 
   List<Map<String, Object?>> _zeilen(String tabelle) => datenbank.verbindung
       .select('SELECT * FROM $tabelle ORDER BY id')
