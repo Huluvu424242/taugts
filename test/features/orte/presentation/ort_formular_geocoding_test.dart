@@ -43,8 +43,9 @@ void main() {
 
   Future<void> formularAnzeigen(
     WidgetTester tester,
-    GeocodingService service,
-  ) async {
+    GeocodingService service, {
+    bool privat = false,
+  }) async {
     await tester.pumpWidget(
       MaterialApp(
         home: OrtFormular(
@@ -54,6 +55,12 @@ void main() {
         ),
       ),
     );
+    if (privat) {
+      await tester.tap(find.byType(DropdownButtonFormField).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Privater Ort').last);
+      await tester.pumpAndSettle();
+    }
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Breitengrad (optional)'),
       '50.8323',
@@ -103,7 +110,17 @@ void main() {
 
     final name = find.widgetWithText(TextFormField, 'Name');
     final adresse = find.widgetWithText(TextFormField, 'Adresse (optional)');
+    await tester.scrollUntilVisible(
+      name,
+      -120,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(tester.widget<TextFormField>(name).controller!.text, 'Testgaststätte');
+    await tester.scrollUntilVisible(
+      adresse,
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(
       tester.widget<TextFormField>(adresse).controller!.text,
       'Teststraße 1, Chemnitz',
@@ -119,26 +136,32 @@ void main() {
     await tester.tap(find.text('Adresse aus Koordinaten vorschlagen'));
     await tester.pumpAndSettle();
 
+    await tester.scrollUntilVisible(
+      find.text('Adressdienst nicht erreichbar.'),
+      -120,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Adressdienst nicht erreichbar.'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Ort speichern'),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Ort speichern'), findsOneWidget);
   });
 
   testWidgets('private Orte übertragen keine exakten Koordinaten', (tester) async {
     final service = _GeocodingService();
-    await formularAnzeigen(tester, service);
-    await tester.tap(find.byType(DropdownButtonFormField).first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Privater Ort').last);
-    await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Adresse aus Koordinaten vorschlagen'),
-      120,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await formularAnzeigen(tester, service, privat: true);
     await tester.tap(find.text('Adresse aus Koordinaten vorschlagen'));
     await tester.pumpAndSettle();
 
     expect(service.aufrufe, 0);
+    await tester.scrollUntilVisible(
+      find.textContaining('private Orte werden exakte Koordinaten nicht'),
+      -120,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(
       find.textContaining('private Orte werden exakte Koordinaten nicht'),
       findsOneWidget,
