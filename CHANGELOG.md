@@ -19,6 +19,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Fixed
 
+- Die Importausführung verhindert nun auch auf Service-Ebene eine zweite gleichzeitige beziehungsweise reentrante Ausführung für dieselbe lokale Datenbank und gibt die Sperre nach Erfolg oder Fehler zuverlässig wieder frei.
 - Importvorschau und Importausführung verwenden nun konsistent `erlebnisPositionen` und berücksichtigen Ortsbewertungen, sodass dieselben historischen Sammlungen geplant und tatsächlich verarbeitet werden.
 
 ## [0.1.0+4] - 2026-09-01

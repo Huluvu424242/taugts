@@ -62,6 +62,8 @@ class ImportAusfuehrungService {
   final ImportProtokollRepository protokollRepository;
   final ImportAliasRepository aliasRepository;
 
+  static final Set<LokaleDatenbank> _laufendeDatenbanken = <LokaleDatenbank>{};
+
   static const _reihenfolge = <String>[
     'profile',
     'objekte',
@@ -90,6 +92,35 @@ class ImportAusfuehrungService {
     List<ImportAliasReferenz> aliase = const [],
     Map<String, int> zusammengefuehrtNachSammlung = const {},
     DateTime? ausgefuehrtAm,
+  }) {
+    if (!_laufendeDatenbanken.add(datenbank)) {
+      throw StateError('Für diese Datenbank läuft bereits ein Import.');
+    }
+    try {
+      return _ausfuehrenGesperrt(
+        datenbank: datenbank,
+        importDokument: importDokument,
+        strategie: strategie,
+        entscheidungen: entscheidungen,
+        mergeAliase: mergeAliase,
+        aliase: aliase,
+        zusammengefuehrtNachSammlung: zusammengefuehrtNachSammlung,
+        ausgefuehrtAm: ausgefuehrtAm,
+      );
+    } finally {
+      _laufendeDatenbanken.remove(datenbank);
+    }
+  }
+
+  ImportAusfuehrungsErgebnis _ausfuehrenGesperrt({
+    required LokaleDatenbank datenbank,
+    required Map<String, Object?> importDokument,
+    required ImportStrategie strategie,
+    required ImportKonfliktEntscheidungsStand entscheidungen,
+    required Map<String, String> mergeAliase,
+    required List<ImportAliasReferenz> aliase,
+    required Map<String, int> zusammengefuehrtNachSammlung,
+    required DateTime? ausgefuehrtAm,
   }) {
     final zeitpunkt = (ausgefuehrtAm ?? DateTime.now()).toUtc();
     final ergebnis = <String, ImportErgebnisZaehler>{};
