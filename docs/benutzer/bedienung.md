@@ -20,6 +20,8 @@ Orte können mit Typ, optionaler Adresse, Koordinaten, OpenStreetMap-Referenz un
 
 Koordinaten lassen sich optional auf einer OpenStreetMap-Karte kontrollieren und korrigieren. Die manuelle Orts- und Koordinateneingabe bleibt auch ohne Netzwerkverbindung verfügbar.
 
+Für nicht private Orte kann über **Adresse aus Koordinaten vorschlagen** ausdrücklich eine Online-Anreicherung gestartet werden. Erst dann werden die aktuell eingegebenen Koordinaten an OpenStreetMap/Nominatim übertragen. Name und Adresse erscheinen nur als Vorschlag und werden erst nach Bestätigung in das Formular übernommen; beide Angaben können anschließend korrigiert werden. Für Orte vom Typ **Privater Ort** überträgt Taugt’s? keine exakten Koordinaten an den Adressdienst. Fehlendes Netz, kein Treffer oder ein Fehler des Dienstes verhindern das manuelle Speichern des Ortes nicht.
+
 ## Erlebnisse und Bewertungen
 
 Restaurantbesuche und Einkäufe können geplant, begonnen, beendet, in der Erlebnisübersicht wiedergefunden und nachträglich bearbeitet werden. Die Übersicht gruppiert laufende, geplante und vergangene Erlebnisse und zeigt Zeitkontext, Ort und Positionsanzahl.
