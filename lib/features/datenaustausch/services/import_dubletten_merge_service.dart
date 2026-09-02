@@ -32,6 +32,27 @@ class ImportDublettenMergeErgebnis {
 class ImportDublettenMergeService {
   const ImportDublettenMergeService();
 
+  String kanonischeIdFuer({
+    required String sammlung,
+    required String id,
+    required Iterable<ImportAliasReferenz> aliases,
+  }) {
+    var aktuell = id;
+    final besucht = <String>{};
+    while (besucht.add(aktuell)) {
+      ImportAliasReferenz? treffer;
+      for (final alias in aliases) {
+        if (alias.sammlung == sammlung && alias.aliasId == aktuell) {
+          treffer = alias;
+          break;
+        }
+      }
+      if (treffer == null) return aktuell;
+      aktuell = treffer.kanonischeId;
+    }
+    throw StateError('Zyklische Aliasreferenz für $sammlung/$id.');
+  }
+
   ImportDublettenMergeErgebnis plane({
     required String sammlung,
     required String importId,
