@@ -1,6 +1,6 @@
 # Attributions
 
-Stand der Prüfung: 31. August 2026 · vorbereitete Version: 0.1.0+3
+Stand der Prüfung: 2. September 2026 · vorbereitete Version: 0.1.0+4
 
 ## Taugt’s?-App-Logo
 
@@ -42,6 +42,12 @@ Third-Party-Notices bleiben maßgeblich.
 - [path_provider](https://pub.dev/packages/path_provider) – BSD-3-Clause;
   Ermittlung des Anwendungsdatenverzeichnisses
 - [uuid](https://pub.dev/packages/uuid) – MIT; Erzeugung stabiler UUIDs
+
+## Datenaustausch
+
+- [file_picker](https://pub.dev/packages/file_picker) – MIT; plattformübergreifender Systemdialog zur Auswahl des Speicherziels
+- [share_plus](https://pub.dev/packages/share_plus) – BSD-3-Clause; Übergabe einer Exportdatei an den System-Teilen-Dialog, insbesondere unter Android
+- [package_info_plus](https://pub.dev/packages/package_info_plus) – BSD-3-Clause; Ermittlung der tatsächlich installierten App- und Buildversion für die Exportmetadaten
 
 ## Lokale Barcode-Erkennung
 
