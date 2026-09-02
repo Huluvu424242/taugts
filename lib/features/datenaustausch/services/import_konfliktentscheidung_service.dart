@@ -1,7 +1,10 @@
 import 'package:taugts/features/datenaustausch/services/import_konfliktanalyse_service.dart';
 
-
-enum ImportKonfliktArt { versionskonflikt, identitaetskonflikt, fachlicheDublette }
+enum ImportKonfliktArt {
+  versionskonflikt,
+  identitaetskonflikt,
+  fachlicheDublette
+}
 
 enum ImportKonfliktAktion {
   lokaleVersion,
@@ -98,8 +101,8 @@ class ImportKonfliktentscheidungService {
         final lokal = lokalNachId[eintrag.key];
         if (lokal == null || _gleich(eintrag.value, lokal)) continue;
         final importWert = eintrag.value;
-        final identitaetskonflikt =
-            _istHistorisch(sammlung) && !_gleicherHistorischerKontext(sammlung, importWert, lokal);
+        final identitaetskonflikt = _istHistorisch(sammlung) &&
+            !_gleicherHistorischerKontext(sammlung, importWert, lokal);
         final art = identitaetskonflikt
             ? ImportKonfliktArt.identitaetskonflikt
             : ImportKonfliktArt.versionskonflikt;
@@ -123,11 +126,14 @@ class ImportKonfliktentscheidungService {
     }
 
     for (final dublette in analyse.fachlicheDubletten) {
-      final importWert = _finde(importDokument, dublette.sammlung, dublette.importId);
-      final lokal = _finde(lokalesDokument, dublette.sammlung, dublette.lokaleId);
+      final importWert =
+          _finde(importDokument, dublette.sammlung, dublette.importId);
+      final lokal =
+          _finde(lokalesDokument, dublette.sammlung, dublette.lokaleId);
       konflikte.add(
         ImportEinzelKonflikt(
-          schluessel: '${dublette.sammlung}|${dublette.importId}|${dublette.lokaleId}',
+          schluessel:
+              '${dublette.sammlung}|${dublette.importId}|${dublette.lokaleId}',
           art: ImportKonfliktArt.fachlicheDublette,
           sammlung: dublette.sammlung,
           importId: dublette.importId,
@@ -255,14 +261,17 @@ class ImportKonfliktentscheidungService {
     Map<String, Object?> dokument,
     String sammlung,
     String id,
-  ) => _nachId(_liste(dokument, sammlung))[id];
+  ) =>
+      _nachId(_liste(dokument, sammlung))[id];
 
-  Map<String, Map<String, Object?>> _nachId(List<Map<String, Object?>> werte) => {
+  Map<String, Map<String, Object?>> _nachId(List<Map<String, Object?>> werte) =>
+      {
         for (final wert in werte)
           if (wert['id'] is String) wert['id'] as String: wert,
       };
 
-  List<Map<String, Object?>> _liste(Map<String, Object?> dokument, String name) =>
+  List<Map<String, Object?>> _liste(
+          Map<String, Object?> dokument, String name) =>
       ((dokument[name] as List?) ?? const [])
           .whereType<Map>()
           .map((e) => Map<String, Object?>.from(e))
