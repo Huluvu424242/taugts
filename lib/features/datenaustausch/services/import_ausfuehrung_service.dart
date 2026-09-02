@@ -77,6 +77,7 @@ class ImportAusfuehrungService {
     ImportKonfliktEntscheidungsStand entscheidungen =
         const ImportKonfliktEntscheidungsStand(),
     Map<String, String> mergeAliase = const {},
+    Map<String, int> zusammengefuehrtNachSammlung = const {},
     DateTime? ausgefuehrtAm,
   }) {
     final zeitpunkt = (ausgefuehrtAm ?? DateTime.now()).toUtc();
@@ -91,14 +92,14 @@ class ImportAusfuehrungService {
           var zaehler = const ImportErgebnisZaehler();
           for (final roh in (importDokument[sammlung] as List? ?? const [])) {
             if (roh is! Map) {
-              zaehler = zaehler.plus(fehlerhaft: 1);
               throw const FormatException('Importeintrag ist kein Objekt.');
             }
             final wert = Map<String, Object?>.from(roh);
             final importId = wert['id'] as String?;
             if (importId == null || importId.isEmpty) {
-              zaehler = zaehler.plus(fehlerhaft: 1);
-              throw const FormatException('Importeintrag besitzt keine stabile ID.');
+              throw const FormatException(
+                'Importeintrag besitzt keine stabile ID.',
+              );
             }
             final zielId = mergeAliase[importId] ?? importId;
             final aktion = _entscheidung(sammlung, importId, entscheidungen);
@@ -144,6 +145,7 @@ class ImportAusfuehrungService {
       rethrow;
     }
 
+    _beruecksichtigeMerges(ergebnis, zusammengefuehrtNachSammlung);
     final result = ImportAusfuehrungsErgebnis(Map.unmodifiable(ergebnis));
     _protokolliereSicher(
       datenbank: datenbank,
@@ -160,6 +162,26 @@ class ImportAusfuehrungService {
     int limit = 20,
   }) =>
       protokollRepository.lade(datenbank, limit: limit);
+
+  void _beruecksichtigeMerges(
+    Map<String, ImportErgebnisZaehler> ergebnis,
+    Map<String, int> merges,
+  ) {
+    for (final eintrag in merges.entries) {
+      if (eintrag.value <= 0) continue;
+      final bisher = ergebnis[eintrag.key] ?? const ImportErgebnisZaehler();
+      final abziehbar = bisher.aktualisiert < eintrag.value
+          ? bisher.aktualisiert
+          : eintrag.value;
+      ergebnis[eintrag.key] = ImportErgebnisZaehler(
+        hinzugefuegt: bisher.hinzugefuegt,
+        aktualisiert: bisher.aktualisiert - abziehbar,
+        uebersprungen: bisher.uebersprungen,
+        zusammengefuehrt: bisher.zusammengefuehrt + eintrag.value,
+        fehlerhaft: bisher.fehlerhaft,
+      );
+    }
+  }
 
   void _ersetzeBestand(LokaleDatenbank datenbank) {
     for (final tabelle in const [
@@ -200,8 +222,7 @@ class ImportAusfuehrungService {
         fehlerhaft: gesamt.fehlerhaft + zusaetzlichFehlerhaft,
       );
     } catch (_) {
-      // Ein Protokollierungsfehler darf weder einen erfolgreichen Import
-      // zurückrollen noch die ursprüngliche Importursache verdecken.
+      // Das Protokoll darf die eigentliche Importtransaktion nicht beeinflussen.
     }
   }
 
@@ -283,6 +304,7 @@ class ImportAusfuehrungService {
       );
       return;
     }
+
     final mapping = _mapping(sammlung);
     final tabelle = _tabelle(sammlung);
     if (mapping == null || tabelle == null) return;
@@ -428,13 +450,14 @@ class ImportAusfuehrungService {
         'UPDATE $tabelle SET $set WHERE $idSpalte = ?',
         params,
       );
-    } else {
-      final spalten = werte.keys.join(', ');
-      final platzhalter = List.filled(werte.length, '?').join(', ');
-      db.verbindung.execute(
-        'INSERT INTO $tabelle ($spalten) VALUES ($platzhalter)',
-        werte.values.toList(),
-      );
+      return;
     }
+
+    final spalten = werte.keys.join(', ');
+    final platzhalter = List.filled(werte.length, '?').join(', ');
+    db.verbindung.execute(
+      'INSERT INTO $tabelle ($spalten) VALUES ($platzhalter)',
+      werte.values.toList(),
+    );
   }
 }
