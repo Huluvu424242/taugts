@@ -24,4 +24,10 @@ Mit **Export speichern** wird zunächst der Systemdialog für das Speicherziel g
 
 Historische Daten bleiben eigenständige Datensätze: Ein neuer Preis oder eine neue Bewertung desselben Produkts beziehungsweise Ortes überschreibt frühere Beobachtungen nicht. Geldbeträge werden ohne Gleitkomma-Rundungsfehler gespeichert.
 
-Kann eine Datei nicht geschrieben oder geteilt werden, zeigt Taugt’s? einen verständlichen Fehler an; der lokale Datenbestand bleibt unverändert. Import und Konfliktprüfung folgen in den nächsten Stories. Bis ein späterer Import ausdrücklich bestätigt wird, werden durch den Datenaustausch keine Daten eingelesen oder überschrieben.
+Importdateien werden vor einer späteren Übernahme vollständig geprüft. Anschließend kann zwischen **Bestand ersetzen**, **Import bevorzugen** und **Lokalen Bestand bevorzugen** gewählt werden. Die Vorschau zeigt, wie viele Datensätze hinzugefügt, aktualisiert, behalten oder entfernt würden. Bei **Bestand ersetzen** warnt Taugt’s? ausdrücklich vor Datenverlust und bietet vorher einen Sicherungsexport an.
+
+Erkennt Taugt’s? abweichende Versionen, widersprüchliche historische Identitäten oder mögliche fachliche Dubletten, können diese Konflikte einzeln betrachtet werden. Unterschiede zwischen lokaler und importierter Version werden gegenübergestellt. Je Konflikttyp stehen nur zulässige Entscheidungen zur Verfügung; bei einem Identitätswiderspruch wird **Beide behalten** beispielsweise nicht angeboten. Eine Entscheidung kann auf weitere Konflikte derselben Art und Datensammlung übertragen und jederzeit vor der späteren Ausführung geändert werden.
+
+Die Konfliktentscheidung bleibt Teil der Vorschau. Auch ein Wechsel zurück zur Importvorschau verändert keine lokalen Daten. Das tatsächliche Zusammenführen von Dubletten und die atomare Ausführung des Imports werden in nachfolgenden Ausbaustufen ergänzt.
+
+Kann eine Datei nicht geschrieben, geteilt oder geprüft werden, zeigt Taugt’s? einen verständlichen Fehler an; der lokale Datenbestand bleibt unverändert. Bis ein späterer Import ausdrücklich bestätigt wird, werden durch den Datenaustausch keine Daten eingelesen oder überschrieben.
