@@ -18,8 +18,10 @@ Eine Bug-Meldung wird lokal vorbereitet und anschließend im Browser zur Prüfun
 
 ## Import und Export
 
-Das zukünftige Datenaustauschformat ist bereits als versioniertes, menschenlesbares JSON-Format definiert. Es trägt die Kennung `taugts-export`, eine unabhängige Schemaversion, Exportzeitpunkt und App-Version und bewahrt die Beziehungen zwischen Profilen, Produkten, Orten, Erlebnissen, Preisen und Bewertungen.
+Über **Import/Export** auf der Startseite kann der vollständige lokale Datenbestand als versionierte JSON-Datei exportiert werden. Die Datei trägt die Kennung `taugts-export`, eine unabhängige Schemaversion, Exportzeitpunkt und die tatsächlich installierte App-Version.
 
-Historische Daten bleiben dabei eigenständige Datensätze: Ein neuer Preis oder eine neue Bewertung desselben Produkts beziehungsweise Ortes überschreibt frühere Beobachtungen nicht. Geldbeträge werden ohne Gleitkomma-Rundungsfehler gespeichert.
+Mit **Export speichern** wird zunächst der Systemdialog für das Speicherziel geöffnet. Wird dieser abgebrochen, passiert nichts. Unter Android kann die erzeugte Datei außerdem mit **Export teilen** an eine installierte App übergeben werden. Das Erzeugen des Exports benötigt keinen Server und verändert die lokalen Daten nicht.
 
-Die eigentliche Funktion zum Erzeugen, Speichern und Einlesen solcher Dateien ist in Version 0.1.0+4 noch nicht enthalten und wird in nachfolgenden Stories umgesetzt. Deshalb sollte eine Deinstallation derzeit nur erfolgen, wenn ein möglicher Verlust der lokal gespeicherten Fachdaten akzeptiert wird.
+Historische Daten bleiben eigenständige Datensätze: Ein neuer Preis oder eine neue Bewertung desselben Produkts beziehungsweise Ortes überschreibt frühere Beobachtungen nicht. Geldbeträge werden ohne Gleitkomma-Rundungsfehler gespeichert.
+
+Kann eine Datei nicht geschrieben oder geteilt werden, zeigt Taugt’s? einen verständlichen Fehler an; der lokale Datenbestand bleibt unverändert. Import und Konfliktprüfung folgen in den nächsten Stories. Bis ein späterer Import ausdrücklich bestätigt wird, werden durch den Datenaustausch keine Daten eingelesen oder überschrieben.
