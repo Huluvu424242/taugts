@@ -8,6 +8,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Importdateien werden vor jeder späteren Übernahme vollständig und ohne Datenbankänderung auf JSON-Syntax, Formatkennung, Schemaversion, Pflichtfelder, Datentypen, fachliche Regeln und referenzielle Konsistenz geprüft; Größen-, Tiefen- und Knotengrenzen schützen zusätzlich vor unangemessenen Eingaben.
+- Eine getestete Vorwärtsmigration übernimmt die unterstützte Vorab-Schemaversion 0 in Version 1; unbekannte neuere Schemaversionen werden ausdrücklich abgewiesen.
 - Ein versioniertes, datenbankunabhängiges JSON-Austauschformat `taugts-export` mit JSON Schema sowie gültigen und ungültigen Fixtures bildet Profile, Objekte, Orte, Erlebnisse, historische Preise und Bewertungen, Kriterien und Kategorien stabil über UUID-Beziehungen ab.
 
 ## [0.1.0+4] - 2026-09-01
