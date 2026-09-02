@@ -18,4 +18,8 @@ Eine Bug-Meldung wird lokal vorbereitet und anschließend im Browser zur Prüfun
 
 ## Import und Export
 
-Import und Export sind in Version 0.1.0+3 noch nicht enthalten. Deshalb sollte eine Deinstallation derzeit nur erfolgen, wenn ein möglicher Verlust der lokal gespeicherten Fachdaten akzeptiert wird.
+Das zukünftige Datenaustauschformat ist bereits als versioniertes, menschenlesbares JSON-Format definiert. Es trägt die Kennung `taugts-export`, eine unabhängige Schemaversion, Exportzeitpunkt und App-Version und bewahrt die Beziehungen zwischen Profilen, Produkten, Orten, Erlebnissen, Preisen und Bewertungen.
+
+Historische Daten bleiben dabei eigenständige Datensätze: Ein neuer Preis oder eine neue Bewertung desselben Produkts beziehungsweise Ortes überschreibt frühere Beobachtungen nicht. Geldbeträge werden ohne Gleitkomma-Rundungsfehler gespeichert.
+
+Die eigentliche Funktion zum Erzeugen, Speichern und Einlesen solcher Dateien ist in Version 0.1.0+4 noch nicht enthalten und wird in nachfolgenden Stories umgesetzt. Deshalb sollte eine Deinstallation derzeit nur erfolgen, wenn ein möglicher Verlust der lokal gespeicherten Fachdaten akzeptiert wird.
