@@ -1,0 +1,26 @@
+{
+  "format": "taugts-export",
+  "schemaVersion": 1,
+  "exportiertAm": "2026-09-02T16:15:00Z",
+  "appVersion": "0.1.0+4",
+  "profile": [],
+  "objekte": [],
+  "orte": [],
+  "erlebnisse": [],
+  "erlebnisPositionen": [
+    {
+      "id": "50000000-0000-4000-8000-000000000099",
+      "erlebnisId": "40000000-0000-4000-8000-000000000099",
+      "produktId": "20000000-0000-4000-8000-000000000099",
+      "anzahl": 1,
+      "erstelltAm": "2026-09-02T15:00:00Z",
+      "geaendertAm": "2026-09-02T15:00:00Z"
+    }
+  ],
+  "preisbeobachtungen": [],
+  "bewertungskriterien": [],
+  "bewertungen": [],
+  "ortsbewertungen": [],
+  "kategorien": [],
+  "kategorieZuordnungen": []
+}
