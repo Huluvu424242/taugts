@@ -1,0 +1,29 @@
+{
+  "format": "fremdes-format",
+  "schemaVersion": 2,
+  "exportiertAm": "02.09.2026 18:00",
+  "appVersion": "",
+  "profile": [],
+  "objekte": [],
+  "orte": [],
+  "erlebnisse": [],
+  "erlebnisPositionen": [],
+  "preisbeobachtungen": [
+    {
+      "id": "keine-uuid",
+      "erlebnisId": "40000000-0000-4000-8000-000000000099",
+      "erlebnisPositionId": "50000000-0000-4000-8000-000000000099",
+      "produktId": "20000000-0000-4000-8000-000000000099",
+      "betragMinor": -1,
+      "waehrung": "€",
+      "beobachtetAm": "gestern",
+      "erstelltAm": "gestern",
+      "geaendertAm": "gestern"
+    }
+  ],
+  "bewertungskriterien": [],
+  "bewertungen": [],
+  "ortsbewertungen": [],
+  "kategorien": [],
+  "kategorieZuordnungen": []
+}
