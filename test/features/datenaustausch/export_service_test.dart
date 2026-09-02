@@ -54,7 +54,9 @@ void main() {
         '2026-09-01T10:00:00.000Z',
       ],
     );
-    final vorher = datenbank.verbindung.select('SELECT COUNT(*) AS n FROM profile').single['n'];
+    final vorher = datenbank.verbindung
+        .select('SELECT COUNT(*) AS n FROM profile')
+        .single['n'];
 
     final dokument = jsonDecode(
       ExportService(datenbank, appVersion: '0.1.0+4').erzeugeJson(),
@@ -63,7 +65,9 @@ void main() {
 
     expect(profile, hasLength(1));
     expect((profile.single as Map<String, Object?>)['anzeigename'], 'Anna');
-    final nachher = datenbank.verbindung.select('SELECT COUNT(*) AS n FROM profile').single['n'];
+    final nachher = datenbank.verbindung
+        .select('SELECT COUNT(*) AS n FROM profile')
+        .single['n'];
     expect(nachher, vorher);
   });
 }
