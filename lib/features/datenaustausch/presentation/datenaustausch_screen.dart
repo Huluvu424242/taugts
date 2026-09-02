@@ -108,7 +108,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
               ),
               if (_laeuft) ...[
                 const SizedBox(height: 20),
-                const Semantics(
+                Semantics(
                   label: 'Export wird vorbereitet',
                   child: LinearProgressIndicator(),
                 ),
