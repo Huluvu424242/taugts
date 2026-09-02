@@ -118,7 +118,8 @@ void main() {
         contains(ImportKonfliktAktion.zusammenfuehren));
   });
 
-  test('Entscheidung kann auf weitere Konflikte desselben Typs angewendet werden',
+  test(
+      'Entscheidung kann auf weitere Konflikte desselben Typs angewendet werden',
       () {
     const erster = ImportEinzelKonflikt(
       schluessel: 'objekte|1|1',
