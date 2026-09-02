@@ -6,7 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 abstract interface class ExportZielService {
-  Future<String?> speichern({required String dateiname, required String inhalt});
+  Future<String?> speichern(
+      {required String dateiname, required String inhalt});
 
   Future<void> teilen({required String dateiname, required String inhalt});
 }
