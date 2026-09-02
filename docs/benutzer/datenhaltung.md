@@ -28,6 +28,10 @@ Importdateien werden vor einer späteren Übernahme vollständig geprüft. Ansch
 
 Erkennt Taugt’s? abweichende Versionen, widersprüchliche historische Identitäten oder mögliche fachliche Dubletten, können diese Konflikte einzeln betrachtet werden. Unterschiede zwischen lokaler und importierter Version werden gegenübergestellt. Je Konflikttyp stehen nur zulässige Entscheidungen zur Verfügung; bei einem Identitätswiderspruch wird **Beide behalten** beispielsweise nicht angeboten. Eine Entscheidung kann auf weitere Konflikte derselben Art und Datensammlung übertragen und jederzeit vor der späteren Ausführung geändert werden.
 
-Die Konfliktentscheidung bleibt Teil der Vorschau. Auch ein Wechsel zurück zur Importvorschau verändert keine lokalen Daten. Das tatsächliche Zusammenführen von Dubletten und die atomare Ausführung des Imports werden in nachfolgenden Ausbaustufen ergänzt.
+Bei einer fachlichen Dublette von Produkten oder Orten kann **Zusammenführen** gewählt werden. Dabei bleibt die bereits lokale UUID die kanonische Identität. Für widersprüchliche Stammdaten kann pro Feld festgelegt werden, ob der lokale oder der importierte Wert verwendet werden soll. Die importierte UUID bleibt als Aliasreferenz im Importplan erhalten, damit derselbe Datensatz bei späteren Importen wiedererkannt werden kann.
+
+Beim Produkt-Merge werden geplante Erlebnispositionen, Preisbeobachtungen, Produktbewertungen und Kategoriezuordnungen auf die kanonische Produkt-ID bezogen. Beim Orts-Merge werden Erlebnisse, ortsbezogene Preise sowie Produkt- und Ortsbewertungen auf die kanonische Orts-ID bezogen. Historische IDs, Zeitpunkte, Preise, Bewertungswerte und Kriterienkontexte werden dabei nicht zusammengefasst oder überschrieben.
+
+Die Konfliktentscheidung und auch das Zusammenführen bleiben bis zur ausdrücklichen Importbestätigung Teil der Vorschau. Die atomare Speicherung des fertig geplanten Imports folgt im nächsten Ausbauschritt. Bis dahin verändern auch Merge-Entscheidungen keine lokalen Daten.
 
 Kann eine Datei nicht geschrieben, geteilt oder geprüft werden, zeigt Taugt’s? einen verständlichen Fehler an; der lokale Datenbestand bleibt unverändert. Bis ein späterer Import ausdrücklich bestätigt wird, werden durch den Datenaustausch keine Daten eingelesen oder überschrieben.
