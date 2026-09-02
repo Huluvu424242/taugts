@@ -1,0 +1,217 @@
+{
+  "format": "taugts-export",
+  "schemaVersion": 1,
+  "exportiertAm": "2026-09-02T16:15:00Z",
+  "appVersion": "0.1.0+4",
+  "profile": [
+    {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "anzeigename": "Beispielprofil",
+      "erstelltAm": "2026-08-28T18:00:00Z",
+      "geaendertAm": "2026-08-28T18:00:00Z"
+    }
+  ],
+  "objekte": [
+    {
+      "id": "20000000-0000-4000-8000-000000000001",
+      "name": "Beispiel Pils",
+      "art": "produkt",
+      "produktart": "bier",
+      "marke": "Beispiel",
+      "brauerei": "Beispielbrauerei",
+      "sorte": "Pils",
+      "alkoholgehalt": "4.9",
+      "herkunft": "Deutschland",
+      "gebinde": "0,5-l-Flasche",
+      "fuellmengeMl": 500,
+      "barcode": "4000000000001",
+      "notiz": null,
+      "erstelltAm": "2026-08-29T10:00:00Z",
+      "geaendertAm": "2026-08-29T10:00:00Z"
+    }
+  ],
+  "orte": [
+    {
+      "id": "30000000-0000-4000-8000-000000000001",
+      "name": "Beispielgaststätte",
+      "typ": "gastronomie",
+      "adresse": "Musterstraße 1, 09111 Chemnitz",
+      "breitengrad": "50.8323",
+      "laengengrad": "12.9253",
+      "osmReferenz": "node/123456789",
+      "notiz": null,
+      "erstelltAm": "2026-08-29T10:05:00Z",
+      "geaendertAm": "2026-08-29T10:05:00Z"
+    }
+  ],
+  "erlebnisse": [
+    {
+      "id": "40000000-0000-4000-8000-000000000001",
+      "herkunftProfilId": "10000000-0000-4000-8000-000000000001",
+      "typ": "restaurantbesuch",
+      "status": "beendet",
+      "ortId": "30000000-0000-4000-8000-000000000001",
+      "geplanterTag": "2026-08-30",
+      "geplanteMinute": 1080,
+      "geplanteDauerMinuten": 90,
+      "tatsaechlicherBeginn": "2026-08-30T18:03:00Z",
+      "tatsaechlichesEnde": "2026-08-30T19:37:00Z",
+      "notiz": "Erster Besuch",
+      "istEntwurf": false,
+      "erstelltAm": "2026-08-30T17:50:00Z",
+      "geaendertAm": "2026-08-30T19:38:00Z"
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000002",
+      "herkunftProfilId": "10000000-0000-4000-8000-000000000001",
+      "typ": "restaurantbesuch",
+      "status": "beendet",
+      "ortId": "30000000-0000-4000-8000-000000000001",
+      "geplanterTag": "2026-09-01",
+      "geplanteMinute": 1110,
+      "geplanteDauerMinuten": 90,
+      "tatsaechlicherBeginn": "2026-09-01T18:31:00Z",
+      "tatsaechlichesEnde": "2026-09-01T20:02:00Z",
+      "notiz": "Zweiter Besuch",
+      "istEntwurf": false,
+      "erstelltAm": "2026-09-01T18:20:00Z",
+      "geaendertAm": "2026-09-01T20:03:00Z"
+    }
+  ],
+  "erlebnisPositionen": [
+    {
+      "id": "50000000-0000-4000-8000-000000000001",
+      "erlebnisId": "40000000-0000-4000-8000-000000000001",
+      "produktId": "20000000-0000-4000-8000-000000000001",
+      "anzahl": 2,
+      "erstelltAm": "2026-08-30T18:05:00Z",
+      "geaendertAm": "2026-08-30T18:05:00Z"
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000002",
+      "erlebnisId": "40000000-0000-4000-8000-000000000002",
+      "produktId": "20000000-0000-4000-8000-000000000001",
+      "anzahl": 1,
+      "erstelltAm": "2026-09-01T18:35:00Z",
+      "geaendertAm": "2026-09-01T18:35:00Z"
+    }
+  ],
+  "preisbeobachtungen": [
+    {
+      "id": "60000000-0000-4000-8000-000000000001",
+      "erlebnisId": "40000000-0000-4000-8000-000000000001",
+      "erlebnisPositionId": "50000000-0000-4000-8000-000000000001",
+      "produktId": "20000000-0000-4000-8000-000000000001",
+      "ortId": "30000000-0000-4000-8000-000000000001",
+      "betragMinor": 420,
+      "waehrung": "EUR",
+      "beobachtetAm": "2026-08-30T18:05:00Z",
+      "erstelltAm": "2026-08-30T18:05:00Z",
+      "geaendertAm": "2026-08-30T18:05:00Z"
+    },
+    {
+      "id": "60000000-0000-4000-8000-000000000002",
+      "erlebnisId": "40000000-0000-4000-8000-000000000002",
+      "erlebnisPositionId": "50000000-0000-4000-8000-000000000002",
+      "produktId": "20000000-0000-4000-8000-000000000001",
+      "ortId": "30000000-0000-4000-8000-000000000001",
+      "betragMinor": 450,
+      "waehrung": "EUR",
+      "beobachtetAm": "2026-09-01T18:35:00Z",
+      "erstelltAm": "2026-09-01T18:35:00Z",
+      "geaendertAm": "2026-09-01T18:35:00Z"
+    }
+  ],
+  "bewertungskriterien": [
+    {
+      "id": "70000000-0000-4000-8000-000000000001",
+      "name": "Gesamturteil",
+      "beschreibung": "Unabhängige Gesamtwertung des Getränks.",
+      "eingabetyp": "wertung",
+      "reihenfolge": 0,
+      "aktiv": true,
+      "produktart": "bier",
+      "objektart": "getraenk",
+      "version": 1,
+      "auswahlwerte": [],
+      "erstelltAm": "2026-08-28T18:00:00Z",
+      "geaendertAm": "2026-08-28T18:00:00Z"
+    }
+  ],
+  "bewertungen": [
+    {
+      "id": "80000000-0000-4000-8000-000000000001",
+      "zielart": "produkt",
+      "objektId": "20000000-0000-4000-8000-000000000001",
+      "erlebnisId": "40000000-0000-4000-8000-000000000001",
+      "erlebnisPositionId": "50000000-0000-4000-8000-000000000001",
+      "ortsbewertungId": null,
+      "ortId": "30000000-0000-4000-8000-000000000001",
+      "herkunftProfilId": "10000000-0000-4000-8000-000000000001",
+      "bewertetAm": "2026-08-30T18:50:00Z",
+      "kriterium": {
+        "id": "70000000-0000-4000-8000-000000000001",
+        "name": "Gesamturteil",
+        "beschreibung": "Unabhängige Gesamtwertung des Getränks.",
+        "eingabetyp": "wertung",
+        "reihenfolge": 0,
+        "version": 1,
+        "auswahlwerte": []
+      },
+      "wert": "4",
+      "erstelltAm": "2026-08-30T18:50:00Z",
+      "geaendertAm": "2026-08-30T18:50:00Z"
+    },
+    {
+      "id": "80000000-0000-4000-8000-000000000002",
+      "zielart": "produkt",
+      "objektId": "20000000-0000-4000-8000-000000000001",
+      "erlebnisId": "40000000-0000-4000-8000-000000000002",
+      "erlebnisPositionId": "50000000-0000-4000-8000-000000000002",
+      "ortsbewertungId": null,
+      "ortId": "30000000-0000-4000-8000-000000000001",
+      "herkunftProfilId": "10000000-0000-4000-8000-000000000001",
+      "bewertetAm": "2026-09-01T18:50:00Z",
+      "kriterium": {
+        "id": "70000000-0000-4000-8000-000000000001",
+        "name": "Gesamturteil",
+        "beschreibung": "Unabhängige Gesamtwertung des Getränks.",
+        "eingabetyp": "wertung",
+        "reihenfolge": 0,
+        "version": 1,
+        "auswahlwerte": []
+      },
+      "wert": "3.5",
+      "erstelltAm": "2026-09-01T18:50:00Z",
+      "geaendertAm": "2026-09-01T18:50:00Z"
+    }
+  ],
+  "ortsbewertungen": [
+    {
+      "id": "90000000-0000-4000-8000-000000000001",
+      "erlebnisId": "40000000-0000-4000-8000-000000000001",
+      "ortId": "30000000-0000-4000-8000-000000000001",
+      "herkunftProfilId": "10000000-0000-4000-8000-000000000001",
+      "bewertetAm": "2026-08-30T19:20:00Z",
+      "notiz": "Angenehmer Besuch.",
+      "erstelltAm": "2026-08-30T19:20:00Z",
+      "geaendertAm": "2026-08-30T19:20:00Z"
+    }
+  ],
+  "kategorien": [
+    {
+      "id": "a0000000-0000-4000-8000-000000000001",
+      "name": "Bier",
+      "zielart": "objekt",
+      "elternKategorieId": null,
+      "erstelltAm": "2026-08-28T18:00:00Z",
+      "geaendertAm": "2026-08-28T18:00:00Z"
+    }
+  ],
+  "kategorieZuordnungen": [
+    {
+      "kategorieId": "a0000000-0000-4000-8000-000000000001",
+      "zielId": "20000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
