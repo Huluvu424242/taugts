@@ -8,6 +8,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Importkonflikte können einzeln mit Gegenüberstellung der abweichenden Felder entschieden werden; Entscheidungen lassen sich auf weitere Konflikte derselben Art und Sammlung anwenden, während unzulässige Aktionen wie „Beide behalten“ bei Identitätswidersprüchen nicht angeboten werden.
 - Die Importvorschau bietet die Strategien „Bestand ersetzen“, „Import bevorzugen“ und „Lokalen Bestand bevorzugen“ und berechnet deren Auswirkungen ohne lokale Daten zu verändern.
 - „Bestand ersetzen“ warnt vor Datenverlust und bietet unmittelbar einen Sicherungsexport an; historische Beobachtungen mit verschiedenen stabilen IDs bleiben bei ergänzenden Strategien eigenständige Datensätze, während widersprüchliche historische Kontexte derselben ID als Identitätskonflikt sichtbar werden.
 - Importdateien werden vor jeder späteren Übernahme vollständig und ohne Datenbankänderung auf JSON-Syntax, Formatkennung, Schemaversion, Pflichtfelder, Datentypen, fachliche Regeln und referenzielle Konsistenz geprüft; Größen-, Tiefen- und Knotengrenzen schützen zusätzlich vor unangemessenen Eingaben.
