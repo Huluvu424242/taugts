@@ -8,6 +8,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Geprüfte Importe können nach Vorschau und Konfliktentscheidung ausdrücklich atomar ausgeführt werden; Erfolg und Rollback werden lokal datensparsam protokolliert, Wiederholungsimporte bewahren stabile Historien-IDs ohne technische Dubletten und das Ergebnis weist Erlebnisse, Positionen, Preisbeobachtungen sowie Produkt- und Ortsbewertungen getrennt aus.
 - Fachliche Produkt- und Ortsdubletten können kontrolliert zusammengeführt werden: Die lokale UUID bleibt kanonisch, widersprüchliche Stammdaten werden feldweise ausgewählt, alle betroffenen Importreferenzen werden auf die kanonische ID umgebogen und die frühere Import-UUID bleibt als Alias im Merge-Plan erhalten, ohne historische Preise oder Bewertungen zu verändern.
 - Importkonflikte können einzeln mit Gegenüberstellung der abweichenden Felder entschieden werden; Entscheidungen lassen sich auf weitere Konflikte derselben Art und Sammlung anwenden, während unzulässige Aktionen wie „Beide behalten“ bei Identitätswidersprüchen nicht angeboten werden.
 - Die Importvorschau bietet die Strategien „Bestand ersetzen“, „Import bevorzugen“ und „Lokalen Bestand bevorzugen“ und berechnet deren Auswirkungen ohne lokale Daten zu verändern.
@@ -15,6 +16,10 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Importdateien werden vor jeder späteren Übernahme vollständig und ohne Datenbankänderung auf JSON-Syntax, Formatkennung, Schemaversion, Pflichtfelder, Datentypen, fachliche Regeln und referenzielle Konsistenz geprüft; Größen-, Tiefen- und Knotengrenzen schützen zusätzlich vor unangemessenen Eingaben.
 - Eine getestete Vorwärtsmigration übernimmt die unterstützte Vorab-Schemaversion 0 in Version 1; unbekannte neuere Schemaversionen werden ausdrücklich abgewiesen.
 - Ein versioniertes, datenbankunabhängiges JSON-Austauschformat `taugts-export` mit JSON Schema sowie gültigen und ungültigen Fixtures bildet Profile, Objekte, Orte, Erlebnisse, historische Preise und Bewertungen, Kriterien und Kategorien stabil über UUID-Beziehungen ab.
+
+### Fixed
+
+- Importvorschau und Importausführung verwenden nun konsistent `erlebnisPositionen` und berücksichtigen Ortsbewertungen, sodass dieselben historischen Sammlungen geplant und tatsächlich verarbeitet werden.
 
 ## [0.1.0+4] - 2026-09-01
 
