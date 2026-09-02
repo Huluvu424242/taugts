@@ -8,6 +8,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Fachliche Produkt- und Ortsdubletten können kontrolliert zusammengeführt werden: Die lokale UUID bleibt kanonisch, widersprüchliche Stammdaten werden feldweise ausgewählt, alle betroffenen Importreferenzen werden auf die kanonische ID umgebogen und die frühere Import-UUID bleibt als Alias im Merge-Plan erhalten, ohne historische Preise oder Bewertungen zu verändern.
 - Importkonflikte können einzeln mit Gegenüberstellung der abweichenden Felder entschieden werden; Entscheidungen lassen sich auf weitere Konflikte derselben Art und Sammlung anwenden, während unzulässige Aktionen wie „Beide behalten“ bei Identitätswidersprüchen nicht angeboten werden.
 - Die Importvorschau bietet die Strategien „Bestand ersetzen“, „Import bevorzugen“ und „Lokalen Bestand bevorzugen“ und berechnet deren Auswirkungen ohne lokale Daten zu verändern.
 - „Bestand ersetzen“ warnt vor Datenverlust und bietet unmittelbar einen Sicherungsexport an; historische Beobachtungen mit verschiedenen stabilen IDs bleiben bei ergänzenden Strategien eigenständige Datensätze, während widersprüchliche historische Kontexte derselben ID als Identitätskonflikt sichtbar werden.
