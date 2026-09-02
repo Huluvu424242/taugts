@@ -1,6 +1,6 @@
 # Versioniertes JSON-Austauschformat
 
-Taugt’s? verwendet für Sicherung und Datenaustausch ein eigenes, von der lokalen SQLite-Datenbank unabhängiges JSON-Format. Diese Dokumentation beschreibt **Schemaversion 1**. Die eigentliche Export- und Importfunktion wird in nachfolgenden Stories umgesetzt.
+Taugt’s? verwendet für Sicherung und Datenaustausch ein eigenes, von der lokalen SQLite-Datenbank unabhängiges JSON-Format. Diese Dokumentation beschreibt **Schemaversion 1**. Der Export ist implementiert; Importdateien werden vor jeder späteren Übernahme durch die sichere Importvalidierung vollständig geprüft.
 
 ## Kennung und Versionierung
 
@@ -33,8 +33,13 @@ Beispieldaten liegen unter:
 
 - `schema/fixtures/taugts-export-v1-gueltig.json`
 - `schema/fixtures/taugts-export-v1-ungueltig.json`
+- `schema/fixtures/taugts-export-v0-migrierbar.json`
+- `schema/fixtures/taugts-export-v1-verwaist.json`
+- `schema/fixtures/taugts-export-v1-fachlich-ungueltig.json`
 
 Das gültige Fixture enthält dasselbe Produkt in zwei unterschiedlichen Restaurantbesuchen mit eigenständigen Erlebnispositionen, Preisbeobachtungen und Bewertungen. Damit wird ausdrücklich gezeigt, dass spätere Beobachtungen ältere Werte nicht überschreiben.
+
+Die zusätzlichen Import-Fixtures prüfen eine unterstützte Vorwärtsmigration, verwaiste Referenzen und fachlich ungültige Status-/Zeitkombinationen. Details stehen unter [Sichere Importvalidierung](importvalidierung.md).
 
 ## Oberste Struktur
 
@@ -69,7 +74,7 @@ Beispiele:
 - eine Ortsbewertung verweist auf genau das Erlebnis und den bewerteten Ort,
 - Kategoriezuordnungen enthalten Kategorie- und Ziel-ID.
 
-JSON Schema kann die Existenz einer referenzierten UUID in einer anderen Sammlung nicht vollständig ausdrücken. Die referenzielle Prüfung ist daher zusätzlich Aufgabe der Importvalidierung aus Story #17.
+JSON Schema kann die Existenz einer referenzierten UUID in einer anderen Sammlung nicht vollständig ausdrücken. Deshalb prüft `ImportValidierungsService` die referenzielle Konsistenz zusätzlich und weist verwaiste oder widersprüchliche Beobachtungen ab.
 
 ## Historische Erlebnisse
 
@@ -87,6 +92,8 @@ Folgende Zeitinformationen bleiben getrennt:
 - `tatsaechlichesEnde`: optionaler UTC-Zeitstempel.
 
 Ein später bearbeitetes Erlebnis behält seine ID. Ein tatsächlich neues Erlebnis erhält eine neue ID.
+
+Die Importvalidierung erzwingt die gleichen fachlichen Zeitregeln wie das lokale Modell: Eine geplante Uhrzeit benötigt einen Tag, ein tatsächliches Ende einen Beginn, das Ende darf nicht vor dem Beginn liegen, aktive Erlebnisse benötigen einen Beginn und beendete Erlebnisse benötigen Beginn und Ende.
 
 ## Erlebnispositionen und Preise
 
@@ -107,6 +114,8 @@ Geldwerte werden **nicht als Gleitkommazahl** exportiert. `betragMinor: 450` mit
 
 Eine Korrektur derselben Preisbeobachtung behält deren ID. Ein Preis bei einem anderen Erlebnis oder eine fachlich neue Beobachtung erhält eine neue ID.
 
+Beim Import werden nicht nur die einzelnen IDs geprüft. Erlebnisposition, Erlebnis und Produkt einer Preisbeobachtung müssen auch zueinander passen; verwaiste oder widersprüchliche Preisbeobachtungen werden abgewiesen.
+
 ## Dezimalwerte
 
 Nicht-monetäre Dezimalwerte wie Alkoholgehalt, Koordinaten und Bewertungswerte werden als kanonische Dezimalstrings gespeichert, zum Beispiel:
@@ -126,7 +135,7 @@ Verbindlich sind:
 - keine Exponentialschreibweise,
 - keine lokalisierte Darstellung.
 
-Damit ist die textuelle Zahl unabhängig von Sprache und Gleitkommaimplementierung eindeutig reproduzierbar.
+Damit ist die textuelle Zahl unabhängig von Sprache und Gleitkommaimplementierung eindeutig reproduzierbar. Die Importvalidierung lehnt abweichende Darstellungen ab.
 
 ## Bewertungen und Kriterienhistorie
 
@@ -147,7 +156,9 @@ Jeder Bewertungswert enthält neben der Kriterien-ID einen **historischen Kriter
 
 Damit bleibt eine frühere Bewertung auch dann interpretierbar, wenn das aktive Kriterium später umbenannt, umsortiert, deaktiviert oder mit einer anderen Skala versehen wird. Die Sammlung `bewertungskriterien` beschreibt zusätzlich die aktuell im Export vorhandenen Kriterienkonfigurationen.
 
-`bewertetAm` ist der fachliche Bewertungszeitpunkt. Für bestehende Produktbewertungen, bei denen die lokale Persistenz bisher keinen getrennten Bewertungszeitpunkt besitzt, entspricht er beim Export dem ursprünglichen Erstellungszeitpunkt der Bewertung. Die spätere Import-/Exportimplementierung muss diese Abbildung konsistent beibehalten.
+`bewertetAm` ist der fachliche Bewertungszeitpunkt. Für bestehende Produktbewertungen, bei denen die lokale Persistenz bisher keinen getrennten Bewertungszeitpunkt besitzt, entspricht er beim Export dem ursprünglichen Erstellungszeitpunkt der Bewertung. Export und Validierung behalten diese Abbildung konsistent bei.
+
+Die Importvalidierung verlangt für jeden historischen Wert einen vollständigen Snapshot und prüft seine Kriterien-ID sowie die Versionsbeziehung. Dadurch bleibt jede akzeptierte historische Bewertung eindeutig interpretierbar.
 
 ## Herkunft
 
@@ -159,7 +170,13 @@ Ein optionaler bekannter Wert darf als `null` übertragen werden, wenn das Schem
 
 JSON Schema erlaubt in Schemaversion 1 zusätzliche, nicht bekannte Felder. Das ist eine bewusste Vorwärtskompatibilitätsregel: Ein Leser von Version 1 darf unbekannte **optionale** Felder ignorieren, muss aber zuerst Formatkennung und Schemaversion prüfen. Eine Datei mit einer unbekannten neueren `schemaVersion` darf nicht still wie Version 1 behandelt werden.
 
-Unbekannte Felder dürfen niemals bekannte IDs, Beziehungen oder Bedeutungen überschreiben. Die konkrete sichere Behandlung beim Import wird in Story #17 implementiert und getestet.
+`ImportValidierungsService` setzt diese Regel um: unbekannte zusätzliche Felder innerhalb einer unterstützten Version werden ignoriert; Pflichtfelder, bekannte IDs und Beziehungen werden weiterhin streng geprüft. Eine unbekannte neuere Schemaversion wird abgewiesen.
+
+## Unterstützte Vorwärtsmigration
+
+Die aktuelle Version 1 unterstützt zusätzlich die vor der ersten veröffentlichten Austauschformatversion verwendete Vorabversion 0. Diese entspricht der Version-1-Struktur, kann aber `kategorien` und `kategorieZuordnungen` noch weglassen. Die Migration ergänzt diese Sammlungen leer und setzt die Schemaversion auf 1.
+
+Migrationen laufen ausschließlich auf einer Kopie des dekodierten Dokuments im Arbeitsspeicher. Die Eingabedatei und lokale SQLite-Daten werden dabei nicht verändert. Jede künftige Versionsstufe benötigt eine eigene getestete Vorwärtsmigration.
 
 ## Korrektur und neue Historie
 
@@ -169,14 +186,17 @@ Die Identität eines historischen Datensatzes wird durch seine stabile ID bestim
 - eine andere ID bedeutet eine eigenständige Beobachtung,
 - gleiches Produkt, gleicher Ort oder gleicher Preis allein bedeutet **keine** Identität.
 
-Dadurch können dasselbe Produkt und derselbe Ort über die Zeit beliebig viele eigenständige Preise und Bewertungen besitzen.
+Dadurch können dasselbe Produkt und derselbe Ort über die Zeit beliebig viele eigenständige Preise und Bewertungen besitzen. Die Importvalidierung weist nur tatsächlich mehrfach verwendete IDs innerhalb derselben Sammlung als Duplikat ab.
+
+## Sicherheitsgrenzen
+
+Vor der fachlichen Analyse begrenzt die Importvalidierung die Eingabe standardmäßig auf 10 MiB, 40 Verschachtelungsebenen und 250.000 JSON-Knoten. Jede fachliche Sammlung darf höchstens 50.000 Einträge enthalten. Details und Begründung stehen unter [Sichere Importvalidierung](importvalidierung.md).
 
 ## Abgrenzung zu den Folgestories
 
-Diese Story definiert das Austauschformat. Sie implementiert noch keinen Dateidialog und verändert noch keine lokalen Daten.
+Das Format, der Export und die sichere Vorvalidierung sind damit implementiert. Die Validierung verändert absichtlich noch keine lokalen Daten.
 
 Die nachfolgenden Stories übernehmen darauf aufbauend:
 
-- #16: Exportdatei erzeugen, speichern und teilen,
-- #17: Datei, Schema, Beziehungen und Migrationen sicher validieren,
-- #18 bis #22: Vorschau, Konfliktbehandlung und atomare Importausführung.
+- #18: Importvorschau und Konfliktanalyse,
+- #19 bis #22: Konfliktbehandlung, atomare Importausführung und weitere Datenaustauschabläufe.
