@@ -5,6 +5,9 @@ import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/presentation/kriterien_screen.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/datenaustausch/presentation/datenaustausch_screen.dart';
+import 'package:taugts/features/datenaustausch/services/export_service.dart';
+import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
 import 'package:taugts/features/erlebnisse/presentation/entwuerfe_screen.dart';
 import 'package:taugts/features/erlebnisse/presentation/erlebnis_screen.dart';
 import 'package:taugts/features/orte/presentation/orte_screen.dart';
@@ -18,6 +21,8 @@ class HomeScreen extends StatefulWidget {
     this.profil,
     this.profilRepository,
     this.bewertungsRepository,
+    this.exportService,
+    this.exportZielService,
     this.idGenerator,
     super.key,
   });
@@ -25,6 +30,8 @@ class HomeScreen extends StatefulWidget {
   final Profil? profil;
   final ProfilRepository? profilRepository;
   final BewertungsRepository? bewertungsRepository;
+  final ExportService? exportService;
+  final ExportZielService? exportZielService;
   final IdGenerator? idGenerator;
 
   @override
@@ -52,10 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (profil == null || repository == null) return;
     final geaendert = await Navigator.of(context).push<Profil>(
       MaterialPageRoute(
-        builder: (_) => ProfilScreen(
-          profil: profil,
-          repository: repository,
-        ),
+        builder: (_) => ProfilScreen(profil: profil, repository: repository),
       ),
     );
     if (geaendert != null && mounted) {
@@ -105,6 +109,20 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) => KriterienScreen(
           repository: repository,
           idGenerator: idGenerator,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _datenaustauschOeffnen() async {
+    final exportService = widget.exportService;
+    final exportZielService = widget.exportZielService;
+    if (exportService == null || exportZielService == null) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => DatenaustauschScreen(
+          exportService: exportService,
+          exportZielService: exportZielService,
         ),
       ),
     );
@@ -187,16 +205,10 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Flexible(
               fit: FlexFit.loose,
-              child: Text(
-                'Taugt’s?',
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text('Taugt’s?', overflow: TextOverflow.ellipsis),
             ),
             SizedBox(width: 4),
-            AppLogo(
-              key: Key('hauptmenue-logo'),
-              size: 32,
-            ),
+            AppLogo(key: Key('hauptmenue-logo'), size: 32),
           ],
         ),
         actions: [
@@ -255,9 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         children: [
                           const Expanded(
-                            child: Text(
-                              'Aktive Erlebnisse konnten nicht geladen werden.',
-                            ),
+                            child: Text('Aktive Erlebnisse konnten nicht geladen werden.'),
                           ),
                           TextButton(
                             onPressed: () => setState(_erlebnisseNeuLaden),
@@ -324,10 +334,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 24),
             Semantics(
               header: true,
-              child: Text(
-                'Bereiche',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              child: Text('Bereiche', style: Theme.of(context).textTheme.titleMedium),
             ),
             const SizedBox(height: 12),
             LayoutBuilder(
@@ -344,8 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.inventory_2_outlined,
                       label: 'Dinge',
-                      onPressed: widget.bewertungsRepository != null &&
-                              widget.idGenerator != null
+                      onPressed: widget.bewertungsRepository != null && widget.idGenerator != null
                           ? _produkteOeffnen
                           : null,
                     ),
@@ -353,8 +359,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.place_outlined,
                       label: 'Orte',
-                      onPressed: widget.bewertungsRepository != null &&
-                              widget.idGenerator != null
+                      onPressed: widget.bewertungsRepository != null && widget.idGenerator != null
                           ? _orteOeffnen
                           : null,
                     ),
@@ -380,17 +385,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.import_export,
                       label: 'Import/Export',
-                      onPressed: () => _infoOeffnen(
-                        'Import/Export',
-                        'Der Datenaustausch wird in einem späteren MVP umgesetzt. Lokale Daten werden bis dahin nicht automatisch übertragen.',
-                      ),
+                      onPressed: widget.exportService != null && widget.exportZielService != null
+                          ? _datenaustauschOeffnen
+                          : null,
                     ),
                     _navigationsKachel(
                       width: breite,
                       icon: Icons.settings_outlined,
                       label: 'Einstellungen',
-                      onPressed: widget.bewertungsRepository != null &&
-                              widget.idGenerator != null
+                      onPressed: widget.bewertungsRepository != null && widget.idGenerator != null
                           ? _kriterienOeffnen
                           : () => _infoOeffnen(
                                 'Einstellungen',
