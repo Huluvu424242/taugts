@@ -32,7 +32,7 @@ Bei einer fachlichen Dublette von Produkten oder Orten kann **Zusammenführen** 
 
 Beim Produkt-Merge werden Erlebnispositionen, Preisbeobachtungen und Produktbewertungen auf die kanonische Produkt-ID bezogen. Beim Orts-Merge werden Erlebnisse, ortsbezogene Preise sowie Produkt- und Ortsbewertungen auf die kanonische Orts-ID bezogen. Historische IDs, Zeitpunkte, Preise, Bewertungswerte und Kriterienkontexte bleiben dabei eigenständige historische Beobachtungen.
 
-Die Konfliktentscheidung und das Zusammenführen bleiben bis zur ausdrücklichen Importbestätigung Teil der Vorschau. Erst **Import verbindlich ausführen** schreibt die geprüften Daten. Während dieser Ausführung sind weitere Import- und Exportaktionen gesperrt.
+Die Konfliktentscheidung und das Zusammenführen bleiben bis zur ausdrücklichen Importbestätigung Teil der Vorschau. Erst **Import verbindlich ausführen** schreibt die geprüften Daten. Während dieser Ausführung sind weitere Import- und Exportaktionen in der Oberfläche gesperrt. Zusätzlich verhindert der Importdienst selbst eine zweite gleichzeitige beziehungsweise reentrante Ausführung für dieselbe lokale Datenbank und gibt diese Sperre nach Erfolg oder Fehler zuverlässig wieder frei.
 
 Die Speicherung erfolgt atomar in einer Datenbanktransaktion. Scheitert ein Datensatz oder das Speichern einer neuen Aliasreferenz, werden alle fachlichen Änderungen dieses Importversuchs einschließlich der neuen Aliaszuordnung zurückgerollt. Ein wiederholter Import derselben stabilen oder bereits als Alias bekannten IDs erzeugt keine zusätzlichen technischen Datensätze. Erlebnisse, Positionen, Preisbeobachtungen, Produktbewertungen und Ortsbewertungen werden im Importergebnis getrennt ausgewiesen.
 
