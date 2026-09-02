@@ -69,6 +69,7 @@ void main() {
       ],
       'bewertungen': [
         {'id': 'b-1', 'objektId': 'prod-1', 'erlebnisId': 'e-1', 'ortId': 'import-o', 'bewertetAm': '2026-08-10T18:30:00Z', 'wert': '3.5'},
+        {'id': 'b-ort', 'objektId': 'import-o', 'erlebnisId': 'e-1', 'ortId': 'import-o', 'ortsbewertungId': 'ob-1', 'bewertetAm': '2026-08-10T19:00:00Z', 'wert': '4'},
       ],
       'ortsbewertungen': [
         {'id': 'ob-1', 'erlebnisId': 'e-1', 'ortId': 'import-o', 'bewertetAm': '2026-08-10T19:00:00Z'},
@@ -86,10 +87,14 @@ void main() {
 
     expect(((ergebnis.dokument['erlebnisse'] as List).single as Map)['ortId'], 'lokal-o');
     expect(((ergebnis.dokument['preisbeobachtungen'] as List).single as Map)['ortId'], 'lokal-o');
-    expect(((ergebnis.dokument['bewertungen'] as List).single as Map)['ortId'], 'lokal-o');
+    final bewertungen = ergebnis.dokument['bewertungen'] as List;
+    expect((bewertungen[0] as Map)['ortId'], 'lokal-o');
+    expect((bewertungen[0] as Map)['objektId'], 'prod-1');
+    expect((bewertungen[1] as Map)['ortId'], 'lokal-o');
+    expect((bewertungen[1] as Map)['objektId'], 'lokal-o');
     expect(((ergebnis.dokument['ortsbewertungen'] as List).single as Map)['ortId'], 'lokal-o');
     expect(((ergebnis.dokument['preisbeobachtungen'] as List).single as Map)['beobachtetAm'], '2026-08-10T18:05:00Z');
-    expect(((ergebnis.dokument['bewertungen'] as List).single as Map)['bewertetAm'], '2026-08-10T18:30:00Z');
+    expect((bewertungen[1] as Map)['bewertetAm'], '2026-08-10T19:00:00Z');
   });
 
   test('Aliasreferenzen erkennen spätere Import-IDs auch über Alias-Ketten wieder', () {
