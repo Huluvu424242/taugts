@@ -228,7 +228,8 @@ void main() {
             .single['n'],
     };
     final import = vollstaendigesDokument();
-    (import['orte']! as List).single['name'] = null;
+    final importOrte = (import['orte']! as List).cast<Map<String, Object?>>();
+    importOrte.single['name'] = null;
 
     expect(
       () => service.ausfuehren(
