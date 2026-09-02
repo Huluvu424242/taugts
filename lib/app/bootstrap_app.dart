@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:taugts/app/taugts_app.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/support/app_support.dart';
@@ -7,6 +8,8 @@ import 'package:taugts/core/theme/app_theme.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/bewertungen/services/datenbank_factory.dart';
 import 'package:taugts/features/bewertungen/services/sqlite_bewertungs_repository.dart';
+import 'package:taugts/features/datenaustausch/services/export_service.dart';
+import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 import 'package:taugts/features/profil/services/profil_repository.dart';
 import 'package:taugts/features/profil/services/sqlite_profil_repository.dart';
@@ -23,6 +26,7 @@ class _BootstrapAppState extends State<BootstrapApp> {
 
   Future<_StartDaten> _initialisieren() async {
     final datenbank = await oeffneLokaleDatenbank();
+    final paket = await PackageInfo.fromPlatform();
     const idGenerator = UuidGenerator();
     final profilRepository = SqliteProfilRepository(
       datenbank,
@@ -32,6 +36,11 @@ class _BootstrapAppState extends State<BootstrapApp> {
       profil: await profilRepository.ladeOderErstelleProfil(),
       profilRepository: profilRepository,
       bewertungsRepository: SqliteBewertungsRepository(datenbank),
+      exportService: ExportService(
+        datenbank,
+        appVersion: '${paket.version}+${paket.buildNumber}',
+      ),
+      exportZielService: SystemExportZielService(),
       idGenerator: idGenerator,
     );
   }
@@ -50,6 +59,8 @@ class _BootstrapAppState extends State<BootstrapApp> {
               profil: daten.profil,
               profilRepository: daten.profilRepository,
               bewertungsRepository: daten.bewertungsRepository,
+              exportService: daten.exportService,
+              exportZielService: daten.exportZielService,
               idGenerator: daten.idGenerator,
             );
           }
@@ -111,11 +122,15 @@ class _StartDaten {
     required this.profil,
     required this.profilRepository,
     required this.bewertungsRepository,
+    required this.exportService,
+    required this.exportZielService,
     required this.idGenerator,
   });
 
   final Profil profil;
   final ProfilRepository profilRepository;
   final BewertungsRepository bewertungsRepository;
+  final ExportService exportService;
+  final ExportZielService exportZielService;
   final IdGenerator idGenerator;
 }
