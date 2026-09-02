@@ -130,7 +130,9 @@ class _OrtFormularState extends State<OrtFormular> {
     if (!(_formularKey.currentState?.validate() ?? false)) {
       setState(() => _fehler = _validierungsfehler());
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bitte Eingaben prüfen.')),
+        const SnackBar(
+          content: Text('Bitte Eingaben prüfen.'),
+        ),
       );
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted) return;
@@ -195,7 +197,9 @@ class _OrtFormularState extends State<OrtFormular> {
       if (!mounted) return;
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Der Ort konnte nicht gespeichert werden.')),
+        const SnackBar(
+          content: Text('Der Ort konnte nicht gespeichert werden.'),
+        ),
       );
     }
   }
@@ -229,7 +233,8 @@ class _OrtFormularState extends State<OrtFormular> {
       _standortMeldung = null;
     });
     try {
-      final standort = await widget.standortService.aktuellenStandortErmitteln();
+      final standort =
+          await widget.standortService.aktuellenStandortErmitteln();
       if (!mounted) return;
       final genauigkeit = standort.genauigkeitMeter == null
           ? 'nicht verfügbar'
@@ -261,7 +266,8 @@ class _OrtFormularState extends State<OrtFormular> {
         setState(() {
           _breitengrad.text = standort.breitengrad.toStringAsFixed(6);
           _laengengrad.text = standort.laengengrad.toStringAsFixed(6);
-          _standortMeldung = 'Standort übernommen. Koordinaten sind bearbeitbar.';
+          _standortMeldung =
+              'Standort übernommen. Koordinaten sind bearbeitbar.';
         });
       }
     } catch (fehler) {
@@ -279,8 +285,12 @@ class _OrtFormularState extends State<OrtFormular> {
   Future<void> _adresseVorschlagen() async {
     final breite = _kommazahl(_breitengrad.text);
     final laenge = _kommazahl(_laengengrad.text);
-    if (breite == null || laenge == null ||
-        breite < -90 || breite > 90 || laenge < -180 || laenge > 180) {
+    if (breite == null ||
+        laenge == null ||
+        breite < -90 ||
+        breite > 90 ||
+        laenge < -180 ||
+        laenge > 180) {
       setState(() => _standortMeldung =
           'Für einen Adressvorschlag sind gültige Koordinaten erforderlich.');
       return;
@@ -354,7 +364,10 @@ class _OrtFormularState extends State<OrtFormular> {
     final laenge = _kommazahl(_laengengrad.text);
     final ausgangsposition =
         breite == null || laenge == null ? null : LatLng(breite, laenge);
-    final position = await (widget.karteOeffnen?.call(context, ausgangsposition) ??
+    final position = await (widget.karteOeffnen?.call(
+          context,
+          ausgangsposition,
+        ) ??
         Navigator.of(context).push<LatLng>(
           MaterialPageRoute(
             builder: (_) => OrtKarteScreen(ausgangsposition: ausgangsposition),
@@ -398,10 +411,15 @@ class _OrtFormularState extends State<OrtFormular> {
                   initialValue: _typ,
                   decoration: const InputDecoration(labelText: 'Ortstyp'),
                   items: const [
-                    DropdownMenuItem(value: Ortstyp.gastronomie, child: Text('Gastronomie')),
-                    DropdownMenuItem(value: Ortstyp.geschaeft, child: Text('Geschäft')),
-                    DropdownMenuItem(value: Ortstyp.privat, child: Text('Privater Ort')),
-                    DropdownMenuItem(value: Ortstyp.sonstiger, child: Text('Sonstiger Ort')),
+                    DropdownMenuItem(
+                        value: Ortstyp.gastronomie,
+                        child: Text('Gastronomie')),
+                    DropdownMenuItem(
+                        value: Ortstyp.geschaeft, child: Text('Geschäft')),
+                    DropdownMenuItem(
+                        value: Ortstyp.privat, child: Text('Privater Ort')),
+                    DropdownMenuItem(
+                        value: Ortstyp.sonstiger, child: Text('Sonstiger Ort')),
                   ],
                   onChanged: (wert) => setState(() => _typ = wert!),
                 ),
@@ -441,7 +459,10 @@ class _OrtFormularState extends State<OrtFormular> {
                   maxLength: 16,
                   focusNode: _breitengradFokus,
                   validator: _breitengradPruefen,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: true,
+                  ),
                 ),
                 _textfeld(
                   _laengengrad,
@@ -449,7 +470,10 @@ class _OrtFormularState extends State<OrtFormular> {
                   maxLength: 16,
                   focusNode: _laengengradFokus,
                   validator: _laengengradPruefen,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: true,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
@@ -465,8 +489,17 @@ class _OrtFormularState extends State<OrtFormular> {
                     'Online-Anreicherung über OpenStreetMap/Nominatim. Nur nach Betätigung werden die eingegebenen Koordinaten übertragen.',
                   ),
                 ),
-                _textfeld(_osmReferenz, 'OSM-Referenz (optional)', maxLength: 160),
-                _textfeld(_notiz, 'Notiz (optional)', maxLength: 1000, maxLines: 4),
+                _textfeld(
+                  _osmReferenz,
+                  'OSM-Referenz (optional)',
+                  maxLength: 160,
+                ),
+                _textfeld(
+                  _notiz,
+                  'Notiz (optional)',
+                  maxLength: 1000,
+                  maxLines: 4,
+                ),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: _speichert ? null : _speichern,
