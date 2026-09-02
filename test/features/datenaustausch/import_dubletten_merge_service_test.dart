@@ -92,6 +92,27 @@ void main() {
     expect(((ergebnis.dokument['bewertungen'] as List).single as Map)['bewertetAm'], '2026-08-10T18:30:00Z');
   });
 
+  test('Aliasreferenzen erkennen spätere Import-IDs auch über Alias-Ketten wieder', () {
+    final id = service.kanonischeIdFuer(
+      sammlung: 'objekte',
+      id: 'import-alt',
+      aliases: const [
+        ImportAliasReferenz(
+          sammlung: 'objekte',
+          aliasId: 'import-alt',
+          kanonischeId: 'import-neuer',
+        ),
+        ImportAliasReferenz(
+          sammlung: 'objekte',
+          aliasId: 'import-neuer',
+          kanonischeId: 'lokal',
+        ),
+      ],
+    );
+
+    expect(id, 'lokal');
+  });
+
   test('Eingabedokument wird bei der Merge-Planung nicht verändert', () {
     final lokal = <String, Object?>{'objekte': [{'id': 'lokal', 'name': 'Lokal'}]};
     final import = <String, Object?>{
