@@ -148,21 +148,26 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         });
         return;
       }
+      final importDokument =
+          widget.importAusfuehrungService.normalisiereBekannteAliase(
+        widget.exportService.datenbank,
+        validierung.dokument!,
+      );
       final lokal = Map<String, Object?>.from(
         jsonDecode(widget.exportService.erzeugeJson()) as Map,
       );
       final analyse = widget.importKonfliktanalyseService.analysiere(
-        importDokument: validierung.dokument!,
+        importDokument: importDokument,
         lokalesDokument: lokal,
       );
       final konflikte = widget.importKonfliktentscheidungService.ermittle(
-        importDokument: validierung.dokument!,
+        importDokument: importDokument,
         lokalesDokument: lokal,
         analyse: analyse,
       );
       setState(() {
         _analyse = analyse;
-        _importDokument = validierung.dokument!;
+        _importDokument = importDokument;
         _lokalesDokument = lokal;
         _strategiePlan = _planeStrategie(analyse);
         _konflikte = konflikte;
@@ -288,6 +293,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
     try {
       var dokument = _tiefeKopie(_importDokument!);
       final mergesNachSammlung = <String, int>{};
+      final neueAliase = <ImportAliasReferenz>[];
       for (final konflikt in _konflikte) {
         if (_entscheidungsStand.fuer(konflikt) !=
                 ImportKonfliktAktion.zusammenfuehren ||
@@ -303,6 +309,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
           feldauswahl: _mergeFeldauswahl[konflikt.schluessel] ?? const {},
         );
         dokument = merge.dokument;
+        neueAliase.add(merge.alias);
         mergesNachSammlung.update(
           konflikt.sammlung,
           (wert) => wert + 1,
@@ -315,6 +322,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         importDokument: dokument,
         strategie: _strategie,
         entscheidungen: _entscheidungsStand,
+        aliase: neueAliase,
         zusammengefuehrtNachSammlung: mergesNachSammlung,
       );
       final protokoll = widget.importAusfuehrungService.ladeProtokoll(
