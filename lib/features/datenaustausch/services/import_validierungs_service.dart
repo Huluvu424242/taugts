@@ -930,7 +930,8 @@ class ImportValidierungsService {
     }
 
     if (wert['zielart'] == 'produkt') {
-      _referenz(wert['objektId'], produktIds, '$pfad.objektId', 'Produkt', fehler);
+      _referenz(
+          wert['objektId'], produktIds, '$pfad.objektId', 'Produkt', fehler);
       _referenz(
         wert['erlebnisPositionId'],
         positionsIds,
@@ -1157,7 +1158,8 @@ class ImportValidierungsService {
     String pfad,
     List<ImportValidierungsFehler> fehler,
   ) {
-    if (wert[feld] is! String || !_dezimalRegExp.hasMatch(wert[feld] as String)) {
+    if (wert[feld] is! String ||
+        !_dezimalRegExp.hasMatch(wert[feld] as String)) {
       _fehler(
         fehler,
         'dezimalzahl_ungueltig',
