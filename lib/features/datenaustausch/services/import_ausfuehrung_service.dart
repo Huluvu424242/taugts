@@ -1,5 +1,6 @@
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_protokoll_repository.dart';
 import 'package:taugts/features/datenaustausch/services/import_strategie_service.dart';
 
 class ImportErgebnisZaehler {
@@ -23,7 +24,8 @@ class ImportErgebnisZaehler {
     int uebersprungen = 0,
     int zusammengefuehrt = 0,
     int fehlerhaft = 0,
-  }) => ImportErgebnisZaehler(
+  }) =>
+      ImportErgebnisZaehler(
         hinzugefuegt: this.hinzugefuegt + hinzugefuegt,
         aktualisiert: this.aktualisiert + aktualisiert,
         uebersprungen: this.uebersprungen + uebersprungen,
@@ -34,6 +36,7 @@ class ImportErgebnisZaehler {
 
 class ImportAusfuehrungsErgebnis {
   const ImportAusfuehrungsErgebnis(this.nachSammlung);
+
   final Map<String, ImportErgebnisZaehler> nachSammlung;
 
   ImportErgebnisZaehler get gesamt => nachSammlung.values.fold(
@@ -49,11 +52,22 @@ class ImportAusfuehrungsErgebnis {
 }
 
 class ImportAusfuehrungService {
-  const ImportAusfuehrungService();
+  const ImportAusfuehrungService({
+    this.protokollRepository = const ImportProtokollRepository(),
+  });
+
+  final ImportProtokollRepository protokollRepository;
 
   static const _reihenfolge = <String>[
-    'profile', 'objekte', 'orte', 'bewertungskriterien', 'erlebnisse',
-    'erlebnisPositionen', 'preisbeobachtungen', 'ortsbewertungen', 'bewertungen',
+    'profile',
+    'objekte',
+    'orte',
+    'bewertungskriterien',
+    'erlebnisse',
+    'erlebnisPositionen',
+    'preisbeobachtungen',
+    'ortsbewertungen',
+    'bewertungen',
   ];
 
   ImportAusfuehrungsErgebnis ausfuehren({
@@ -63,50 +77,132 @@ class ImportAusfuehrungService {
     ImportKonfliktEntscheidungsStand entscheidungen =
         const ImportKonfliktEntscheidungsStand(),
     Map<String, String> mergeAliase = const {},
+    DateTime? ausgefuehrtAm,
   }) {
+    final zeitpunkt = (ausgefuehrtAm ?? DateTime.now()).toUtc();
     final ergebnis = <String, ImportErgebnisZaehler>{};
-    datenbank.transaktion(() {
-      if (strategie == ImportStrategie.bestandErsetzen) {
-        for (final tabelle in const [
-          'bewertungen', 'ortsbewertungen', 'preisbeobachtungen',
-          'erlebnispositionen', 'erlebnisse', 'produkte', 'objekte', 'orte',
-        ]) {
-          datenbank.verbindung.execute('DELETE FROM $tabelle');
+
+    try {
+      datenbank.transaktion(() {
+        if (strategie == ImportStrategie.bestandErsetzen) {
+          _ersetzeBestand(datenbank);
         }
-      }
-      for (final sammlung in _reihenfolge) {
-        var zaehler = const ImportErgebnisZaehler();
-        for (final roh in (importDokument[sammlung] as List? ?? const [])) {
-          final wert = Map<String, Object?>.from(roh as Map);
-          final importId = wert['id'] as String?;
-          if (importId == null) continue;
-          final zielId = mergeAliase[importId] ?? importId;
-          final aktion = _entscheidung(sammlung, importId, entscheidungen);
-          if (aktion == ImportKonfliktAktion.ueberspringen ||
-              aktion == ImportKonfliktAktion.lokaleVersion) {
-            zaehler = zaehler.plus(uebersprungen: 1);
-            continue;
+        for (final sammlung in _reihenfolge) {
+          var zaehler = const ImportErgebnisZaehler();
+          for (final roh in (importDokument[sammlung] as List? ?? const [])) {
+            if (roh is! Map) {
+              zaehler = zaehler.plus(fehlerhaft: 1);
+              throw const FormatException('Importeintrag ist kein Objekt.');
+            }
+            final wert = Map<String, Object?>.from(roh);
+            final importId = wert['id'] as String?;
+            if (importId == null || importId.isEmpty) {
+              zaehler = zaehler.plus(fehlerhaft: 1);
+              throw const FormatException('Importeintrag besitzt keine stabile ID.');
+            }
+            final zielId = mergeAliase[importId] ?? importId;
+            final aktion = _entscheidung(sammlung, importId, entscheidungen);
+            if (aktion == ImportKonfliktAktion.ueberspringen ||
+                aktion == ImportKonfliktAktion.lokaleVersion) {
+              zaehler = zaehler.plus(uebersprungen: 1);
+              continue;
+            }
+            if (aktion == ImportKonfliktAktion.zusammenfuehren &&
+                mergeAliase.containsKey(importId)) {
+              zaehler = zaehler.plus(zusammengefuehrt: 1);
+              continue;
+            }
+            final existiert = _existiert(datenbank, sammlung, zielId);
+            if (existiert &&
+                strategie == ImportStrategie.lokalBevorzugen &&
+                aktion != ImportKonfliktAktion.importVersion) {
+              zaehler = zaehler.plus(uebersprungen: 1);
+              continue;
+            }
+            _schreibe(
+              datenbank,
+              sammlung,
+              {...wert, 'id': zielId},
+              existiert,
+            );
+            zaehler = existiert
+                ? zaehler.plus(aktualisiert: 1)
+                : zaehler.plus(hinzugefuegt: 1);
           }
-          if (aktion == ImportKonfliktAktion.zusammenfuehren &&
-              mergeAliase.containsKey(importId)) {
-            zaehler = zaehler.plus(zusammengefuehrt: 1);
-            continue;
-          }
-          final existiert = _existiert(datenbank, sammlung, zielId);
-          if (existiert && strategie == ImportStrategie.lokalBevorzugen &&
-              aktion != ImportKonfliktAktion.importVersion) {
-            zaehler = zaehler.plus(uebersprungen: 1);
-            continue;
-          }
-          _schreibe(datenbank, sammlung, {...wert, 'id': zielId}, existiert);
-          zaehler = existiert
-              ? zaehler.plus(aktualisiert: 1)
-              : zaehler.plus(hinzugefuegt: 1);
+          ergebnis[sammlung] = zaehler;
         }
-        ergebnis[sammlung] = zaehler;
-      }
-    });
-    return ImportAusfuehrungsErgebnis(Map.unmodifiable(ergebnis));
+      });
+    } catch (_) {
+      _protokolliereSicher(
+        datenbank: datenbank,
+        zeitpunkt: zeitpunkt,
+        erfolgreich: false,
+        strategie: strategie,
+        ergebnis: ergebnis,
+        zusaetzlichFehlerhaft: 1,
+      );
+      rethrow;
+    }
+
+    final result = ImportAusfuehrungsErgebnis(Map.unmodifiable(ergebnis));
+    _protokolliereSicher(
+      datenbank: datenbank,
+      zeitpunkt: zeitpunkt,
+      erfolgreich: true,
+      strategie: strategie,
+      ergebnis: ergebnis,
+    );
+    return result;
+  }
+
+  List<ImportProtokollEintrag> ladeProtokoll(
+    LokaleDatenbank datenbank, {
+    int limit = 20,
+  }) =>
+      protokollRepository.lade(datenbank, limit: limit);
+
+  void _ersetzeBestand(LokaleDatenbank datenbank) {
+    for (final tabelle in const [
+      'bewertungen',
+      'ortsbewertungen',
+      'preisbeobachtungen',
+      'erlebnispositionen',
+      'erlebnisse',
+      'produkte',
+      'objekte',
+      'orte',
+      'kriterien',
+      'profile',
+    ]) {
+      datenbank.verbindung.execute('DELETE FROM $tabelle');
+    }
+  }
+
+  void _protokolliereSicher({
+    required LokaleDatenbank datenbank,
+    required DateTime zeitpunkt,
+    required bool erfolgreich,
+    required ImportStrategie strategie,
+    required Map<String, ImportErgebnisZaehler> ergebnis,
+    int zusaetzlichFehlerhaft = 0,
+  }) {
+    final gesamt = ImportAusfuehrungsErgebnis(ergebnis).gesamt;
+    try {
+      protokollRepository.speichere(
+        datenbank: datenbank,
+        ausgefuehrtAm: zeitpunkt,
+        erfolgreich: erfolgreich,
+        strategie: strategie,
+        hinzugefuegt: gesamt.hinzugefuegt,
+        aktualisiert: gesamt.aktualisiert,
+        uebersprungen: gesamt.uebersprungen,
+        zusammengefuehrt: gesamt.zusammengefuehrt,
+        fehlerhaft: gesamt.fehlerhaft + zusaetzlichFehlerhaft,
+      );
+    } catch (_) {
+      // Ein Protokollierungsfehler darf weder einen erfolgreichen Import
+      // zurückrollen noch die ursprüngliche Importursache verdecken.
+    }
   }
 
   ImportKonfliktAktion? _entscheidung(
@@ -126,15 +222,20 @@ class ImportAusfuehrungService {
   bool _existiert(LokaleDatenbank db, String sammlung, String id) {
     final tabelle = _tabelle(sammlung);
     if (tabelle == null) return false;
-    return db.verbindung.select('SELECT 1 FROM $tabelle WHERE id = ?', [id]).isNotEmpty;
+    return db.verbindung
+        .select('SELECT 1 FROM $tabelle WHERE id = ?', [id]).isNotEmpty;
   }
 
   String? _tabelle(String sammlung) => switch (sammlung) {
-        'profile' => 'profile', 'objekte' => 'objekte', 'orte' => 'orte',
-        'bewertungskriterien' => 'kriterien', 'erlebnisse' => 'erlebnisse',
+        'profile' => 'profile',
+        'objekte' => 'objekte',
+        'orte' => 'orte',
+        'bewertungskriterien' => 'kriterien',
+        'erlebnisse' => 'erlebnisse',
         'erlebnisPositionen' => 'erlebnispositionen',
         'preisbeobachtungen' => 'preisbeobachtungen',
-        'ortsbewertungen' => 'ortsbewertungen', 'bewertungen' => 'bewertungen',
+        'ortsbewertungen' => 'ortsbewertungen',
+        'bewertungen' => 'bewertungen',
         _ => null,
       };
 
@@ -145,18 +246,41 @@ class ImportAusfuehrungService {
     bool existiert,
   ) {
     if (sammlung == 'objekte') {
-      _upsert(db, 'objekte', _werte(wert, const {
-        'id': 'id', 'name': 'name', 'art': 'art', 'erstelltAm': 'erstellt_am',
-        'geaendertAm': 'geaendert_am',
-      }), existiert);
-      final produktExistiert = db.verbindung
-          .select('SELECT 1 FROM produkte WHERE objekt_id = ?', [wert['id']]).isNotEmpty;
-      _upsert(db, 'produkte', _werte(wert, const {
-        'id': 'objekt_id', 'marke': 'marke', 'produktart': 'produktart',
-        'brauerei': 'brauerei', 'sorte': 'sorte', 'alkoholgehalt': 'alkoholgehalt',
-        'herkunft': 'herkunft', 'gebinde': 'gebinde', 'fuellmengeMl': 'fuellmenge_ml',
-        'barcode': 'barcode', 'notiz': 'notiz',
-      }), produktExistiert, idSpalte: 'objekt_id');
+      _upsert(
+        db,
+        'objekte',
+        _werte(wert, const {
+          'id': 'id',
+          'name': 'name',
+          'art': 'art',
+          'erstelltAm': 'erstellt_am',
+          'geaendertAm': 'geaendert_am',
+        }),
+        existiert,
+      );
+      final produktExistiert = db.verbindung.select(
+        'SELECT 1 FROM produkte WHERE objekt_id = ?',
+        [wert['id']],
+      ).isNotEmpty;
+      _upsert(
+        db,
+        'produkte',
+        _werte(wert, const {
+          'id': 'objekt_id',
+          'marke': 'marke',
+          'produktart': 'produktart',
+          'brauerei': 'brauerei',
+          'sorte': 'sorte',
+          'alkoholgehalt': 'alkoholgehalt',
+          'herkunft': 'herkunft',
+          'gebinde': 'gebinde',
+          'fuellmengeMl': 'fuellmenge_ml',
+          'barcode': 'barcode',
+          'notiz': 'notiz',
+        }),
+        produktExistiert,
+        idSpalte: 'objekt_id',
+      );
       return;
     }
     final mapping = _mapping(sammlung);
@@ -166,18 +290,101 @@ class ImportAusfuehrungService {
   }
 
   Map<String, String>? _mapping(String sammlung) => switch (sammlung) {
-    'profile' => const {'id':'id','anzeigename':'anzeigename','erstelltAm':'erstellt_am','geaendertAm':'geaendert_am'},
-    'orte' => const {'id':'id','name':'name','typ':'typ','adresse':'adresse','breitengrad':'breitengrad','laengengrad':'laengengrad','osmReferenz':'osm_referenz','notiz':'notiz','erstelltAm':'erstellt_am','geaendertAm':'geaendert_am'},
-    'erlebnisse' => const {'id':'id','herkunftProfilId':'herkunft_profil_id','typ':'typ','status':'status','ortId':'ort_id','geplanterTag':'geplanter_tag','geplanteMinute':'geplante_minute','geplanteDauerMinuten':'geplante_dauer_minuten','tatsaechlicherBeginn':'tatsaechlicher_beginn','tatsaechlichesEnde':'tatsaechliches_ende','notiz':'notiz','istEntwurf':'ist_entwurf','erstelltAm':'erstellt_am','geaendertAm':'geaendert_am'},
-    'erlebnisPositionen' => const {'id':'id','erlebnisId':'erlebnis_id','produktId':'produkt_id','anzahl':'anzahl','erstelltAm':'erstellt_am','geaendertAm':'geaendert_am'},
-    'preisbeobachtungen' => const {'id':'id','erlebnisId':'erlebnis_id','erlebnisPositionId':'erlebnis_position_id','produktId':'produkt_id','ortId':'ort_id','betragMinor':'betrag_minor','waehrung':'waehrung','beobachtetAm':'beobachtet_am','erstelltAm':'erstellt_am','geaendertAm':'geaendert_am'},
-    'ortsbewertungen' => const {'id':'id','erlebnisId':'erlebnis_id','ortId':'ort_id','herkunftProfilId':'herkunft_profil_id','bewertetAm':'bewertet_am','notiz':'notiz','erstelltAm':'erstellt_am','geaendertAm':'geaendert_am'},
-    'bewertungskriterien' => const {'id':'id','name':'name','beschreibung':'beschreibung','eingabetyp':'eingabetyp','reihenfolge':'reihenfolge','aktiv':'aktiv','produktart':'produktart','objektart':'objektart','version':'version','erstelltAm':'erstellt_am','geaendertAm':'geaendert_am'},
-    'bewertungen' => const {'id':'id','erlebnisId':'erlebnis_id','erlebnisPositionId':'erlebnis_position_id','ortsbewertungId':'ortsbewertung_id','ortId':'ort_id','herkunftProfilId':'herkunft_profil_id','wert':'wert','erstelltAm':'erstellt_am','geaendertAm':'geaendert_am'},
-    _ => null,
-  };
+        'profile' => const {
+            'id': 'id',
+            'anzeigename': 'anzeigename',
+            'erstelltAm': 'erstellt_am',
+            'geaendertAm': 'geaendert_am',
+          },
+        'orte' => const {
+            'id': 'id',
+            'name': 'name',
+            'typ': 'typ',
+            'adresse': 'adresse',
+            'breitengrad': 'breitengrad',
+            'laengengrad': 'laengengrad',
+            'osmReferenz': 'osm_referenz',
+            'notiz': 'notiz',
+            'erstelltAm': 'erstellt_am',
+            'geaendertAm': 'geaendert_am',
+          },
+        'erlebnisse' => const {
+            'id': 'id',
+            'herkunftProfilId': 'herkunft_profil_id',
+            'typ': 'typ',
+            'status': 'status',
+            'ortId': 'ort_id',
+            'geplanterTag': 'geplanter_tag',
+            'geplanteMinute': 'geplante_minute',
+            'geplanteDauerMinuten': 'geplante_dauer_minuten',
+            'tatsaechlicherBeginn': 'tatsaechlicher_beginn',
+            'tatsaechlichesEnde': 'tatsaechliches_ende',
+            'notiz': 'notiz',
+            'istEntwurf': 'ist_entwurf',
+            'erstelltAm': 'erstellt_am',
+            'geaendertAm': 'geaendert_am',
+          },
+        'erlebnisPositionen' => const {
+            'id': 'id',
+            'erlebnisId': 'erlebnis_id',
+            'produktId': 'produkt_id',
+            'anzahl': 'anzahl',
+            'erstelltAm': 'erstellt_am',
+            'geaendertAm': 'geaendert_am',
+          },
+        'preisbeobachtungen' => const {
+            'id': 'id',
+            'erlebnisId': 'erlebnis_id',
+            'erlebnisPositionId': 'erlebnis_position_id',
+            'produktId': 'produkt_id',
+            'ortId': 'ort_id',
+            'betragMinor': 'betrag_minor',
+            'waehrung': 'waehrung',
+            'beobachtetAm': 'beobachtet_am',
+            'erstelltAm': 'erstellt_am',
+            'geaendertAm': 'geaendert_am',
+          },
+        'ortsbewertungen' => const {
+            'id': 'id',
+            'erlebnisId': 'erlebnis_id',
+            'ortId': 'ort_id',
+            'herkunftProfilId': 'herkunft_profil_id',
+            'bewertetAm': 'bewertet_am',
+            'notiz': 'notiz',
+            'erstelltAm': 'erstellt_am',
+            'geaendertAm': 'geaendert_am',
+          },
+        'bewertungskriterien' => const {
+            'id': 'id',
+            'name': 'name',
+            'beschreibung': 'beschreibung',
+            'eingabetyp': 'eingabetyp',
+            'reihenfolge': 'reihenfolge',
+            'aktiv': 'aktiv',
+            'produktart': 'produktart',
+            'objektart': 'objektart',
+            'version': 'version',
+            'erstelltAm': 'erstellt_am',
+            'geaendertAm': 'geaendert_am',
+          },
+        'bewertungen' => const {
+            'id': 'id',
+            'erlebnisId': 'erlebnis_id',
+            'erlebnisPositionId': 'erlebnis_position_id',
+            'ortsbewertungId': 'ortsbewertung_id',
+            'ortId': 'ort_id',
+            'herkunftProfilId': 'herkunft_profil_id',
+            'wert': 'wert',
+            'erstelltAm': 'erstellt_am',
+            'geaendertAm': 'geaendert_am',
+          },
+        _ => null,
+      };
 
-  Map<String, Object?> _werte(Map<String, Object?> quelle, Map<String, String> mapping) {
+  Map<String, Object?> _werte(
+    Map<String, Object?> quelle,
+    Map<String, String> mapping,
+  ) {
     final ziel = <String, Object?>{};
     for (final eintrag in mapping.entries) {
       var wert = quelle[eintrag.key];
@@ -191,7 +398,8 @@ class ImportAusfuehrungService {
       ziel['kriterium_eingabetyp'] = kriterium['eingabetyp'];
       ziel['kriterium_reihenfolge'] = kriterium['reihenfolge'];
       ziel['kriterium_version'] = kriterium['version'];
-      ziel['kriterium_auswahlwerte'] = (kriterium['auswahlwerte'] as List? ?? const []).join('\n');
+      ziel['kriterium_auswahlwerte'] =
+          (kriterium['auswahlwerte'] as List? ?? const []).join('\n');
     }
     if (quelle['auswahlwerte'] is List) {
       ziel['auswahlwerte'] = (quelle['auswahlwerte'] as List).join('\n');
@@ -199,16 +407,34 @@ class ImportAusfuehrungService {
     return ziel;
   }
 
-  void _upsert(LokaleDatenbank db, String tabelle, Map<String, Object?> werte,
-      bool existiert, {String idSpalte = 'id'}) {
+  void _upsert(
+    LokaleDatenbank db,
+    String tabelle,
+    Map<String, Object?> werte,
+    bool existiert, {
+    String idSpalte = 'id',
+  }) {
     if (existiert) {
-      final set = werte.keys.where((k) => k != idSpalte).map((k) => '$k = ?').join(', ');
-      final params = [for (final e in werte.entries) if (e.key != idSpalte) e.value, werte[idSpalte]];
-      db.verbindung.execute('UPDATE $tabelle SET $set WHERE $idSpalte = ?', params);
+      final set = werte.keys
+          .where((k) => k != idSpalte)
+          .map((k) => '$k = ?')
+          .join(', ');
+      final params = [
+        for (final e in werte.entries)
+          if (e.key != idSpalte) e.value,
+        werte[idSpalte],
+      ];
+      db.verbindung.execute(
+        'UPDATE $tabelle SET $set WHERE $idSpalte = ?',
+        params,
+      );
     } else {
       final spalten = werte.keys.join(', ');
       final platzhalter = List.filled(werte.length, '?').join(', ');
-      db.verbindung.execute('INSERT INTO $tabelle ($spalten) VALUES ($platzhalter)', werte.values.toList());
+      db.verbindung.execute(
+        'INSERT INTO $tabelle ($spalten) VALUES ($platzhalter)',
+        werte.values.toList(),
+      );
     }
   }
 }
