@@ -34,6 +34,7 @@ nav:
   - Entwicklerdokumentation:
       - Überblick: entwicklung/index.md
       - Dokumentationswerkzeugkette: entwicklung/dokumentationswerkzeugkette.md
+      - JSON-Austauschformat: entwicklung/austauschformat.md
       - Android-Release: android-release.md
       - OpenStreetMap: openstreetmap.md
       - Fachliche Anforderungen: fachliche_anforderungen.md
