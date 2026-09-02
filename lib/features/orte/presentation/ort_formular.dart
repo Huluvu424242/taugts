@@ -412,8 +412,7 @@ class _OrtFormularState extends State<OrtFormular> {
                   decoration: const InputDecoration(labelText: 'Ortstyp'),
                   items: const [
                     DropdownMenuItem(
-                        value: Ortstyp.gastronomie,
-                        child: Text('Gastronomie')),
+                        value: Ortstyp.gastronomie, child: Text('Gastronomie')),
                     DropdownMenuItem(
                         value: Ortstyp.geschaeft, child: Text('Geschäft')),
                     DropdownMenuItem(
