@@ -2,7 +2,7 @@
 
 ## Ziel
 
-Eine fachliche Dublette besitzt eine andere stabile UUID, beschreibt aber dasselbe reale Produkt oder denselben realen Ort. Beim Zusammenführen bleibt die bereits lokale UUID kanonisch. Die importierte UUID wird als Aliasreferenz im Importplan erhalten, damit Story #22 sie bei der atomaren Übernahme persistieren und spätere Importe wiedererkennen kann.
+Eine fachliche Dublette besitzt eine andere stabile UUID, beschreibt aber dasselbe reale Produkt oder denselben realen Ort. Beim Zusammenführen bleibt die bereits lokale UUID kanonisch. Die importierte UUID wird als Aliasreferenz lokal gespeichert, damit spätere Importe denselben realen Datensatz wiedererkennen.
 
 ## Stammdaten
 
@@ -26,4 +26,8 @@ Der Merge ersetzt ausschließlich Referenzen auf den zusammengeführten Stammdat
 
 ## Alias und spätere Wiedererkennung
 
-`ImportDublettenMergeErgebnis` enthält zusätzlich zum umgeschriebenen Importdokument eine `ImportAliasReferenz` mit importierter Alias-ID und kanonischer lokaler ID. Die eigentliche persistente Speicherung dieser Aliasreferenz gehört zusammen mit allen anderen Schreiboperationen zur atomaren Importausführung in Story #22. Bis dahin bleibt der gesamte Merge ein unverbindlicher Plan und verändert keine lokalen Daten.
+`ImportDublettenMergeErgebnis` enthält zusätzlich zum umgeschriebenen Importdokument eine `ImportAliasReferenz` mit importierter Alias-ID und kanonischer lokaler ID. Bei der bestätigten Importausführung wird diese Referenz in `import_aliases` innerhalb derselben Datenbanktransaktion wie die Fachdaten gespeichert. Schlägt die Aliasprüfung oder eine andere Schreiboperation fehl, werden Fachdaten und neue Aliasreferenzen gemeinsam zurückgerollt.
+
+Vor einer späteren Konfliktanalyse lädt `ImportAliasRepository` die bekannten lokalen Aliasreferenzen und normalisiert importierte Produkt- und Orts-IDs sowie die davon abhängigen Erlebnis-, Preis- und Bewertungsbezüge auf die jeweils kanonische ID. Dadurch erzeugt eine bereits zusammengeführte frühere UUID bei einem erneuten Import keine neue technische Dublette.
+
+Alias-Ketten werden bis zur endgültigen kanonischen ID aufgelöst. Widersprüchliche Zuordnungen und Zyklen werden abgewiesen. Die Aliasdaten bleiben ausschließlich lokal und werden nicht als fachliche Bewertungs- oder Nutzungsdaten behandelt.
