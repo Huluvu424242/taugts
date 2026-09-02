@@ -1,0 +1,41 @@
+{
+  "format": "taugts-export",
+  "schemaVersion": 1,
+  "exportiertAm": "2026-09-02T16:15:00Z",
+  "appVersion": "0.1.0+4",
+  "profile": [
+    {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "anzeigename": null,
+      "erstelltAm": "2026-09-02T14:00:00Z",
+      "geaendertAm": "2026-09-02T14:00:00Z"
+    }
+  ],
+  "objekte": [],
+  "orte": [],
+  "erlebnisse": [
+    {
+      "id": "40000000-0000-4000-8000-000000000001",
+      "herkunftProfilId": "10000000-0000-4000-8000-000000000001",
+      "typ": "einkauf",
+      "status": "beendet",
+      "ortId": null,
+      "geplanterTag": null,
+      "geplanteMinute": 600,
+      "geplanteDauerMinuten": 30,
+      "tatsaechlicherBeginn": null,
+      "tatsaechlichesEnde": "2026-09-02T16:00:00Z",
+      "notiz": null,
+      "istEntwurf": false,
+      "erstelltAm": "2026-09-02T14:00:00Z",
+      "geaendertAm": "2026-09-02T16:00:00Z"
+    }
+  ],
+  "erlebnisPositionen": [],
+  "preisbeobachtungen": [],
+  "bewertungskriterien": [],
+  "bewertungen": [],
+  "ortsbewertungen": [],
+  "kategorien": [],
+  "kategorieZuordnungen": []
+}
