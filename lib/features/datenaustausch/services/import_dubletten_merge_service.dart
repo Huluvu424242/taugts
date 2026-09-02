@@ -62,7 +62,8 @@ class ImportDublettenMergeService {
     required Map<String, DublettenFeldQuelle> feldauswahl,
   }) {
     if (!_unterstuetzteSammlung(sammlung)) {
-      throw ArgumentError('Zusammenführen wird für $sammlung nicht unterstützt.');
+      throw ArgumentError(
+          'Zusammenführen wird für $sammlung nicht unterstützt.');
     }
     final importWert = _finde(importDokument, sammlung, importId);
     final lokalWert = _finde(lokalesDokument, sammlung, lokaleId);
@@ -77,8 +78,9 @@ class ImportDublettenMergeService {
     for (final feld in {...importWert.keys, ...lokalWert.keys}) {
       if (feld == 'id') continue;
       final quelle = feldauswahl[feld] ?? DublettenFeldQuelle.lokal;
-      zusammengefuehrt[feld] =
-          quelle == DublettenFeldQuelle.import ? importWert[feld] : lokalWert[feld];
+      zusammengefuehrt[feld] = quelle == DublettenFeldQuelle.import
+          ? importWert[feld]
+          : lokalWert[feld];
     }
     zusammengefuehrt['id'] = lokaleId;
     if (index >= 0) {
@@ -151,7 +153,8 @@ class ImportDublettenMergeService {
     return null;
   }
 
-  List<Map<String, Object?>> _liste(Map<String, Object?> dokument, String name) =>
+  List<Map<String, Object?>> _liste(
+          Map<String, Object?> dokument, String name) =>
       ((dokument[name] as List?) ?? const [])
           .whereType<Map>()
           .map((e) => Map<String, Object?>.from(e))
