@@ -6,6 +6,7 @@ Dieser Bereich bündelt technische Informationen für Entwicklung und Wartung vo
 
 - [Dokumentationswerkzeugkette](dokumentationswerkzeugkette.md)
 - [Versioniertes JSON-Austauschformat](austauschformat.md)
+- [Sichere Importvalidierung](importvalidierung.md)
 - [Android-Release](../android-release.md)
 - [OpenStreetMap](../openstreetmap.md)
 - [Fachliche Anforderungen](../fachliche_anforderungen.md)
