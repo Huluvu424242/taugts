@@ -9,14 +9,16 @@ class ChangelogDarstellung extends StatelessWidget {
   Widget build(BuildContext context) {
     final eintraege = _parse(markdown);
     if (eintraege.isEmpty) {
-      return const Text('Für diese Version ist noch keine Änderungshistorie verfügbar.');
+      return const Text(
+        'Für diese Version ist noch keine Änderungshistorie verfügbar.',
+      );
     }
 
     return ListView.separated(
       key: const Key('aenderungshistorie-inhalt'),
       shrinkWrap: true,
       itemCount: eintraege.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) => _Versionskarte(eintrag: eintraege[index]),
     );
   }
@@ -64,9 +66,9 @@ class _Versionskarte extends StatelessWidget {
               Text(eintrag.datum!, style: theme.textTheme.bodySmall),
             ],
             const SizedBox(height: 8),
-            for (final abschnitt in eintrag.abschnitte) ...[
-              _Abschnitt(abschnitt: abschnitt),
-              if (abschnitt != eintrag.abschnitte.last)
+            for (var index = 0; index < eintrag.abschnitte.length; index++) ...[
+              _Abschnitt(abschnitt: eintrag.abschnitte[index]),
+              if (index < eintrag.abschnitte.length - 1)
                 const SizedBox(height: 10),
             ],
           ],
@@ -174,6 +176,16 @@ List<_Versionseintrag> _parse(String markdown) {
 
     if (zeile.startsWith('- ') && abschnitt != null) {
       abschnitt.eintraege.add(_bereinige(zeile.substring(2)));
+      continue;
+    }
+
+    if (zeile.isNotEmpty &&
+        abschnitt != null &&
+        abschnitt.eintraege.isNotEmpty &&
+        !zeile.startsWith('[')) {
+      final letzterIndex = abschnitt.eintraege.length - 1;
+      abschnitt.eintraege[letzterIndex] =
+          '${abschnitt.eintraege[letzterIndex]} ${_bereinige(zeile)}';
     }
   }
 
@@ -181,15 +193,28 @@ List<_Versionseintrag> _parse(String markdown) {
     versionen.add(version);
   }
   versionen.removeWhere(
-    (eintrag) => eintrag.abschnitte.every((abschnitt) => abschnitt.eintraege.isEmpty),
+    (eintrag) =>
+        eintrag.abschnitte.every((abschnitt) => abschnitt.eintraege.isEmpty),
   );
   return versionen;
 }
 
-String _bereinige(String text) => text
-    .replaceAll(RegExp(r'\*\*([^*]+)\*\*'), r'$1')
-    .replaceAll(RegExp(r'`([^`]+)`'), r'$1')
-    .replaceAll(RegExp(r'\[([^\]]+)\]\([^\)]+\)'), r'$1');
+String _bereinige(String text) {
+  var ergebnis = text;
+  ergebnis = ergebnis.replaceAllMapped(
+    RegExp(r'\*\*([^*]+)\*\*'),
+    (match) => match.group(1) ?? '',
+  );
+  ergebnis = ergebnis.replaceAllMapped(
+    RegExp(r'`([^`]+)`'),
+    (match) => match.group(1) ?? '',
+  );
+  ergebnis = ergebnis.replaceAllMapped(
+    RegExp(r'\[([^\]]+)\]\([^\)]+\)'),
+    (match) => match.group(1) ?? '',
+  );
+  return ergebnis;
+}
 
 class _Versionseintrag {
   _Versionseintrag({
