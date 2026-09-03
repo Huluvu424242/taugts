@@ -4,9 +4,11 @@ Taugt’s? dient dazu, Produkte, Orte und Erlebnisse lokal zu erfassen und zu be
 
 ## Startseite
 
-Die mobile Startseite bietet die zentralen Aktionen **Jetzt bewerten**, **Erlebnis registrieren** und **Alle Erlebnisse**. Zusätzlich führt die Navigation zu Dinge, Orte, Bewertungen, Suche, Import/Export und Einstellungen. Noch nicht umgesetzte Bereiche zeigen eine verständliche Informationsseite statt einer funktionslosen Aktion.
+Die mobile Startseite bietet die zentralen Aktionen **Jetzt bewerten**, **Erlebnis registrieren** und **Alle Erlebnisse**. Zusätzlich führt die Navigation zu Produkte, Orte, Bewertungen, Suche, Import/Export und Einstellungen. Noch nicht umgesetzte Bereiche zeigen eine verständliche Informationsseite statt einer funktionslosen Aktion.
 
 Ist genau ein Erlebnis aktiv, kann es direkt von der Startseite fortgesetzt werden. Bei mehreren aktiven Erlebnissen wird keine Auswahl automatisch vorweggenommen.
+
+Die Kachel **Suche** öffnet denselben globalen Suchbereich wie der Eintrag **Suche** in der unteren Navigation.
 
 ## Produkte
 
@@ -21,6 +23,10 @@ Orte können mit Typ, optionaler Adresse, Koordinaten, OpenStreetMap-Referenz un
 Koordinaten lassen sich optional auf einer OpenStreetMap-Karte kontrollieren und korrigieren. Die manuelle Orts- und Koordinateneingabe bleibt auch ohne Netzwerkverbindung verfügbar.
 
 Für nicht private Orte kann über **Adresse aus Koordinaten vorschlagen** ausdrücklich eine Online-Anreicherung gestartet werden. Erst dann werden die aktuell eingegebenen Koordinaten an OpenStreetMap/Nominatim übertragen. Name und Adresse erscheinen nur als Vorschlag und werden erst nach Bestätigung in das Formular übernommen; beide Angaben können anschließend korrigiert werden. Für Orte vom Typ **Privater Ort** überträgt Taugt’s? keine exakten Koordinaten an den Adressdienst. Fehlendes Netz, kein Treffer oder ein Fehler des Dienstes verhindern das manuelle Speichern des Ortes nicht.
+
+## Suche
+
+Die globale Suche arbeitet vollständig auf dem lokalen Datenbestand. Sie kann gemeinsam oder gezielt Produkte, Orte, Erlebnisse sowie historische Bewertungen und Preisbeobachtungen durchsuchen. Je nach Suchbereich stehen zusätzliche Filter wie Erlebnistyp, Status oder Historienart zur Verfügung. Historische Treffer führen ihren gespeicherten Erlebnis-, Produkt- oder Ortskontext mit.
 
 ## Erlebnisse und Bewertungen
 
