@@ -101,9 +101,11 @@ void main() {
     await tester.tap(find.byTooltip('Barcode scannen'));
     await tester.pumpAndSettle();
 
-    final barcodeFeld = find.widgetWithText(TextFormField, 'Barcode');
-    expect(tester.widget<TextFormField>(barcodeFeld).controller?.text,
-        '9876543210128');
+    final barcodeFeld = find.widgetWithText(TextFormField, 'EAN / Barcode');
+    expect(
+      tester.widget<TextFormField>(barcodeFeld).controller?.text,
+      '9876543210128',
+    );
     await tester.fling(
       find.byType(ListView).last,
       const Offset(0, -1000),
