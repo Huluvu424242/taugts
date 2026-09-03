@@ -22,6 +22,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Fixed
 
+- Die Such-Kachel auf der Startseite öffnet nun den bereits vorhandenen globalen Suchbereich statt des veralteten Hinweises „Suche noch nicht verfügbar“.
 - Die globale Suche durchsucht standardmäßig Produkte, Orte, Erlebnisse sowie Bewertungen und Preise gemeinsam; Suchbegriffe werden jetzt auch auf historische Datensätze angewendet.
 - Das Importergebnis trennt Produktbewertungswerte, Ortsbewertungen und deren einzelne Kriterienwerte fachlich korrekt, statt Ortswerte als Produktbewertungen zu zählen.
 
