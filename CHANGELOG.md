@@ -8,6 +8,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Die Produktionsdatenbank stellt nun den vollständigen aktuellen Tabellenstand einschließlich Kategorien, Klassifikation, Kategorie-Kriteriensets und Import-Hilfstabellen deterministisch beim Öffnen bereit; die Architektur dokumentiert Schema, Migrationshistorie, Integritätsregeln, fachliche Abweichungen und ER-Diagramme ausführlich.
 - Grundlegende lokale Auswertungen zeigen vergleichbare Kriterienwerte, Preis- und Bewertungsverläufe sowie Erlebnis- und ausdrücklich erfasste Andrangsdaten nachvollziehbar und ohne implizite Kausalaussagen.
 - Die vollständig lokale Suche findet Produkte, Orte, Erlebnisse, Bewertungen und Preisbeobachtungen über kombinierbare strukturierte und freie Filter und führt historische Treffer in ihren Erlebniskontext.
 - Kategorie-Kriteriensets können zentrale Kriterien geordnet erweitern oder ersetzen, aus Elternkategorien erben und zeigen Standard-, geerbte und explizite Quellen nachvollziehbar an.
@@ -116,7 +117,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
   gespeichert, fortgesetzt und nach Bestätigung verworfen werden.
 - Vollständig lokale Ortsverwaltung mit Ortstyp, optionaler Adresse,
   Koordinaten, OSM-Referenz und Notiz sowie Suche, Auswahlmodus und
-  nicht blockiernder Dublettenwarnung.
+  nicht blockierender Dublettenwarnung.
 - Offline-Produktverwaltung für Bier und andere Produkte mit optionalen
   Stammdaten, barrierefreier Validierung und Kennzeichnung unvollständiger
   Einträge.

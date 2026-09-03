@@ -42,6 +42,7 @@ nav:
   - Architektur:
       - Überblick: architecture/README.md
       - ADR 0001 – Lokale Persistenz mit SQLite: architecture/0001-lokale-persistenz-mit-sqlite.md
+      - Datenbankschema und Migrationen: architecture/datenbank.md
       - Reverse Geocoding: architecture/reverse-geocoding.md
   - Projekt auf GitHub: https://github.com/Huluvu424242/taugts
 
