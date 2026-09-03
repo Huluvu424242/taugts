@@ -1,7 +1,7 @@
 name: taugts
 description: Eine lokale Bewertungs-App für Dinge, die etwas taugen – oder eben nicht.
 publish_to: none
-version: 0.1.0+5
+version: 0.1.0+6
 
 environment:
   sdk: '>=3.5.0 <4.0.0'

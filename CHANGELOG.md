@@ -6,6 +6,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+## [0.1.0+6] - 2026-09-03
+
 ### Added
 
 - In der Produkterfassung kann die EAN direkt am Feld **EAN / Barcode** über den vorhandenen lokalen Barcode-Scanner übernommen werden; Scan-Abbruch und bestehende Formulardaten bleiben dabei unverändert.
@@ -14,11 +16,13 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Die vollständig lokale Suche findet Produkte, Orte, Erlebnisse, Bewertungen und Preisbeobachtungen über kombinierbare strukturierte und freie Filter und führt historische Treffer in ihren Erlebniskontext.
 - Kategorie-Kriteriensets können zentrale Kriterien geordnet erweitern oder ersetzen, aus Elternkategorien erben und zeigen Standard-, geerbte und explizite Quellen nachvollziehbar an.
 - Strukturierte Kategorien, Herkunft, Hersteller und Eigenschaften bleiben fachlich von freien Tags getrennt; Tags werden lokal normalisiert gespeichert und können entfernt werden, ohne historische Bewertungen zu verändern.
+- Die Über-Seite bietet zwischen Hilfe und Projektseite eine offline verfügbare **Änderungshistorie**, die das eingebettete `CHANGELOG.md` strukturiert als Versionen, Datumsangaben, Änderungsarten und Einträge anzeigt.
 
 ### Changed
 
 - Beim Speichern eines Restaurantbesuchs oder Einkaufs wird eine ausgefüllte und seit dem letzten Speichern geänderte Gaststätten- beziehungsweise Geschäftsbewertung nun gemeinsam mit dem Erlebnis gespeichert.
 - Die Über-Seite zeigt direkt unter ihrer Überschrift die installierte Releaseversion, bietet danach einen Hilfe-Link zum Einstieg der Benutzerdokumentation und weist als letzte Inhaltszeile `🄯  created by Huluvu424242` aus.
+- Der Einstieg zur Produkterfassung auf der Startseite ist als **Produkte** statt als **Dinge** bezeichnet.
 
 ### Fixed
 
@@ -136,7 +140,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
 - Featureorientierte Ausgangsstruktur, Startscreen und Widget-Test.
 
-[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+5...HEAD
+[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+6...HEAD
+[0.1.0+6]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+5...v0.1.0+6
 [0.1.0+5]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+4...v0.1.0+5
 [0.1.0+4]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+3...v0.1.0+4
 [0.1.0+3]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+2...v0.1.0+3
