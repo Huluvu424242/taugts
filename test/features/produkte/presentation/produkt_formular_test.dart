@@ -100,7 +100,8 @@ void main() {
     await tester.tap(find.byTooltip('EAN scannen'));
     await tester.pumpAndSettle();
 
-    final barcode = tester.widget<TextFormField>(find.byType(TextFormField).at(1));
+    final barcode =
+        tester.widget<TextFormField>(find.byType(TextFormField).at(1));
     expect(barcode.controller?.text, '9780201379624');
   });
 }
