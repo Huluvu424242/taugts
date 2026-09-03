@@ -31,3 +31,4 @@ flutter:
   assets:
     - assets/icons/app_icon_source.png
     - assets/badges/powered_by_ki.png
+    - CHANGELOG.md
