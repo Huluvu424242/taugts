@@ -6,6 +6,10 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+### Added
+
+- Strukturierte Kategorien, Herkunft, Hersteller und Eigenschaften bleiben fachlich von freien Tags getrennt; Tags werden lokal normalisiert gespeichert und können entfernt werden, ohne historische Bewertungen zu verändern.
+
 ### Fixed
 
 - Das Importergebnis trennt Produktbewertungswerte, Ortsbewertungen und deren einzelne Kriterienwerte fachlich korrekt, statt Ortswerte als Produktbewertungen zu zählen.
