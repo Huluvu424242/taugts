@@ -9,6 +9,8 @@ import 'package:taugts/features/kategorien/services/kategorie_repository.dart';
 import 'package:taugts/features/kategorien/services/kriterienset_repository.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 import 'package:taugts/features/profil/services/profil_repository.dart';
+import 'package:taugts/features/suche/presentation/suche_screen.dart';
+import 'package:taugts/features/suche/services/suche_service.dart';
 
 class HauptnavigationScreen extends StatefulWidget {
   const HauptnavigationScreen({
@@ -20,6 +22,7 @@ class HauptnavigationScreen extends StatefulWidget {
     required this.idGenerator,
     required this.kategorieRepository,
     required this.kriteriensetRepository,
+    required this.sucheService,
     super.key,
   });
 
@@ -31,6 +34,7 @@ class HauptnavigationScreen extends StatefulWidget {
   final IdGenerator? idGenerator;
   final KategorieRepository? kategorieRepository;
   final KriteriensetRepository? kriteriensetRepository;
+  final SucheService? sucheService;
 
   @override
   State<HauptnavigationScreen> createState() => _HauptnavigationScreenState();
@@ -55,6 +59,9 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
         exportZielService: widget.exportZielService,
         idGenerator: widget.idGenerator,
       ),
+      widget.sucheService == null
+          ? const _NichtVerfuegbar(text: 'Die Suche ist nicht verfügbar.')
+          : SucheScreen(service: widget.sucheService!),
       if (kannSets)
         KriteriensetsScreen(
           kategorien: kategorien,
@@ -62,7 +69,9 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
           bewertungen: bewertungen,
         )
       else
-        const _NichtVerfuegbar(),
+        const _NichtVerfuegbar(
+          text: 'Kategorie-Kriteriensets sind nicht verfügbar.',
+        ),
     ];
     return Scaffold(
       body: IndexedStack(index: _index, children: screens),
@@ -76,6 +85,10 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
             label: 'Start',
           ),
           NavigationDestination(
+            icon: Icon(Icons.search),
+            label: 'Suche',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.rule_outlined),
             selectedIcon: Icon(Icons.rule),
             label: 'Kriterien-Sets',
@@ -87,14 +100,16 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
 }
 
 class _NichtVerfuegbar extends StatelessWidget {
-  const _NichtVerfuegbar();
+  const _NichtVerfuegbar({required this.text});
+
+  final String text;
 
   @override
-  Widget build(BuildContext context) => const SafeArea(
+  Widget build(BuildContext context) => SafeArea(
         child: Center(
           child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text('Kategorie-Kriteriensets sind nicht verfügbar.'),
+            padding: const EdgeInsets.all(24),
+            child: Text(text),
           ),
         ),
       );
