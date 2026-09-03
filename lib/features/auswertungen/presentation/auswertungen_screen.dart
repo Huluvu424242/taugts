@@ -58,7 +58,9 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                   const SizedBox(height: 16),
                   _Karte(
                     titel: 'Bewertungen',
-                    zeilen: ['${daten.bewertungsanzahl} gespeicherte Kriterienwerte'],
+                    zeilen: [
+                      '${daten.bewertungsanzahl} gespeicherte Kriterienwerte'
+                    ],
                   ),
                   _Karte(
                     titel: 'Vergleichbare Durchschnittswerte',
@@ -128,7 +130,8 @@ class _Karte extends StatelessWidget {
             children: [
               Semantics(
                 header: true,
-                child: Text(titel, style: Theme.of(context).textTheme.titleMedium),
+                child:
+                    Text(titel, style: Theme.of(context).textTheme.titleMedium),
               ),
               const SizedBox(height: 8),
               if (zeilen.isEmpty)
