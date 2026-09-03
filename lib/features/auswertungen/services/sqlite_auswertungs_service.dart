@@ -82,7 +82,12 @@ class SqliteAuswertungsService implements AuswertungsService {
       WHERE (? IS NULL OR pb.produkt_id = ?)
         AND (? IS NULL OR pk.kategorie_id = ?)
       ORDER BY pb.beobachtet_am
-    ''', [filter.objektId, filter.objektId, filter.kategorieId, filter.kategorieId]);
+    ''', [
+      filter.objektId,
+      filter.objektId,
+      filter.kategorieId,
+      filter.kategorieId
+    ]);
     return [
       for (final row in rows)
         Zeitwert(
@@ -95,7 +100,8 @@ class SqliteAuswertungsService implements AuswertungsService {
 
   List<Zeitwert> _qualitaetsverlauf(AuswertungsFilter filter) =>
       _bewertungsRows(filter)
-          .where((row) => row['eingabetyp'] == 'wertung' && row['produkt_id'] != null)
+          .where((row) =>
+              row['eingabetyp'] == 'wertung' && row['produkt_id'] != null)
           .map(
             (row) => Zeitwert(
               zeitpunkt: DateTime.parse(row['erstellt_am']! as String),
@@ -108,7 +114,8 @@ class SqliteAuswertungsService implements AuswertungsService {
 
   List<Zeitwert> _ortsverlauf(AuswertungsFilter filter) =>
       _bewertungsRows(filter)
-          .where((row) => row['eingabetyp'] == 'wertung' && row['ort_id'] != null)
+          .where(
+              (row) => row['eingabetyp'] == 'wertung' && row['ort_id'] != null)
           .map(
             (row) => Zeitwert(
               zeitpunkt: DateTime.parse(row['erstellt_am']! as String),
@@ -135,8 +142,10 @@ class SqliteAuswertungsService implements AuswertungsService {
     ]);
     final gruppen = <String, (int, int)>{};
     for (final row in rows) {
-      final beginn = DateTime.tryParse(row['tatsaechlicher_beginn'] as String? ?? '');
-      final ende = DateTime.tryParse(row['tatsaechliches_ende'] as String? ?? '');
+      final beginn =
+          DateTime.tryParse(row['tatsaechlicher_beginn'] as String? ?? '');
+      final ende =
+          DateTime.tryParse(row['tatsaechliches_ende'] as String? ?? '');
       if (beginn == null) continue;
       final tageszeit = beginn.hour < 11
           ? 'morgens'
@@ -145,7 +154,9 @@ class SqliteAuswertungsService implements AuswertungsService {
               : 'abends';
       final key = '${row['typ']} · Wochentag ${beginn.weekday} · $tageszeit';
       final bisher = gruppen[key] ?? (0, 0);
-      final dauer = ende == null ? 0 : ende.difference(beginn).inMinutes.clamp(0, 24 * 60);
+      final dauer = ende == null
+          ? 0
+          : ende.difference(beginn).inMinutes.clamp(0, 24 * 60);
       gruppen[key] = (bisher.$1 + 1, bisher.$2 + dauer);
     }
     return [
