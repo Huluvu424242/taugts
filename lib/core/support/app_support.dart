@@ -304,7 +304,8 @@ Future<void> zeigeAenderungshistorie(
               maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.65,
             ),
             child: FutureBuilder<String>(
-              future: (changelogGateway ?? const AssetChangelogService()).laden(),
+              future:
+                  (changelogGateway ?? const AssetChangelogService()).laden(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Semantics(
