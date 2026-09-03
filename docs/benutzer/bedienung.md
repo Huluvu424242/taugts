@@ -28,7 +28,7 @@ Restaurantbesuche und Einkäufe können geplant, begonnen, beendet, in der Erleb
 
 Ein Restaurantbesuch führt seine Produkte als Bestellung. Mengen, Einzelpreise und Bewertungsstatus sind direkt sichtbar und bearbeitbar. Ein Einkauf verwendet denselben Erlebnisweg als Einkaufsliste, kann auch ohne Termin geplant werden und zeigt eine Summe ausschließlich aus Positionen mit erfasstem Preis; fehlende Preise werden ausdrücklich ausgewiesen.
 
-Bei einem Restaurantbesuch können die Produkte und die Gaststätte im selben Vorgang, aber als getrennte Bewertungen erfasst werden. Bei einem Einkauf kann entsprechend das Geschäft getrennt von Einkaufsliste und Produktbewertungen bewertet werden. Frühere Bewertungen werden dadurch nicht überschrieben.
+Bei einem Restaurantbesuch können die Produkte und die Gaststätte im selben Vorgang, aber als getrennte Bewertungen erfasst werden. Bei einem Einkauf kann entsprechend das Geschäft getrennt von Einkaufsliste und Produktbewertungen bewertet werden. Eine ausgefüllte Gaststätten- oder Geschäftsbewertung wird beim allgemeinen **Speichern** des Erlebnisses automatisch mitgespeichert, wenn sie seit dem letzten Speichern geändert wurde. Der eigene Button **Bewertung speichern** bleibt weiterhin verfügbar. Frühere Bewertungen werden dadurch nicht überschrieben.
 
 ## Historien
 
