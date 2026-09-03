@@ -3,6 +3,7 @@ import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/core/support/app_info.dart';
 import 'package:taugts/core/support/app_info_service.dart';
 import 'package:taugts/core/support/changelog_service.dart';
+import 'package:taugts/core/support/changelog_view.dart';
 import 'package:taugts/core/support/external_url_service.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 
@@ -152,6 +153,9 @@ Future<void> zeigeUeberDialog(
 
           return AlertDialog(
             scrollable: true,
+            titlePadding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+            contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             title: const Text('Über Taugt’s?'),
             content: FutureBuilder<AppInfo>(
               future: gateway.laden(),
@@ -177,7 +181,7 @@ Future<void> zeigeUeberDialog(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Releaseversion ${snapshot.data!.displayVersion}'),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Semantics(
                       button: true,
                       label: 'Hilfe in der Benutzerdokumentation extern öffnen',
@@ -192,7 +196,6 @@ Future<void> zeigeUeberDialog(
                         label: const Text('Hilfe'),
                       ),
                     ),
-                    const SizedBox(height: 16),
                     Semantics(
                       button: true,
                       label: 'Änderungshistorie anzeigen',
@@ -206,7 +209,6 @@ Future<void> zeigeUeberDialog(
                         label: const Text('Änderungshistorie'),
                       ),
                     ),
-                    const SizedBox(height: 16),
                     Semantics(
                       button: true,
                       label: 'Projektseite extern öffnen',
@@ -247,7 +249,7 @@ Future<void> zeigeUeberDialog(
                         ),
                       ),
                     ],
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
                     const Text('🄯  created by Huluvu424242'),
                   ],
                 );
@@ -297,32 +299,32 @@ Future<void> zeigeAenderungshistorie(
         title: const Text('Änderungshistorie'),
         content: SizedBox(
           width: 560,
-          child: FutureBuilder<String>(
-            future: (changelogGateway ?? const AssetChangelogService()).laden(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    'Änderungshistorie konnte nicht geladen werden: ${snapshot.error}',
-                  ),
-                );
-              }
-              if (!snapshot.hasData) {
-                return Center(
-                  child: Semantics(
-                    label: 'Änderungshistorie wird geladen',
-                    child: const CircularProgressIndicator(),
-                  ),
-                );
-              }
-              return SingleChildScrollView(
-                child: SelectableText(
-                  snapshot.data!,
-                  key: const Key('aenderungshistorie-inhalt'),
-                ),
-              );
-            },
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.65,
+            ),
+            child: FutureBuilder<String>(
+              future: (changelogGateway ?? const AssetChangelogService()).laden(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      'Änderungshistorie konnte nicht geladen werden: ${snapshot.error}',
+                    ),
+                  );
+                }
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: Semantics(
+                      label: 'Änderungshistorie wird geladen',
+                      child: const CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                return ChangelogDarstellung(markdown: snapshot.data!);
+              },
+            ),
           ),
         ),
         actions: [
