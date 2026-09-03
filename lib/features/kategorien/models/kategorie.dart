@@ -15,7 +15,11 @@ class Kategorie {
   final String? elternId;
   final bool istStandard;
 
-  Kategorie kopiereMit({String? name, String? elternId, bool elternEntfernen = false}) =>
+  Kategorie kopiereMit({
+    String? name,
+    String? elternId,
+    bool elternEntfernen = false,
+  }) =>
       Kategorie(
         id: id,
         name: name ?? this.name,
@@ -74,5 +78,13 @@ abstract final class StandardKategorien {
     istStandard: true,
   );
 
-  static const alle = [produkt, getraenk, bier, speise, ort, gastronomie, geschaeft];
+  static const alle = [
+    produkt,
+    getraenk,
+    bier,
+    speise,
+    ort,
+    gastronomie,
+    geschaeft,
+  ];
 }
