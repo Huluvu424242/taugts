@@ -1,5 +1,6 @@
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/kategorien/models/kategorie.dart';
 import 'package:taugts/features/kategorien/models/kriterienset.dart';
 import 'package:taugts/features/kategorien/services/kategorie_repository.dart';
 import 'package:taugts/features/kategorien/services/kriterienset_repository.dart';
@@ -20,7 +21,9 @@ class KriteriensetService {
     required KriteriumObjektart fallbackObjektart,
   }) async {
     final alleKriterien = await bewertungen.ladeKriterien(nurAktive: true);
-    final nachId = {for (final kriterium in alleKriterien) kriterium.id: kriterium};
+    final nachId = {
+      for (final kriterium in alleKriterien) kriterium.id: kriterium,
+    };
     final pfad = _pfad(kategorieId);
     final wirksam = <String, WirksamesKriterium>{};
     var wirksamerFallback = fallbackObjektart;
@@ -71,8 +74,8 @@ class KriteriensetService {
     );
   }
 
-  List<dynamic> _pfad(String kategorieId) {
-    final pfad = <dynamic>[];
+  List<Kategorie> _pfad(String kategorieId) {
+    final pfad = <Kategorie>[];
     final besucht = <String>{};
     var aktuell = kategorien.finde(kategorieId);
     while (aktuell != null && besucht.add(aktuell.id)) {
