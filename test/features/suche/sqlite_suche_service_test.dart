@@ -56,6 +56,34 @@ void main() {
     );
   });
 
+  test('Globale Suche findet Treffer außerhalb des Produktbereichs', () async {
+    final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+    addTearDown(db.schliessen);
+    SqliteKategorieRepository(db);
+    SqliteKlassifikationsRepository(db);
+    final bewertungen = SqliteBewertungsRepository(db);
+    final jetzt = DateTime.utc(2026, 9, 3);
+    await bewertungen.speichereOrt(Ort(
+      id: 'o1',
+      name: 'Zum Goldenen Hopfen',
+      typ: Ortstyp.gastronomie,
+      adresse: 'Markt 1',
+      erstelltAm: jetzt,
+      geaendertAm: jetzt,
+    ));
+    final service = SqliteSucheService(db);
+
+    final treffer = await service.suche(
+      const Suchfilter(text: 'Goldenen Hopfen'),
+    );
+
+    expect(treffer.map((wert) => wert.id), contains('o1'));
+    expect(
+      treffer.firstWhere((wert) => wert.id == 'o1').art,
+      Suchziel.orte,
+    );
+  });
+
   test('Erlebnisse lassen sich nach Typ und Status kombinieren', () async {
     final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     addTearDown(db.schliessen);
