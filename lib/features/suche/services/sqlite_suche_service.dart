@@ -24,7 +24,8 @@ class SqliteSucheService implements SucheService {
   }
 
   @override
-  Future<List<Suchtreffer>> suche(Suchfilter filter) async => switch (filter.ziel) {
+  Future<List<Suchtreffer>> suche(Suchfilter filter) async =>
+      switch (filter.ziel) {
         Suchziel.produkte => _produkte(filter),
         Suchziel.orte => _orte(filter),
         Suchziel.erlebnisse => _erlebnisse(filter),
@@ -49,7 +50,16 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR pk.kategorie_id = ?)
       ORDER BY o.name COLLATE NOCASE
       LIMIT 500
-    ''', [text, text, text, text, text, text, filter.kategorieId, filter.kategorieId]);
+    ''', [
+      text,
+      text,
+      text,
+      text,
+      text,
+      text,
+      filter.kategorieId,
+      filter.kategorieId
+    ]);
     return [
       for (final row in rows)
         Suchtreffer(
@@ -80,7 +90,16 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR ok.kategorie_id = ?)
       ORDER BY o.name COLLATE NOCASE
       LIMIT 500
-    ''', [text, text, text, text, text, text, filter.kategorieId, filter.kategorieId]);
+    ''', [
+      text,
+      text,
+      text,
+      text,
+      text,
+      text,
+      filter.kategorieId,
+      filter.kategorieId
+    ]);
     return [
       for (final row in rows)
         Suchtreffer(
@@ -116,13 +135,21 @@ class SqliteSucheService implements SucheService {
       ORDER BY zeit DESC
       LIMIT 500
     ''', [
-      text, text, text,
-      filter.erlebnistyp?.name, filter.erlebnistyp?.name,
-      filter.erlebnisstatus?.name, filter.erlebnisstatus?.name,
-      filter.ortId, filter.ortId,
-      filter.produktId, filter.produktId,
-      von, von,
-      bis, bis,
+      text,
+      text,
+      text,
+      filter.erlebnistyp?.name,
+      filter.erlebnistyp?.name,
+      filter.erlebnisstatus?.name,
+      filter.erlebnisstatus?.name,
+      filter.ortId,
+      filter.ortId,
+      filter.produktId,
+      filter.produktId,
+      von,
+      von,
+      bis,
+      bis,
     ]);
     return [
       for (final row in rows)
@@ -186,11 +213,18 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR b.erstellt_am <= ?)
       ORDER BY b.erstellt_am DESC
     ''', [
-      filter.produktId, filter.produktId,
-      filter.ortId, filter.ortId,
-      filter.herkunftProfilId, filter.herkunftProfilId,
-      filter.kategorieId, filter.kategorieId,
-      von, von, bis, bis,
+      filter.produktId,
+      filter.produktId,
+      filter.ortId,
+      filter.ortId,
+      filter.herkunftProfilId,
+      filter.herkunftProfilId,
+      filter.kategorieId,
+      filter.kategorieId,
+      von,
+      von,
+      bis,
+      bis,
     ]);
     return [
       for (final row in rows)
@@ -227,10 +261,16 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR ob.bewertet_am <= ?)
       ORDER BY ob.bewertet_am DESC
     ''', [
-      filter.ortId, filter.ortId,
-      filter.herkunftProfilId, filter.herkunftProfilId,
-      filter.kategorieId, filter.kategorieId,
-      von, von, bis, bis,
+      filter.ortId,
+      filter.ortId,
+      filter.herkunftProfilId,
+      filter.herkunftProfilId,
+      filter.kategorieId,
+      filter.kategorieId,
+      von,
+      von,
+      bis,
+      bis,
     ]);
     return [
       for (final row in rows)
@@ -273,10 +313,16 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR pb.beobachtet_am <= ?)
       ORDER BY pb.beobachtet_am DESC
     ''', [
-      filter.produktId, filter.produktId,
-      filter.ortId, filter.ortId,
-      filter.kategorieId, filter.kategorieId,
-      von, von, bis, bis,
+      filter.produktId,
+      filter.produktId,
+      filter.ortId,
+      filter.ortId,
+      filter.kategorieId,
+      filter.kategorieId,
+      von,
+      von,
+      bis,
+      bis,
     ]);
     return [
       for (final row in rows)
