@@ -253,11 +253,16 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     if (!await _validiere(erlebnis) || !mounted) return;
     setState(() => _speichert = true);
     try {
-      await widget.repository.speichereErlebnis(erlebnis);
+      var gemeinsamGespeichert = false;
+      if (schliessen) {
+        gemeinsamGespeichert =
+            await _ortsbewertungController.speichereFallsGeaendert(erlebnis);
+      }
+      if (!gemeinsamGespeichert) {
+        await widget.repository.speichereErlebnis(erlebnis);
+      }
       if (!mounted) return;
       if (schliessen) {
-        await _ortsbewertungController.speichereFallsGeaendert(erlebnis);
-        if (!mounted) return;
         Navigator.of(context).pop(erlebnis);
         return;
       }
