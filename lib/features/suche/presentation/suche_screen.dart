@@ -16,7 +16,7 @@ class SucheScreen extends StatefulWidget {
 
 class _SucheScreenState extends State<SucheScreen> {
   final _text = TextEditingController();
-  Suchziel _ziel = Suchziel.produkte;
+  Suchziel _ziel = Suchziel.alle;
   Erlebnistyp? _erlebnistyp;
   Erlebnisstatus? _status;
   Historienart? _historienart;
@@ -82,7 +82,9 @@ class _SucheScreenState extends State<SucheScreen> {
                 items: [
                   for (final ziel in Suchziel.values)
                     DropdownMenuItem(
-                        value: ziel, child: Text(_zielLabel(ziel))),
+                      value: ziel,
+                      child: Text(_zielLabel(ziel)),
+                    ),
                 ],
                 onChanged: (wert) => setState(() {
                   if (wert != null) _ziel = wert;
@@ -147,7 +149,9 @@ class _SucheScreenState extends State<SucheScreen> {
                     ),
                     for (final art in Historienart.values)
                       DropdownMenuItem(
-                          value: art, child: Text(_historieLabel(art))),
+                        value: art,
+                        child: Text(_historieLabel(art)),
+                      ),
                   ],
                   onChanged: (wert) => setState(() {
                     _historienart = wert;
@@ -178,8 +182,10 @@ class _SucheScreenState extends State<SucheScreen> {
               const SizedBox(height: 20),
               Semantics(
                 header: true,
-                child: Text('Ergebnisse',
-                    style: Theme.of(context).textTheme.titleLarge),
+                child: Text(
+                  'Ergebnisse',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
               if (_treffer != null)
                 FutureBuilder<List<Suchtreffer>>(
@@ -189,7 +195,8 @@ class _SucheScreenState extends State<SucheScreen> {
                       return Semantics(
                         liveRegion: true,
                         child: const Text(
-                            'Die Suche konnte nicht ausgeführt werden.'),
+                          'Die Suche konnte nicht ausgeführt werden.',
+                        ),
                       );
                     }
                     if (!snapshot.hasData) {
@@ -228,6 +235,7 @@ class _SucheScreenState extends State<SucheScreen> {
       );
 
   String _zielLabel(Suchziel ziel) => switch (ziel) {
+        Suchziel.alle => 'Alle',
         Suchziel.produkte => 'Produkte',
         Suchziel.orte => 'Orte',
         Suchziel.erlebnisse => 'Erlebnisse',
@@ -261,8 +269,10 @@ class SuchtrefferDetailScreen extends StatelessWidget {
             children: [
               Semantics(
                 header: true,
-                child: Text(treffer.titel,
-                    style: Theme.of(context).textTheme.headlineSmall),
+                child: Text(
+                  treffer.titel,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
               ),
               const SizedBox(height: 12),
               Text(treffer.untertitel),
