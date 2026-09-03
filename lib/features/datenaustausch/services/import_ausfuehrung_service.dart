@@ -132,12 +132,19 @@ class ImportAusfuehrungService {
           _ersetzeBestand(datenbank);
         }
         for (final sammlung in _reihenfolge) {
-          var zaehler = const ImportErgebnisZaehler();
+          for (final ergebnisSammlung in _ergebnisSammlungen(sammlung)) {
+            ergebnis.putIfAbsent(
+              ergebnisSammlung,
+              () => const ImportErgebnisZaehler(),
+            );
+          }
           for (final roh in (importDokument[sammlung] as List? ?? const [])) {
             if (roh is! Map) {
               throw const FormatException('Importeintrag ist kein Objekt.');
             }
             final wert = Map<String, Object?>.from(roh);
+            final ergebnisSammlung = _ergebnisSammlung(sammlung, wert);
+            final zaehler = ergebnis[ergebnisSammlung]!;
             final importId = wert['id'] as String?;
             if (importId == null || importId.isEmpty) {
               throw const FormatException(
@@ -148,19 +155,20 @@ class ImportAusfuehrungService {
             final aktion = _entscheidung(sammlung, importId, entscheidungen);
             if (aktion == ImportKonfliktAktion.ueberspringen ||
                 aktion == ImportKonfliktAktion.lokaleVersion) {
-              zaehler = zaehler.plus(uebersprungen: 1);
+              ergebnis[ergebnisSammlung] = zaehler.plus(uebersprungen: 1);
               continue;
             }
             if (aktion == ImportKonfliktAktion.zusammenfuehren &&
                 mergeAliase.containsKey(importId)) {
-              zaehler = zaehler.plus(zusammengefuehrt: 1);
+              ergebnis[ergebnisSammlung] =
+                  zaehler.plus(zusammengefuehrt: 1);
               continue;
             }
             final existiert = _existiert(datenbank, sammlung, zielId);
             if (existiert &&
                 strategie == ImportStrategie.lokalBevorzugen &&
                 aktion != ImportKonfliktAktion.importVersion) {
-              zaehler = zaehler.plus(uebersprungen: 1);
+              ergebnis[ergebnisSammlung] = zaehler.plus(uebersprungen: 1);
               continue;
             }
             _schreibe(
@@ -169,11 +177,10 @@ class ImportAusfuehrungService {
               {...wert, 'id': zielId},
               existiert,
             );
-            zaehler = existiert
+            ergebnis[ergebnisSammlung] = existiert
                 ? zaehler.plus(aktualisiert: 1)
                 : zaehler.plus(hinzugefuegt: 1);
           }
-          ergebnis[sammlung] = zaehler;
         }
         for (final alias in aliase) {
           aliasRepository.speichere(
@@ -212,6 +219,21 @@ class ImportAusfuehrungService {
     int limit = 20,
   }) =>
       protokollRepository.lade(datenbank, limit: limit);
+
+  List<String> _ergebnisSammlungen(String sammlung) =>
+      sammlung == 'bewertungen'
+          ? const ['produktbewertungen', 'ortsbewertungswerte']
+          : [sammlung];
+
+  String _ergebnisSammlung(
+    String sammlung,
+    Map<String, Object?> wert,
+  ) {
+    if (sammlung != 'bewertungen') return sammlung;
+    return wert['zielart'] == 'ort'
+        ? 'ortsbewertungswerte'
+        : 'produktbewertungen';
+  }
 
   void _beruecksichtigeMerges(
     Map<String, ImportErgebnisZaehler> ergebnis,

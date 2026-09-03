@@ -189,13 +189,17 @@ void main() {
     expect(erstes.nachSammlung['erlebnisPositionen']!.hinzugefuegt, 1);
     expect(erstes.nachSammlung['preisbeobachtungen']!.hinzugefuegt, 1);
     expect(erstes.nachSammlung['ortsbewertungen']!.hinzugefuegt, 1);
-    expect(erstes.nachSammlung['bewertungen']!.hinzugefuegt, 2);
+    expect(erstes.nachSammlung['produktbewertungen']!.hinzugefuegt, 1);
+    expect(erstes.nachSammlung['ortsbewertungswerte']!.hinzugefuegt, 1);
 
     expect(zweites.nachSammlung['erlebnisse']!.aktualisiert, 1);
     expect(zweites.nachSammlung['erlebnisPositionen']!.aktualisiert, 1);
     expect(zweites.nachSammlung['preisbeobachtungen']!.aktualisiert, 1);
     expect(zweites.nachSammlung['ortsbewertungen']!.aktualisiert, 1);
-    expect(zweites.nachSammlung['bewertungen']!.aktualisiert, 2);
+    expect(zweites.nachSammlung['produktbewertungen']!.aktualisiert, 1);
+    expect(zweites.nachSammlung['ortsbewertungswerte']!.aktualisiert, 1);
+    expect(erstes.gesamt.hinzugefuegt, 10);
+    expect(zweites.gesamt.aktualisiert, 10);
 
     for (final tabelle in const {
       'erlebnisse': 1,

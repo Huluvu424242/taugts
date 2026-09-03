@@ -728,8 +728,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       'erlebnisse': 'Erlebnisse',
       'erlebnisPositionen': 'Positionen',
       'preisbeobachtungen': 'Preisbeobachtungen',
-      'bewertungen': 'Produktbewertungen',
+      'produktbewertungen': 'Produktbewertungen',
       'ortsbewertungen': 'Ortsbewertungen',
+      'ortsbewertungswerte': 'Bewertungswerte zu Orten',
     };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
