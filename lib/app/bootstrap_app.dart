@@ -10,6 +10,10 @@ import 'package:taugts/features/bewertungen/services/datenbank_factory.dart';
 import 'package:taugts/features/bewertungen/services/sqlite_bewertungs_repository.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
+import 'package:taugts/features/kategorien/services/kategorie_repository.dart';
+import 'package:taugts/features/kategorien/services/kriterienset_repository.dart';
+import 'package:taugts/features/kategorien/services/sqlite_kategorie_repository.dart';
+import 'package:taugts/features/kategorien/services/sqlite_kriterienset_repository.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 import 'package:taugts/features/profil/services/profil_repository.dart';
 import 'package:taugts/features/profil/services/sqlite_profil_repository.dart';
@@ -32,10 +36,14 @@ class _BootstrapAppState extends State<BootstrapApp> {
       datenbank,
       idGenerator: idGenerator,
     );
+    final kategorieRepository = SqliteKategorieRepository(datenbank);
+    final kriteriensetRepository = SqliteKriteriensetRepository(datenbank);
     return _StartDaten(
       profil: await profilRepository.ladeOderErstelleProfil(),
       profilRepository: profilRepository,
       bewertungsRepository: SqliteBewertungsRepository(datenbank),
+      kategorieRepository: kategorieRepository,
+      kriteriensetRepository: kriteriensetRepository,
       exportService: ExportService(
         datenbank,
         appVersion: '${paket.version}+${paket.buildNumber}',
@@ -59,6 +67,8 @@ class _BootstrapAppState extends State<BootstrapApp> {
               profil: daten.profil,
               profilRepository: daten.profilRepository,
               bewertungsRepository: daten.bewertungsRepository,
+              kategorieRepository: daten.kategorieRepository,
+              kriteriensetRepository: daten.kriteriensetRepository,
               exportService: daten.exportService,
               exportZielService: daten.exportZielService,
               idGenerator: daten.idGenerator,
@@ -122,6 +132,8 @@ class _StartDaten {
     required this.profil,
     required this.profilRepository,
     required this.bewertungsRepository,
+    required this.kategorieRepository,
+    required this.kriteriensetRepository,
     required this.exportService,
     required this.exportZielService,
     required this.idGenerator,
@@ -130,6 +142,8 @@ class _StartDaten {
   final Profil profil;
   final ProfilRepository profilRepository;
   final BewertungsRepository bewertungsRepository;
+  final KategorieRepository kategorieRepository;
+  final KriteriensetRepository kriteriensetRepository;
   final ExportService exportService;
   final ExportZielService exportZielService;
   final IdGenerator idGenerator;
