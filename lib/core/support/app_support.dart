@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/core/support/app_info.dart';
 import 'package:taugts/core/support/app_info_service.dart';
+import 'package:taugts/core/support/changelog_service.dart';
 import 'package:taugts/core/support/external_url_service.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 
@@ -13,11 +14,7 @@ const _benutzerdokumentationUrl =
 const appLogoAsset = 'assets/badges/powered_by_ki.png';
 
 class AppLogo extends StatelessWidget {
-  const AppLogo({
-    required this.size,
-    this.semanticLabel,
-    super.key,
-  });
+  const AppLogo({required this.size, this.semanticLabel, super.key});
 
   final double size;
   final String? semanticLabel;
@@ -30,13 +27,12 @@ class AppLogo extends StatelessWidget {
       height: size,
       fit: BoxFit.contain,
     );
-    final label = semanticLabel;
-    if (label == null) {
+    if (semanticLabel == null) {
       return ExcludeSemantics(child: logo);
     }
     return Semantics(
       image: true,
-      label: label,
+      label: semanticLabel,
       child: ExcludeSemantics(child: logo),
     );
   }
@@ -47,12 +43,14 @@ class AppSupportMenu extends StatelessWidget {
     required this.contextName,
     this.appInfoGateway,
     this.externalUrlGateway,
+    this.changelogGateway,
     super.key,
   });
 
   final String contextName;
   final AppInfoGateway? appInfoGateway;
   final ExternalUrlGateway? externalUrlGateway;
+  final ChangelogGateway? changelogGateway;
 
   @override
   Widget build(BuildContext context) => PopupMenuButton<_SupportAktion>(
@@ -71,6 +69,7 @@ class AppSupportMenu extends StatelessWidget {
                 context,
                 appInfoGateway: appInfoGateway,
                 externalUrlGateway: externalUrlGateway,
+                changelogGateway: changelogGateway,
               );
           }
         },
@@ -118,15 +117,16 @@ Future<void> zeigeUeberDialog(
   BuildContext context, {
   AppInfoGateway? appInfoGateway,
   ExternalUrlGateway? externalUrlGateway,
+  ChangelogGateway? changelogGateway,
 }) async {
   final gateway = appInfoGateway ?? AppInfoService();
   final urlGateway = externalUrlGateway ?? ExternalUrlService();
+  final changelog = changelogGateway ?? const AssetChangelogService();
   await showDialog<void>(
     context: context,
     builder: (dialogContext) {
       String? linkFehler;
       bool oeffnetLink = false;
-
       return StatefulBuilder(
         builder: (context, setDialogState) {
           Future<void> oeffneExternesZiel({
@@ -139,14 +139,10 @@ Future<void> zeigeUeberDialog(
             });
             try {
               await urlGateway.oeffnen(url);
-              if (!context.mounted) {
-                return;
-              }
+              if (!context.mounted) return;
               setDialogState(() => oeffnetLink = false);
             } catch (error) {
-              if (!context.mounted) {
-                return;
-              }
+              if (!context.mounted) return;
               setDialogState(() {
                 oeffnetLink = false;
                 linkFehler = '$zielName konnte nicht geöffnet werden: $error';
@@ -194,6 +190,20 @@ Future<void> zeigeUeberDialog(
                                 ),
                         icon: const Icon(Icons.help_outline),
                         label: const Text('Hilfe'),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Semantics(
+                      button: true,
+                      label: 'Änderungshistorie anzeigen',
+                      child: TextButton.icon(
+                        key: const Key('aenderungshistorie-button'),
+                        onPressed: () => zeigeAenderungshistorie(
+                          dialogContext,
+                          changelogGateway: changelog,
+                        ),
+                        icon: const Icon(Icons.history),
+                        label: const Text('Änderungshistorie'),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -261,10 +271,7 @@ Future<void> zeigeUeberDialog(
                 key: const Key('ueber-schliessen-mit-logo'),
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const AppLogo(
-                    size: 32,
-                    semanticLabel: 'Powered by KI',
-                  ),
+                  const AppLogo(size: 32, semanticLabel: 'Powered by KI'),
                   const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => Navigator.of(dialogContext).pop(),
@@ -279,6 +286,53 @@ Future<void> zeigeUeberDialog(
     },
   );
 }
+
+Future<void> zeigeAenderungshistorie(
+  BuildContext context, {
+  ChangelogGateway? changelogGateway,
+}) =>
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Änderungshistorie'),
+        content: SizedBox(
+          width: 560,
+          child: FutureBuilder<String>(
+            future: (changelogGateway ?? const AssetChangelogService()).laden(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    'Änderungshistorie konnte nicht geladen werden: ${snapshot.error}',
+                  ),
+                );
+              }
+              if (!snapshot.hasData) {
+                return Center(
+                  child: Semantics(
+                    label: 'Änderungshistorie wird geladen',
+                    child: const CircularProgressIndicator(),
+                  ),
+                );
+              }
+              return SingleChildScrollView(
+                child: SelectableText(
+                  snapshot.data!,
+                  key: const Key('aenderungshistorie-inhalt'),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Schließen'),
+          ),
+        ],
+      ),
+    );
 
 Future<void> zeigeBarrierefreiheitserklaerung(
   BuildContext context, {
@@ -367,21 +421,15 @@ Future<void> zeigeBugMeldung(
   try {
     appInfo = await gateway.laden();
   } catch (error) {
-    if (!context.mounted) {
-      return;
-    }
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          'Releaseversion konnte nicht geladen werden: $error',
-        ),
+        content: Text('Releaseversion konnte nicht geladen werden: $error'),
       ),
     );
     return;
   }
-  if (!context.mounted) {
-    return;
-  }
+  if (!context.mounted) return;
   await showDialog<void>(
     context: context,
     builder: (_) => _BugMeldungDialog(
@@ -409,13 +457,11 @@ class _BugMeldungDialog extends StatefulWidget {
 
 class _BugMeldungDialogState extends State<_BugMeldungDialog> {
   static const _beschreibungMaxLength = 2000;
-
   final _formularKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
   final _fehlerFokus = FocusNode(debugLabel: 'Bugreport-Fehlersammler');
   final _typFokus = FocusNode(debugLabel: 'Fehlerart');
   final _beschreibung = TextEditingController();
-
   String? _fehlerart;
   bool _zeigtFehler = false;
   bool _oeffnet = false;
@@ -442,18 +488,14 @@ class _BugMeldungDialogState extends State<_BugMeldungDialog> {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
       );
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       _fehlerFokus.requestFocus();
       return;
     }
-
     setState(() {
       _oeffnet = true;
       _fehlermeldung = null;
     });
-
     final titel = '[$_fehlerart] App-Fehler in ${widget.contextName}';
     final beschreibung = _beschreibung.text.trim();
     final inhalt = [
@@ -481,17 +523,12 @@ class _BugMeldungDialogState extends State<_BugMeldungDialog> {
         'body': inhalt,
       },
     );
-
     try {
       await widget.externalUrlGateway.oeffnen(uri.toString());
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       Navigator.of(context).pop();
     } catch (error) {
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       setState(() {
         _oeffnet = false;
         _fehlermeldung =
@@ -517,16 +554,12 @@ class _BugMeldungDialogState extends State<_BugMeldungDialog> {
                     builder: (_) => _zeigtFehler && _fehlerart == null
                         ? FormularFehlersammler(
                             focusNode: _fehlerFokus,
-                            fehler: [
-                              ('Fehlerart: Bitte auswählen', _typFokus),
-                            ],
+                            fehler: [('Fehlerart: Bitte auswählen', _typFokus)],
                           )
                         : const SizedBox.shrink(),
                   ),
                   Text('Kontext: ${widget.contextName}'),
-                  Text(
-                    'Releaseversion: ${widget.appInfo.displayVersion}',
-                  ),
+                  Text('Releaseversion: ${widget.appInfo.displayVersion}'),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     focusNode: _typFokus,
@@ -609,9 +642,7 @@ class _BugMeldungDialogState extends State<_BugMeldungDialog> {
           FilledButton.icon(
             onPressed: _oeffnet ? null : _absenden,
             icon: const Icon(Icons.open_in_new),
-            label: Text(
-              _oeffnet ? 'Wird geöffnet …' : 'Auf GitHub prüfen',
-            ),
+            label: Text(_oeffnet ? 'Wird geöffnet …' : 'Auf GitHub prüfen'),
           ),
         ],
       );
