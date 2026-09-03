@@ -19,7 +19,8 @@ class ChangelogDarstellung extends StatelessWidget {
       shrinkWrap: true,
       itemCount: eintraege.length,
       separatorBuilder: (context, index) => const SizedBox(height: 12),
-      itemBuilder: (context, index) => _Versionskarte(eintrag: eintraege[index]),
+      itemBuilder: (context, index) =>
+          _Versionskarte(eintrag: eintraege[index]),
     );
   }
 }
@@ -135,7 +136,8 @@ List<_Versionseintrag> _parse(String markdown) {
       }
       final kopf = zeile.substring(3).trim();
       final istUnveroeffentlicht = kopf == '[Unreleased]';
-      final match = RegExp(r'^\[([^\]]+)\](?:\s+-\s+(.+))?$').firstMatch(kopf);
+      final match =
+          RegExp(r'^\[([^\]]+)\](?:\s+-\s+(.+))?$').firstMatch(kopf);
       version = _Versionseintrag(
         titel: istUnveroeffentlicht
             ? 'In Entwicklung'
