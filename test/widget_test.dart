@@ -9,7 +9,7 @@ void main() {
     expect(find.text('Taugt’s?'), findsOneWidget);
     expect(find.text('Was taugt’s?'), findsOneWidget);
     expect(find.text('Jetzt bewerten'), findsOneWidget);
-    expect(find.text('Dinge'), findsOneWidget);
+    expect(find.text('Produkte'), findsOneWidget);
     expect(find.text('Orte'), findsOneWidget);
     expect(find.text('Bewertungen'), findsOneWidget);
 
