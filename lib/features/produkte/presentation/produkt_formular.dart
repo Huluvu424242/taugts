@@ -5,6 +5,11 @@ import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/produkte/presentation/barcode_scanner_screen.dart';
+
+typedef ProduktFormularBarcodeScanStart = Future<String?> Function(
+  BuildContext context,
+);
 
 class _Validierungsfehler {
   const _Validierungsfehler(this.text, this.fokus);
@@ -19,6 +24,7 @@ class ProduktFormular extends StatefulWidget {
     required this.idGenerator,
     this.produkt,
     this.barcodeVorgabe,
+    this.barcodeScanStart,
     this.onErneutBewerten,
     super.key,
   });
@@ -27,6 +33,7 @@ class ProduktFormular extends StatefulWidget {
   final IdGenerator idGenerator;
   final Produkt? produkt;
   final String? barcodeVorgabe;
+  final ProduktFormularBarcodeScanStart? barcodeScanStart;
   final Future<void> Function()? onErneutBewerten;
 
   @override
@@ -127,6 +134,26 @@ class _ProduktFormularState extends State<ProduktFormular> {
       return 'Bitte eine positive Füllmenge eingeben.';
     }
     return null;
+  }
+
+  Future<void> _barcodeScannen() async {
+    final barcode = await (widget.barcodeScanStart?.call(context) ??
+        Navigator.of(context).push<String>(
+          MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+        ));
+    if (!mounted || barcode == null) {
+      return;
+    }
+    final wert = barcode.trim();
+    if (wert.isEmpty) {
+      return;
+    }
+    setState(() {
+      _barcode.text = wert;
+      if (_zeigtFehler) {
+        _fehler = _validierungsfehler();
+      }
+    });
   }
 
   Future<void> _speichern() async {
@@ -300,11 +327,16 @@ class _ProduktFormularState extends State<ProduktFormular> {
                 ),
                 _textfeld(
                   _barcode,
-                  'Barcode',
+                  'EAN / Barcode',
                   maxLength: 80,
                   validator: _minimalangabePruefen,
                   keyboardType: TextInputType.number,
                   focusNode: _barcodeFokus,
+                  suffixIcon: IconButton(
+                    tooltip: 'EAN scannen',
+                    onPressed: _speichert ? null : _barcodeScannen,
+                    icon: const Icon(Icons.qr_code_scanner),
+                  ),
                 ),
                 _textfeld(_marke, 'Marke (optional)', maxLength: 120),
                 if (_produktart == Produktart.bier) ...[
@@ -352,13 +384,14 @@ class _ProduktFormularState extends State<ProduktFormular> {
     FocusNode? focusNode,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
+    Widget? suffixIcon,
   }) =>
       Padding(
         padding: const EdgeInsets.only(top: 16),
         child: TextFormField(
           controller: controller,
           focusNode: focusNode,
-          decoration: InputDecoration(labelText: label),
+          decoration: InputDecoration(labelText: label, suffixIcon: suffixIcon),
           keyboardType: keyboardType,
           maxLength: maxLength,
           maxLines: maxLines,
