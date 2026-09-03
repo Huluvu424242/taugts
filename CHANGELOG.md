@@ -17,6 +17,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Changed
 
+- Beim Speichern eines Restaurantbesuchs oder Einkaufs wird eine ausgefüllte und seit dem letzten Speichern geänderte Gaststätten- beziehungsweise Geschäftsbewertung nun gemeinsam mit dem Erlebnis gespeichert.
 - Die Über-Seite zeigt direkt unter ihrer Überschrift die installierte Releaseversion, bietet danach einen Hilfe-Link zum Einstieg der Benutzerdokumentation und weist als letzte Inhaltszeile `🄯  created by Huluvu424242` aus.
 
 ### Fixed
