@@ -39,6 +39,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   final _endeFokus = FocusNode();
   final _dauer = TextEditingController();
   final _notiz = TextEditingController();
+  final _ortsbewertungController = GaststaettenbewertungController();
   final _positionenInBearbeitung = <String>{};
   late final String _id;
   late final DateTime _erstelltAm;
@@ -255,6 +256,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       await widget.repository.speichereErlebnis(erlebnis);
       if (!mounted) return;
       if (schliessen) {
+        await _ortsbewertungController.speichereFallsGeaendert(erlebnis);
+        if (!mounted) return;
         Navigator.of(context).pop(erlebnis);
         return;
       }
@@ -264,14 +267,17 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('${_statusLabel(erlebnis.status)} gespeichert.')),
+          content: Text('${_statusLabel(erlebnis.status)} gespeichert.'),
+        ),
       );
     } catch (_) {
       if (!mounted) return;
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Das Erlebnis konnte nicht gespeichert werden.'),
+          content: Text(
+            'Das Erlebnis konnte nicht vollständig gespeichert werden.',
+          ),
         ),
       );
     }
@@ -355,7 +361,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Die Position konnte nicht entfernt werden.')),
+          content: Text('Die Position konnte nicht entfernt werden.'),
+        ),
       );
     }
   }
@@ -541,7 +548,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     final waehrungen = mitPreis.map((e) => e.preis!.betrag.waehrung).toSet();
     if (mitPreis.isEmpty) {
       return const Text(
-          'Summe nicht verfügbar · für alle Positionen fehlt ein Preis.');
+        'Summe nicht verfügbar · für alle Positionen fehlt ein Preis.',
+      );
     }
     if (waehrungen.length != 1) {
       return Text(
@@ -808,6 +816,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   idGenerator: widget.idGenerator,
                   erlebnis: _erlebnisAusEingaben(),
                   ort: _ort,
+                  controller: _ortsbewertungController,
                 ),
               ],
             ],
