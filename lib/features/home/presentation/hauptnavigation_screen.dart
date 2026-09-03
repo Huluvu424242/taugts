@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:taugts/core/ids/id_generator.dart';
+import 'package:taugts/features/auswertungen/presentation/auswertungen_screen.dart';
+import 'package:taugts/features/auswertungen/services/auswertungs_service.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
@@ -23,6 +25,7 @@ class HauptnavigationScreen extends StatefulWidget {
     required this.kategorieRepository,
     required this.kriteriensetRepository,
     required this.sucheService,
+    required this.auswertungsService,
     super.key,
   });
 
@@ -35,6 +38,7 @@ class HauptnavigationScreen extends StatefulWidget {
   final KategorieRepository? kategorieRepository;
   final KriteriensetRepository? kriteriensetRepository;
   final SucheService? sucheService;
+  final AuswertungsService? auswertungsService;
 
   @override
   State<HauptnavigationScreen> createState() => _HauptnavigationScreenState();
@@ -62,6 +66,9 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
       widget.sucheService == null
           ? const _NichtVerfuegbar(text: 'Die Suche ist nicht verfügbar.')
           : SucheScreen(service: widget.sucheService!),
+      widget.auswertungsService == null
+          ? const _NichtVerfuegbar(text: 'Auswertungen sind nicht verfügbar.')
+          : AuswertungenScreen(service: widget.auswertungsService!),
       if (kannSets)
         KriteriensetsScreen(
           kategorien: kategorien,
@@ -84,9 +91,11 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
             selectedIcon: Icon(Icons.home),
             label: 'Start',
           ),
+          NavigationDestination(icon: Icon(Icons.search), label: 'Suche'),
           NavigationDestination(
-            icon: Icon(Icons.search),
-            label: 'Suche',
+            icon: Icon(Icons.insights_outlined),
+            selectedIcon: Icon(Icons.insights),
+            label: 'Auswertung',
           ),
           NavigationDestination(
             icon: Icon(Icons.rule_outlined),

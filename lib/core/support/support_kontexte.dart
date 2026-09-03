@@ -22,6 +22,7 @@ abstract final class SupportKontexte {
   static const bewertungsverlauf = 'Bewertungsverlauf';
   static const suche = 'Suche und Filter';
   static const suchtreffer = 'Suchtreffer und historischer Kontext';
+  static const auswertungen = 'Lokale Auswertungen';
   static const ueberDialog = 'Über-Dialog';
   static const barrierefreiheitserklaerung = 'Barrierefreiheitserklärung';
 

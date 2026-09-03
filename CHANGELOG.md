@@ -8,6 +8,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- Grundlegende lokale Auswertungen zeigen vergleichbare Kriterienwerte, Preis- und Bewertungsverläufe sowie Erlebnis- und ausdrücklich erfasste Andrangsdaten nachvollziehbar und ohne implizite Kausalaussagen.
 - Die vollständig lokale Suche findet Produkte, Orte, Erlebnisse, Bewertungen und Preisbeobachtungen über kombinierbare strukturierte und freie Filter und führt historische Treffer in ihren Erlebniskontext.
 - Kategorie-Kriteriensets können zentrale Kriterien geordnet erweitern oder ersetzen, aus Elternkategorien erben und zeigen Standard-, geerbte und explizite Quellen nachvollziehbar an.
 - Strukturierte Kategorien, Herkunft, Hersteller und Eigenschaften bleiben fachlich von freien Tags getrennt; Tags werden lokal normalisiert gespeichert und können entfernt werden, ohne historische Bewertungen zu verändern.

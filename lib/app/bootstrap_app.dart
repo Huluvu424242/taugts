@@ -5,6 +5,7 @@ import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/core/theme/app_theme.dart';
+import 'package:taugts/features/auswertungen/services/sqlite_auswertungs_service.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/bewertungen/services/datenbank_factory.dart';
 import 'package:taugts/features/bewertungen/services/sqlite_bewertungs_repository.dart';
@@ -50,6 +51,7 @@ class _BootstrapAppState extends State<BootstrapApp> {
       kategorieRepository: kategorieRepository,
       kriteriensetRepository: kriteriensetRepository,
       sucheService: SqliteSucheService(datenbank),
+      auswertungsService: SqliteAuswertungsService(datenbank),
       exportService: ExportService(
         datenbank,
         appVersion: '${paket.version}+${paket.buildNumber}',
@@ -76,6 +78,7 @@ class _BootstrapAppState extends State<BootstrapApp> {
               kategorieRepository: daten.kategorieRepository,
               kriteriensetRepository: daten.kriteriensetRepository,
               sucheService: daten.sucheService,
+              auswertungsService: daten.auswertungsService,
               exportService: daten.exportService,
               exportZielService: daten.exportZielService,
               idGenerator: daten.idGenerator,
@@ -142,6 +145,7 @@ class _StartDaten {
     required this.kategorieRepository,
     required this.kriteriensetRepository,
     required this.sucheService,
+    required this.auswertungsService,
     required this.exportService,
     required this.exportZielService,
     required this.idGenerator,
@@ -153,6 +157,7 @@ class _StartDaten {
   final KategorieRepository kategorieRepository;
   final KriteriensetRepository kriteriensetRepository;
   final SucheService sucheService;
+  final SqliteAuswertungsService auswertungsService;
   final ExportService exportService;
   final ExportZielService exportZielService;
   final IdGenerator idGenerator;

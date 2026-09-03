@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/theme/app_theme.dart';
+import 'package:taugts/features/auswertungen/services/auswertungs_service.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
@@ -22,6 +23,7 @@ class TaugtsApp extends StatelessWidget {
     this.kategorieRepository,
     this.kriteriensetRepository,
     this.sucheService,
+    this.auswertungsService,
     super.key,
   });
 
@@ -34,6 +36,7 @@ class TaugtsApp extends StatelessWidget {
   final KategorieRepository? kategorieRepository;
   final KriteriensetRepository? kriteriensetRepository;
   final SucheService? sucheService;
+  final AuswertungsService? auswertungsService;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -48,6 +51,7 @@ class TaugtsApp extends StatelessWidget {
           kategorieRepository: kategorieRepository,
           kriteriensetRepository: kriteriensetRepository,
           sucheService: sucheService,
+          auswertungsService: auswertungsService,
         ),
         theme: AppTheme.light,
         title: 'Taugt’s?',
