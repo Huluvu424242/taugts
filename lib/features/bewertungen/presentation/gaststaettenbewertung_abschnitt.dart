@@ -229,7 +229,8 @@ class _FormularState extends State<_Formular> {
       widget.istGeschaeft ? 'Geschäftsbewertung' : 'Gaststättenbewertung';
 
   bool get _hatEingabe =>
-      _werte.values.any((wert) => wert != null) || _notiz.text.trim().isNotEmpty;
+      _werte.values.any((wert) => wert != null) ||
+      _notiz.text.trim().isNotEmpty;
 
   @override
   void initState() {
@@ -287,8 +288,7 @@ class _FormularState extends State<_Formular> {
       for (final eintrag in _werte.entries)
         if (eintrag.value != null)
           Bewertung(
-            id: vorhandeneWerte[eintrag.key]?.id ??
-                widget.idGenerator.neueId(),
+            id: vorhandeneWerte[eintrag.key]?.id ?? widget.idGenerator.neueId(),
             erlebnisId: erlebnis.id,
             ortId: widget.ort.id,
             ortsbewertungId: id,
