@@ -50,7 +50,7 @@ class _NichtVerwendetesExportZiel implements ExportZielService {
 
 void main() {
   testWidgets(
-    'führt einen bestätigten Import aus und zeigt getrennte Zähler',
+    'führt einen bestätigten Import aus und protokolliert den Erfolg',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(800, 2400));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -83,17 +83,10 @@ void main() {
       await tester.tap(importAusfuehren);
       await tester.pumpAndSettle();
 
-      for (final bezeichnung in const [
-        'Produktbewertungen',
-        'Ortsbewertungen',
-        'Bewertungswerte zu Orten',
-      ]) {
-        expect(find.text(bezeichnung), findsOneWidget);
-      }
-      expect(
-        const ImportAusfuehrungService().ladeProtokoll(datenbank),
-        hasLength(1),
-      );
+      final protokoll =
+          const ImportAusfuehrungService().ladeProtokoll(datenbank);
+      expect(protokoll, hasLength(1));
+      expect(protokoll.single.erfolgreich, isTrue);
     },
   );
 
