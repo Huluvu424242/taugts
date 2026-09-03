@@ -37,6 +37,8 @@ void main() {
     expect(logo.left, greaterThan(titel.right));
     expect(find.byTooltip('Mein Profil bearbeiten'), findsOneWidget);
     expect(find.byTooltip('App-Menü öffnen'), findsOneWidget);
+    expect(find.text('Produkte'), findsOneWidget);
+    expect(find.text('Dinge'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

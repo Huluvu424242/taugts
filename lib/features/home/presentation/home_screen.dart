@@ -354,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _navigationsKachel(
                       width: breite,
                       icon: Icons.inventory_2_outlined,
-                      label: 'Dinge',
+                      label: 'Produkte',
                       onPressed: widget.bewertungsRepository != null &&
                               widget.idGenerator != null
                           ? _produkteOeffnen
