@@ -9,6 +9,7 @@ import 'package:taugts/features/kategorien/services/kategorie_repository.dart';
 import 'package:taugts/features/kategorien/services/kriterienset_repository.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 import 'package:taugts/features/profil/services/profil_repository.dart';
+import 'package:taugts/features/suche/services/suche_service.dart';
 
 class TaugtsApp extends StatelessWidget {
   const TaugtsApp({
@@ -20,6 +21,7 @@ class TaugtsApp extends StatelessWidget {
     this.idGenerator,
     this.kategorieRepository,
     this.kriteriensetRepository,
+    this.sucheService,
     super.key,
   });
 
@@ -31,6 +33,7 @@ class TaugtsApp extends StatelessWidget {
   final IdGenerator? idGenerator;
   final KategorieRepository? kategorieRepository;
   final KriteriensetRepository? kriteriensetRepository;
+  final SucheService? sucheService;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -44,6 +47,7 @@ class TaugtsApp extends StatelessWidget {
           idGenerator: idGenerator,
           kategorieRepository: kategorieRepository,
           kriteriensetRepository: kriteriensetRepository,
+          sucheService: sucheService,
         ),
         theme: AppTheme.light,
         title: 'Taugt’s?',

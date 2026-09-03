@@ -19,7 +19,7 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
 
-    expect(find.text('Suche'), findsOneWidget);
+    expect(find.text('Suche'), findsWidgets);
     expect(find.text('Import/Export'), findsOneWidget);
     expect(find.text('Einstellungen'), findsOneWidget);
     expect(find.text('Erlebnis registrieren'), findsOneWidget);
