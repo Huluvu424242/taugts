@@ -8,6 +8,8 @@ import 'package:taugts/core/support/support_kontexte.dart';
 const _appRepository = 'Huluvu424242/taugts';
 const _projektseiteUrl = 'https://github.com/Huluvu424242/taugts';
 const _projektdokumentationUrl = 'https://huluvu424242.github.io/taugts/';
+const _benutzerdokumentationUrl =
+    'https://huluvu424242.github.io/taugts/benutzer/';
 const appLogoAsset = 'assets/badges/powered_by_ki.png';
 
 class AppLogo extends StatelessWidget {
@@ -178,9 +180,22 @@ Future<void> zeigeUeberDialog(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Taugt’s?'),
-                    const SizedBox(height: 8),
                     Text('Releaseversion ${snapshot.data!.displayVersion}'),
+                    const SizedBox(height: 8),
+                    Semantics(
+                      button: true,
+                      label: 'Hilfe in der Benutzerdokumentation extern öffnen',
+                      child: TextButton.icon(
+                        onPressed: oeffnetLink
+                            ? null
+                            : () => oeffneExternesZiel(
+                                  url: _benutzerdokumentationUrl,
+                                  zielName: 'Hilfe',
+                                ),
+                        icon: const Icon(Icons.help_outline),
+                        label: const Text('Hilfe'),
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     Semantics(
                       button: true,
@@ -222,6 +237,8 @@ Future<void> zeigeUeberDialog(
                         ),
                       ),
                     ],
+                    const SizedBox(height: 16),
+                    const Text('🄯  created by Huluvu424242'),
                   ],
                 );
               },
