@@ -21,7 +21,7 @@ class SqliteKategorieRepository implements KategorieRepository {
     ''');
     _db.verbindung.execute('''
       CREATE TABLE IF NOT EXISTS produkt_kategorien (
-        produkt_id TEXT NOT NULL REFERENCES produkte(id) ON DELETE CASCADE,
+        produkt_id TEXT NOT NULL REFERENCES produkte(objekt_id) ON DELETE CASCADE,
         kategorie_id TEXT NOT NULL REFERENCES kategorien(id),
         PRIMARY KEY (produkt_id, kategorie_id)
       )
