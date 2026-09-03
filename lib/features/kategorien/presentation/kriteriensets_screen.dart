@@ -154,7 +154,8 @@ class _KriteriensetsScreenState extends State<KriteriensetsScreen> {
                 future: _kriterien,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return const Text('Kriterien konnten nicht geladen werden.');
+                    return const Text(
+                        'Kriterien konnten nicht geladen werden.');
                   }
                   if (!snapshot.hasData) {
                     return Semantics(
@@ -168,7 +169,8 @@ class _KriteriensetsScreenState extends State<KriteriensetsScreen> {
                         CheckboxListTile(
                           value: _explizit.contains(kriterium.id),
                           title: Text(kriterium.name),
-                          subtitle: Text(_artLabel(kriterium.wirksameObjektart)),
+                          subtitle:
+                              Text(_artLabel(kriterium.wirksameObjektart)),
                           onChanged: (aktiv) => setState(() {
                             if (aktiv == true) {
                               _explizit.add(kriterium.id);
