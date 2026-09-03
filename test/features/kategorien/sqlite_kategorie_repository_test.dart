@@ -61,9 +61,10 @@ void main() {
 
   test('verhindert stilles Löschen verwendeter Kategorien', () {
     db.verbindung.execute(
-      "INSERT INTO produkte (id, name, erstellt_am, geaendert_am) "
-      "VALUES ('p1', 'Test', '2026-09-03', '2026-09-03')",
+      "INSERT INTO objekte (id, name, art, erstellt_am, geaendert_am) "
+      "VALUES ('p1', 'Test', 'produkt', '2026-09-03', '2026-09-03')",
     );
+    db.verbindung.execute("INSERT INTO produkte (objekt_id) VALUES ('p1')");
     repository.ordneProduktZu('p1', StandardKategorien.bier.id);
     expect(
       repository.kategorienFuerProdukt('p1'),
