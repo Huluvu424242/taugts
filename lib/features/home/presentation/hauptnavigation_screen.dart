@@ -62,6 +62,7 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
         exportService: widget.exportService,
         exportZielService: widget.exportZielService,
         idGenerator: widget.idGenerator,
+        onSucheOeffnen: () => setState(() => _index = 1),
       ),
       widget.sucheService == null
           ? const _NichtVerfuegbar(text: 'Die Suche ist nicht verfügbar.')
