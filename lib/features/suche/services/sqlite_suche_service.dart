@@ -26,11 +26,22 @@ class SqliteSucheService implements SucheService {
   @override
   Future<List<Suchtreffer>> suche(Suchfilter filter) async =>
       switch (filter.ziel) {
+        Suchziel.alle => _alle(filter),
         Suchziel.produkte => _produkte(filter),
         Suchziel.orte => _orte(filter),
         Suchziel.erlebnisse => _erlebnisse(filter),
         Suchziel.historie => _historie(filter),
       };
+
+  List<Suchtreffer> _alle(Suchfilter filter) {
+    final ergebnis = <Suchtreffer>[
+      ..._produkte(filter),
+      ..._orte(filter),
+      ..._erlebnisse(filter),
+      ..._historie(filter),
+    ];
+    return ergebnis.take(500).toList(growable: false);
+  }
 
   List<Suchtreffer> _produkte(Suchfilter filter) {
     final text = '%${filter.text.trim().toLowerCase()}%';
@@ -58,7 +69,7 @@ class SqliteSucheService implements SucheService {
       text,
       text,
       filter.kategorieId,
-      filter.kategorieId
+      filter.kategorieId,
     ]);
     return [
       for (final row in rows)
@@ -98,7 +109,7 @@ class SqliteSucheService implements SucheService {
       text,
       text,
       filter.kategorieId,
-      filter.kategorieId
+      filter.kategorieId,
     ]);
     return [
       for (final row in rows)
@@ -181,14 +192,15 @@ class SqliteSucheService implements SucheService {
         filter.historienart == Historienart.preisbeobachtung) {
       ergebnis.addAll(_preise(filter));
     }
-    ergebnis.sort((a, b) =>
-        (b.zeitpunkt ?? DateTime.fromMillisecondsSinceEpoch(0)).compareTo(
-          a.zeitpunkt ?? DateTime.fromMillisecondsSinceEpoch(0),
-        ));
+    ergebnis.sort(
+      (a, b) => (b.zeitpunkt ?? DateTime.fromMillisecondsSinceEpoch(0))
+          .compareTo(a.zeitpunkt ?? DateTime.fromMillisecondsSinceEpoch(0)),
+    );
     return ergebnis.take(500).toList(growable: false);
   }
 
   List<Suchtreffer> _produktbewertungen(Suchfilter filter) {
+    final text = '%${filter.text.trim().toLowerCase()}%';
     final von = filter.von?.toUtc().toIso8601String();
     final bis = filter.bis?.toUtc().toIso8601String();
     final rows = _db.verbindung.select('''
@@ -205,6 +217,10 @@ class SqliteSucheService implements SucheService {
       LEFT JOIN orte o ON o.id = COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id)
       LEFT JOIN produkt_kategorien pk ON pk.produkt_id = ep.produkt_id
       WHERE b.ortsbewertung_id IS NULL
+        AND (? = '%%'
+          OR LOWER(p.name) LIKE ?
+          OR LOWER(COALESCE(o.name, '')) LIKE ?
+          OR LOWER(COALESCE(b.kriterium_name, k.name, b.kriterium_id)) LIKE ?)
         AND (? IS NULL OR ep.produkt_id = ?)
         AND (? IS NULL OR COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) = ?)
         AND (? IS NULL OR b.herkunft_profil_id = ?)
@@ -213,6 +229,10 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR b.erstellt_am <= ?)
       ORDER BY b.erstellt_am DESC
     ''', [
+      text,
+      text,
+      text,
+      text,
       filter.produktId,
       filter.produktId,
       filter.ortId,
@@ -243,6 +263,7 @@ class SqliteSucheService implements SucheService {
   }
 
   List<Suchtreffer> _ortsbewertungen(Suchfilter filter) {
+    final text = '%${filter.text.trim().toLowerCase()}%';
     final von = filter.von?.toUtc().toIso8601String();
     final bis = filter.bis?.toUtc().toIso8601String();
     final rows = _db.verbindung.select('''
@@ -254,13 +275,19 @@ class SqliteSucheService implements SucheService {
       JOIN orte o ON o.id = ob.ort_id
       LEFT JOIN kriterien k ON k.id = b.kriterium_id
       LEFT JOIN ort_kategorien ok ON ok.ort_id = ob.ort_id
-      WHERE (? IS NULL OR ob.ort_id = ?)
+      WHERE (? = '%%'
+          OR LOWER(o.name) LIKE ?
+          OR LOWER(COALESCE(b.kriterium_name, k.name, b.kriterium_id)) LIKE ?)
+        AND (? IS NULL OR ob.ort_id = ?)
         AND (? IS NULL OR b.herkunft_profil_id = ?)
         AND (? IS NULL OR ok.kategorie_id = ?)
         AND (? IS NULL OR ob.bewertet_am >= ?)
         AND (? IS NULL OR ob.bewertet_am <= ?)
       ORDER BY ob.bewertet_am DESC
     ''', [
+      text,
+      text,
+      text,
       filter.ortId,
       filter.ortId,
       filter.herkunftProfilId,
@@ -296,6 +323,7 @@ class SqliteSucheService implements SucheService {
   }
 
   List<Suchtreffer> _preise(Suchfilter filter) {
+    final text = '%${filter.text.trim().toLowerCase()}%';
     final von = filter.von?.toUtc().toIso8601String();
     final bis = filter.bis?.toUtc().toIso8601String();
     final rows = _db.verbindung.select('''
@@ -306,13 +334,19 @@ class SqliteSucheService implements SucheService {
       JOIN objekte p ON p.id = pb.produkt_id
       LEFT JOIN orte o ON o.id = pb.ort_id
       LEFT JOIN produkt_kategorien pk ON pk.produkt_id = pb.produkt_id
-      WHERE (? IS NULL OR pb.produkt_id = ?)
+      WHERE (? = '%%'
+          OR LOWER(p.name) LIKE ?
+          OR LOWER(COALESCE(o.name, '')) LIKE ?)
+        AND (? IS NULL OR pb.produkt_id = ?)
         AND (? IS NULL OR pb.ort_id = ?)
         AND (? IS NULL OR pk.kategorie_id = ?)
         AND (? IS NULL OR pb.beobachtet_am >= ?)
         AND (? IS NULL OR pb.beobachtet_am <= ?)
       ORDER BY pb.beobachtet_am DESC
     ''', [
+      text,
+      text,
+      text,
       filter.produktId,
       filter.produktId,
       filter.ortId,
