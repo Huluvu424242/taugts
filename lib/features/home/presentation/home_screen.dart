@@ -24,6 +24,7 @@ class HomeScreen extends StatefulWidget {
     this.exportService,
     this.exportZielService,
     this.idGenerator,
+    this.onSucheOeffnen,
     super.key,
   });
 
@@ -33,6 +34,7 @@ class HomeScreen extends StatefulWidget {
   final ExportService? exportService;
   final ExportZielService? exportZielService;
   final IdGenerator? idGenerator;
+  final VoidCallback? onSucheOeffnen;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -268,7 +270,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           const Expanded(
                             child: Text(
-                                'Aktive Erlebnisse konnten nicht geladen werden.'),
+                              'Aktive Erlebnisse konnten nicht geladen werden.',
+                            ),
                           ),
                           TextButton(
                             onPressed: () => setState(_erlebnisseNeuLaden),
@@ -382,10 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.search,
                       label: 'Suche',
-                      onPressed: () => _infoOeffnen(
-                        'Suche',
-                        'Die globale Suche ist noch nicht verfügbar. Dinge und Orte können bereits in ihren jeweiligen Bereichen gesucht werden.',
-                      ),
+                      onPressed: widget.onSucheOeffnen,
                     ),
                     _navigationsKachel(
                       width: breite,
