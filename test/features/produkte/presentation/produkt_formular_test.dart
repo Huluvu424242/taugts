@@ -57,4 +57,50 @@ void main() {
 
     expect(FocusManager.instance.primaryFocus?.context, isNotNull);
   });
+
+  testWidgets('übernimmt gescannte EAN und erhält vorhandene Formulardaten',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProduktFormular(
+          repository: repository,
+          idGenerator: _FesterIdGenerator(),
+          barcodeScanStart: (_) async => '4006381333931',
+        ),
+      ),
+    );
+
+    final textfelder = find.byType(TextFormField);
+    await tester.enterText(textfelder.at(0), 'Testprodukt');
+    await tester.enterText(textfelder.at(2), 'Testmarke');
+
+    await tester.tap(find.byTooltip('EAN scannen'));
+    await tester.pumpAndSettle();
+
+    final name = tester.widget<TextFormField>(textfelder.at(0));
+    final barcode = tester.widget<TextFormField>(textfelder.at(1));
+    final marke = tester.widget<TextFormField>(textfelder.at(2));
+    expect(name.controller?.text, 'Testprodukt');
+    expect(barcode.controller?.text, '4006381333931');
+    expect(marke.controller?.text, 'Testmarke');
+  });
+
+  testWidgets('behält vorhandene EAN bei Scan-Abbruch bei', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProduktFormular(
+          repository: repository,
+          idGenerator: _FesterIdGenerator(),
+          barcodeVorgabe: '9780201379624',
+          barcodeScanStart: (_) async => null,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('EAN scannen'));
+    await tester.pumpAndSettle();
+
+    final barcode = tester.widget<TextFormField>(find.byType(TextFormField).at(1));
+    expect(barcode.controller?.text, '9780201379624');
+  });
 }
