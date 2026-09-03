@@ -136,8 +136,7 @@ List<_Versionseintrag> _parse(String markdown) {
       }
       final kopf = zeile.substring(3).trim();
       final istUnveroeffentlicht = kopf == '[Unreleased]';
-      final match =
-          RegExp(r'^\[([^\]]+)\](?:\s+-\s+(.+))?$').firstMatch(kopf);
+      final match = RegExp(r'^\[([^\]]+)\](?:\s+-\s+(.+))?$').firstMatch(kopf);
       version = _Versionseintrag(
         titel: istUnveroeffentlicht
             ? 'In Entwicklung'
