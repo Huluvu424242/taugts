@@ -160,8 +160,7 @@ class ImportAusfuehrungService {
             }
             if (aktion == ImportKonfliktAktion.zusammenfuehren &&
                 mergeAliase.containsKey(importId)) {
-              ergebnis[ergebnisSammlung] =
-                  zaehler.plus(zusammengefuehrt: 1);
+              ergebnis[ergebnisSammlung] = zaehler.plus(zusammengefuehrt: 1);
               continue;
             }
             final existiert = _existiert(datenbank, sammlung, zielId);
@@ -220,10 +219,9 @@ class ImportAusfuehrungService {
   }) =>
       protokollRepository.lade(datenbank, limit: limit);
 
-  List<String> _ergebnisSammlungen(String sammlung) =>
-      sammlung == 'bewertungen'
-          ? const ['produktbewertungen', 'ortsbewertungswerte']
-          : [sammlung];
+  List<String> _ergebnisSammlungen(String sammlung) => sammlung == 'bewertungen'
+      ? const ['produktbewertungen', 'ortsbewertungswerte']
+      : [sammlung];
 
   String _ergebnisSammlung(
     String sammlung,
