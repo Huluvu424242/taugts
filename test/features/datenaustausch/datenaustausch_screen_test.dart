@@ -82,11 +82,9 @@ void main() {
       await tester.pumpAndSettle();
 
       final importAusfuehren = find.text('Import verbindlich ausführen');
-      await tester.scrollUntilVisible(
-        importAusfuehren,
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
+      expect(importAusfuehren, findsOneWidget);
+      await tester.ensureVisible(importAusfuehren);
+      await tester.pumpAndSettle();
       await tester.tap(importAusfuehren);
       await tester.pumpAndSettle();
 
