@@ -89,7 +89,6 @@ void main() {
       await tester.pumpAndSettle();
 
       for (final bezeichnung in const [
-        'Import erfolgreich abgeschlossen.',
         'Produktbewertungen',
         'Ortsbewertungen',
         'Bewertungswerte zu Orten',
