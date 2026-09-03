@@ -1,6 +1,6 @@
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 
-enum Suchziel { produkte, orte, erlebnisse, historie }
+enum Suchziel { alle, produkte, orte, erlebnisse, historie }
 
 enum Historienart {
   produktbewertung,
@@ -11,7 +11,7 @@ enum Historienart {
 
 class Suchfilter {
   const Suchfilter({
-    this.ziel = Suchziel.produkte,
+    this.ziel = Suchziel.alle,
     this.text = '',
     this.kategorieId,
     this.ortId,
