@@ -42,7 +42,10 @@ class _SucheScreenState extends State<SucheScreen> {
       erlebnisstatus: _ziel == Suchziel.erlebnisse ? _status : null,
       historienart: _ziel == Suchziel.historie ? _historienart : null,
     );
-    setState(() => _treffer = widget.service.suche(filter));
+    final treffer = widget.service.suche(filter);
+    setState(() {
+      _treffer = treffer;
+    });
   }
 
   @override
@@ -86,10 +89,10 @@ class _SucheScreenState extends State<SucheScreen> {
                       child: Text(_zielLabel(ziel)),
                     ),
                 ],
-                onChanged: (wert) => setState(() {
+                onChanged: (wert) {
                   if (wert != null) _ziel = wert;
                   _suchen();
-                }),
+                },
               ),
               if (_ziel == Suchziel.erlebnisse) ...[
                 const SizedBox(height: 12),
@@ -107,10 +110,10 @@ class _SucheScreenState extends State<SucheScreen> {
                       child: Text('Einkauf'),
                     ),
                   ],
-                  onChanged: (wert) => setState(() {
+                  onChanged: (wert) {
                     _erlebnistyp = wert;
                     _suchen();
-                  }),
+                  },
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<Erlebnisstatus?>(
@@ -131,10 +134,10 @@ class _SucheScreenState extends State<SucheScreen> {
                       child: Text('Beendet'),
                     ),
                   ],
-                  onChanged: (wert) => setState(() {
+                  onChanged: (wert) {
                     _status = wert;
                     _suchen();
-                  }),
+                  },
                 ),
               ],
               if (_ziel == Suchziel.historie) ...[
@@ -153,10 +156,10 @@ class _SucheScreenState extends State<SucheScreen> {
                         child: Text(_historieLabel(art)),
                       ),
                   ],
-                  onChanged: (wert) => setState(() {
+                  onChanged: (wert) {
                     _historienart = wert;
                     _suchen();
-                  }),
+                  },
                 ),
               ],
               const SizedBox(height: 12),
