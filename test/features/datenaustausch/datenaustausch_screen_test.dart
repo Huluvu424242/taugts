@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -61,6 +62,10 @@ void main() {
         appVersion: '0.0.0-test',
         jetzt: () => DateTime.utc(2026, 9, 3),
       );
+      final importDokument = Map<String, Object?>.from(
+        jsonDecode(exportService.erzeugeJson()) as Map,
+      );
+      importDokument['bewertungskriterien'] = <Object?>[];
 
       await tester.pumpWidget(
         MaterialApp(
@@ -68,7 +73,7 @@ void main() {
             exportService: exportService,
             exportZielService: _NichtVerwendetesExportZiel(),
             importQuelleService: _FesteImportQuelle(
-              exportService.erzeugeJson(),
+              jsonEncode(importDokument),
             ),
           ),
         ),
