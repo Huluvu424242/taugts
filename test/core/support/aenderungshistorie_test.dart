@@ -7,7 +7,7 @@ import 'package:taugts/core/support/changelog_service.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 
 void main() {
-  testWidgets('Änderungshistorie steht zwischen Hilfe und Projektseite', (
+  testWidgets('Änderungshistorie steht kompakt zwischen Hilfe und Projektseite', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -36,11 +36,16 @@ void main() {
     final projektseite = tester.getTopLeft(find.text('Projektseite')).dy;
     expect(hilfe, lessThan(historie));
     expect(historie, lessThan(projektseite));
+    expect(historie - hilfe, lessThan(60));
+    expect(projektseite - historie, lessThan(60));
 
     await tester.tap(find.text('Änderungshistorie'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Teständerung'), findsOneWidget);
+    expect(find.text('In Entwicklung'), findsOneWidget);
+    expect(find.text('Neu'), findsOneWidget);
+    expect(find.text('Teständerung'), findsOneWidget);
     expect(find.byKey(const Key('aenderungshistorie-inhalt')), findsOneWidget);
+    expect(find.textContaining('## '), findsNothing);
   });
 
   testWidgets('Lesefehler der Änderungshistorie wird verständlich angezeigt', (
@@ -88,7 +93,15 @@ class _FakeChangelogGateway implements ChangelogGateway {
   const _FakeChangelogGateway();
 
   @override
-  Future<String> laden() async => '# Änderungshistorie\n\n- Teständerung';
+  Future<String> laden() async => '''
+# Changelog
+
+## [Unreleased]
+
+### Added
+
+- Teständerung
+''';
 }
 
 class _FehlerChangelogGateway implements ChangelogGateway {
