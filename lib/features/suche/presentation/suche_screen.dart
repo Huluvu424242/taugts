@@ -81,7 +81,8 @@ class _SucheScreenState extends State<SucheScreen> {
                 decoration: const InputDecoration(labelText: 'Suchbereich'),
                 items: [
                   for (final ziel in Suchziel.values)
-                    DropdownMenuItem(value: ziel, child: Text(_zielLabel(ziel))),
+                    DropdownMenuItem(
+                        value: ziel, child: Text(_zielLabel(ziel))),
                 ],
                 onChanged: (wert) => setState(() {
                   if (wert != null) _ziel = wert;
@@ -145,7 +146,8 @@ class _SucheScreenState extends State<SucheScreen> {
                       child: Text('Alle historischen Daten'),
                     ),
                     for (final art in Historienart.values)
-                      DropdownMenuItem(value: art, child: Text(_historieLabel(art))),
+                      DropdownMenuItem(
+                          value: art, child: Text(_historieLabel(art))),
                   ],
                   onChanged: (wert) => setState(() {
                     _historienart = wert;
@@ -176,7 +178,8 @@ class _SucheScreenState extends State<SucheScreen> {
               const SizedBox(height: 20),
               Semantics(
                 header: true,
-                child: Text('Ergebnisse', style: Theme.of(context).textTheme.titleLarge),
+                child: Text('Ergebnisse',
+                    style: Theme.of(context).textTheme.titleLarge),
               ),
               if (_treffer != null)
                 FutureBuilder<List<Suchtreffer>>(
@@ -185,7 +188,8 @@ class _SucheScreenState extends State<SucheScreen> {
                     if (snapshot.hasError) {
                       return Semantics(
                         liveRegion: true,
-                        child: const Text('Die Suche konnte nicht ausgeführt werden.'),
+                        child: const Text(
+                            'Die Suche konnte nicht ausgeführt werden.'),
                       );
                     }
                     if (!snapshot.hasData) {
@@ -209,7 +213,8 @@ class _SucheScreenState extends State<SucheScreen> {
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () => Navigator.of(context).push<void>(
                               MaterialPageRoute(
-                                builder: (_) => SuchtrefferDetailScreen(treffer: treffer),
+                                builder: (_) =>
+                                    SuchtrefferDetailScreen(treffer: treffer),
                               ),
                             ),
                           ),
@@ -256,7 +261,8 @@ class SuchtrefferDetailScreen extends StatelessWidget {
             children: [
               Semantics(
                 header: true,
-                child: Text(treffer.titel, style: Theme.of(context).textTheme.headlineSmall),
+                child: Text(treffer.titel,
+                    style: Theme.of(context).textTheme.headlineSmall),
               ),
               const SizedBox(height: 12),
               Text(treffer.untertitel),
@@ -267,7 +273,8 @@ class SuchtrefferDetailScreen extends StatelessWidget {
                 SelectableText('Erlebnis: ${treffer.erlebnisId}'),
               if (treffer.produktId != null)
                 SelectableText('Produkt: ${treffer.produktId}'),
-              if (treffer.ortId != null) SelectableText('Ort: ${treffer.ortId}'),
+              if (treffer.ortId != null)
+                SelectableText('Ort: ${treffer.ortId}'),
               const SizedBox(height: 16),
               const Text(
                 'Der Treffer bezeichnet genau den gespeicherten Datensatz und nennt seinen Erlebniskontext. Korrekturen desselben Datensatzes behalten dieselbe Identität.',
