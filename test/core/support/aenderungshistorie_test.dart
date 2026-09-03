@@ -44,7 +44,8 @@ void main() {
       expect(find.text('In Entwicklung'), findsOneWidget);
       expect(find.text('Neu'), findsOneWidget);
       expect(find.text('Teständerung'), findsOneWidget);
-      expect(find.byKey(const Key('aenderungshistorie-inhalt')), findsOneWidget);
+      expect(
+          find.byKey(const Key('aenderungshistorie-inhalt')), findsOneWidget);
       expect(find.textContaining('## '), findsNothing);
     },
   );
