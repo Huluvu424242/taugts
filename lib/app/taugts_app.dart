@@ -4,7 +4,9 @@ import 'package:taugts/core/theme/app_theme.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
-import 'package:taugts/features/home/presentation/home_screen.dart';
+import 'package:taugts/features/home/presentation/hauptnavigation_screen.dart';
+import 'package:taugts/features/kategorien/services/kategorie_repository.dart';
+import 'package:taugts/features/kategorien/services/kriterienset_repository.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 import 'package:taugts/features/profil/services/profil_repository.dart';
 
@@ -16,6 +18,8 @@ class TaugtsApp extends StatelessWidget {
     this.exportService,
     this.exportZielService,
     this.idGenerator,
+    this.kategorieRepository,
+    this.kriteriensetRepository,
     super.key,
   });
 
@@ -25,21 +29,23 @@ class TaugtsApp extends StatelessWidget {
   final ExportService? exportService;
   final ExportZielService? exportZielService;
   final IdGenerator? idGenerator;
+  final KategorieRepository? kategorieRepository;
+  final KriteriensetRepository? kriteriensetRepository;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(
-        profil: profil,
-        profilRepository: profilRepository,
-        bewertungsRepository: bewertungsRepository,
-        exportService: exportService,
-        exportZielService: exportZielService,
-        idGenerator: idGenerator,
-      ),
-      theme: AppTheme.light,
-      title: 'Taugt’s?',
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: HauptnavigationScreen(
+          profil: profil,
+          profilRepository: profilRepository,
+          bewertungsRepository: bewertungsRepository,
+          exportService: exportService,
+          exportZielService: exportZielService,
+          idGenerator: idGenerator,
+          kategorieRepository: kategorieRepository,
+          kriteriensetRepository: kriteriensetRepository,
+        ),
+        theme: AppTheme.light,
+        title: 'Taugt’s?',
+      );
 }
