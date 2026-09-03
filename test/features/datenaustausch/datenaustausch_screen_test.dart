@@ -52,6 +52,8 @@ void main() {
   testWidgets(
     'führt einen bestätigten Import aus und zeigt getrennte Zähler',
     (tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 2400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
       final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
       addTearDown(datenbank.schliessen);
       final exportService = ExportService(
@@ -73,18 +75,11 @@ void main() {
       );
 
       final importPruefen = find.text('Importdatei auswählen und prüfen');
-      await tester.scrollUntilVisible(
-        importPruefen,
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
       await tester.tap(importPruefen);
       await tester.pumpAndSettle();
 
       final importAusfuehren = find.text('Import verbindlich ausführen');
       expect(importAusfuehren, findsOneWidget);
-      await tester.ensureVisible(importAusfuehren);
-      await tester.pumpAndSettle();
       await tester.tap(importAusfuehren);
       await tester.pumpAndSettle();
 
@@ -93,11 +88,6 @@ void main() {
         'Ortsbewertungen',
         'Bewertungswerte zu Orten',
       ]) {
-        await tester.scrollUntilVisible(
-          find.text(bezeichnung),
-          200,
-          scrollable: find.byType(Scrollable).first,
-        );
         expect(find.text(bezeichnung), findsOneWidget);
       }
       expect(
