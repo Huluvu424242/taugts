@@ -41,7 +41,8 @@ void main() {
     expect(projektdokumentation, findsOneWidget);
     expect(urheber, findsOneWidget);
 
-    expect(tester.getTopLeft(version).dy, lessThan(tester.getTopLeft(hilfe).dy));
+    expect(
+        tester.getTopLeft(version).dy, lessThan(tester.getTopLeft(hilfe).dy));
     expect(
       tester.getTopLeft(hilfe).dy,
       lessThan(tester.getTopLeft(projektseite).dy),
