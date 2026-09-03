@@ -325,6 +325,28 @@ flutter test
 - Lizenzrelevante ausgelieferte Frameworks, Laufzeitabhängigkeiten, Logos, Bilder, Schriften und Assets werden mit Herkunft, Rechteinhaber, Lizenz und Verwendung in `ATTRIBUTIONS.md` dokumentiert, sobald sie hinzukommen.
 - `CHANGELOG.md` wird nach Keep a Changelog gepflegt.
 
+## Releasevorbereitung
+
+Die Releasevorbereitung durch einen KI-Agenten ist ein eigener, verbindlicher Arbeitsablauf. Sie wird auf einem eigenen Arbeitsbranch durchgeführt und über einen Pull Request gegen `master` bereitgestellt. Ein Release darf erst als vorbereitet gemeldet werden, wenn die nachfolgenden Schritte vollständig durchgeführt und auf Konsistenz geprüft wurden.
+
+### Verbindlicher Ablauf
+
+1. Den vorgesehenen Releaseumfang und die Zielversion einschließlich Buildnummer anhand des aktuellen `master`-Stands und der seit dem letzten Release aufgenommenen Änderungen ermitteln.
+2. Die zentrale Versionsangabe des Projekts auf die vorgesehene Releaseversion einschließlich Buildnummer aktualisieren. Alle Stellen, die diese Version fest oder abgeleitet anzeigen, müssen denselben Release-Stand wiedergeben.
+3. `CHANGELOG.md` nach Keep a Changelog für das Release aktualisieren. Der Changelog auf `master` ist die maßgebliche fachliche Quelle für die veröffentlichte Änderungshistorie.
+4. Alle für den Release-Stand relevanten Dokumentationen prüfen und aktualisieren. Dazu gehören mindestens Benutzerdokumentation, Entwicklerdokumentation und vorhandene Release-Dokumentation; insbesondere müssen neue oder geänderte sichtbare Funktionen, Bedienabläufe, Einschränkungen, Datenhaltung sowie Import-/Exportverhalten korrekt beschrieben sein.
+5. Die in der laufenden App im Bereich `Über` angezeigte `Änderungshistorie` im selben Releasevorbereitungs-PR aktualisieren. Ihr fachlicher Inhalt muss mit dem für dieses Release vorgesehenen Inhalt von `CHANGELOG.md` übereinstimmen und darf keine eigenständig abweichend gepflegte Releasehistorie bilden.
+6. Vor Abschluss ausdrücklich gegenprüfen, dass Versionsangabe einschließlich Buildnummer, `CHANGELOG.md`, relevante Dokumentation und die unter `Über` angezeigte `Änderungshistorie` denselben Release-Stand beschreiben. Abweichungen werden vor Bereitstellung des PRs behoben.
+7. Die nach den Abschnitten `Codestyle und Prüfungen` sowie `Pull Requests und Branches` erforderlichen Prüfungen durchführen und den Releasevorbereitungs-PR mit Ziel, Änderungen, Prüfungen, Dokumentationsstatus, Risiken und Closing-Keyword bereitstellen.
+
+### Synchronisationsregel für die Änderungshistorie
+
+- `CHANGELOG.md` auf `master` ist der fachliche Master für die Änderungshistorie eines veröffentlichten Releases.
+- Die im Bereich `Über` angezeigte `Änderungshistorie` ist eine Nutzeransicht dieses Inhalts und muss zum Zeitpunkt des Releases inhaltlich mit dem Changelog synchron sein.
+- Formulierungen dürfen für die Darstellung in der App gekürzt oder an die verfügbare Oberfläche angepasst werden, solange keine Änderung ergänzt, weggelassen oder in ihrer Bedeutung verändert wird.
+- Wird `CHANGELOG.md` im Releasevorbereitungs-PR nachträglich geändert, muss die angezeigte `Änderungshistorie` im selben PR erneut abgeglichen und erforderlichenfalls angepasst werden.
+- Eine Releasevorbereitung ist unvollständig, solange Changelog und angezeigte Änderungshistorie für das vorgesehene Release voneinander abweichen.
+
 ## Pull Requests und Branches
 
 - `master` wird nur über Pull Requests verändert und niemals rebased oder per Force Push überschrieben.
