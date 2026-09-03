@@ -12,7 +12,7 @@ Ist genau ein Erlebnis aktiv, kann es direkt von der Startseite fortgesetzt werd
 
 Produkte wie Getränke, Speisen und andere Dinge können lokal angelegt, gesucht und bearbeitet werden. Produkte lassen sich anhand typabhängiger, lokal konfigurierbarer Kriterien bewerten. Bereits bekannte Produkte können aus Produktliste, Produktdetails und Bewertungsverlauf erneut bewertet werden, ohne ihre Stammdaten neu anzulegen.
 
-EAN-, GTIN- und UPC-Barcodes können nach einer bewussten Nutzeraktion mit der Kamera gescannt, bestätigt und einem vorhandenen oder neuen Produkt zugeordnet werden.
+EAN-, GTIN- und UPC-Barcodes können nach einer bewussten Nutzeraktion mit der Kamera gescannt, bestätigt und einem vorhandenen oder neuen Produkt zugeordnet werden. Beim Anlegen und Bearbeiten eines Produkts steht dafür direkt am Feld **EAN / Barcode** ein Scan-Symbol zur Verfügung. Ein bestätigter Scan übernimmt den Code in das Feld, ohne andere bereits eingegebene Produktdaten zu verändern; bei einem Abbruch bleibt auch der bisherige EAN-/Barcode-Wert unverändert. Die manuelle Eingabe bleibt jederzeit möglich.
 
 ## Orte
 
