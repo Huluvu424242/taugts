@@ -8,6 +8,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Added
 
+- In der Produkterfassung kann die EAN direkt am Feld **EAN / Barcode** über den vorhandenen lokalen Barcode-Scanner übernommen werden; Scan-Abbruch und bestehende Formulardaten bleiben dabei unverändert.
 - Die Produktionsdatenbank stellt nun den vollständigen aktuellen Tabellenstand einschließlich Kategorien, Klassifikation, Kategorie-Kriteriensets und Import-Hilfstabellen deterministisch beim Öffnen bereit; die Architektur dokumentiert Schema, Migrationshistorie, Integritätsregeln, fachliche Abweichungen und ER-Diagramme ausführlich.
 - Grundlegende lokale Auswertungen zeigen vergleichbare Kriterienwerte, Preis- und Bewertungsverläufe sowie Erlebnis- und ausdrücklich erfasste Andrangsdaten nachvollziehbar und ohne implizite Kausalaussagen.
 - Die vollständig lokale Suche findet Produkte, Orte, Erlebnisse, Bewertungen und Preisbeobachtungen über kombinierbare strukturierte und freie Filter und führt historische Treffer in ihren Erlebniskontext.
