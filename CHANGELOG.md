@@ -14,6 +14,10 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Kategorie-Kriteriensets können zentrale Kriterien geordnet erweitern oder ersetzen, aus Elternkategorien erben und zeigen Standard-, geerbte und explizite Quellen nachvollziehbar an.
 - Strukturierte Kategorien, Herkunft, Hersteller und Eigenschaften bleiben fachlich von freien Tags getrennt; Tags werden lokal normalisiert gespeichert und können entfernt werden, ohne historische Bewertungen zu verändern.
 
+### Changed
+
+- Die Über-Seite zeigt direkt unter ihrer Überschrift die installierte Releaseversion, bietet danach einen Hilfe-Link zum Einstieg der Benutzerdokumentation und weist als letzte Inhaltszeile `🄯  created by Huluvu424242` aus.
+
 ### Fixed
 
 - Das Importergebnis trennt Produktbewertungswerte, Ortsbewertungen und deren einzelne Kriterienwerte fachlich korrekt, statt Ortswerte als Produktbewertungen zu zählen.
