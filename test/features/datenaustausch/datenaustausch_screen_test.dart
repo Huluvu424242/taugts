@@ -80,7 +80,11 @@ void main() {
 
       final importAusfuehren = find.text('Import verbindlich ausführen');
       expect(importAusfuehren, findsOneWidget);
-      await tester.tap(importAusfuehren);
+      final bestaetigungsButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
+      );
+      expect(bestaetigungsButton.onPressed, isNotNull);
+      bestaetigungsButton.onPressed!();
       await tester.pumpAndSettle();
 
       final protokoll =
