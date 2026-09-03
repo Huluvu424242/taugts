@@ -6,6 +6,10 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+### Fixed
+
+- Das Importergebnis trennt Produktbewertungswerte, Ortsbewertungen und deren einzelne Kriterienwerte fachlich korrekt, statt Ortswerte als Produktbewertungen zu zählen.
+
 ## [0.1.0+5] - 2026-09-02
 
 ### Added
