@@ -4,12 +4,37 @@ import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 
+class GaststaettenbewertungController {
+  Object? _owner;
+  Future<void> Function(Erlebnis erlebnis)? _speicherAktion;
+
+  Future<void> speichereFallsGeaendert(Erlebnis erlebnis) async {
+    final aktion = _speicherAktion;
+    if (aktion != null) await aktion(erlebnis);
+  }
+
+  void _verbinde(
+    Object owner,
+    Future<void> Function(Erlebnis erlebnis) speicherAktion,
+  ) {
+    _owner = owner;
+    _speicherAktion = speicherAktion;
+  }
+
+  void _trenne(Object owner) {
+    if (!identical(_owner, owner)) return;
+    _owner = null;
+    _speicherAktion = null;
+  }
+}
+
 class GaststaettenbewertungAbschnitt extends StatefulWidget {
   const GaststaettenbewertungAbschnitt({
     required this.repository,
     required this.idGenerator,
     required this.erlebnis,
     required this.ort,
+    this.controller,
     super.key,
   });
 
@@ -17,6 +42,7 @@ class GaststaettenbewertungAbschnitt extends StatefulWidget {
   final IdGenerator idGenerator;
   final Erlebnis erlebnis;
   final Ort? ort;
+  final GaststaettenbewertungController? controller;
 
   @override
   State<GaststaettenbewertungAbschnitt> createState() =>
@@ -79,7 +105,8 @@ class _GaststaettenbewertungAbschnittState
       title: Text('$_bezeichnung bewerten'),
       subtitle: ort == null
           ? Text(
-              'Bitte zuerst ${_istGeschaeft ? 'ein Geschäft' : 'eine Gaststätte'} auswählen.')
+              'Bitte zuerst ${_istGeschaeft ? 'ein Geschäft' : 'eine Gaststätte'} auswählen.',
+            )
           : FutureBuilder<_Daten>(
               future: _laden,
               builder: (context, snapshot) {
@@ -145,6 +172,7 @@ class _GaststaettenbewertungAbschnittState
                 ort: ort,
                 daten: snapshot.data!,
                 istGeschaeft: _istGeschaeft,
+                controller: widget.controller,
                 fehlerFokus: _fehlerFokus,
                 ersterWertFokus: _ersterWertFokus,
                 notizFokus: _notizFokus,
@@ -169,6 +197,7 @@ class _Formular extends StatefulWidget {
     required this.ersterWertFokus,
     required this.notizFokus,
     required this.onGespeichert,
+    this.controller,
   });
 
   final BewertungsRepository repository;
@@ -177,6 +206,7 @@ class _Formular extends StatefulWidget {
   final Ort ort;
   final _Daten daten;
   final bool istGeschaeft;
+  final GaststaettenbewertungController? controller;
   final FocusNode fehlerFokus;
   final FocusNode ersterWertFokus;
   final FocusNode notizFokus;
@@ -189,18 +219,24 @@ class _Formular extends StatefulWidget {
 class _FormularState extends State<_Formular> {
   late final TextEditingController _notiz;
   late final Map<String, double?> _werte;
+  late OrtsbewertungMitWerten? _bisher;
   var _eingabeFehlt = false;
   var _speichert = false;
   var _gespeichert = false;
+  var _geaendert = false;
 
   String get _bezeichnung =>
       widget.istGeschaeft ? 'Geschäftsbewertung' : 'Gaststättenbewertung';
 
+  bool get _hatEingabe =>
+      _werte.values.any((wert) => wert != null) || _notiz.text.trim().isNotEmpty;
+
   @override
   void initState() {
     super.initState();
+    _bisher = widget.daten.vorhanden;
     final vorhanden = {
-      for (final wert in widget.daten.vorhanden?.werte ?? <Bewertung>[])
+      for (final wert in _bisher?.werte ?? <Bewertung>[])
         wert.kriteriumId: wert.wert,
     };
     _werte = {
@@ -208,19 +244,87 @@ class _FormularState extends State<_Formular> {
         kriterium.id: vorhanden[kriterium.id],
     };
     _notiz = TextEditingController(
-      text: widget.daten.vorhanden?.ortsbewertung.notiz ?? '',
+      text: _bisher?.ortsbewertung.notiz ?? '',
     );
+    widget.controller?._verbinde(this, _speichereFallsGeaendert);
+  }
+
+  @override
+  void didUpdateWidget(covariant _Formular oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller == widget.controller) return;
+    oldWidget.controller?._trenne(this);
+    widget.controller?._verbinde(this, _speichereFallsGeaendert);
   }
 
   @override
   void dispose() {
+    widget.controller?._trenne(this);
     _notiz.dispose();
     super.dispose();
   }
 
+  Future<void> _speichereOrtsbewertung(Erlebnis erlebnis) async {
+    final jetzt = DateTime.now().toUtc();
+    final id = _bisher?.ortsbewertung.id ?? widget.idGenerator.neueId();
+    final vorhandeneWerte = {
+      for (final wert in _bisher?.werte ?? <Bewertung>[])
+        wert.kriteriumId: wert,
+    };
+    final ortsbewertung = Ortsbewertung(
+      id: id,
+      erlebnisId: erlebnis.id,
+      ortId: widget.ort.id,
+      herkunftProfilId: erlebnis.herkunftProfilId,
+      bewertetAm: erlebnis.tatsaechlicherBeginn ?? erlebnis.erlebtAm,
+      notiz: _notiz.text.trim().isEmpty ? null : _notiz.text.trim(),
+      erstelltAm: _bisher?.ortsbewertung.erstelltAm ?? jetzt,
+      geaendertAm: jetzt,
+    );
+    final bewertungen = <Bewertung>[
+      for (final wert in _bisher?.werte ?? <Bewertung>[])
+        if (!_werte.containsKey(wert.kriteriumId)) wert,
+      for (final eintrag in _werte.entries)
+        if (eintrag.value != null)
+          Bewertung(
+            id: vorhandeneWerte[eintrag.key]?.id ??
+                widget.idGenerator.neueId(),
+            erlebnisId: erlebnis.id,
+            ortId: widget.ort.id,
+            ortsbewertungId: id,
+            kriteriumId: eintrag.key,
+            herkunftProfilId: erlebnis.herkunftProfilId,
+            wert: eintrag.value!,
+            erstelltAm: vorhandeneWerte[eintrag.key]?.erstelltAm ?? jetzt,
+            geaendertAm: jetzt,
+          ),
+    ];
+    await widget.repository.speichereOrtsbewertung(
+      erlebnis: erlebnis,
+      ort: widget.ort,
+      ortsbewertung: ortsbewertung,
+      bewertungen: bewertungen,
+    );
+    _bisher = OrtsbewertungMitWerten(
+      ortsbewertung: ortsbewertung,
+      werte: bewertungen,
+    );
+  }
+
+  Future<void> _speichereFallsGeaendert(Erlebnis erlebnis) async {
+    if (!_geaendert || !_hatEingabe) return;
+    await _speichereOrtsbewertung(erlebnis);
+    if (!mounted) return;
+    setState(() {
+      _gespeichert = true;
+      _geaendert = false;
+      _eingabeFehlt = false;
+    });
+    widget.onGespeichert();
+  }
+
   Future<void> _speichern() async {
-    if (_werte.values.every((wert) => wert == null) &&
-        _notiz.text.trim().isEmpty) {
+    if (!_hatEingabe) {
       setState(() => _eingabeFehlt = true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Bitte $_bezeichnung prüfen.')),
@@ -229,50 +333,13 @@ class _FormularState extends State<_Formular> {
       return;
     }
     setState(() => _speichert = true);
-    final jetzt = DateTime.now().toUtc();
-    final bisher = widget.daten.vorhanden;
-    final id = bisher?.ortsbewertung.id ?? widget.idGenerator.neueId();
-    final vorhandeneWerte = {
-      for (final wert in bisher?.werte ?? <Bewertung>[]) wert.kriteriumId: wert,
-    };
     try {
-      await widget.repository.speichereOrtsbewertung(
-        erlebnis: widget.erlebnis,
-        ort: widget.ort,
-        ortsbewertung: Ortsbewertung(
-          id: id,
-          erlebnisId: widget.erlebnis.id,
-          ortId: widget.ort.id,
-          herkunftProfilId: widget.erlebnis.herkunftProfilId,
-          bewertetAm:
-              widget.erlebnis.tatsaechlicherBeginn ?? widget.erlebnis.erlebtAm,
-          notiz: _notiz.text.trim().isEmpty ? null : _notiz.text.trim(),
-          erstelltAm: bisher?.ortsbewertung.erstelltAm ?? jetzt,
-          geaendertAm: jetzt,
-        ),
-        bewertungen: [
-          for (final wert in bisher?.werte ?? <Bewertung>[])
-            if (!_werte.containsKey(wert.kriteriumId)) wert,
-          for (final eintrag in _werte.entries)
-            if (eintrag.value != null)
-              Bewertung(
-                id: vorhandeneWerte[eintrag.key]?.id ??
-                    widget.idGenerator.neueId(),
-                erlebnisId: widget.erlebnis.id,
-                ortId: widget.ort.id,
-                ortsbewertungId: id,
-                kriteriumId: eintrag.key,
-                herkunftProfilId: widget.erlebnis.herkunftProfilId,
-                wert: eintrag.value!,
-                erstelltAm: vorhandeneWerte[eintrag.key]?.erstelltAm ?? jetzt,
-                geaendertAm: jetzt,
-              ),
-        ],
-      );
+      await _speichereOrtsbewertung(widget.erlebnis);
       if (!mounted) return;
       setState(() {
         _speichert = false;
         _gespeichert = true;
+        _geaendert = false;
         _eingabeFehlt = false;
       });
       widget.onGespeichert();
@@ -355,6 +422,7 @@ class _FormularState extends State<_Formular> {
                           _werte[widget.daten.kriterien[index].id] = wert;
                           _eingabeFehlt = false;
                           _gespeichert = false;
+                          _geaendert = true;
                         }),
               ),
             TextField(
@@ -366,6 +434,7 @@ class _FormularState extends State<_Formular> {
               onChanged: (_) => setState(() {
                 _eingabeFehlt = false;
                 _gespeichert = false;
+                _geaendert = true;
               }),
             ),
             const SizedBox(height: 8),
