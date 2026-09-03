@@ -6,16 +6,16 @@ import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart'
 
 class GaststaettenbewertungController {
   Object? _owner;
-  Future<void> Function(Erlebnis erlebnis)? _speicherAktion;
+  Future<bool> Function(Erlebnis erlebnis)? _speicherAktion;
 
-  Future<void> speichereFallsGeaendert(Erlebnis erlebnis) async {
+  Future<bool> speichereFallsGeaendert(Erlebnis erlebnis) async {
     final aktion = _speicherAktion;
-    if (aktion != null) await aktion(erlebnis);
+    return aktion == null ? false : aktion(erlebnis);
   }
 
   void _verbinde(
     Object owner,
-    Future<void> Function(Erlebnis erlebnis) speicherAktion,
+    Future<bool> Function(Erlebnis erlebnis) speicherAktion,
   ) {
     _owner = owner;
     _speicherAktion = speicherAktion;
@@ -311,16 +311,17 @@ class _FormularState extends State<_Formular> {
     );
   }
 
-  Future<void> _speichereFallsGeaendert(Erlebnis erlebnis) async {
-    if (!_geaendert || !_hatEingabe) return;
+  Future<bool> _speichereFallsGeaendert(Erlebnis erlebnis) async {
+    if (!_geaendert || !_hatEingabe) return false;
     await _speichereOrtsbewertung(erlebnis);
-    if (!mounted) return;
+    if (!mounted) return true;
     setState(() {
       _gespeichert = true;
       _geaendert = false;
       _eingabeFehlt = false;
     });
     widget.onGespeichert();
+    return true;
   }
 
   Future<void> _speichern() async {
