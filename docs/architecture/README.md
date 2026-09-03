@@ -10,7 +10,9 @@ Taugt’s? wird featureorientiert und offline-first entwickelt. UI, Fachlogik un
 - Import und Export sind explizite Nutzeraktionen. Dateiformat, Konfliktstrategie und Datenschutz werden vor ihrer Implementierung als eigene Architekturentscheidung dokumentiert.
 - State Management und Navigation werden erst bei konkretem Bedarf ausgewählt.
 - Die lokale Persistenz verwendet SQLite; Entscheidung und Folgen beschreibt
-  [ADR 0001](0001-lokale-persistenz-mit-sqlite.md).
+  [ADR 0001](0001-lokale-persistenz-mit-sqlite.md). Das vollständige aktuelle
+  Tabellen- und Historienmodell einschließlich Migrationen und ER-Diagrammen
+  beschreibt die [Datenbankdokumentation](datenbank.md).
 - Getränkebewertungen verwenden stabile, in SQLite konfigurierte Kriterien.
   Qualitätswertungen und beschreibende Intensitäten bleiben getrennt; ein
   Gesamturteil wird nicht aus Einzelwerten berechnet.
