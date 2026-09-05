@@ -6,9 +6,14 @@ import 'package:taugts/features/suche/models/suchmodelle.dart';
 import 'package:taugts/features/suche/services/suche_service.dart';
 
 class SucheScreen extends StatefulWidget {
-  const SucheScreen({required this.service, super.key});
+  const SucheScreen({
+    required this.service,
+    this.initialZiel = Suchziel.alle,
+    super.key,
+  });
 
   final SucheService service;
+  final Suchziel initialZiel;
 
   @override
   State<SucheScreen> createState() => _SucheScreenState();
@@ -16,7 +21,7 @@ class SucheScreen extends StatefulWidget {
 
 class _SucheScreenState extends State<SucheScreen> {
   final _text = TextEditingController();
-  Suchziel _ziel = Suchziel.alle;
+  late Suchziel _ziel = widget.initialZiel;
   Erlebnistyp? _erlebnistyp;
   Erlebnisstatus? _status;
   Historienart? _historienart;
