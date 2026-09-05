@@ -13,7 +13,7 @@ class ExportService {
 
   String erzeugeJson() => const JsonEncoder.withIndent('  ').convert({
         'format': 'taugts-export',
-        'schemaVersion': 1,
+        'schemaVersion': 2,
         'exportiertAm': jetzt().toUtc().toIso8601String(),
         'appVersion': appVersion,
         'profile': _profile(),
@@ -168,6 +168,7 @@ class ExportService {
             'auswahlwerte': _auswahlwerte(z['kriterium_auswahlwerte']),
           },
           'wert': _dezimal(z['wert']),
+          'textWert': z['text_wert'],
           'erstelltAm': z['erstellt_am'],
           'geaendertAm': z['geaendert_am'],
         };
