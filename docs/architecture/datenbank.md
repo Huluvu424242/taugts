@@ -10,29 +10,31 @@ Diese Seite beschreibt den aktuellen physischen Schema-Stand, seine Beziehungen,
 
 `LokaleDatenbank.oeffnen()` aktiviert `PRAGMA foreign_keys = ON`, liest `PRAGMA user_version` und führt notwendige Vorwärtsmigrationen innerhalb einer `BEGIN IMMEDIATE`-Transaktion aus.
 
-Vor dem ersten produktiven Release wurde die während der Entwicklung entstandene Migrationskette konsolidiert. Der vollständige aktuelle Datenbankstand ist deshalb die **Baseline mit Schemaversion 1**:
+Vor dem ersten produktiven Release wurde die während der Entwicklung entstandene Migrationskette konsolidiert. **Schema 1 bleibt die dauerhafte produktive Baseline. Der aktuelle physische Datenbankstand ist Schema 2.**
 
 - Eine neue Datenbank besitzt zunächst `user_version = 0`.
-- Der einzige initiale Migrationsschritt **0 → 1** erzeugt das vollständige aktuelle Schema einschließlich der Feature-Tabellen für Kategorien, Klassifikation, Kriteriensets und Import-Unterstützung.
-- Anschließend werden die aktuellen Standardkriterien idempotent bereitgestellt und `user_version` auf `1` gesetzt.
-- Erst nach erfolgreichem Abschluss der gesamten Transaktion gilt die Datenbank als Schema 1.
+- Der initiale Migrationsschritt **0 → 1** erzeugt die produktive Baseline einschließlich der Feature-Tabellen für Kategorien, Klassifikation, Kriteriensets und Import-Unterstützung.
+- Der anschließende Schritt **1 → 2** erweitert Bewertungswerte um das optionale Textfeld `text_wert`. Das bisher zwingende numerische Feld `wert` wird optional; eine Datenbankprüfung erzwingt, dass pro Bewertung genau ein numerischer oder textueller Wert gesetzt ist.
+- Bereits vorhandene numerische Bewertungen werden bei **1 → 2** unverändert in die neue Tabelle übernommen; `text_wert` bleibt für sie `NULL`.
+- Anschließend werden die aktuellen Standardkriterien idempotent bereitgestellt und `user_version` auf `2` gesetzt.
+- Erst nach erfolgreichem Abschluss der gesamten Transaktion gilt die Datenbank als Schema 2.
 
-Die früheren Entwicklungsstände 1 bis 13 sind keine unterstützten Produktivschemata mehr. Für sie existiert bewusst kein Upgradepfad. Da zum Zeitpunkt dieser Konsolidierung noch kein produktiver Release mit dauerhaft zu erhaltenden Nutzerdaten existierte, dürfen lokale Vorab- und Entwicklungsdatenbanken verworfen und mit Schema 1 neu angelegt werden.
+Die früheren Entwicklungsstände 1 bis 13 vor der Baseline-Konsolidierung sind keine unterstützten Produktivschemata mehr. Für sie existiert bewusst kein Upgradepfad. Die nach der Konsolidierung definierte produktive **Schemaversion 1** ist davon zu unterscheiden und besitzt mit **1 → 2** nun den ersten dauerhaft zu erhaltenden Vorwärtsmigrationspfad.
 
 ## Baseline und künftige Migrationen
 
-Die Konsolidierung entfernt nur historische Entwicklungsaltlasten; der Migrationsmechanismus selbst bleibt verbindlich erhalten. Ab dem ersten produktiven Schema gilt:
+Die Konsolidierung entfernt nur historische Entwicklungsaltlasten; der Migrationsmechanismus selbst bleibt verbindlich erhalten. Ab dem produktiven Schema 1 gilt:
 
 1. Jede persistenzrelevante Schemaänderung erhöht `schemaVersion` genau um einen Schritt.
-2. Für die nächste Änderung wird ein expliziter, vorwärtsgerichteter Schritt **1 → 2** ergänzt; danach entsprechend **2 → 3**, **3 → 4** usw.
+2. Der erste produktive Folgeschritt ist **1 → 2** für typisierte Bewertungswerte. Die nächste Änderung wird entsprechend **2 → 3** ergänzt; danach **3 → 4** usw.
 3. Eine Migration wird transaktional ausgeführt und erst nach erfolgreichem Abschluss durch die neue `user_version` bestätigt.
 4. Für einmal produktiv ausgelieferte Schemaversionen bleibt der Upgradepfad erhalten. Produktive Nutzerdaten dürfen nicht still verworfen werden.
 5. Eine Datenbank mit einer höheren, von der installierten App nicht unterstützten Schemaversion wird verständlich abgelehnt.
 6. Jede neue Migration erhält Tests für den unmittelbar vorherigen unterstützten Produktivstand sowie die Neuanlage auf dem aktuellen Schema.
 
-Damit ist Schema 1 der dauerhafte Ausgangspunkt der produktiven Migrationshistorie. Die vor der Baseline liegenden Entwicklungszwischenstände werden nicht mehr im Anwendungscode nachgebildet.
+Damit ist Schema 1 der dauerhafte Ausgangspunkt der produktiven Migrationshistorie und Schema 2 der aktuelle Stand. Die vor der Baseline liegenden Entwicklungszwischenstände werden nicht mehr im Anwendungscode nachgebildet.
 
-Die Legacy-Spalten aus den frühen Erlebnisentwürfen sind im heutigen Baseline-Schema weiterhin vorhanden und werden vom Repository noch geschrieben. Die Konsolidierung der Versionshistorie ist deshalb ausdrücklich **keine** fachliche Bereinigung dieser Felder; siehe „Fachlicher Schema-Abgleich“.
+Die Legacy-Spalten aus den frühen Erlebnisentwürfen sind weiterhin vorhanden und werden vom Repository noch geschrieben. Die neue Migration 1 → 2 betrifft ausschließlich die Repräsentation von Kriterienwerten und ist ausdrücklich **keine** fachliche Bereinigung dieser Felder; siehe „Fachlicher Schema-Abgleich“.
 
 ## Tabellen und Verantwortlichkeiten
 
@@ -49,7 +51,7 @@ Die Legacy-Spalten aus den frühen Erlebnisentwürfen sind im heutigen Baseline-
 - `erlebnispositionen`: Produkte innerhalb eines Erlebnisses; Anzahl ist mindestens 1.
 - `preisbeobachtungen`: beobachteter Einzelpreis einer konkreten Position mit Minor-Einheiten, Währung, Zeitpunkt und optionalem Ort. Pro Position existiert höchstens eine Preisbeobachtung; eine Korrektur aktualisiert diese Beobachtung, ein neues Erlebnis erzeugt eine neue Position und damit eine neue historische Beobachtung.
 - `ortsbewertungen`: eigenständige historische Bewertung des Ortes in genau einem Erlebnis. `erlebnis_id` ist eindeutig, sodass ein Erlebnis höchstens eine Ortsbewertung besitzt.
-- `bewertungen`: einzelne Kriterienwerte. Produktwerte verweisen auf die Erlebnisposition; Ortswerte können auf `ortsbewertungen` verweisen. Zusätzlich werden Kriterienname, -typ, -reihenfolge, -version, -beschreibung und Auswahlwerte als Snapshot gespeichert, damit alte Bewertungen trotz später geänderter Kriterien interpretierbar bleiben.
+- `bewertungen`: einzelne Kriterienwerte. Produktwerte verweisen auf die Erlebnisposition; Ortswerte können auf `ortsbewertungen` verweisen. Numerische Eingabetypen verwenden `wert`, Auswahl und Freitext verwenden `text_wert`; genau eines der beiden Felder ist pro Datensatz gesetzt. Zusätzlich werden Kriterienname, -typ, -reihenfolge, -version, -beschreibung und Auswahlwerte als Snapshot gespeichert, damit alte Bewertungen trotz später geänderter Kriterien interpretierbar bleiben.
 - `kriterien`: aktuelle konfigurierbare Definitionen der Bewertungsdimensionen.
 
 ### Kategorien und Klassifikation
@@ -144,14 +146,15 @@ SQLite erzwingt bereits unter anderem:
 - Geplante Minute nur zwischen 0 und 1439 und geplante Dauer nur größer als 0.
 - Höchstens eine Preisbeobachtung pro Erlebnisposition.
 - Höchstens eine Ortsbewertung pro Erlebnis.
+- Für jeden Kriterienwert ist genau eines der Felder `wert` oder `text_wert` gesetzt; leere Textwerte sind unzulässig.
 - Eindeutige Kategoriezuordnungen und eindeutige normalisierte Tags pro Zielobjekt.
 - Import-Alias darf nicht auf sich selbst zeigen und ist auf die Sammlungen `objekte`/`orte` begrenzt.
 
-Zusätzliche fachliche Regeln wie Kategoriezyklen und Erlebnis-Zeitkombinationen werden in Fach-/Repositorylogik validiert. SQLite kann diese Regeln nicht in jedem Fall sinnvoll allein ausdrücken.
+Zusätzliche fachliche Regeln wie die konkrete Zuordnung von Eingabetyp zu numerischem beziehungsweise textuellem Wert, Kategoriezyklen und Erlebnis-Zeitkombinationen werden in Fach-/Repositorylogik validiert. SQLite kann diese Regeln nicht in jedem Fall sinnvoll allein ausdrücken.
 
 ## Fachlicher Schema-Abgleich
 
-Abgeglichen wurden insbesondere die Stories #2, #4, #5, #8, #15, #17, #23, #70, #71, #72, #73, #74 und #76.
+Abgeglichen wurden insbesondere die Stories #2, #4, #5, #8, #15, #17, #23, #70, #71, #72, #73, #74 und #76 sowie Bug #205.
 
 | Anforderung | Stand | Bewertung |
 | --- | --- | --- |
@@ -160,6 +163,7 @@ Abgeglichen wurden insbesondere die Stories #2, #4, #5, #8, #15, #17, #23, #70, 
 | Preis pro Produkt, Ort und Erlebnis historisch | Erfüllt | `preisbeobachtungen` referenziert Position, Produkt, Erlebnis, Zeitpunkt und optional Ort. |
 | Separate historische Gaststätten-/Geschäftsbewertung | Erfüllt | `ortsbewertungen` ist vom Produktpfad getrennt und besitzt `bewertet_am`. |
 | Historisch interpretierbare Kriterien | Erfüllt | Kriterien-Snapshots liegen in `bewertungen`; die aktuelle Kriteriendefinition kann sich weiterentwickeln. |
+| Typgerechte Kriterienwerte | Erfüllt ab Schema 2 | Numerische Typen liegen in `wert`; `Auswahl` und `Freitext` in `text_wert`. Die 1→2-Migration bewahrt sämtliche bisherigen numerischen Werte. |
 | Kategorien und Kriteriensets | Erfüllt, physische Initialisierung konsolidiert | Die Tabellen sind Bestandteil der transaktionalen Schema-1-Baseline und werden nicht erst beim Repositoryzugriff nachgezogen. |
 | Expliziter fachlicher Zeitpunkt jeder Produktbewertung | **Teilweise** | `bewertungen` besitzt `erstellt_am`/`geaendert_am`, aber kein ausdrücklich benanntes `bewertet_am`. Der Erlebniszeitpunkt liefert Kontext, die Bedeutung von `erstellt_am` als Beobachtungszeitpunkt ist jedoch nicht so eindeutig wie bei `ortsbewertungen`. |
 | Eindeutiger Bewertungskontext auf DB-Ebene | **Teilweise** | SQLite verhindert derzeit nicht, dass ein Kriterienwert gleichzeitig oder gar nicht auf Produktposition/Ortsbewertung verweist. Die Fachlogik muss diese Invariante sichern. |
@@ -175,7 +179,7 @@ Die drei fachlich relevantesten Folgeschritte sind:
 2. Für Produktbewertungen einen expliziten fachlichen Bewertungszeitpunkt definieren (`bewertet_am`) oder verbindlich dokumentieren und testen, dass `erstellt_am` genau diese Semantik besitzt.
 3. Eine DB-nahe Integritätsstrategie für Bewertungskontext sowie generische Klassifikationsreferenzen festlegen, ohne die getrennten Produkt-/Ortstabellen künstlich zusammenzuführen.
 
-Diese Punkte werden **nicht** still im Rahmen der Baseline-Konsolidierung umgedeutet, weil sie das Fachmodell und Import-/Exportformat betreffen und jeweils eigenständige Migrationen benötigen.
+Diese Punkte werden **nicht** still im Rahmen von Bug #205 umgedeutet, weil sie das Fachmodell und Import-/Exportformat darüber hinaus betreffen und jeweils eigenständige Migrationen benötigen.
 
 ## Sicherung, Wiederherstellung und Fehlerverhalten
 
@@ -183,12 +187,12 @@ Migrationen laufen atomar. Schlägt ein Schritt fehl, wird die Transaktion zurü
 
 Für die einmalige Baseline-Konsolidierung vor dem ersten produktiven Release gilt: Entwicklungs- und Vorabdatenbanken mit den früheren internen Versionsständen werden nicht migriert. Wer darin Testdaten erhalten möchte, muss sie vor dem Wechsel über das von der physischen SQLite-Struktur entkoppelte JSON-Austauschformat exportieren, die lokale Datenbank neu anlegen lassen und die Daten anschließend über den regulären Importpfad wieder einlesen.
 
-Für alle künftigen migrationsrelevanten Änderungen nach Schema 1 gilt:
+Für alle migrationsrelevanten Änderungen ab der produktiven Baseline gilt:
 
 1. Das bestehende JSON-Gesamtexportformat ist der bevorzugte nutzerinitiierte Sicherungs- und Wiederherstellungsweg, weil es von der physischen SQLite-Struktur entkoppelt ist.
 2. Eine rohe Kopie von `taugts.sqlite` darf nur bei geschlossener App beziehungsweise nach sauber geschlossenem Datenbank-Handle als technische Sicherung betrachtet werden. Das Projekt implementiert derzeit keinen automatischen Datei-Snapshot vor jeder Migration.
 3. Eine Migration darf erst nach Tests mit Neu-Datenbank und mindestens dem unmittelbar vorherigen unterstützten Produktivstand als abgeschlossen gelten.
-4. Destruktive Tabellen-Rebuilds benötigen einen expliziten Nachweis, wie jeder fachlich relevante Altwert in den Zielstand übernommen wird.
+4. Destruktive Tabellen-Rebuilds benötigen einen expliziten Nachweis, wie jeder fachlich relevante Altwert in den Zielstand übernommen wird. Für 1 → 2 wird dieser Nachweis durch den Migrationstest erbracht, der vorhandene numerische Bewertungen unverändert übernimmt.
 
 ## Pflege-Regel für künftige Änderungen
 
