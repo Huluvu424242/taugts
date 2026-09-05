@@ -1,6 +1,6 @@
 # Benutzerdokumentation
 
-Diese Dokumentation richtet sich an Nutzerinnen und Nutzer von **Taugt’s?**. Sie beschreibt den aktuell ausgelieferten Funktionsumfang der vorbereiteten Android-Version **0.1.0+6**.
+Diese Dokumentation richtet sich an Nutzerinnen und Nutzer von **Taugt’s?**. Sie beschreibt den aktuell ausgelieferten Funktionsumfang der vorbereiteten Android-Version **0.1.0+7**.
 
 Taugt’s? speichert Produkte, Orte, Erlebnisse und Bewertungen lokal auf dem Gerät. Für die Kernfunktionen sind weder ein Konto noch eine Serververbindung erforderlich.
 
