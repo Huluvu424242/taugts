@@ -39,3 +39,9 @@ Die Speicherung erfolgt atomar in einer Datenbanktransaktion. Scheitert ein Date
 Taugt’s? führt außerdem ein lokales Importprotokoll. Es enthält nur Zeitpunkt, Erfolgs- beziehungsweise Rollbackstatus, gewählte Strategie und Zähler für hinzugefügte, aktualisierte, übersprungene, zusammengeführte und fehlerhafte Datensätze. Importierte Fachinhalte wie Namen, Notizen, Preise oder Bewertungswerte werden nicht in das Protokoll kopiert.
 
 Kann eine Datei nicht geschrieben, geteilt oder geprüft werden, zeigt Taugt’s? einen verständlichen Fehler an. Scheitert die eigentliche Importausführung, weist die App ausdrücklich auf den Rollback hin; der vorherige fachliche Datenbestand bleibt erhalten.
+
+## Hinweis zum Update auf 0.1.0+7
+
+Mit 0.1.0+7 wurde die während der Vorabentwicklung entstandene SQLite-Migrationshistorie auf eine neue produktive Baseline konsolidiert und anschließend für typisierte Kriterienwerte weiterentwickelt. Lokale Datenbanken aus älteren Vorabständen, insbesondere aus 0.1.0+6 und davor, besitzen keinen direkten Datenbank-Upgradepfad auf diesen neuen Stand.
+
+Wer Daten aus einer älteren Vorabversion behalten möchte, sollte **vor dem Update** einen vollständigen JSON-Export erstellen und sicher aufbewahren. Die Wiederherstellung dieses Exports in einer frisch angelegten 0.1.0+7-Datenbank muss vor dem Löschen der alten App-Daten geprüft werden. Ohne benötigte Altdaten können die lokalen App-Daten für 0.1.0+7 neu angelegt werden.
