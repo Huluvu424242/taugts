@@ -6,6 +6,24 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+## [0.1.0+7] - 2026-09-05
+
+### Added
+
+- Die Benutzerdokumentation erklärt die sechs Eingabetypen für Bewertungskriterien anhand konkreter Beispiele und grenzt insbesondere Qualitätswertung und beschreibende Intensität voneinander ab.
+
+### Changed
+
+- Die lokale SQLite-Migrationshistorie wurde auf eine klare produktive Baseline konsolidiert und anschließend für typisierte Kriterienwerte regulär weiterentwickelt. Ältere Vorab-Datenbanken aus 0.1.0+6 und davor besitzen keinen direkten SQLite-Upgradepfad; für Datenerhalt ist vor dem Update ein JSON-Export und anschließend ein geprüfter Import in eine frisch angelegte Datenbank erforderlich.
+- Die verbindlichen Agentenregeln sind in eine kurze `AGENTS.md` und sieben thematisch getrennte Regeldateien aufgeteilt, ohne die bestehenden Vorgaben abzuschwächen.
+- Die Releasevorbereitung prüft aktuelle Versions- und Buildangaben nun ausdrücklich repositoryweit und unterscheidet sie von bewusst historischen Versionsreferenzen.
+
+### Fixed
+
+- Produkt-, Gaststätten- und Geschäftsbewertungen stellen die Eingabetypen **Wertung**, **Intensität**, **Ja/Nein**, **Zahl**, **Auswahl** und **Freitext** nun typgerecht dar und speichern beziehungsweise laden die jeweiligen Werte korrekt, statt sie pauschal wie eine numerische 1–5-Wertung zu behandeln.
+- Die Startseiten-Kachel **Bewertungen** öffnet nun die vorhandene globale Suche direkt im Bereich **Bewertungen und Preise**, statt den veralteten Hinweis auf noch nicht implementierte Funktionalität zu zeigen.
+- Mermaid-Blöcke der MkDocs-Dokumentation werden als Diagramme konfiguriert, sodass unter anderem ER- und Ablaufdiagramme nicht mehr als rohe Codeblöcke dargestellt werden.
+
 ## [0.1.0+6] - 2026-09-03
 
 ### Added
@@ -140,7 +158,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
 - Featureorientierte Ausgangsstruktur, Startscreen und Widget-Test.
 
-[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+6...HEAD
+[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+7...HEAD
+[0.1.0+7]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+6...v0.1.0+7
 [0.1.0+6]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+5...v0.1.0+6
 [0.1.0+5]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+4...v0.1.0+5
 [0.1.0+4]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+3...v0.1.0+4
