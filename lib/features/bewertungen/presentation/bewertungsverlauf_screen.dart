@@ -248,12 +248,12 @@ class _Verlaufskarte extends StatelessWidget {
     return 'Zeitraum: ${zeit(erlebnis.tatsaechlicherBeginn!)}–${zeit(erlebnis.tatsaechlichesEnde!)}';
   }
 
-  String _wertText(Bewertung bewertung) => switch (
-        bewertung.kriteriumEingabetyp
-      ) {
+  String _wertText(Bewertung bewertung) =>
+      switch (bewertung.kriteriumEingabetyp) {
         KriteriumEingabetyp.jaNein => bewertung.wert == 0 ? 'Nein' : 'Ja',
         KriteriumEingabetyp.zahl => _zahlText(bewertung.wert),
-        KriteriumEingabetyp.auswahl || KriteriumEingabetyp.freitext =>
+        KriteriumEingabetyp.auswahl ||
+        KriteriumEingabetyp.freitext =>
           bewertung.textWert ?? '—',
         _ => bewertung.wert == null
             ? '—'
