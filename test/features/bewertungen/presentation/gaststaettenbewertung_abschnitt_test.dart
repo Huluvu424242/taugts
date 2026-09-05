@@ -134,7 +134,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Mindestens eine Wertung oder Notiz ist erforderlich.'),
+      find.text('Mindestens eine Bewertung oder Notiz ist erforderlich.'),
       findsOneWidget,
     );
     expect(find.text('Bitte Gaststättenbewertung prüfen.'), findsOneWidget);
