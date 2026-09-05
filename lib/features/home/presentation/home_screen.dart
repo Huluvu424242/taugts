@@ -25,6 +25,7 @@ class HomeScreen extends StatefulWidget {
     this.exportZielService,
     this.idGenerator,
     this.onSucheOeffnen,
+    this.onBewertungenOeffnen,
     super.key,
   });
 
@@ -35,6 +36,7 @@ class HomeScreen extends StatefulWidget {
   final ExportZielService? exportZielService;
   final IdGenerator? idGenerator;
   final VoidCallback? onSucheOeffnen;
+  final VoidCallback? onBewertungenOeffnen;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -376,10 +378,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.star_outline,
                       label: 'Bewertungen',
-                      onPressed: () => _infoOeffnen(
-                        'Bewertungen',
-                        'Eine übergreifende Bewertungsliste wird in einer späteren Story ergänzt. Bereits vorhandene Verläufe bleiben über Dinge und Orte erreichbar.',
-                      ),
+                      onPressed: widget.onBewertungenOeffnen,
                     ),
                     _navigationsKachel(
                       width: breite,
