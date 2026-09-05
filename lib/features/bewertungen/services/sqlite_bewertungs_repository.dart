@@ -767,7 +767,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
     Bewertung bewertung,
     Map<String, Object?> kriterium,
   ) {
-    final typ = KriteriumEingabetyp.values.byName(kriterium['eingabetyp'] as String);
+    final typ =
+        KriteriumEingabetyp.values.byName(kriterium['eingabetyp'] as String);
     final zahl = bewertung.wert;
     final text = _leerAlsNull(bewertung.textWert);
     final hatGenauEinenWert = (zahl == null) != (text == null);
@@ -797,7 +798,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
             .where((wert) => wert.isNotEmpty)
             .toSet();
         if (text == null || !auswahlwerte.contains(text)) {
-          throw ArgumentError('Der Auswahlwert ist für das Kriterium ungültig.');
+          throw ArgumentError(
+              'Der Auswahlwert ist für das Kriterium ungültig.');
         }
       case KriteriumEingabetyp.freitext:
         if (text == null || text.length > 500) {
