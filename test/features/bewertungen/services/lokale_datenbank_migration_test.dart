@@ -1,216 +1,71 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
+import 'package:taugts/core/persistenz/aktuelles_datenbankschema.dart';
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 
 void main() {
-  test('migriert Schema 1 bis zum aktuellen Schema ohne Datenverlust', () {
+  test('migriert eine leere Datenbank von Schema 0 auf Baseline 1', () {
     final verbindung = sqlite3.openInMemory();
-    verbindung.execute('''
-      CREATE TABLE bewertungen (
-        id TEXT PRIMARY KEY,
-        erlebnis_id TEXT NOT NULL,
-        kriterium_id TEXT NOT NULL,
-        wert REAL NOT NULL,
-        erstellt_am TEXT NOT NULL
-      )
-    ''');
-    verbindung.execute(
-      "INSERT INTO bewertungen VALUES ('b1', 'e1', 'k1', 4.0, "
-      "'2026-08-28T20:00:00.000Z')",
-    );
-    verbindung.userVersion = 1;
 
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
-    final zeile = verbindung.select('SELECT * FROM bewertungen').single;
-    final profile = verbindung.select('SELECT * FROM profile');
 
-    expect(verbindung.userVersion, LokaleDatenbank.schemaVersion);
-    expect(zeile['wert'], 4.0);
-    expect(zeile['geaendert_am'], zeile['erstellt_am']);
-    expect(zeile['herkunft_profil_id'], profile.single['id']);
-    expect(zeile['kriterium_beschreibung'], isNull);
-    expect(zeile['kriterium_auswahlwerte'], '');
+    expect(LokaleDatenbank.schemaVersion, 1);
+    expect(verbindung.userVersion, 1);
+    expect(verbindung.select('PRAGMA foreign_key_check'), isEmpty);
     datenbank.schliessen();
   });
 
-  test('migriert Produktstammdaten von Schema 3 auf Schema 4', () {
+  test('Baseline 1 enthält den vollständigen aktuellen Tabellenstand', () {
     final verbindung = sqlite3.openInMemory();
-    verbindung.execute('''
-      CREATE TABLE produkte (
-        objekt_id TEXT PRIMARY KEY,
-        marke TEXT
-      )
-    ''');
-    verbindung.execute(
-      "INSERT INTO produkte VALUES ('p1', 'Bestehende Marke')",
-    );
-    verbindung.userVersion = 3;
-
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
-    final zeile = verbindung.select('SELECT * FROM produkte').single;
 
-    expect(verbindung.userVersion, LokaleDatenbank.schemaVersion);
-    expect(zeile['marke'], 'Bestehende Marke');
-    expect(zeile['produktart'], 'bier');
-    expect(zeile['barcode'], isNull);
-    datenbank.schliessen();
-  });
-
-  test('migriert Ortsdaten von Schema 4 auf Schema 5', () {
-    final verbindung = sqlite3.openInMemory();
-    verbindung.execute('''
-      CREATE TABLE orte (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        typ TEXT NOT NULL,
-        erstellt_am TEXT NOT NULL,
-        geaendert_am TEXT NOT NULL
-      )
-    ''');
-    verbindung.execute(
-      "INSERT INTO orte VALUES ('o1', 'Alter Ort', 'privat', 'x', 'x')",
-    );
-    verbindung.userVersion = 4;
-
-    final datenbank = LokaleDatenbank.oeffnen(verbindung);
-    final zeile = verbindung.select('SELECT * FROM orte').single;
-
-    expect(verbindung.userVersion, LokaleDatenbank.schemaVersion);
-    expect(zeile['name'], 'Alter Ort');
-    expect(zeile['adresse'], isNull);
-    expect(zeile['osm_referenz'], isNull);
-    datenbank.schliessen();
-  });
-
-  test('migriert Erlebnisse von Schema 5 auf Entwurfsfelder', () {
-    final verbindung = sqlite3.openInMemory();
-    verbindung.execute('''
-      CREATE TABLE profile (
-        id TEXT PRIMARY KEY,
-        anzeigename TEXT,
-        erstellt_am TEXT NOT NULL,
-        geaendert_am TEXT NOT NULL
-      )
-    ''');
-    verbindung.execute(
-      "INSERT INTO profile VALUES ('u1', NULL, 'x', 'x')",
-    );
-    verbindung.execute('''
-      CREATE TABLE objekte (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        art TEXT NOT NULL,
-        erstellt_am TEXT NOT NULL,
-        geaendert_am TEXT NOT NULL
-      )
-    ''');
-    verbindung.execute(
-      "INSERT INTO objekte VALUES ('p1', 'Alt', 'produkt', 'x', 'x')",
-    );
-    verbindung.execute('''
-      CREATE TABLE produkte (
-        objekt_id TEXT PRIMARY KEY REFERENCES objekte(id),
-        marke TEXT,
-        produktart TEXT NOT NULL DEFAULT 'bier',
-        brauerei TEXT,
-        sorte TEXT,
-        alkoholgehalt REAL,
-        herkunft TEXT,
-        gebinde TEXT,
-        fuellmenge_ml INTEGER,
-        barcode TEXT,
-        notiz TEXT
-      )
-    ''');
-    verbindung.execute(
-      "INSERT INTO produkte (objekt_id, marke) VALUES ('p1', 'Alt')",
-    );
-    verbindung.execute('''
-      CREATE TABLE orte (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        typ TEXT NOT NULL,
-        erstellt_am TEXT NOT NULL,
-        geaendert_am TEXT NOT NULL,
-        adresse TEXT,
-        breitengrad REAL,
-        laengengrad REAL,
-        osm_referenz TEXT,
-        notiz TEXT
-      )
-    ''');
-    verbindung.execute('''
-      CREATE TABLE erlebnisse (
-        id TEXT PRIMARY KEY,
-        produkt_id TEXT NOT NULL,
-        kaufort_id TEXT,
-        konsumort_id TEXT,
-        erlebt_am TEXT NOT NULL,
-        erstellt_am TEXT NOT NULL,
-        geaendert_am TEXT NOT NULL,
-        herkunft_profil_id TEXT NOT NULL
-      )
-    ''');
-    verbindung.execute(
-      "INSERT INTO erlebnisse VALUES ('e1', 'p1', NULL, NULL, "
-      "'2026-08-28T20:15:00.000Z', 'x', 'x', 'u1')",
-    );
-    verbindung.userVersion = 5;
-
-    final datenbank = LokaleDatenbank.oeffnen(verbindung);
-    final zeile = verbindung.select('SELECT * FROM erlebnisse').single;
-
-    expect(zeile['preis'], isNull);
-    expect(zeile['notiz'], isNull);
-    expect(zeile['ist_entwurf'], 0);
-    expect(zeile['typ'], 'restaurantbesuch');
-    expect(zeile['status'], 'geplant');
-    expect(zeile['geplanter_tag'], '2026-08-28');
-    expect(zeile['geplante_minute'], 20 * 60 + 15);
-    expect(zeile['produkt_id'], 'p1');
-    final position = verbindung
+    final tabellen = verbindung
         .select(
-          "SELECT * FROM erlebnispositionen WHERE erlebnis_id = 'e1'",
+          "SELECT name FROM sqlite_master WHERE type = 'table' "
+          "AND name NOT LIKE 'sqlite_%'",
         )
-        .single;
-    expect(position['produkt_id'], 'p1');
-    expect(position['anzahl'], 1);
+        .map((zeile) => zeile['name'] as String)
+        .toSet();
+
+    expect(tabellen, containsAll(AktuellesDatenbankschema.erwarteteTabellen));
+    expect(
+      _spalten(verbindung, 'bewertungen'),
+      containsAll(<String>{
+        'erlebnis_position_id',
+        'ortsbewertung_id',
+        'kriterium_beschreibung',
+        'kriterium_auswahlwerte',
+      }),
+    );
+    expect(
+      _spalten(verbindung, 'erlebnisse'),
+      containsAll(<String>{
+        'typ',
+        'status',
+        'geplanter_tag',
+        'tatsaechlicher_beginn',
+      }),
+    );
+    expect(
+      _spalten(verbindung, 'kriterien'),
+      containsAll(<String>{'objektart', 'version', 'auswahlwerte'}),
+    );
+    expect(verbindung.select('PRAGMA foreign_key_check'), isEmpty);
     datenbank.schliessen();
   });
 
-  test('migriert Kriterien und liefert stabile Getränkestandards aus', () {
+  test('Baseline 1 stellt die aktuellen Standardkriterien bereit', () {
     final verbindung = sqlite3.openInMemory();
-    verbindung.execute('''
-      CREATE TABLE kriterien (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        erstellt_am TEXT NOT NULL,
-        geaendert_am TEXT NOT NULL
-      )
-    ''');
-    verbindung.execute(
-      "INSERT INTO kriterien VALUES ('alt', 'Vorhanden', 'x', 'x')",
-    );
-    verbindung.userVersion = 6;
-
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
-    final vorhanden = verbindung
-        .select(
-          "SELECT * FROM kriterien WHERE id = 'alt'",
-        )
-        .single;
-    final standard = verbindung.select(
+
+    final getraenke = verbindung.select(
       "SELECT * FROM kriterien WHERE id LIKE 'c0000000-%' "
       'ORDER BY reihenfolge',
     );
 
-    expect(verbindung.userVersion, LokaleDatenbank.schemaVersion);
-    expect(vorhanden['name'], 'Vorhanden');
-    expect(vorhanden['eingabetyp'], 'wertung');
-    expect(vorhanden['aktiv'], 1);
-    expect(standard, hasLength(7));
-    expect(standard.first['name'], 'Gesamturteil');
-    expect(standard.last['name'], 'Farbintensität');
+    expect(getraenke, hasLength(7));
+    expect(getraenke.first['name'], 'Gesamturteil');
+    expect(getraenke.last['name'], 'Farbintensität');
     expect(
       verbindung.select("SELECT * FROM kriterien WHERE produktart = 'speise'"),
       hasLength(6),
@@ -227,45 +82,32 @@ void main() {
       hasLength(7),
     );
     expect(
-      verbindung
-          .select("SELECT * FROM kriterien WHERE objektart = 'geschaeft'"),
+      verbindung.select("SELECT * FROM kriterien WHERE objektart = 'geschaeft'"),
       hasLength(8),
     );
     datenbank.schliessen();
   });
 
-  test('migriert Schema 12 auf getrennte historische Ortsbewertungen', () {
+  test('lehnt eine Datenbank mit höherer Schemaversion ab', () {
     final verbindung = sqlite3.openInMemory();
-    verbindung.execute('''
-      CREATE TABLE erlebnisse (
-        id TEXT PRIMARY KEY
-      )
-    ''');
-    verbindung.execute('''
-      CREATE TABLE bewertungen (
-        id TEXT PRIMARY KEY,
-        kriterium_beschreibung TEXT,
-        kriterium_auswahlwerte TEXT NOT NULL DEFAULT ''
-      )
-    ''');
-    verbindung.userVersion = 12;
+    verbindung.userVersion = 2;
 
-    final datenbank = LokaleDatenbank.oeffnen(verbindung);
-
-    expect(verbindung.userVersion, 13);
     expect(
-      verbindung.select(
-        "SELECT name FROM sqlite_master WHERE type = 'table' "
-        "AND name = 'ortsbewertungen'",
+      () => LokaleDatenbank.oeffnen(verbindung),
+      throwsA(
+        isA<StateError>().having(
+          (fehler) => fehler.message,
+          'message',
+          'Nicht unterstützte Schemaversion: 2',
+        ),
       ),
-      hasLength(1),
     );
-    expect(
-      verbindung
-          .select('PRAGMA table_info(bewertungen)')
-          .map((zeile) => zeile['name']),
-      contains('ortsbewertung_id'),
-    );
-    datenbank.schliessen();
+
+    verbindung.close();
   });
 }
+
+Set<String> _spalten(Database verbindung, String tabelle) => verbindung
+    .select('PRAGMA table_info($tabelle)')
+    .map((zeile) => zeile['name'] as String)
+    .toSet();
