@@ -249,7 +249,7 @@ class _Verlaufskarte extends StatelessWidget {
   }
 
   String _wertText(Bewertung bewertung) => switch (
-        bewertung.kriteriumEingabetyp,
+        bewertung.kriteriumEingabetyp
       ) {
         KriteriumEingabetyp.jaNein => bewertung.wert == 0 ? 'Nein' : 'Ja',
         KriteriumEingabetyp.zahl => _zahlText(bewertung.wert),
