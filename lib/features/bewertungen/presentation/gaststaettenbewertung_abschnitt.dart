@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
+import 'package:taugts/features/bewertungen/presentation/kriterium_eingabefeld.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 
 class GaststaettenbewertungController {
@@ -52,7 +53,6 @@ class GaststaettenbewertungAbschnitt extends StatefulWidget {
 class _GaststaettenbewertungAbschnittState
     extends State<GaststaettenbewertungAbschnitt> {
   final _fehlerFokus = FocusNode();
-  final _ersterWertFokus = FocusNode();
   final _notizFokus = FocusNode();
   late Future<_Daten> _laden;
   var _lokalGespeichert = false;
@@ -87,7 +87,6 @@ class _GaststaettenbewertungAbschnittState
   @override
   void dispose() {
     _fehlerFokus.dispose();
-    _ersterWertFokus.dispose();
     _notizFokus.dispose();
     super.dispose();
   }
@@ -174,7 +173,6 @@ class _GaststaettenbewertungAbschnittState
                 istGeschaeft: _istGeschaeft,
                 controller: widget.controller,
                 fehlerFokus: _fehlerFokus,
-                ersterWertFokus: _ersterWertFokus,
                 notizFokus: _notizFokus,
                 onGespeichert: () => setState(() => _lokalGespeichert = true),
               );
@@ -194,7 +192,6 @@ class _Formular extends StatefulWidget {
     required this.daten,
     required this.istGeschaeft,
     required this.fehlerFokus,
-    required this.ersterWertFokus,
     required this.notizFokus,
     required this.onGespeichert,
     this.controller,
@@ -208,7 +205,6 @@ class _Formular extends StatefulWidget {
   final bool istGeschaeft;
   final GaststaettenbewertungController? controller;
   final FocusNode fehlerFokus;
-  final FocusNode ersterWertFokus;
   final FocusNode notizFokus;
   final VoidCallback onGespeichert;
 
@@ -218,9 +214,11 @@ class _Formular extends StatefulWidget {
 
 class _FormularState extends State<_Formular> {
   late final TextEditingController _notiz;
-  late final Map<String, double?> _werte;
+  late final Map<String, KriteriumEingabewert> _werte;
+  late final Map<String, FocusNode> _kriteriumFokusse;
   late OrtsbewertungMitWerten? _bisher;
   var _eingabeFehlt = false;
+  var _validierungAngezeigt = false;
   var _speichert = false;
   var _gespeichert = false;
   var _geaendert = false;
@@ -229,8 +227,33 @@ class _FormularState extends State<_Formular> {
       widget.istGeschaeft ? 'Geschäftsbewertung' : 'Gaststättenbewertung';
 
   bool get _hatEingabe =>
-      _werte.values.any((wert) => wert != null) ||
+      _werte.values.any((wert) => wert.hatWert) ||
       _notiz.text.trim().isNotEmpty;
+
+  bool get _hatWertfehler => _werte.values.any((wert) => wert.fehler != null);
+
+  List<(String, FocusNode)> get _formularFehler {
+    if (!_validierungAngezeigt) return const [];
+    final fehler = <(String, FocusNode)>[];
+    if (_eingabeFehlt) {
+      fehler.add((
+        'Mindestens eine Bewertung oder Notiz ist erforderlich.',
+        widget.daten.kriterien.isEmpty
+            ? widget.notizFokus
+            : _kriteriumFokusse[widget.daten.kriterien.first.id]!,
+      ));
+    }
+    for (final kriterium in widget.daten.kriterien) {
+      final eingabe = _werte[kriterium.id];
+      if (eingabe?.fehler != null) {
+        fehler.add((
+          '${kriterium.name}: ${eingabe!.fehler}',
+          _kriteriumFokusse[kriterium.id]!,
+        ));
+      }
+    }
+    return fehler;
+  }
 
   @override
   void initState() {
@@ -238,11 +261,16 @@ class _FormularState extends State<_Formular> {
     _bisher = widget.daten.vorhanden;
     final vorhanden = {
       for (final wert in _bisher?.werte ?? <Bewertung>[])
-        wert.kriteriumId: wert.wert,
+        wert.kriteriumId: wert,
     };
     _werte = {
       for (final kriterium in widget.daten.kriterien)
-        kriterium.id: vorhanden[kriterium.id],
+        kriterium.id:
+            KriteriumEingabewert.ausBewertung(vorhanden[kriterium.id]),
+    };
+    _kriteriumFokusse = {
+      for (final kriterium in widget.daten.kriterien)
+        kriterium.id: FocusNode(),
     };
     _notiz = TextEditingController(
       text: _bisher?.ortsbewertung.notiz ?? '',
@@ -262,6 +290,9 @@ class _FormularState extends State<_Formular> {
   void dispose() {
     widget.controller?._trenne(this);
     _notiz.dispose();
+    for (final fokus in _kriteriumFokusse.values) {
+      fokus.dispose();
+    }
     super.dispose();
   }
 
@@ -286,7 +317,7 @@ class _FormularState extends State<_Formular> {
       for (final wert in _bisher?.werte ?? <Bewertung>[])
         if (!_werte.containsKey(wert.kriteriumId)) wert,
       for (final eintrag in _werte.entries)
-        if (eintrag.value != null)
+        if (eintrag.value.hatWert)
           Bewertung(
             id: vorhandeneWerte[eintrag.key]?.id ?? widget.idGenerator.neueId(),
             erlebnisId: erlebnis.id,
@@ -294,7 +325,8 @@ class _FormularState extends State<_Formular> {
             ortsbewertungId: id,
             kriteriumId: eintrag.key,
             herkunftProfilId: erlebnis.herkunftProfilId,
-            wert: eintrag.value!,
+            wert: eintrag.value.zahl,
+            textWert: eintrag.value.text,
             erstelltAm: vorhandeneWerte[eintrag.key]?.erstelltAm ?? jetzt,
             geaendertAm: jetzt,
           ),
@@ -312,7 +344,7 @@ class _FormularState extends State<_Formular> {
   }
 
   Future<bool> _speichereFallsGeaendert(Erlebnis erlebnis) async {
-    if (!_geaendert || !_hatEingabe) return false;
+    if (!_geaendert || !_hatEingabe || _hatWertfehler) return false;
     await _speichereOrtsbewertung(erlebnis);
     if (!mounted) return true;
     setState(() {
@@ -324,13 +356,20 @@ class _FormularState extends State<_Formular> {
     return true;
   }
 
+  void _zeigeValidierungsfehler() {
+    setState(() {
+      _validierungAngezeigt = true;
+      _eingabeFehlt = !_hatEingabe;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Bitte $_bezeichnung prüfen.')),
+    );
+    widget.fehlerFokus.requestFocus();
+  }
+
   Future<void> _speichern() async {
-    if (!_hatEingabe) {
-      setState(() => _eingabeFehlt = true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Bitte $_bezeichnung prüfen.')),
-      );
-      widget.fehlerFokus.requestFocus();
+    if (!_hatEingabe || _hatWertfehler) {
+      _zeigeValidierungsfehler();
       return;
     }
     setState(() => _speichert = true);
@@ -359,96 +398,67 @@ class _FormularState extends State<_Formular> {
   }
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_eingabeFehlt)
-              FormularFehlersammler(
-                focusNode: widget.fehlerFokus,
-                fehler: [
-                  (
-                    'Mindestens eine Wertung oder Notiz ist erforderlich.',
-                    widget.daten.kriterien.isEmpty
-                        ? widget.notizFokus
-                        : widget.ersterWertFokus,
-                  ),
-                ],
+  Widget build(BuildContext context) {
+    final formularFehler = _formularFehler;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (formularFehler.isNotEmpty)
+            FormularFehlersammler(
+              focusNode: widget.fehlerFokus,
+              fehler: formularFehler,
+            ),
+          if (widget.daten.kriterien.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                'Keine aktiven ${widget.istGeschaeft ? 'Geschäfts' : 'Gaststätten'}kriterien. Eine Notiz kann dennoch gespeichert werden.',
               ),
-            if (widget.daten.kriterien.isEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  'Keine aktiven ${widget.istGeschaeft ? 'Geschäfts' : 'Gaststätten'}kriterien. Eine Notiz kann dennoch gespeichert werden.',
-                ),
-              ),
-            for (var index = 0; index < widget.daten.kriterien.length; index++)
-              DropdownButtonFormField<double?>(
-                focusNode: index == 0 ? widget.ersterWertFokus : null,
-                initialValue: _werte[widget.daten.kriterien[index].id],
-                decoration: InputDecoration(
-                  labelText: widget.daten.kriterien[index].name,
-                  helperText: widget.daten.kriterien[index].beschreibung,
-                ),
-                items: const [
-                  DropdownMenuItem<double?>(
-                    value: null,
-                    child: Text('Nicht bewertet'),
-                  ),
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text('1 – taugt gar nicht'),
-                  ),
-                  DropdownMenuItem(
-                    value: 2,
-                    child: Text('2 – taugt eher nicht'),
-                  ),
-                  DropdownMenuItem(
-                    value: 3,
-                    child: Text('3 – teils, teils'),
-                  ),
-                  DropdownMenuItem(
-                    value: 4,
-                    child: Text('4 – taugt eher'),
-                  ),
-                  DropdownMenuItem(
-                    value: 5,
-                    child: Text('5 – taugt sehr'),
-                  ),
-                ],
-                onChanged: _speichert
-                    ? null
-                    : (wert) => setState(() {
-                          _werte[widget.daten.kriterien[index].id] = wert;
-                          _eingabeFehlt = false;
-                          _gespeichert = false;
-                          _geaendert = true;
-                        }),
-              ),
-            TextField(
-              controller: _notiz,
-              focusNode: widget.notizFokus,
-              maxLength: 1000,
-              maxLines: 3,
-              decoration: const InputDecoration(labelText: 'Notiz (optional)'),
-              onChanged: (_) => setState(() {
-                _eingabeFehlt = false;
+            ),
+          for (var index = 0; index < widget.daten.kriterien.length; index++) ...[
+            KriteriumEingabefeld(
+              kriterium: widget.daten.kriterien[index],
+              wert: _werte[widget.daten.kriterien[index].id]!,
+              focusNode: _kriteriumFokusse[widget.daten.kriterien[index].id],
+              enabled: !_speichert,
+              errorText: index == 0 && _eingabeFehlt
+                  ? 'Bitte eine Bewertung wählen oder eine Notiz eingeben.'
+                  : null,
+              onChanged: (wert) => setState(() {
+                _werte[widget.daten.kriterien[index].id] = wert;
+                if (wert.hatWert) _eingabeFehlt = false;
                 _gespeichert = false;
                 _geaendert = true;
               }),
             ),
             const SizedBox(height: 8),
-            FilledButton.icon(
-              onPressed: _speichert ? null : _speichern,
-              icon: const Icon(Icons.save_outlined),
-              label: Text(
-                _gespeichert ? 'Bewertung gespeichert' : 'Bewertung speichern',
-              ),
-            ),
           ],
-        ),
-      );
+          TextField(
+            controller: _notiz,
+            focusNode: widget.notizFokus,
+            maxLength: 1000,
+            maxLines: 3,
+            decoration: const InputDecoration(labelText: 'Notiz (optional)'),
+            onChanged: (_) => setState(() {
+              if (_notiz.text.trim().isNotEmpty) _eingabeFehlt = false;
+              _gespeichert = false;
+              _geaendert = true;
+            }),
+          ),
+          const SizedBox(height: 8),
+          FilledButton.icon(
+            onPressed: _speichert ? null : _speichern,
+            icon: const Icon(Icons.save_outlined),
+            label: Text(
+              _gespeichert ? 'Bewertung gespeichert' : 'Bewertung speichern',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Daten {
