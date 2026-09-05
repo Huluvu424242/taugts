@@ -54,7 +54,7 @@ class ImportValidierungsService {
     this.grenzen = const ImportValidierungsGrenzen(),
   });
 
-  static const aktuelleSchemaVersion = 1;
+  static const aktuelleSchemaVersion = 2;
   static const aeltesteUnterstuetzteSchemaVersion = 0;
 
   static const _sammlungsNamen = [
@@ -231,10 +231,25 @@ class ImportValidierungsService {
     int version,
   ) {
     final migriert = Map<String, Object?>.from(dokument);
-    if (version == 0) {
+    var aktuelleVersion = version;
+    if (aktuelleVersion == 0) {
       migriert['schemaVersion'] = 1;
       migriert.putIfAbsent('kategorien', () => <Object?>[]);
       migriert.putIfAbsent('kategorieZuordnungen', () => <Object?>[]);
+      aktuelleVersion = 1;
+    }
+    if (aktuelleVersion == 1) {
+      final bewertungen = migriert['bewertungen'];
+      if (bewertungen is List) {
+        migriert['bewertungen'] = [
+          for (final roh in bewertungen)
+            if (roh is Map)
+              {..._map(roh), 'textWert': null}
+            else
+              roh,
+        ];
+      }
+      migriert['schemaVersion'] = 2;
     }
     return migriert;
   }
@@ -597,7 +612,6 @@ class ImportValidierungsService {
       _optionaleUuid(wert, 'ortId', '$pfad.ortId', fehler);
       _uuid(wert, 'herkunftProfilId', '$pfad.herkunftProfilId', fehler);
       _utcZeit(wert, 'bewertetAm', '$pfad.bewertetAm', fehler);
-      _dezimalzahl(wert, 'wert', '$pfad.wert', fehler);
       _zeitstempel(wert, pfad, fehler);
 
       final snapshot = wert['kriterium'];
@@ -638,6 +652,96 @@ class ImportValidierungsService {
         'auswahlwerte',
         '$pfad.kriterium.auswahlwerte',
         fehler,
+      );
+      _validiereBewertungswert(wert, kriterium, pfad, fehler);
+    }
+  }
+
+  void _validiereBewertungswert(
+    Map<String, Object?> bewertung,
+    Map<String, Object?> kriterium,
+    String pfad,
+    List<ImportValidierungsFehler> fehler,
+  ) {
+    final typ = kriterium['eingabetyp'];
+    final zahl = bewertung['wert'];
+    final text = bewertung['textWert'];
+    final hatZahl = zahl != null;
+    final hatText = text != null;
+    if (hatZahl == hatText) {
+      _fehler(
+        fehler,
+        'bewertungswert_ungueltig',
+        pfad,
+        'Eine Bewertung muss genau einen numerischen oder textuellen Wert enthalten.',
+      );
+      return;
+    }
+    if (typ == 'auswahl' || typ == 'freitext') {
+      if (text is! String || text.trim().isEmpty) {
+        _fehler(
+          fehler,
+          'text_ungueltig',
+          '$pfad.textWert',
+          'Der Kriterienwert muss eine nicht leere Zeichenkette sein.',
+        );
+        return;
+      }
+      if (typ == 'freitext' && text.length > 500) {
+        _fehler(
+          fehler,
+          'text_zu_lang',
+          '$pfad.textWert',
+          'Freitext darf höchstens 500 Zeichen enthalten.',
+        );
+      }
+      if (typ == 'auswahl') {
+        final optionen = kriterium['auswahlwerte'];
+        if (optionen is! List || !optionen.contains(text)) {
+          _fehler(
+            fehler,
+            'auswahlwert_ungueltig',
+            '$pfad.textWert',
+            'Der Wert gehört nicht zu den historischen Auswahlwerten.',
+          );
+        }
+      }
+      return;
+    }
+    if (zahl is! String || !_dezimalRegExp.hasMatch(zahl)) {
+      _fehler(
+        fehler,
+        'dezimalzahl_ungueltig',
+        '$pfad.wert',
+        'Der Kriterienwert muss eine kanonische Dezimalzahl mit Punkt enthalten.',
+      );
+      return;
+    }
+    final numerisch = double.tryParse(zahl);
+    if (numerisch == null || !numerisch.isFinite) {
+      _fehler(
+        fehler,
+        'dezimalzahl_ungueltig',
+        '$pfad.wert',
+        'Der Kriterienwert muss eine endliche Dezimalzahl sein.',
+      );
+      return;
+    }
+    if ((typ == 'wertung' || typ == 'intensitaet') &&
+        (numerisch < 1 || numerisch > 5 || numerisch != numerisch.round())) {
+      _fehler(
+        fehler,
+        'skalenwert_ungueltig',
+        '$pfad.wert',
+        'Wertung und Intensität müssen eine Ganzzahl von 1 bis 5 sein.',
+      );
+    }
+    if (typ == 'jaNein' && numerisch != 0 && numerisch != 1) {
+      _fehler(
+        fehler,
+        'ja_nein_ungueltig',
+        '$pfad.wert',
+        'Ja/Nein muss als 0 oder 1 gespeichert sein.',
       );
     }
   }
