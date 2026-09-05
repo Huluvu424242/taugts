@@ -6,9 +6,9 @@ Taugt’s? ist eine Offline-first-Flutter-App zur lokalen Erfassung und Bewertun
 von Produkten, Orten und Erlebnissen. Die Datenhaltung bleibt auf dem Gerät;
 für die Kernfunktionen sind weder Konto noch Serververbindung erforderlich.
 
-Die vorbereitete Android-Version ist **0.1.0+6**.
+Die vorbereitete Android-Version ist **0.1.0+7**.
 
-## Funktionsumfang von 0.1.0+6
+## Funktionsumfang von 0.1.0+7
 
 - Produkte wie Getränke, Speisen und andere Produkte lokal anlegen, suchen,
   bearbeiten und erneut bewerten, ohne Stammdaten neu anzulegen
@@ -24,7 +24,9 @@ Die vorbereitete Android-Version ist **0.1.0+6**.
   Erlebnisübersicht wiederfinden und nachträglich bearbeiten
 - Restaurantbestellungen und Einkaufslisten mit mehreren Positionen, Anzahl,
   Währung, optionalem Einzelpreis und sichtbarem Bewertungsstatus führen
-- Produkte anhand typabhängiger, lokal konfigurierbarer Kriterien bewerten
+- Produkte, Gaststätten und Geschäfte anhand lokal konfigurierbarer Kriterien
+  bewerten; Wertung, Intensität, Ja/Nein, Zahl, Auswahl und Freitext werden
+  entsprechend ihrem Eingabetyp erfasst und gespeichert
 - Gaststätten und Geschäfte im selben Erlebnis getrennt von den
   Produktbewertungen bewerten; geänderte Ortsbewertungen werden gemeinsam mit
   dem Erlebnis gespeichert
@@ -32,7 +34,8 @@ Die vorbereitete Android-Version ist **0.1.0+6**.
   Preisen, Mengen, konkretem Erlebniszusammenhang und getrennten
   Beobachtungszeitpunkten anzeigen
 - globale lokale Suche über Produkte, Orte, Erlebnisse, Bewertungen und Preise
-  mit strukturierten und freien Filtern verwenden
+  mit strukturierten und freien Filtern verwenden; die Startseiten-Kachel
+  **Bewertungen** führt direkt in die Historien-Suche
 - lokale Auswertungen zu vergleichbaren Kriterienwerten, Preis- und
   Bewertungsverläufen sowie ausdrücklich erfassten Andrangsdaten nutzen
 - EAN-, GTIN- und UPC-Barcodes bewusst starten, lokal scannen, bestätigen und
@@ -68,7 +71,7 @@ Die vorbereitete Android-Version ist **0.1.0+6**.
 Nach Veröffentlichung steht die APK unter
 [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) bereit:
 
-1. `taugts-0.1.0+6.apk` und die zugehörige
+1. `taugts-0.1.0+7.apk` und die zugehörige
    `.apk.sha256`-Datei herunterladen.
 2. Die SHA-256-Prüfsumme kontrollieren.
 3. Unter Android gegebenenfalls die Installation aus der verwendeten
@@ -78,12 +81,22 @@ Nach Veröffentlichung steht die APK unter
 Unter Windows lässt sich die Prüfsumme so ermitteln:
 
 ```powershell
-Get-FileHash .\taugts-0.1.0+6.apk -Algorithm SHA256
+Get-FileHash .\taugts-0.1.0+7.apk -Algorithm SHA256
 ```
 
 Der Hash muss mit dem Inhalt von
-`taugts-0.1.0+6.apk.sha256` übereinstimmen. APK-Updates funktionieren nur mit
+`taugts-0.1.0+7.apk.sha256` übereinstimmen. APK-Updates funktionieren nur mit
 demselben Release-Signierschlüssel.
+
+### Hinweis für Updates aus älteren Vorabversionen
+
+Die lokale SQLite-Datenbank wurde für 0.1.0+7 auf eine neue Baseline
+konsolidiert und anschließend für typisierte Kriterienwerte erweitert. Für die
+während der Vorabentwicklung verwendeten älteren Datenbankschemata besteht kein
+direkter Datenbank-Upgradepfad. Wer Daten aus 0.1.0+6 oder früher behalten
+möchte, sollte **vor dem Update** einen vollständigen JSON-Export erstellen und
+dessen Wiederherstellung in einer frisch angelegten 0.1.0+7-Datenbank prüfen,
+bevor alte App-Daten gelöscht werden.
 
 ## Datenschutz und lokale Daten
 
@@ -117,6 +130,9 @@ Dokumentationslinks ist eine Netzwerkverbindung erforderlich. Für Orte vom Typ
 - Import und Export müssen vor Veröffentlichung zusätzlich mit realistischen
   Datenbeständen sowie Abbruch-, Fehler-, Wiederholungs- und Rollbackfällen auf
   einem realen Android-Gerät geprüft werden.
+- Der Übergang von einer älteren Vorab-Datenbank auf 0.1.0+7 besitzt keinen
+  direkten SQLite-Migrationspfad; Datenerhalt muss über Export, frische
+  Datenbank und geprüften Import abgesichert werden.
 - Die systematische manuelle Prüfung mit TalkBack, großer Systemschrift,
   Gestennavigation und einem kleinen Android-Gerät ist vor einer öffentlichen
   Freigabe noch abzuschließen; siehe
@@ -202,11 +218,11 @@ Der ausschließlich manuell startbare GitHub-Actions-Workflow
 ihrer SHA-256-Prüfsumme als GitHub Release veröffentlichen.
 
 Einrichtung, Sicherheitsvorgaben und Ablauf stehen in
-[docs/android-release.md](docs/android-release.md). Für Version 0.1.0+6 liegen
+[docs/android-release.md](docs/android-release.md). Für Version 0.1.0+7 liegen
 außerdem folgende Dokumente bereit:
 
-- [Release Notes](docs/releases/0.1.0+6.md)
-- [Release-Checkliste](docs/release-checklist-0.1.0+6.md)
+- [Release Notes](docs/releases/0.1.0+7.md)
+- [Release-Checkliste](docs/release-checklist-0.1.0+7.md)
 - [Changelog](CHANGELOG.md)
 
 Der Release-Workflow darf erst nach Einrichtung der Signing-Secrets und einer
