@@ -723,34 +723,89 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       [bewertung.kriteriumId],
     );
     final kriterium = kriterien.isEmpty ? null : kriterien.single;
+    if (kriterium == null) {
+      throw ArgumentError.value(
+        bewertung.kriteriumId,
+        'kriteriumId',
+        'Das Bewertungskriterium ist unbekannt.',
+      );
+    }
+    _pruefeBewertungswert(bewertung, kriterium);
     datenbank.verbindung.execute(
       '''
         INSERT INTO bewertungen (
-          id, erlebnis_id, kriterium_id, wert, erstellt_am, geaendert_am,
-          herkunft_profil_id, erlebnis_position_id, ort_id, kriterium_name,
-          kriterium_eingabetyp, kriterium_reihenfolge, kriterium_version,
-          kriterium_beschreibung, kriterium_auswahlwerte, ortsbewertung_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          id, erlebnis_id, kriterium_id, wert, text_wert, erstellt_am,
+          geaendert_am, herkunft_profil_id, erlebnis_position_id, ort_id,
+          kriterium_name, kriterium_eingabetyp, kriterium_reihenfolge,
+          kriterium_version, kriterium_beschreibung, kriterium_auswahlwerte,
+          ortsbewertung_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ''',
       [
         bewertung.id,
         bewertung.erlebnisId,
         bewertung.kriteriumId,
         bewertung.wert,
+        _leerAlsNull(bewertung.textWert),
         _zeit(bewertung.erstelltAm),
         _zeit(bewertung.geaendertAm),
         bewertung.herkunftProfilId,
         bewertung.erlebnisPositionId,
         bewertung.ortId,
-        kriterium?['name'],
-        kriterium?['eingabetyp'],
-        kriterium?['reihenfolge'],
-        kriterium?['version'],
-        kriterium?['beschreibung'],
-        kriterium?['auswahlwerte'] ?? '',
+        kriterium['name'],
+        kriterium['eingabetyp'],
+        kriterium['reihenfolge'],
+        kriterium['version'],
+        kriterium['beschreibung'],
+        kriterium['auswahlwerte'] ?? '',
         bewertung.ortsbewertungId,
       ],
     );
+  }
+
+  void _pruefeBewertungswert(
+    Bewertung bewertung,
+    Map<String, Object?> kriterium,
+  ) {
+    final typ = KriteriumEingabetyp.values.byName(kriterium['eingabetyp'] as String);
+    final zahl = bewertung.wert;
+    final text = _leerAlsNull(bewertung.textWert);
+    final hatGenauEinenWert = (zahl == null) != (text == null);
+    if (!hatGenauEinenWert) {
+      throw ArgumentError('Eine Bewertung benötigt genau einen Wert.');
+    }
+    switch (typ) {
+      case KriteriumEingabetyp.wertung:
+      case KriteriumEingabetyp.intensitaet:
+        if (zahl == null ||
+            zahl < 1 ||
+            zahl > 5 ||
+            zahl != zahl.roundToDouble()) {
+          throw ArgumentError('Wertung und Intensität müssen 1 bis 5 sein.');
+        }
+      case KriteriumEingabetyp.jaNein:
+        if (zahl != 0 && zahl != 1) {
+          throw ArgumentError('Ja/Nein muss als 0 oder 1 gespeichert werden.');
+        }
+      case KriteriumEingabetyp.zahl:
+        if (zahl == null || !zahl.isFinite) {
+          throw ArgumentError('Zahl-Kriterien benötigen eine endliche Zahl.');
+        }
+      case KriteriumEingabetyp.auswahl:
+        final auswahlwerte = (kriterium['auswahlwerte'] as String? ?? '')
+            .split('\n')
+            .where((wert) => wert.isNotEmpty)
+            .toSet();
+        if (text == null || !auswahlwerte.contains(text)) {
+          throw ArgumentError('Der Auswahlwert ist für das Kriterium ungültig.');
+        }
+      case KriteriumEingabetyp.freitext:
+        if (text == null || text.length > 500) {
+          throw ArgumentError(
+            'Freitext muss zwischen 1 und 500 Zeichen enthalten.',
+          );
+        }
+    }
   }
 
   @override
@@ -838,7 +893,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
         erlebnisPositionId: row['erlebnis_position_id'] as String?,
         ortId: row['ort_id'] as String?,
         ortsbewertungId: row['ortsbewertung_id'] as String?,
-        wert: (row['wert'] as num).toDouble(),
+        wert: (row['wert'] as num?)?.toDouble(),
+        textWert: row['text_wert'] as String?,
         erstelltAm: DateTime.parse(row['erstellt_am'] as String),
         geaendertAm: DateTime.parse(row['geaendert_am'] as String),
         kriteriumName: row['kriterium_name'] as String?,
