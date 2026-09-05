@@ -583,9 +583,10 @@ class Bewertung {
     required this.erlebnisId,
     required this.kriteriumId,
     required this.herkunftProfilId,
-    required this.wert,
     required this.erstelltAm,
     required this.geaendertAm,
+    this.wert,
+    this.textWert,
     this.erlebnisPositionId,
     this.ortId,
     this.kriteriumName,
@@ -595,7 +596,8 @@ class Bewertung {
     this.kriteriumVersion,
     this.kriteriumAuswahlwerte = const [],
     this.ortsbewertungId,
-  });
+  })  : assert(wert != null || textWert != null),
+        assert(wert == null || textWert == null);
 
   final String id;
   final String erlebnisId;
@@ -604,7 +606,8 @@ class Bewertung {
   final String? ortsbewertungId;
   final String kriteriumId;
   final String herkunftProfilId;
-  final double wert;
+  final double? wert;
+  final String? textWert;
   final DateTime erstelltAm;
   final DateTime geaendertAm;
   final String? kriteriumName;
