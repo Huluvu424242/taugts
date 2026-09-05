@@ -248,12 +248,24 @@ class _Verlaufskarte extends StatelessWidget {
     return 'Zeitraum: ${zeit(erlebnis.tatsaechlicherBeginn!)}–${zeit(erlebnis.tatsaechlichesEnde!)}';
   }
 
-  String _wertText(Bewertung bewertung) =>
-      switch (bewertung.kriteriumEingabetyp) {
+  String _wertText(Bewertung bewertung) => switch (
+        bewertung.kriteriumEingabetyp,
+      ) {
         KriteriumEingabetyp.jaNein => bewertung.wert == 0 ? 'Nein' : 'Ja',
-        KriteriumEingabetyp.zahl => bewertung.wert.toString(),
-        _ => '${bewertung.wert.toStringAsFixed(0)} / 5',
+        KriteriumEingabetyp.zahl => _zahlText(bewertung.wert),
+        KriteriumEingabetyp.auswahl || KriteriumEingabetyp.freitext =>
+          bewertung.textWert ?? '—',
+        _ => bewertung.wert == null
+            ? '—'
+            : '${bewertung.wert!.toStringAsFixed(0)} / 5',
       };
+
+  String _zahlText(double? wert) {
+    if (wert == null) return '—';
+    return wert == wert.roundToDouble()
+        ? wert.toStringAsFixed(0)
+        : wert.toString();
+  }
 
   Bewertung? _gesamtwertung(List<Bewertung> bewertungen) {
     for (final bewertung in bewertungen) {
