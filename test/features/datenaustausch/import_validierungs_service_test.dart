@@ -13,14 +13,15 @@ Map<String, Object?> _dokument(String name) =>
 void main() {
   const service = ImportValidierungsService();
 
-  test('gültiges V1-Fixture wird vollständig akzeptiert', () {
+  test('gültiges V1-Fixture wird auf V2 migriert und vollständig akzeptiert', () {
     final ergebnis = service.validiere(
       _fixture('taugts-export-v1-gueltig.json'),
     );
 
     expect(ergebnis.istGueltig, isTrue);
-    expect(ergebnis.wurdeMigriert, isFalse);
-    expect(ergebnis.schemaVersion, 1);
+    expect(ergebnis.wurdeMigriert, isTrue);
+    expect(ergebnis.urspruenglicheSchemaVersion, 1);
+    expect(ergebnis.schemaVersion, 2);
     expect(ergebnis.fehler, isEmpty);
   });
 
@@ -36,7 +37,7 @@ void main() {
     expect(service.validiere(jsonEncode(dokument)).istGueltig, isTrue);
   });
 
-  test('Vorabversion 0 wird vorwärts auf V1 migriert', () {
+  test('Vorabversion 0 wird vorwärts auf V2 migriert', () {
     final ergebnis = service.validiere(
       _fixture('taugts-export-v0-migrierbar.json'),
     );
@@ -44,14 +45,14 @@ void main() {
     expect(ergebnis.istGueltig, isTrue);
     expect(ergebnis.wurdeMigriert, isTrue);
     expect(ergebnis.urspruenglicheSchemaVersion, 0);
-    expect(ergebnis.schemaVersion, 1);
+    expect(ergebnis.schemaVersion, 2);
     expect(ergebnis.dokument!['kategorien'], isEmpty);
     expect(ergebnis.dokument!['kategorieZuordnungen'], isEmpty);
   });
 
   test('nicht unterstützte neuere Version wird abgewiesen', () {
     final dokument = _dokument('taugts-export-v1-gueltig.json');
-    dokument['schemaVersion'] = 2;
+    dokument['schemaVersion'] = 3;
 
     final ergebnis = service.validiere(jsonEncode(dokument));
 
@@ -133,6 +134,29 @@ void main() {
     objekt['zukuenftigesFeld'] = 'wird ignoriert';
 
     expect(service.validiere(jsonEncode(dokument)).istGueltig, isTrue);
+  });
+
+  test('V2 akzeptiert einen textuellen Auswahlwert', () {
+    final dokument = _dokument('taugts-export-v1-gueltig.json');
+    dokument['schemaVersion'] = 2;
+    final kriterien = dokument['bewertungskriterien'] as List<Object?>;
+    final kriterium = kriterien.first as Map<String, Object?>;
+    kriterium['eingabetyp'] = 'auswahl';
+    kriterium['auswahlwerte'] = ['Direkt', 'Langsam'];
+    final bewertungen = dokument['bewertungen'] as List<Object?>;
+    for (final roh in bewertungen) {
+      final bewertung = roh as Map<String, Object?>;
+      final snapshot = bewertung['kriterium'] as Map<String, Object?>;
+      snapshot['eingabetyp'] = 'auswahl';
+      snapshot['auswahlwerte'] = ['Direkt', 'Langsam'];
+      bewertung['wert'] = null;
+      bewertung['textWert'] = 'Direkt';
+    }
+
+    final ergebnis = service.validiere(jsonEncode(dokument));
+
+    expect(ergebnis.istGueltig, isTrue);
+    expect(ergebnis.schemaVersion, 2);
   });
 
   test('Dateigröße wird vor dem JSON-Parsing begrenzt', () {
