@@ -11,7 +11,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 1;
+  static const schemaVersion = 2;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -41,6 +41,9 @@ class LokaleDatenbank {
           case 0:
             _migriereVon0Auf1();
             aktuelleVersion = 1;
+          case 1:
+            _migriereVon1Auf2();
+            aktuelleVersion = 2;
           default:
             throw StateError(
               'Kein Migrationspfad von Schemaversion $aktuelleVersion '
@@ -55,7 +58,29 @@ class LokaleDatenbank {
   }
 
   void _migriereVon0Auf1() {
-    _erstelleAktuellesSchema();
+    _erstelleSchemaVersion1();
+  }
+
+  void _migriereVon1Auf2() {
+    verbindung.execute('ALTER TABLE bewertungen RENAME TO bewertungen_v1');
+    _erstelleBewertungenTabelleVersion2();
+    verbindung.execute('''
+      INSERT INTO bewertungen (
+        id, erlebnis_id, kriterium_id, wert, text_wert, erstellt_am,
+        geaendert_am, herkunft_profil_id, erlebnis_position_id, ort_id,
+        kriterium_name, kriterium_eingabetyp, kriterium_reihenfolge,
+        kriterium_version, kriterium_beschreibung, kriterium_auswahlwerte,
+        ortsbewertung_id
+      )
+      SELECT
+        id, erlebnis_id, kriterium_id, wert, NULL, erstellt_am,
+        geaendert_am, herkunft_profil_id, erlebnis_position_id, ort_id,
+        kriterium_name, kriterium_eingabetyp, kriterium_reihenfolge,
+        kriterium_version, kriterium_beschreibung, kriterium_auswahlwerte,
+        ortsbewertung_id
+      FROM bewertungen_v1
+    ''');
+    verbindung.execute('DROP TABLE bewertungen_v1');
   }
 
   void _stelleStandardkriterienBereit() {
@@ -100,7 +125,7 @@ class LokaleDatenbank {
         [name],
       ).isNotEmpty;
 
-  void _erstelleAktuellesSchema() {
+  void _erstelleSchemaVersion1() {
     verbindung.execute('''
       CREATE TABLE profile (
         id TEXT PRIMARY KEY,
@@ -166,7 +191,7 @@ class LokaleDatenbank {
       )
     ''');
     _erstelleOrtsbewertungenTabelle();
-    _erstelleBewertungenTabelle();
+    _erstelleBewertungenTabelleVersion1();
     AktuellesDatenbankschema.stelleFeatureTabellenBereit(verbindung);
   }
 
@@ -202,7 +227,7 @@ class LokaleDatenbank {
     ''');
   }
 
-  void _erstelleBewertungenTabelle() {
+  void _erstelleBewertungenTabelleVersion1() {
     verbindung.execute('''
       CREATE TABLE bewertungen (
         id TEXT PRIMARY KEY,
@@ -223,6 +248,36 @@ class LokaleDatenbank {
         kriterium_auswahlwerte TEXT NOT NULL DEFAULT '',
         ortsbewertung_id TEXT REFERENCES ortsbewertungen(id)
           ON DELETE CASCADE
+      )
+    ''');
+  }
+
+  void _erstelleBewertungenTabelleVersion2() {
+    verbindung.execute('''
+      CREATE TABLE bewertungen (
+        id TEXT PRIMARY KEY,
+        erlebnis_id TEXT NOT NULL REFERENCES erlebnisse(id) ON DELETE CASCADE,
+        kriterium_id TEXT NOT NULL REFERENCES kriterien(id),
+        wert REAL,
+        text_wert TEXT,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL,
+        herkunft_profil_id TEXT NOT NULL REFERENCES profile(id),
+        erlebnis_position_id TEXT REFERENCES erlebnispositionen(id)
+          ON DELETE CASCADE,
+        ort_id TEXT REFERENCES orte(id),
+        kriterium_name TEXT,
+        kriterium_eingabetyp TEXT,
+        kriterium_reihenfolge INTEGER,
+        kriterium_version INTEGER,
+        kriterium_beschreibung TEXT,
+        kriterium_auswahlwerte TEXT NOT NULL DEFAULT '',
+        ortsbewertung_id TEXT REFERENCES ortsbewertungen(id)
+          ON DELETE CASCADE,
+        CHECK (
+          (wert IS NOT NULL AND text_wert IS NULL) OR
+          (wert IS NULL AND text_wert IS NOT NULL AND LENGTH(TRIM(text_wert)) > 0)
+        )
       )
     ''');
   }
