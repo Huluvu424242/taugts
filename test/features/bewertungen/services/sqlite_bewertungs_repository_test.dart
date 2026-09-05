@@ -530,7 +530,7 @@ void main() {
       erlebnisId: erlebnisId,
       kriteriumId: kriteriumId,
       herkunftProfilId: profilId,
-      wert: 1,
+      textWert: 'Direkt',
       erstelltAm: zeit,
       geaendertAm: zeit,
     ));
@@ -774,7 +774,7 @@ void main() {
           ),
         ],
       ),
-      throwsA(isA<SqliteException>()),
+      throwsArgumentError,
     );
 
     final zeile = datenbank.verbindung.select(
