@@ -4,34 +4,35 @@
 
 Taugt’s? speichert seine fachlichen Daten offline-first in einer lokalen SQLite-Datei `taugts.sqlite` im Application-Support-Verzeichnis der jeweiligen Plattform. Die Datenbank ist Arbeitsdatenbank; das versionierte JSON-Format ist das davon unabhängige Austausch- und Sicherungsformat.
 
-Diese Seite beschreibt den aktuellen physischen Schema-Stand, seine Beziehungen, die historische Migrationskette und den Abgleich mit den fachlichen Stories. Maßgeblich für die Kernmigrationen ist `LokaleDatenbank`, für die zum aktuellen Stand zusätzlich erforderlichen Feature-Tabellen `AktuellesDatenbankschema`.
+Diese Seite beschreibt den aktuellen physischen Schema-Stand, seine Beziehungen, die Baseline vor dem ersten produktiven Release und die Regeln für künftige Vorwärtsmigrationen. Maßgeblich für den Migrationsablauf ist `LokaleDatenbank`; die Definition der gemeinsam genutzten Feature-Tabellen liegt in `AktuellesDatenbankschema`.
 
 ## Initialisierung und Schemastand
 
-`LokaleDatenbank.oeffnen()` aktiviert `PRAGMA foreign_keys = ON`, liest `PRAGMA user_version` und führt notwendige Vorwärtsmigrationen innerhalb einer `BEGIN IMMEDIATE`-Transaktion aus. Eine neue Datenbank mit `user_version = 0` wird **direkt aus dem aktuellen Kernschema** erzeugt; sie durchläuft nicht künstlich die historischen Migrationen.
+`LokaleDatenbank.oeffnen()` aktiviert `PRAGMA foreign_keys = ON`, liest `PRAGMA user_version` und führt notwendige Vorwärtsmigrationen innerhalb einer `BEGIN IMMEDIATE`-Transaktion aus.
 
-Die Produktions-Factory ergänzt anschließend deterministisch alle aktuellen Feature-Tabellen. Historisch wurden Kategorien, Klassifikation, Kategorie-Kriteriensets und Import-Hilfstabellen erst beim ersten Zugriff auf ihr jeweiliges Repository erzeugt. Diese DDL-Aufrufe bleiben vorerst idempotent bestehen, sind aber nicht mehr Voraussetzung dafür, dass eine über die Produktions-Factory geöffnete Datenbank vollständig strukturiert ist.
+Vor dem ersten produktiven Release wurde die während der Entwicklung entstandene Migrationskette konsolidiert. Der vollständige aktuelle Datenbankstand ist deshalb die **Baseline mit Schemaversion 1**:
 
-Die historische Upgrade-Kette wird bewusst nicht gelöscht: Eine bereits installierte App kann noch eine ältere `user_version` besitzen. Ein echtes „Squashen“ der Migrationen würde diese Nutzerdaten von einem Updatepfad abschneiden.
+- Eine neue Datenbank besitzt zunächst `user_version = 0`.
+- Der einzige initiale Migrationsschritt **0 → 1** erzeugt das vollständige aktuelle Schema einschließlich der Feature-Tabellen für Kategorien, Klassifikation, Kriteriensets und Import-Unterstützung.
+- Anschließend werden die aktuellen Standardkriterien idempotent bereitgestellt und `user_version` auf `1` gesetzt.
+- Erst nach erfolgreichem Abschluss der gesamten Transaktion gilt die Datenbank als Schema 1.
 
-## Migrationshistorie
+Die früheren Entwicklungsstände 1 bis 13 sind keine unterstützten Produktivschemata mehr. Für sie existiert bewusst kein Upgradepfad. Da zum Zeitpunkt dieser Konsolidierung noch kein produktiver Release mit dauerhaft zu erhaltenden Nutzerdaten existierte, dürfen lokale Vorab- und Entwicklungsdatenbanken verworfen und mit Schema 1 neu angelegt werden.
 
-| Zielstand | Inhalt der Migration |
-| --- | --- |
-| V2 | Änderungszeitpunkt bestehender Bewertungen ergänzt. |
-| V3 | Lokales Profil und Herkunftsreferenzen für Erlebnisse/Bewertungen eingeführt. |
-| V4 | Produktstammdaten um Produktart, Brauerei, Sorte, Alkohol, Herkunft, Gebinde, Füllmenge, Barcode und Notiz erweitert. |
-| V5 | Orte um Adresse, Koordinaten, OSM-Referenz und Notiz erweitert. |
-| V6 | Frühes Erlebnisformat um Preis, Menge, Gebinde, Notiz und Entwurfsstatus erweitert. |
-| V7 | Bewertungskriterien um Beschreibung, Eingabetyp, Reihenfolge und Aktivstatus erweitert. |
-| V8 | Erlebnis auf Typ, Status, Planung sowie tatsächlichen Beginn/Ende umgestellt; Altwerte wurden übernommen. |
-| V9 | Erlebnispositionen und historische Preisbeobachtungen eingeführt; frühere Einzelprodukt-/Preisfelder wurden in die neue Struktur überführt. |
-| V10 | Produktart an Kriterien ergänzt. |
-| V11 | Kriterien um Objektart, Version und Auswahlwerte erweitert; Bewertungen erhielten Ortskontext und Kriterien-Snapshot-Felder. |
-| V12 | Kriterienbeschreibung und Auswahlwerte zusätzlich in historischen Bewertungen eingefroren. |
-| V13 | Separate historische Ortsbewertungen eingeführt und Kriterienwerte einer Ortsbewertung zuordenbar gemacht. |
+## Baseline und künftige Migrationen
 
-Die Legacy-Spalten aus den frühen Erlebnisversionen sind im heutigen Kernschema noch vorhanden und werden vom Repository noch geschrieben. Sie können deshalb nicht gefahrlos nur durch ein DDL-Aufräumen entfernt werden; siehe „Fachlicher Schema-Abgleich“.
+Die Konsolidierung entfernt nur historische Entwicklungsaltlasten; der Migrationsmechanismus selbst bleibt verbindlich erhalten. Ab dem ersten produktiven Schema gilt:
+
+1. Jede persistenzrelevante Schemaänderung erhöht `schemaVersion` genau um einen Schritt.
+2. Für die nächste Änderung wird ein expliziter, vorwärtsgerichteter Schritt **1 → 2** ergänzt; danach entsprechend **2 → 3**, **3 → 4** usw.
+3. Eine Migration wird transaktional ausgeführt und erst nach erfolgreichem Abschluss durch die neue `user_version` bestätigt.
+4. Für einmal produktiv ausgelieferte Schemaversionen bleibt der Upgradepfad erhalten. Produktive Nutzerdaten dürfen nicht still verworfen werden.
+5. Eine Datenbank mit einer höheren, von der installierten App nicht unterstützten Schemaversion wird verständlich abgelehnt.
+6. Jede neue Migration erhält Tests für den unmittelbar vorherigen unterstützten Produktivstand sowie die Neuanlage auf dem aktuellen Schema.
+
+Damit ist Schema 1 der dauerhafte Ausgangspunkt der produktiven Migrationshistorie. Die vor der Baseline liegenden Entwicklungszwischenstände werden nicht mehr im Anwendungscode nachgebildet.
+
+Die Legacy-Spalten aus den frühen Erlebnisentwürfen sind im heutigen Baseline-Schema weiterhin vorhanden und werden vom Repository noch geschrieben. Die Konsolidierung der Versionshistorie ist deshalb ausdrücklich **keine** fachliche Bereinigung dieser Felder; siehe „Fachlicher Schema-Abgleich“.
 
 ## Tabellen und Verantwortlichkeiten
 
@@ -159,7 +160,7 @@ Abgeglichen wurden insbesondere die Stories #2, #4, #5, #8, #15, #17, #23, #70, 
 | Preis pro Produkt, Ort und Erlebnis historisch | Erfüllt | `preisbeobachtungen` referenziert Position, Produkt, Erlebnis, Zeitpunkt und optional Ort. |
 | Separate historische Gaststätten-/Geschäftsbewertung | Erfüllt | `ortsbewertungen` ist vom Produktpfad getrennt und besitzt `bewertet_am`. |
 | Historisch interpretierbare Kriterien | Erfüllt | Kriterien-Snapshots liegen in `bewertungen`; die aktuelle Kriteriendefinition kann sich weiterentwickeln. |
-| Kategorien und Kriteriensets | Erfüllt, physische Initialisierung konsolidiert | Die Tabellen werden nun beim Produktions-DB-Öffnen bereitgestellt statt erst zufällig beim ersten Repositoryzugriff. |
+| Kategorien und Kriteriensets | Erfüllt, physische Initialisierung konsolidiert | Die Tabellen sind Bestandteil der transaktionalen Schema-1-Baseline und werden nicht erst beim Repositoryzugriff nachgezogen. |
 | Expliziter fachlicher Zeitpunkt jeder Produktbewertung | **Teilweise** | `bewertungen` besitzt `erstellt_am`/`geaendert_am`, aber kein ausdrücklich benanntes `bewertet_am`. Der Erlebniszeitpunkt liefert Kontext, die Bedeutung von `erstellt_am` als Beobachtungszeitpunkt ist jedoch nicht so eindeutig wie bei `ortsbewertungen`. |
 | Eindeutiger Bewertungskontext auf DB-Ebene | **Teilweise** | SQLite verhindert derzeit nicht, dass ein Kriterienwert gleichzeitig oder gar nicht auf Produktposition/Ortsbewertung verweist. Die Fachlogik muss diese Invariante sichern. |
 | Einheitliches Erlebnis ohne Altmodell | **Abweichung** | `erlebnisse` enthält weiterhin `produkt_id`, `kaufort_id`, `konsumort_id`, `erlebt_am`, `preis`, `menge`, `gebinde`. Diese Felder stammen aus dem Vor-Positionsmodell und werden aktuell noch vom Repository geschrieben. Sie duplizieren fachlich `ort_id`, Positionen und Preisbeobachtungen und bergen Drift-Risiko. |
@@ -174,17 +175,19 @@ Die drei fachlich relevantesten Folgeschritte sind:
 2. Für Produktbewertungen einen expliziten fachlichen Bewertungszeitpunkt definieren (`bewertet_am`) oder verbindlich dokumentieren und testen, dass `erstellt_am` genau diese Semantik besitzt.
 3. Eine DB-nahe Integritätsstrategie für Bewertungskontext sowie generische Klassifikationsreferenzen festlegen, ohne die getrennten Produkt-/Ortstabellen künstlich zusammenzuführen.
 
-Diese Punkte werden **nicht** still im Rahmen einer Dokumentationskonsolidierung umgedeutet, weil sie das Fachmodell und Import-/Exportformat betreffen und jeweils eigenständige Migrationen benötigen.
+Diese Punkte werden **nicht** still im Rahmen der Baseline-Konsolidierung umgedeutet, weil sie das Fachmodell und Import-/Exportformat betreffen und jeweils eigenständige Migrationen benötigen.
 
 ## Sicherung, Wiederherstellung und Fehlerverhalten
 
 Migrationen laufen atomar. Schlägt ein Schritt fehl, wird die Transaktion zurückgerollt und der bisherige `user_version`-Stand bleibt erhalten. Eine Datenbank mit einer neueren, von der App nicht unterstützten `user_version` wird nicht geöffnet.
 
-Vor einer migrationsrelevanten Änderung gilt:
+Für die einmalige Baseline-Konsolidierung vor dem ersten produktiven Release gilt: Entwicklungs- und Vorabdatenbanken mit den früheren internen Versionsständen werden nicht migriert. Wer darin Testdaten erhalten möchte, muss sie vor dem Wechsel über das von der physischen SQLite-Struktur entkoppelte JSON-Austauschformat exportieren, die lokale Datenbank neu anlegen lassen und die Daten anschließend über den regulären Importpfad wieder einlesen.
+
+Für alle künftigen migrationsrelevanten Änderungen nach Schema 1 gilt:
 
 1. Das bestehende JSON-Gesamtexportformat ist der bevorzugte nutzerinitiierte Sicherungs- und Wiederherstellungsweg, weil es von der physischen SQLite-Struktur entkoppelt ist.
 2. Eine rohe Kopie von `taugts.sqlite` darf nur bei geschlossener App beziehungsweise nach sauber geschlossenem Datenbank-Handle als technische Sicherung betrachtet werden. Das Projekt implementiert derzeit keinen automatischen Datei-Snapshot vor jeder Migration.
-3. Eine Migration darf erst nach Tests mit Neu-Datenbank und mindestens einem relevanten Altstand als abgeschlossen gelten.
+3. Eine Migration darf erst nach Tests mit Neu-Datenbank und mindestens dem unmittelbar vorherigen unterstützten Produktivstand als abgeschlossen gelten.
 4. Destruktive Tabellen-Rebuilds benötigen einen expliziten Nachweis, wie jeder fachlich relevante Altwert in den Zielstand übernommen wird.
 
 ## Pflege-Regel für künftige Änderungen
