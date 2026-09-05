@@ -269,8 +269,7 @@ class _FormularState extends State<_Formular> {
             KriteriumEingabewert.ausBewertung(vorhanden[kriterium.id]),
     };
     _kriteriumFokusse = {
-      for (final kriterium in widget.daten.kriterien)
-        kriterium.id: FocusNode(),
+      for (final kriterium in widget.daten.kriterien) kriterium.id: FocusNode(),
     };
     _notiz = TextEditingController(
       text: _bisher?.ortsbewertung.notiz ?? '',
@@ -417,7 +416,9 @@ class _FormularState extends State<_Formular> {
                 'Keine aktiven ${widget.istGeschaeft ? 'Geschäfts' : 'Gaststätten'}kriterien. Eine Notiz kann dennoch gespeichert werden.',
               ),
             ),
-          for (var index = 0; index < widget.daten.kriterien.length; index++) ...[
+          for (var index = 0;
+              index < widget.daten.kriterien.length;
+              index++) ...[
             KriteriumEingabefeld(
               kriterium: widget.daten.kriterien[index],
               wert: _werte[widget.daten.kriterien[index].id]!,
