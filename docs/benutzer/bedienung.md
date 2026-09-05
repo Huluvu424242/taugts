@@ -8,7 +8,7 @@ Die mobile Startseite bietet die zentralen Aktionen **Jetzt bewerten**, **Erlebn
 
 Ist genau ein Erlebnis aktiv, kann es direkt von der Startseite fortgesetzt werden. Bei mehreren aktiven Erlebnissen wird keine Auswahl automatisch vorweggenommen.
 
-Die Kachel **Suche** öffnet denselben globalen Suchbereich wie der Eintrag **Suche** in der unteren Navigation.
+Die Kachel **Suche** öffnet denselben globalen Suchbereich wie der Eintrag **Suche** in der unteren Navigation. Die Kachel **Bewertungen** öffnet ebenfalls diesen Suchbereich, setzt ihn aber direkt auf **Bewertungen und Preise**, sodass historische Produkt-, Gaststätten- und Geschäftsbewertungen sowie Preisbeobachtungen unmittelbar durchsucht und weiter nach Historienart gefiltert werden können.
 
 ## Produkte
 
