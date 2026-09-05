@@ -24,7 +24,7 @@ void main() {
     final dokument = jsonDecode(service.erzeugeJson()) as Map<String, Object?>;
 
     expect(dokument['format'], 'taugts-export');
-    expect(dokument['schemaVersion'], 1);
+    expect(dokument['schemaVersion'], 2);
     expect(dokument['exportiertAm'], '2026-09-02T18:30:00.000Z');
     expect(dokument['appVersion'], '0.1.0+4');
     for (final schluessel in const [
