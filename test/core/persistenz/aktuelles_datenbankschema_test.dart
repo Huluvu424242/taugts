@@ -5,12 +5,10 @@ import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 
 void main() {
   test(
-    'stellt den vollständigen aktuellen physischen Tabellenstand bereit',
+    'stellt beim Öffnen den vollständigen aktuellen physischen Tabellenstand bereit',
     () {
       final verbindung = sqlite3.openInMemory();
       final datenbank = LokaleDatenbank.oeffnen(verbindung);
-
-      AktuellesDatenbankschema.stelleFeatureTabellenBereit(verbindung);
 
       final tabellen = verbindung
           .select(
@@ -31,7 +29,7 @@ void main() {
     },
   );
 
-  test('Feature-Baseline ist idempotent', () {
+  test('Feature-Baseline bleibt idempotent', () {
     final verbindung = sqlite3.openInMemory();
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
 
