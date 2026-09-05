@@ -13,7 +13,8 @@ Map<String, Object?> _dokument(String name) =>
 void main() {
   const service = ImportValidierungsService();
 
-  test('gültiges V1-Fixture wird auf V2 migriert und vollständig akzeptiert', () {
+  test('gültiges V1-Fixture wird auf V2 migriert und vollständig akzeptiert',
+      () {
     final ergebnis = service.validiere(
       _fixture('taugts-export-v1-gueltig.json'),
     );
