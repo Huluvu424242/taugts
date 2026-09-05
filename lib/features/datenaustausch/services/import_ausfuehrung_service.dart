@@ -467,6 +467,7 @@ class ImportAusfuehrungService {
             'ortId': 'ort_id',
             'herkunftProfilId': 'herkunft_profil_id',
             'wert': 'wert',
+            'textWert': 'text_wert',
             'erstelltAm': 'erstellt_am',
             'geaendertAm': 'geaendert_am',
           },
