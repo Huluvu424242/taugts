@@ -243,10 +243,7 @@ class ImportValidierungsService {
       if (bewertungen is List) {
         migriert['bewertungen'] = [
           for (final roh in bewertungen)
-            if (roh is Map)
-              {..._map(roh), 'textWert': null}
-            else
-              roh,
+            if (roh is Map) {..._map(roh), 'textWert': null} else roh,
         ];
       }
       migriert['schemaVersion'] = 2;
