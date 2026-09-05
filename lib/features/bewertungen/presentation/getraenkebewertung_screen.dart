@@ -178,8 +178,7 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
             KriteriumEingabewert.ausBewertung(vorhandene[kriterium.id]),
     };
     _kriteriumFokusse = {
-      for (final kriterium in widget.daten.kriterien)
-        kriterium.id: FocusNode(),
+      for (final kriterium in widget.daten.kriterien) kriterium.id: FocusNode(),
     };
   }
 
