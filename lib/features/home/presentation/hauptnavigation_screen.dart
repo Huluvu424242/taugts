@@ -11,6 +11,7 @@ import 'package:taugts/features/kategorien/services/kategorie_repository.dart';
 import 'package:taugts/features/kategorien/services/kriterienset_repository.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 import 'package:taugts/features/profil/services/profil_repository.dart';
+import 'package:taugts/features/suche/models/suchmodelle.dart';
 import 'package:taugts/features/suche/presentation/suche_screen.dart';
 import 'package:taugts/features/suche/services/suche_service.dart';
 
@@ -46,6 +47,16 @@ class HauptnavigationScreen extends StatefulWidget {
 
 class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
   var _index = 0;
+  var _sucheVersion = 0;
+  var _sucheZiel = Suchziel.alle;
+
+  void _sucheOeffnen(Suchziel ziel) {
+    setState(() {
+      _sucheZiel = ziel;
+      _sucheVersion++;
+      _index = 1;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +73,16 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
         exportService: widget.exportService,
         exportZielService: widget.exportZielService,
         idGenerator: widget.idGenerator,
-        onSucheOeffnen: () => setState(() => _index = 1),
+        onSucheOeffnen: () => _sucheOeffnen(Suchziel.alle),
+        onBewertungenOeffnen: () => _sucheOeffnen(Suchziel.historie),
       ),
       widget.sucheService == null
           ? const _NichtVerfuegbar(text: 'Die Suche ist nicht verfügbar.')
-          : SucheScreen(service: widget.sucheService!),
+          : SucheScreen(
+              key: ValueKey(_sucheVersion),
+              service: widget.sucheService!,
+              initialZiel: _sucheZiel,
+            ),
       widget.auswertungsService == null
           ? const _NichtVerfuegbar(text: 'Auswertungen sind nicht verfügbar.')
           : AuswertungenScreen(service: widget.auswertungsService!),
