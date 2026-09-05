@@ -16,6 +16,30 @@ Produkte wie Getränke, Speisen und andere Dinge können lokal angelegt, gesucht
 
 EAN-, GTIN- und UPC-Barcodes können nach einer bewussten Nutzeraktion mit der Kamera gescannt, bestätigt und einem vorhandenen oder neuen Produkt zugeordnet werden. Beim Anlegen und Bearbeiten eines Produkts steht dafür direkt am Feld **EAN / Barcode** ein Scan-Symbol zur Verfügung. Ein bestätigter Scan übernimmt den Code in das Feld, ohne andere bereits eingegebene Produktdaten zu verändern; bei einem Abbruch bleibt auch der bisherige EAN-/Barcode-Wert unverändert. Die manuelle Eingabe bleibt jederzeit möglich.
 
+## Bewertungskriterien und Eingabetypen
+
+Bewertungskriterien legen fest, welche Eigenschaften eines Produkts oder Ortes bei einer Bewertung erfasst werden. Beim Anlegen eines eigenen Kriteriums bestimmt der **Eingabetyp**, welche Art von Antwort erfasst wird. Die Typen unterscheiden bewusst zwischen subjektiven Qualitätsurteilen, der Stärke einer Eigenschaft und beschreibenden oder objektiven Angaben.
+
+| Eingabetyp | Bedeutung | Beispiele |
+| --- | --- | --- |
+| **Wertung** | Ein subjektives Qualitätsurteil: Wie gut oder schlecht ist etwas aus deiner Sicht? | **Geschmack** oder **Preis-Leistung**. Eine hohe Wertung bedeutet eine hohe wahrgenommene Qualität. |
+| **Intensität** | Die Stärke oder Ausprägung einer Eigenschaft, ohne sie als gut oder schlecht zu beurteilen. Die Skala reicht von **1 – sehr gering** über **3 – mittel** bis **5 – sehr stark**. | **Bitterkeit** eines Bieres. Ein sehr bitteres Bier kann trotzdem sehr gut schmecken und daher gleichzeitig eine hohe Geschmackswertung erhalten. |
+| **Ja/Nein** | Eine Eigenschaft, die entweder zutrifft oder nicht. | **Alkoholfrei?** oder **Außenbereich vorhanden?** |
+| **Zahl** | Ein numerischer Mess-, Mengen- oder anderer Zahlenwert ohne Qualitätswertung. | **Wartezeit** in Minuten oder ein anderer fachlich sinnvoller Messwert. |
+| **Auswahl** | Genau einer der beim Kriterium vorher festgelegten Auswahlwerte wird gewählt. | **Farbe:** hell, bernstein, dunkel oder **Andrang:** leer, normal, voll. |
+| **Freitext** | Eine frei formulierte Beschreibung für Angaben, die sich nicht sinnvoll auf eine feste Skala oder Auswahl begrenzen lassen. | **Besonderheiten:** „Röstmalzig, etwas rauchig, langer Abgang.“ |
+
+### Wertung oder Intensität?
+
+Diese beiden Typen sehen ähnlich aus, beantworten aber unterschiedliche Fragen:
+
+- **Wertung:** „Wie gut finde ich diese Eigenschaft?“
+- **Intensität:** „Wie stark ist diese Eigenschaft ausgeprägt?“
+
+Beispielsweise beschreibt **Bitterkeit = 5 – sehr stark** zunächst nur, dass ein Bier sehr bitter ist. Ob dir diese Bitterkeit gefällt, sagt der Intensitätswert nicht aus. **Geschmack = hohe Wertung** kann deshalb gleichzeitig zutreffen.
+
+Diese Unterscheidung ist auch für Auswertungen wichtig: Qualitätsdurchschnitte werden ausschließlich aus Kriterien vom Typ **Wertung** derselben Kriterien-ID und Kriterienversion gebildet. Intensität, Ja/Nein, Zahl, Auswahl und Freitext werden nicht in einen gemeinsamen Qualitätswert eingerechnet. Weitere Einzelheiten stehen unter [Auswertungen](auswertungen.md).
+
 ## Orte
 
 Orte können mit Typ, optionaler Adresse, Koordinaten, OpenStreetMap-Referenz und Notiz gespeichert werden. Der aktuelle Standort kann ausschließlich nach Nutzeraktion ermittelt und vor der Übernahme geprüft werden.
