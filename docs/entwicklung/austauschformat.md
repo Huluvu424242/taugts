@@ -11,7 +11,7 @@ Jede Datei besitzt mindestens folgende Kopfdaten:
   "format": "taugts-export",
   "schemaVersion": 2,
   "exportiertAm": "2026-09-05T18:15:00Z",
-  "appVersion": "0.1.0+6"
+  "appVersion": "0.1.0+7"
 }
 ```
 
