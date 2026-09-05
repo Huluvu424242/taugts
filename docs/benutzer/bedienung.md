@@ -29,6 +29,19 @@ Bewertungskriterien legen fest, welche Eigenschaften eines Produkts oder Ortes b
 | **Auswahl** | Genau einer der beim Kriterium vorher festgelegten Auswahlwerte wird gewählt. | **Farbe:** hell, bernstein, dunkel oder **Andrang:** leer, normal, voll. |
 | **Freitext** | Eine frei formulierte Beschreibung für Angaben, die sich nicht sinnvoll auf eine feste Skala oder Auswahl begrenzen lassen. | **Besonderheiten:** „Röstmalzig, etwas rauchig, langer Abgang.“ |
 
+### So erscheinen die Typen im Bewertungsformular
+
+Die gewählte Kriterienart bestimmt unmittelbar das Eingabefeld in Produkt-, Gaststätten- und Geschäftsbewertungen:
+
+- **Wertung** wird als Auswahl von **1 – taugt gar nicht** bis **5 – taugt sehr** angeboten.
+- **Intensität** wird als Auswahl von **1 – sehr gering** bis **5 – sehr stark** angeboten.
+- **Ja/Nein** bietet **Ja**, **Nein** oder **Nicht bewertet** an.
+- **Zahl** ist ein freies Zahlenfeld. Dezimalzahlen können mit Komma oder Punkt eingegeben werden und sind nicht auf den Bereich 1 bis 5 begrenzt.
+- **Auswahl** bietet ausschließlich die Werte an, die beim Kriterium hinterlegt wurden. Sind keine Auswahlwerte hinterlegt, kann dieses Kriterium nicht bewertet werden, bis seine Definition ergänzt wurde.
+- **Freitext** ist ein freies Textfeld mit maximal 500 Zeichen.
+
+Alle Kriterien bleiben optional. Eine Bewertung kann gespeichert werden, sobald mindestens ein Kriterium oder die Bewertungsnotiz ausgefüllt ist. Ungültige Zahleneingaben werden am Feld und zusätzlich im Fehlersammler angezeigt.
+
 ### Wertung oder Intensität?
 
 Diese beiden Typen sehen ähnlich aus, beantworten aber unterschiedliche Fragen:
