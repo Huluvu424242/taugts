@@ -4,6 +4,7 @@ import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
+import 'package:taugts/features/bewertungen/presentation/kriterium_eingabefeld.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 
@@ -155,10 +156,12 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
   final _scrollController = ScrollController();
   final _fehlerKey = GlobalKey();
   final _fehlerFokus = FocusNode();
-  final _ersterKriteriumFokus = FocusNode();
+  final _notizFokus = FocusNode();
   late final TextEditingController _notiz;
-  late final Map<String, double?> _werte;
+  late final Map<String, KriteriumEingabewert> _werte;
+  late final Map<String, FocusNode> _kriteriumFokusse;
   var _eingabeFehlt = false;
+  var _validierungAngezeigt = false;
   var _speichert = false;
 
   @override
@@ -171,7 +174,12 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
     };
     _werte = {
       for (final kriterium in widget.daten.kriterien)
-        kriterium.id: vorhandene[kriterium.id]?.wert,
+        kriterium.id:
+            KriteriumEingabewert.ausBewertung(vorhandene[kriterium.id]),
+    };
+    _kriteriumFokusse = {
+      for (final kriterium in widget.daten.kriterien)
+        kriterium.id: FocusNode(),
     };
   }
 
@@ -179,29 +187,63 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
   void dispose() {
     _scrollController.dispose();
     _fehlerFokus.dispose();
-    _ersterKriteriumFokus.dispose();
+    _notizFokus.dispose();
+    for (final fokus in _kriteriumFokusse.values) {
+      fokus.dispose();
+    }
     _notiz.dispose();
     super.dispose();
   }
 
+  bool get _hatKriteriumwert => _werte.values.any((wert) => wert.hatWert);
+
+  List<(String, FocusNode)> get _formularFehler {
+    if (!_validierungAngezeigt) return const [];
+    final fehler = <(String, FocusNode)>[];
+    if (_eingabeFehlt) {
+      fehler.add((
+        'Mindestens eine Bewertung oder Notiz ist erforderlich.',
+        widget.daten.kriterien.isEmpty
+            ? _notizFokus
+            : _kriteriumFokusse[widget.daten.kriterien.first.id]!,
+      ));
+    }
+    for (final kriterium in widget.daten.kriterien) {
+      final eingabe = _werte[kriterium.id];
+      if (eingabe?.fehler != null) {
+        fehler.add((
+          '${kriterium.name}: ${eingabe!.fehler}',
+          _kriteriumFokusse[kriterium.id]!,
+        ));
+      }
+    }
+    return fehler;
+  }
+
+  Future<void> _zuFehlernNavigieren() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Bitte Eingaben prüfen.')),
+    );
+    if (_scrollController.hasClients) {
+      await _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    }
+    if (!mounted) return;
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return;
+    _fehlerFokus.requestFocus();
+  }
+
   Future<void> _speichern() async {
     final notiz = _notiz.text.trim();
-    if (_werte.values.every((wert) => wert == null) && notiz.isEmpty) {
-      setState(() => _eingabeFehlt = true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bitte Eingaben prüfen.')),
-      );
-      if (_scrollController.hasClients) {
-        await _scrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-        );
-      }
-      if (!mounted) return;
-      await WidgetsBinding.instance.endOfFrame;
-      if (!mounted) return;
-      _fehlerFokus.requestFocus();
+    final hatWertfehler = _werte.values.any((wert) => wert.fehler != null);
+    _eingabeFehlt = !_hatKriteriumwert && notiz.isEmpty;
+    if (_eingabeFehlt || hatWertfehler) {
+      setState(() => _validierungAngezeigt = true);
+      await _zuFehlernNavigieren();
       return;
     }
 
@@ -217,14 +259,15 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
       for (final bewertung in widget.daten.bewertungen)
         if (!aktiveIds.contains(bewertung.kriteriumId)) bewertung,
       for (final eintrag in _werte.entries)
-        if (eintrag.value != null)
+        if (eintrag.value.hatWert)
           Bewertung(
             id: vorhandene[eintrag.key]?.id ?? widget.idGenerator.neueId(),
             erlebnisId: widget.erlebnis.id,
             erlebnisPositionId: widget.erlebnisposition?.position.id,
             kriteriumId: eintrag.key,
             herkunftProfilId: widget.profil.id,
-            wert: eintrag.value!,
+            wert: eintrag.value.zahl,
+            textWert: eintrag.value.text,
             erstelltAm: vorhandene[eintrag.key]?.erstelltAm ?? jetzt,
             geaendertAm: jetzt,
           ),
@@ -262,30 +305,12 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
     }
   }
 
-  String _wertLabel(Bewertungskriterium kriterium, int wert) {
-    if (kriterium.eingabetyp == KriteriumEingabetyp.intensitaet) {
-      return switch (wert) {
-        1 => '1 – sehr gering',
-        2 => '2 – gering',
-        3 => '3 – mittel',
-        4 => '4 – stark',
-        _ => '5 – sehr stark',
-      };
-    }
-    return switch (wert) {
-      1 => '1 – taugt gar nicht',
-      2 => '2 – taugt eher nicht',
-      3 => '3 – teils, teils',
-      4 => '4 – taugt eher',
-      _ => '5 – taugt sehr',
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final datum = MaterialLocalizations.of(context).formatFullDate(
       widget.erlebnis.erlebtAm.toLocal(),
     );
+    final formularFehler = _formularFehler;
     return Column(
       children: [
         Expanded(
@@ -293,16 +318,11 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
             controller: _scrollController,
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
             children: [
-              if (_eingabeFehlt)
+              if (formularFehler.isNotEmpty)
                 FormularFehlersammler(
                   key: _fehlerKey,
                   focusNode: _fehlerFokus,
-                  fehler: [
-                    (
-                      'Mindestens eine Bewertung oder Notiz ist erforderlich.',
-                      _ersterKriteriumFokus,
-                    ),
-                  ],
+                  fehler: formularFehler,
                 ),
               Semantics(
                 header: true,
@@ -329,25 +349,27 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
               for (var index = 0;
                   index < widget.daten.kriterien.length;
                   index++) ...[
-                _KriteriumAuswahl(
+                KriteriumEingabefeld(
                   kriterium: widget.daten.kriterien[index],
-                  wert: _werte[widget.daten.kriterien[index].id],
-                  focusNode: index == 0 ? _ersterKriteriumFokus : null,
+                  wert: _werte[widget.daten.kriterien[index].id]!,
+                  focusNode:
+                      _kriteriumFokusse[widget.daten.kriterien[index].id],
+                  enabled: !_speichert,
                   errorText: index == 0 && _eingabeFehlt
                       ? 'Bitte eine Bewertung wählen oder eine Notiz eingeben.'
                       : null,
                   onChanged: (wert) {
                     setState(() {
                       _werte[widget.daten.kriterien[index].id] = wert;
-                      _eingabeFehlt = false;
+                      if (wert.hatWert) _eingabeFehlt = false;
                     });
                   },
-                  wertLabel: _wertLabel,
                 ),
                 const SizedBox(height: 12),
               ],
               TextField(
                 controller: _notiz,
+                focusNode: _notizFokus,
                 maxLength: 1000,
                 maxLines: 4,
                 onChanged: (_) {
@@ -393,53 +415,6 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
         Produktart.speise => 'Speise',
         Produktart.sonstiges => 'Sonstiges Produkt',
       };
-}
-
-class _KriteriumAuswahl extends StatelessWidget {
-  const _KriteriumAuswahl({
-    required this.kriterium,
-    required this.wert,
-    required this.onChanged,
-    required this.wertLabel,
-    this.focusNode,
-    this.errorText,
-  });
-
-  final Bewertungskriterium kriterium;
-  final double? wert;
-  final ValueChanged<double?> onChanged;
-  final String Function(Bewertungskriterium, int) wertLabel;
-  final FocusNode? focusNode;
-  final String? errorText;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-        container: true,
-        label: kriterium.name,
-        child: DropdownButtonFormField<double>(
-          key: ValueKey('kriterium-${kriterium.id}'),
-          initialValue: wert,
-          focusNode: focusNode,
-          isExpanded: true,
-          decoration: InputDecoration(
-            labelText: kriterium.name,
-            helperText: kriterium.beschreibung,
-            errorText: errorText,
-          ),
-          items: [
-            const DropdownMenuItem<double>(
-              value: null,
-              child: Text('Nicht bewertet'),
-            ),
-            for (var wert = 1; wert <= 5; wert++)
-              DropdownMenuItem<double>(
-                value: wert.toDouble(),
-                child: Text(wertLabel(kriterium, wert)),
-              ),
-          ],
-          onChanged: onChanged,
-        ),
-      );
 }
 
 class _BewertungsDaten {
