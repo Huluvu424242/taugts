@@ -1,6 +1,6 @@
 # Versioniertes JSON-Austauschformat
 
-Taugt’s? verwendet für Sicherung und Datenaustausch ein eigenes, von der lokalen SQLite-Datenbank unabhängiges JSON-Format. Diese Dokumentation beschreibt **Schemaversion 1**. Der Export ist implementiert; Importdateien werden vor jeder späteren Übernahme durch die sichere Importvalidierung vollständig geprüft.
+Taugt’s? verwendet für Sicherung und Datenaustausch ein eigenes, von der lokalen SQLite-Datenbank unabhängiges JSON-Format. Diese Dokumentation beschreibt **Schemaversion 2**. Der Export ist implementiert; Importdateien werden vor jeder späteren Übernahme durch die sichere Importvalidierung vollständig geprüft.
 
 ## Kennung und Versionierung
 
@@ -9,9 +9,9 @@ Jede Datei besitzt mindestens folgende Kopfdaten:
 ```json
 {
   "format": "taugts-export",
-  "schemaVersion": 1,
-  "exportiertAm": "2026-09-02T16:15:00Z",
-  "appVersion": "0.1.0+4"
+  "schemaVersion": 2,
+  "exportiertAm": "2026-09-05T18:15:00Z",
+  "appVersion": "0.1.0+6"
 }
 ```
 
@@ -23,23 +23,17 @@ Jede Datei besitzt mindestens folgende Kopfdaten:
 
 Eine Änderung, die bestehende Felder inkompatibel umdeutet oder entfernt, benötigt eine neue `schemaVersion`. Ergänzende optionale Felder dürfen innerhalb derselben Version hinzukommen, solange vorhandene Bedeutung nicht verändert wird.
 
+Schemaversion 2 wurde eingeführt, weil Bewertungskriterien neben numerischen Werten jetzt auch textuelle Werte für `Auswahl` und `Freitext` speichern können. Dafür besitzt eine Bewertung die getrennten Felder `wert` und `textWert`; genau eines davon ist gesetzt.
+
 ## Formales Schema und Fixtures
 
 Das normative JSON Schema liegt unter:
 
 - `schema/taugts-export.schema.json`
 
-Beispieldaten liegen unter:
+Die vorhandenen Fixtures unter `schema/fixtures/` bleiben bewusst als historische Version-0- und Version-1-Beispiele erhalten. Sie dienen vor allem dazu, die unterstützten Vorwärtsmigrationen, verwaiste Referenzen und fachlich ungültige Status-/Zeitkombinationen zu prüfen. Details stehen unter [Sichere Importvalidierung](importvalidierung.md).
 
-- `schema/fixtures/taugts-export-v1-gueltig.json`
-- `schema/fixtures/taugts-export-v1-ungueltig.json`
-- `schema/fixtures/taugts-export-v0-migrierbar.json`
-- `schema/fixtures/taugts-export-v1-verwaist.json`
-- `schema/fixtures/taugts-export-v1-fachlich-ungueltig.json`
-
-Das gültige Fixture enthält dasselbe Produkt in zwei unterschiedlichen Restaurantbesuchen mit eigenständigen Erlebnispositionen, Preisbeobachtungen und Bewertungen. Damit wird ausdrücklich gezeigt, dass spätere Beobachtungen ältere Werte nicht überschreiben.
-
-Die zusätzlichen Import-Fixtures prüfen eine unterstützte Vorwärtsmigration, verwaiste Referenzen und fachlich ungültige Status-/Zeitkombinationen. Details stehen unter [Sichere Importvalidierung](importvalidierung.md).
+Das bisherige gültige Version-1-Fixture enthält dasselbe Produkt in zwei unterschiedlichen Restaurantbesuchen mit eigenständigen Erlebnispositionen, Preisbeobachtungen und Bewertungen. Damit wird ausdrücklich gezeigt, dass spätere Beobachtungen ältere Werte nicht überschreiben. Beim Import wird es zunächst auf die aktuelle Schemaversion 2 migriert.
 
 ## Oberste Struktur
 
@@ -118,13 +112,13 @@ Beim Import werden nicht nur die einzelnen IDs geprüft. Erlebnisposition, Erleb
 
 ## Dezimalwerte
 
-Nicht-monetäre Dezimalwerte wie Alkoholgehalt, Koordinaten und Bewertungswerte werden als kanonische Dezimalstrings gespeichert, zum Beispiel:
+Nicht-monetäre Dezimalwerte wie Alkoholgehalt, Koordinaten und numerische Bewertungswerte werden als kanonische Dezimalstrings gespeichert, zum Beispiel:
 
 ```json
 {
   "alkoholgehalt": "4.9",
   "breitengrad": "50.8323",
-  "wert": "3.5"
+  "wert": "12.5"
 }
 ```
 
@@ -156,9 +150,42 @@ Jeder Bewertungswert enthält neben der Kriterien-ID einen **historischen Kriter
 
 Damit bleibt eine frühere Bewertung auch dann interpretierbar, wenn das aktive Kriterium später umbenannt, umsortiert, deaktiviert oder mit einer anderen Skala versehen wird. Die Sammlung `bewertungskriterien` beschreibt zusätzlich die aktuell im Export vorhandenen Kriterienkonfigurationen.
 
+### Typisierte Kriterienwerte
+
+Schemaversion 2 bildet die sechs Eingabetypen wie folgt ab:
+
+| Eingabetyp | Exportfeld | Inhalt |
+| --- | --- | --- |
+| `wertung` | `wert` | numerischer Qualitätswert 1 bis 5 |
+| `intensitaet` | `wert` | numerische Intensität 1 bis 5 |
+| `jaNein` | `wert` | `1` für Ja, `0` für Nein |
+| `zahl` | `wert` | freie endliche Zahl |
+| `auswahl` | `textWert` | genau einer der im historischen Snapshot enthaltenen `auswahlwerte` |
+| `freitext` | `textWert` | frei erfasster Text mit höchstens 500 Zeichen |
+
+`wert` und `textWert` sind im JSON beide vorhanden; **genau eines der beiden Felder ist nicht `null`**. Dadurch bleibt die Bedeutung ohne numerische Hilfscodierung von Auswahl- oder Textwerten erhalten.
+
+Beispiel für einen Auswahlwert:
+
+```json
+{
+  "wert": null,
+  "textWert": "Dunkel"
+}
+```
+
+Beispiel für einen Zahlenwert:
+
+```json
+{
+  "wert": "12.5",
+  "textWert": null
+}
+```
+
 `bewertetAm` ist der fachliche Bewertungszeitpunkt. Für bestehende Produktbewertungen, bei denen die lokale Persistenz bisher keinen getrennten Bewertungszeitpunkt besitzt, entspricht er beim Export dem ursprünglichen Erstellungszeitpunkt der Bewertung. Export und Validierung behalten diese Abbildung konsistent bei.
 
-Die Importvalidierung verlangt für jeden historischen Wert einen vollständigen Snapshot und prüft seine Kriterien-ID sowie die Versionsbeziehung. Dadurch bleibt jede akzeptierte historische Bewertung eindeutig interpretierbar.
+Die Importvalidierung verlangt für jeden historischen Wert einen vollständigen Snapshot und prüft seine Kriterien-ID sowie die Versionsbeziehung. Bei Version 2 wird zusätzlich geprüft, dass numerischer oder textueller Wert zum historischen Eingabetyp passt. Dadurch bleibt jede akzeptierte historische Bewertung eindeutig interpretierbar.
 
 ## Herkunft
 
@@ -168,13 +195,18 @@ Profile besitzen eine stabile UUID. Erlebnisse und Bewertungen referenzieren ihr
 
 Ein optionaler bekannter Wert darf als `null` übertragen werden, wenn das Schema dies für das konkrete Feld zulässt. Erforderliche Sammlungen werden dagegen immer als Array ausgegeben und nicht weggelassen.
 
-JSON Schema erlaubt in Schemaversion 1 zusätzliche, nicht bekannte Felder. Das ist eine bewusste Vorwärtskompatibilitätsregel: Ein Leser von Version 1 darf unbekannte **optionale** Felder ignorieren, muss aber zuerst Formatkennung und Schemaversion prüfen. Eine Datei mit einer unbekannten neueren `schemaVersion` darf nicht still wie Version 1 behandelt werden.
+JSON Schema erlaubt in Schemaversion 2 zusätzliche, nicht bekannte Felder. Das ist eine bewusste Vorwärtskompatibilitätsregel: Ein Leser einer unterstützten Version darf unbekannte **optionale** Felder ignorieren, muss aber zuerst Formatkennung und Schemaversion prüfen. Eine Datei mit einer unbekannten neueren `schemaVersion` darf nicht still wie eine bekannte Version behandelt werden.
 
 `ImportValidierungsService` setzt diese Regel um: unbekannte zusätzliche Felder innerhalb einer unterstützten Version werden ignoriert; Pflichtfelder, bekannte IDs und Beziehungen werden weiterhin streng geprüft. Eine unbekannte neuere Schemaversion wird abgewiesen.
 
-## Unterstützte Vorwärtsmigration
+## Unterstützte Vorwärtsmigrationen
 
-Die aktuelle Version 1 unterstützt zusätzlich die vor der ersten veröffentlichten Austauschformatversion verwendete Vorabversion 0. Diese entspricht der Version-1-Struktur, kann aber `kategorien` und `kategorieZuordnungen` noch weglassen. Die Migration ergänzt diese Sammlungen leer und setzt die Schemaversion auf 1.
+Die aktuelle Version 2 unterstützt die älteren Versionen 0 und 1:
+
+- **0 → 1:** Die vor der ersten Austauschformatversion optional fehlenden Sammlungen `kategorien` und `kategorieZuordnungen` werden leer ergänzt.
+- **1 → 2:** Historische Bewertungen erhalten zusätzlich `textWert: null`. Der bisherige numerische `wert` bleibt unverändert erhalten.
+
+Damit werden vorhandene Exporte nicht umgedeutet oder verworfen. Neue textuelle Auswahl- und Freitextwerte entstehen erst in Schemaversion 2.
 
 Migrationen laufen ausschließlich auf einer Kopie des dekodierten Dokuments im Arbeitsspeicher. Die Eingabedatei und lokale SQLite-Daten werden dabei nicht verändert. Jede künftige Versionsstufe benötigt eine eigene getestete Vorwärtsmigration.
 
@@ -194,7 +226,7 @@ Vor der fachlichen Analyse begrenzt die Importvalidierung die Eingabe standardm�
 
 ## Abgrenzung zu den Folgestories
 
-Das Format, der Export und die sichere Vorvalidierung sind damit implementiert. Die Validierung verändert absichtlich noch keine lokalen Daten.
+Das Format, der Export und die sichere Vorvalidierung sind implementiert. Die Validierung verändert absichtlich noch keine lokalen Daten.
 
 Die nachfolgenden Stories übernehmen darauf aufbauend:
 
