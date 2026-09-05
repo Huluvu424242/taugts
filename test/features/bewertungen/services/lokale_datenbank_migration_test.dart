@@ -82,7 +82,8 @@ void main() {
       hasLength(7),
     );
     expect(
-      verbindung.select("SELECT * FROM kriterien WHERE objektart = 'geschaeft'"),
+      verbindung
+          .select("SELECT * FROM kriterien WHERE objektart = 'geschaeft'"),
       hasLength(8),
     );
     datenbank.schliessen();
