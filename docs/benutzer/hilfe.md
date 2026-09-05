@@ -1,6 +1,6 @@
 # Bekannte Einschränkungen und Hilfe
 
-## Bekannte Einschränkungen von 0.1.0+3
+## Bekannte Einschränkungen von 0.1.0+6
 
 - Import und Export sind noch nicht enthalten.
 - Geschäfte können innerhalb eines Einkaufs noch nicht getrennt bewertet werden.
