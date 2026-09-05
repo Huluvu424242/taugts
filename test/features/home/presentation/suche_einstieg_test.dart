@@ -6,6 +6,7 @@ import 'package:taugts/features/suche/services/suche_service.dart';
 
 void main() {
   testWidgets('Such-Kachel öffnet den globalen Suchbereich', (tester) async {
+    final suche = _FakeSucheService();
     await tester.pumpWidget(
       MaterialApp(
         home: HauptnavigationScreen(
@@ -17,7 +18,7 @@ void main() {
           idGenerator: null,
           kategorieRepository: null,
           kriteriensetRepository: null,
-          sucheService: _FakeSucheService(),
+          sucheService: suche,
           auswertungsService: null,
         ),
       ),
@@ -33,14 +34,61 @@ void main() {
 
     expect(find.text('Suchbegriff'), findsOneWidget);
     expect(find.text('Suche noch nicht verfügbar'), findsNothing);
+    expect(suche.letzterFilter?.ziel, Suchziel.alle);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
       1,
     );
   });
+
+  testWidgets(
+    'Bewertungen-Kachel öffnet Suche mit historischen Daten',
+    (tester) async {
+      final suche = _FakeSucheService();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: HauptnavigationScreen(
+            profil: null,
+            profilRepository: null,
+            bewertungsRepository: null,
+            exportService: null,
+            exportZielService: null,
+            idGenerator: null,
+            kategorieRepository: null,
+            kriteriensetRepository: null,
+            sucheService: suche,
+            auswertungsService: null,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final bewertungenKachel =
+          find.widgetWithText(OutlinedButton, 'Bewertungen');
+      expect(bewertungenKachel, findsOneWidget);
+
+      await tester.ensureVisible(bewertungenKachel);
+      await tester.tap(bewertungenKachel);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Suchbegriff'), findsOneWidget);
+      expect(find.text('Bewertungen noch nicht verfügbar'), findsNothing);
+      expect(suche.letzterFilter?.ziel, Suchziel.historie);
+      expect(find.text('Historienart'), findsOneWidget);
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        1,
+      );
+    },
+  );
 }
 
 class _FakeSucheService implements SucheService {
+  Suchfilter? letzterFilter;
+
   @override
-  Future<List<Suchtreffer>> suche(Suchfilter filter) async => [];
+  Future<List<Suchtreffer>> suche(Suchfilter filter) async {
+    letzterFilter = filter;
+    return [];
+  }
 }
