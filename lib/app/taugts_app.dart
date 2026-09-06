@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/theme/app_theme.dart';
 import 'package:taugts/features/auswertungen/services/auswertungs_service.dart';
+import 'package:taugts/features/auswertungen/services/statistik_export_service.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/datenaustausch/services/binaer_export_ziel_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
 import 'package:taugts/features/home/presentation/hauptnavigation_screen.dart';
@@ -19,6 +21,8 @@ class TaugtsApp extends StatelessWidget {
     this.bewertungsRepository,
     this.exportService,
     this.exportZielService,
+    this.binaerExportZielService,
+    this.statistikExportService,
     this.idGenerator,
     this.kategorieRepository,
     this.kriteriensetRepository,
@@ -32,6 +36,8 @@ class TaugtsApp extends StatelessWidget {
   final BewertungsRepository? bewertungsRepository;
   final ExportService? exportService;
   final ExportZielService? exportZielService;
+  final BinaerExportZielService? binaerExportZielService;
+  final StatistikExportService? statistikExportService;
   final IdGenerator? idGenerator;
   final KategorieRepository? kategorieRepository;
   final KriteriensetRepository? kriteriensetRepository;
@@ -47,6 +53,8 @@ class TaugtsApp extends StatelessWidget {
           bewertungsRepository: bewertungsRepository,
           exportService: exportService,
           exportZielService: exportZielService,
+          binaerExportZielService: binaerExportZielService,
+          statistikExportService: statistikExportService,
           idGenerator: idGenerator,
           kategorieRepository: kategorieRepository,
           kriteriensetRepository: kriteriensetRepository,
