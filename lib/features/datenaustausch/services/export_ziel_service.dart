@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
@@ -12,21 +14,39 @@ abstract interface class ExportZielService {
   Future<void> teilen({required String dateiname, required String inhalt});
 }
 
+typedef ExportSpeichernDialog = Future<String?> Function(
+  String dateiname,
+  Uint8List inhalt,
+);
+
 class SystemExportZielService implements ExportZielService {
-  @override
-  Future<String?> speichern({
-    required String dateiname,
-    required String inhalt,
-  }) async {
-    final ziel = await FilePicker.platform.saveFile(
+  SystemExportZielService({ExportSpeichernDialog? speichernDialog})
+      : _speichernDialog = speichernDialog ?? _systemSpeichernDialog;
+
+  final ExportSpeichernDialog _speichernDialog;
+
+  static Future<String?> _systemSpeichernDialog(
+    String dateiname,
+    Uint8List inhalt,
+  ) {
+    return FilePicker.platform.saveFile(
       dialogTitle: 'Taugt’s?-Export speichern',
       fileName: dateiname,
       type: FileType.custom,
       allowedExtensions: const ['json'],
+      bytes: inhalt,
     );
-    if (ziel == null) return null;
-    await File(ziel).writeAsString(inhalt, flush: true);
-    return ziel;
+  }
+
+  @override
+  Future<String?> speichern({
+    required String dateiname,
+    required String inhalt,
+  }) {
+    return _speichernDialog(
+      dateiname,
+      Uint8List.fromList(utf8.encode(inhalt)),
+    );
   }
 
   @override
