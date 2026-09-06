@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:excel_community/excel.dart';
+import 'package:excel_community/excel_community.dart';
 import 'package:taugts/features/auswertungen/models/statistik_export_modelle.dart';
 
 class StatistikExcelDatei {
