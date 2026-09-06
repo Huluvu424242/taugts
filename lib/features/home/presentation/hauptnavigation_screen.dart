@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/features/auswertungen/presentation/auswertungen_screen.dart';
 import 'package:taugts/features/auswertungen/services/auswertungs_service.dart';
+import 'package:taugts/features/auswertungen/services/statistik_export_service.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/datenaustausch/services/binaer_export_ziel_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
 import 'package:taugts/features/home/presentation/home_screen.dart';
@@ -27,6 +29,8 @@ class HauptnavigationScreen extends StatefulWidget {
     required this.kriteriensetRepository,
     required this.sucheService,
     required this.auswertungsService,
+    this.statistikExportService,
+    this.binaerExportZielService,
     super.key,
   });
 
@@ -35,6 +39,8 @@ class HauptnavigationScreen extends StatefulWidget {
   final BewertungsRepository? bewertungsRepository;
   final ExportService? exportService;
   final ExportZielService? exportZielService;
+  final BinaerExportZielService? binaerExportZielService;
+  final StatistikExportService? statistikExportService;
   final IdGenerator? idGenerator;
   final KategorieRepository? kategorieRepository;
   final KriteriensetRepository? kriteriensetRepository;
@@ -85,7 +91,11 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
             ),
       widget.auswertungsService == null
           ? const _NichtVerfuegbar(text: 'Auswertungen sind nicht verfügbar.')
-          : AuswertungenScreen(service: widget.auswertungsService!),
+          : AuswertungenScreen(
+              service: widget.auswertungsService!,
+              statistikExportService: widget.statistikExportService,
+              exportZielService: widget.binaerExportZielService,
+            ),
       if (kannSets)
         KriteriensetsScreen(
           kategorien: kategorien,
