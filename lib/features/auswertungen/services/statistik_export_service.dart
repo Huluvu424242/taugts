@@ -139,8 +139,7 @@ class SqliteStatistikExportService implements StatistikExportService {
     return ergebnis;
   }
 
-  List<Map<String, Object?>> _ortsbewertungsRows() =>
-      _db.verbindung.select('''
+  List<Map<String, Object?>> _ortsbewertungsRows() => _db.verbindung.select('''
         SELECT
           ob.id AS ortsbewertung_id,
           ob.ort_id,
