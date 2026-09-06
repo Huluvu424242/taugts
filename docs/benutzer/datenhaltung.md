@@ -20,7 +20,7 @@ Eine Bug-Meldung wird lokal vorbereitet und anschließend im Browser zur Prüfun
 
 Über **Import/Export** auf der Startseite kann der vollständige lokale Datenbestand als versionierte JSON-Datei exportiert werden. Die Datei trägt die Kennung `taugts-export`, eine unabhängige Schemaversion, Exportzeitpunkt und die tatsächlich installierte App-Version.
 
-Mit **Export speichern** wird zunächst der Systemdialog für das Speicherziel geöffnet. Wird dieser abgebrochen, passiert nichts. Unter Android kann die erzeugte Datei außerdem mit **Export teilen** an eine installierte App übergeben werden. Das Erzeugen des Exports benötigt keinen Server und verändert die lokalen Daten nicht.
+Mit **Export speichern** wird zunächst der Systemdialog für das Speicherziel geöffnet. Wird dieser abgebrochen, passiert nichts. Die Exportdatei wird direkt über den vom System bereitgestellten Speicherweg geschrieben; eine allgemeine Android-Dateisystemberechtigung ist dafür nicht erforderlich. Unter Android kann die erzeugte Datei außerdem mit **Export teilen** an eine installierte App übergeben werden. Das Erzeugen des Exports benötigt keinen Server und verändert die lokalen Daten nicht.
 
 Historische Daten bleiben eigenständige Datensätze: Ein neuer Preis oder eine neue Bewertung desselben Produkts beziehungsweise Ortes überschreibt frühere Beobachtungen nicht. Geldbeträge werden ohne Gleitkomma-Rundungsfehler gespeichert.
 
@@ -40,8 +40,8 @@ Taugt’s? führt außerdem ein lokales Importprotokoll. Es enthält nur Zeitpun
 
 Kann eine Datei nicht geschrieben, geteilt oder geprüft werden, zeigt Taugt’s? einen verständlichen Fehler an. Scheitert die eigentliche Importausführung, weist die App ausdrücklich auf den Rollback hin; der vorherige fachliche Datenbestand bleibt erhalten.
 
-## Hinweis zum Update auf 0.1.0+7
+## Hinweis für Daten aus 0.1.0+6 und früher
 
-Mit 0.1.0+7 wurde die während der Vorabentwicklung entstandene SQLite-Migrationshistorie auf eine neue produktive Baseline konsolidiert und anschließend für typisierte Kriterienwerte weiterentwickelt. Lokale Datenbanken aus älteren Vorabständen, insbesondere aus 0.1.0+6 und davor, besitzen keinen direkten Datenbank-Upgradepfad auf diesen neuen Stand.
+Mit 0.1.0+7 wurde die während der Vorabentwicklung entstandene SQLite-Migrationshistorie auf eine neue produktive Baseline konsolidiert und anschließend für typisierte Kriterienwerte weiterentwickelt. Dieser Baseline-Stand gilt auch für 0.1.0+8. Lokale Datenbanken aus älteren Vorabständen, insbesondere aus 0.1.0+6 und davor, besitzen keinen direkten Datenbank-Upgradepfad auf den aktuellen Stand.
 
-Wer Daten aus einer älteren Vorabversion behalten möchte, sollte **vor dem Update** einen vollständigen JSON-Export erstellen und sicher aufbewahren. Die Wiederherstellung dieses Exports in einer frisch angelegten 0.1.0+7-Datenbank muss vor dem Löschen der alten App-Daten geprüft werden. Ohne benötigte Altdaten können die lokalen App-Daten für 0.1.0+7 neu angelegt werden.
+Wer Daten aus einer solchen älteren Vorabversion behalten möchte, sollte **vor dem Update** einen vollständigen JSON-Export erstellen und sicher aufbewahren. Die Wiederherstellung dieses Exports in einer frisch angelegten aktuellen Datenbank muss vor dem Löschen der alten App-Daten geprüft werden. Ein Update von 0.1.0+7 auf 0.1.0+8 führt keine neue Datenbank-Baseline ein.
