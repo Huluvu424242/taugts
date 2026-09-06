@@ -4,11 +4,12 @@ publish_to: none
 version: 0.1.0+7
 
 environment:
-  sdk: '>=3.5.0 <4.0.0'
+  sdk: '>=3.6.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
+  excel_community: ^2.3.0
   mobile_scanner: ^7.1.3
   geolocator: ^14.0.2
   flutter_map: ^8.2.1
