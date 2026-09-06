@@ -6,9 +6,11 @@ import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/core/theme/app_theme.dart';
 import 'package:taugts/features/auswertungen/services/sqlite_auswertungs_service.dart';
+import 'package:taugts/features/auswertungen/services/statistik_export_service.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/bewertungen/services/datenbank_factory.dart';
 import 'package:taugts/features/bewertungen/services/sqlite_bewertungs_repository.dart';
+import 'package:taugts/features/datenaustausch/services/binaer_export_ziel_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
 import 'package:taugts/features/kategorien/services/kategorie_repository.dart';
@@ -52,11 +54,13 @@ class _BootstrapAppState extends State<BootstrapApp> {
       kriteriensetRepository: kriteriensetRepository,
       sucheService: SqliteSucheService(datenbank),
       auswertungsService: SqliteAuswertungsService(datenbank),
+      statistikExportService: SqliteStatistikExportService(datenbank),
       exportService: ExportService(
         datenbank,
         appVersion: '${paket.version}+${paket.buildNumber}',
       ),
       exportZielService: SystemExportZielService(),
+      binaerExportZielService: SystemBinaerExportZielService(),
       idGenerator: idGenerator,
     );
   }
@@ -79,8 +83,10 @@ class _BootstrapAppState extends State<BootstrapApp> {
               kriteriensetRepository: daten.kriteriensetRepository,
               sucheService: daten.sucheService,
               auswertungsService: daten.auswertungsService,
+              statistikExportService: daten.statistikExportService,
               exportService: daten.exportService,
               exportZielService: daten.exportZielService,
+              binaerExportZielService: daten.binaerExportZielService,
               idGenerator: daten.idGenerator,
             );
           }
@@ -146,8 +152,10 @@ class _StartDaten {
     required this.kriteriensetRepository,
     required this.sucheService,
     required this.auswertungsService,
+    required this.statistikExportService,
     required this.exportService,
     required this.exportZielService,
+    required this.binaerExportZielService,
     required this.idGenerator,
   });
 
@@ -158,7 +166,9 @@ class _StartDaten {
   final KriteriensetRepository kriteriensetRepository;
   final SucheService sucheService;
   final SqliteAuswertungsService auswertungsService;
+  final StatistikExportService statistikExportService;
   final ExportService exportService;
   final ExportZielService exportZielService;
+  final BinaerExportZielService binaerExportZielService;
   final IdGenerator idGenerator;
 }
