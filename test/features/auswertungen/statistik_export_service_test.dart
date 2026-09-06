@@ -104,12 +104,16 @@ void main() {
       [StandardGetraenkekriterien.bitterkeitId, jetzt, jetzt, profil],
     );
 
-    final ortGesamturteilId = db.verbindung.select(
-      "SELECT id FROM kriterien WHERE objektart = 'gastronomie' AND name = 'Gesamturteil' LIMIT 1",
-    ).single['id']! as String;
-    final serviceId = db.verbindung.select(
-      "SELECT id FROM kriterien WHERE objektart = 'gastronomie' AND name = 'Service' LIMIT 1",
-    ).single['id']! as String;
+    final ortGesamturteilId = db.verbindung
+        .select(
+          "SELECT id FROM kriterien WHERE objektart = 'gastronomie' AND name = 'Gesamturteil' LIMIT 1",
+        )
+        .single['id']! as String;
+    final serviceId = db.verbindung
+        .select(
+          "SELECT id FROM kriterien WHERE objektart = 'gastronomie' AND name = 'Service' LIMIT 1",
+        )
+        .single['id']! as String;
 
     for (final ortsbewertung in [
       ('ob1', 'e1', 'o1', DateTime.utc(2026, 9, 5, 18).toIso8601String()),
