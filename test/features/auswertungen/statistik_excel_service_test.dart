@@ -84,19 +84,16 @@ void main() {
       'Produkt 1',
     );
     expect(
-      (produkte.cell(CellIndex.indexByString('B3')).value as DoubleCellValue)
-          .value,
-      5,
+      produkte.cell(CellIndex.indexByString('B3')).value.toString(),
+      '5',
     );
     expect(
-      (produkte.cell(CellIndex.indexByString('C3')).value as DoubleCellValue)
-          .value,
-      3,
+      produkte.cell(CellIndex.indexByString('C3')).value.toString(),
+      '3',
     );
     expect(
-      (produkte.cell(CellIndex.indexByString('D3')).value as DoubleCellValue)
-          .value,
-      4,
+      produkte.cell(CellIndex.indexByString('D3')).value.toString(),
+      '4',
     );
 
     final orte = excel['Ortsbewertungen'];
@@ -105,8 +102,8 @@ void main() {
       'Ort A',
     );
     expect(
-      (orte.cell(CellIndex.indexByString('D2')).value as DoubleCellValue).value,
-      3.5,
+      orte.cell(CellIndex.indexByString('D2')).value.toString(),
+      '3.5',
     );
 
     final verlauf = excel['Ortsverlauf'];
@@ -115,9 +112,8 @@ void main() {
       'Ort A',
     );
     expect(
-      (verlauf.cell(CellIndex.indexByString('B3')).value as DoubleCellValue)
-          .value,
-      3,
+      verlauf.cell(CellIndex.indexByString('B3')).value.toString(),
+      '3',
     );
   });
 }
