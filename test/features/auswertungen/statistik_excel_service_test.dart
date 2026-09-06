@@ -1,12 +1,12 @@
-import 'package:excel_community/excel.dart';
+import 'package:excel_community/excel_community.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:taugts/features/auswertungen/models/statistik_export_modelle.dart';
 import 'package:taugts/features/auswertungen/services/statistik_excel_service.dart';
 
 void main() {
   test('erzeugt drei lesbare Tabellenblätter mit Kennzahlen und Verlauf', () {
-    const daten = StatistikExportDaten(
-      produktbewertungen: [
+    final daten = StatistikExportDaten(
+      produktbewertungen: const [
         ProduktOrtKennzahlen(
           produktId: 'p1',
           produktName: 'Produkt 1',
@@ -20,7 +20,7 @@ void main() {
           ),
         ),
       ],
-      ortsbewertungen: [
+      ortsbewertungen: const [
         OrtsKennzahlen(
           ortId: 'o1',
           ortName: 'Ort A',
@@ -63,8 +63,14 @@ void main() {
     );
 
     final produkte = excel['Produktbewertungen'];
-    expect(produkte.cell(CellIndex.indexByString('A1')).value.toString(), 'Produkt');
-    expect(produkte.cell(CellIndex.indexByString('B1')).value.toString(), 'Ort A');
+    expect(
+      produkte.cell(CellIndex.indexByString('A1')).value.toString(),
+      'Produkt',
+    );
+    expect(
+      produkte.cell(CellIndex.indexByString('B1')).value.toString(),
+      'Ort A',
+    );
     expect(
       produkte.cell(CellIndex.indexByString('B2')).value.toString(),
       'Beste Bewertung',
@@ -73,7 +79,10 @@ void main() {
       produkte.cell(CellIndex.indexByString('C2')).value.toString(),
       'Schlechteste Bewertung',
     );
-    expect(produkte.cell(CellIndex.indexByString('A3')).value.toString(), 'Produkt 1');
+    expect(
+      produkte.cell(CellIndex.indexByString('A3')).value.toString(),
+      'Produkt 1',
+    );
     expect(
       (produkte.cell(CellIndex.indexByString('B3')).value as DoubleCellValue)
           .value,
@@ -91,14 +100,20 @@ void main() {
     );
 
     final orte = excel['Ortsbewertungen'];
-    expect(orte.cell(CellIndex.indexByString('A2')).value.toString(), 'Ort A');
+    expect(
+      orte.cell(CellIndex.indexByString('A2')).value.toString(),
+      'Ort A',
+    );
     expect(
       (orte.cell(CellIndex.indexByString('D2')).value as DoubleCellValue).value,
       3.5,
     );
 
     final verlauf = excel['Ortsverlauf'];
-    expect(verlauf.cell(CellIndex.indexByString('B2')).value.toString(), 'Ort A');
+    expect(
+      verlauf.cell(CellIndex.indexByString('B2')).value.toString(),
+      'Ort A',
+    );
     expect(
       (verlauf.cell(CellIndex.indexByString('B3')).value as DoubleCellValue)
           .value,
