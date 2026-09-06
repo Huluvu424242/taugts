@@ -32,7 +32,7 @@ class StatistikExcelService {
     }
     final jetzt = (zeitpunkt ?? DateTime.now()).toLocal();
     return StatistikExcelDatei(
-      dateiname: 'taugts-statistik-${_dateiDatum( jetzt)}.xlsx',
+      dateiname: 'taugts-statistik-${_dateiDatum(jetzt)}.xlsx',
       inhalt: Uint8List.fromList(bytes),
     );
   }
@@ -67,8 +67,9 @@ class StatistikExcelService {
       CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 1),
       customValue: TextCellValue('Produkt'),
     );
-    sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0)).cellStyle =
-        _hauptKopfStyle;
+    sheet
+        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0))
+        .cellStyle = _hauptKopfStyle;
 
     for (var ortIndex = 0; ortIndex < ortIds.length; ortIndex++) {
       final start = 1 + ortIndex * 3;
@@ -293,14 +294,14 @@ class StatistikExcelService {
 
   static final _hauptKopfStyle = CellStyle(
     bold: true,
-    backgroundColorHex: '#D9EAF7',
+    backgroundColorHex: ExcelColor.fromHexString('D9EAF7'),
     horizontalAlign: HorizontalAlign.Center,
     verticalAlign: VerticalAlign.Center,
     textWrapping: TextWrapping.WrapText,
   );
   static final _kopfStyle = CellStyle(
     bold: true,
-    backgroundColorHex: '#EAF2F8',
+    backgroundColorHex: ExcelColor.fromHexString('EAF2F8'),
     horizontalAlign: HorizontalAlign.Center,
     verticalAlign: VerticalAlign.Center,
     textWrapping: TextWrapping.WrapText,
@@ -311,12 +312,12 @@ class StatistikExcelService {
     numberFormat: CustomNumericNumFormat('0.00'),
   );
   static final _besteStyle = CellStyle(
-    backgroundColorHex: '#E2F0D9',
+    backgroundColorHex: ExcelColor.fromHexString('E2F0D9'),
     horizontalAlign: HorizontalAlign.Right,
     numberFormat: CustomNumericNumFormat('0.00'),
   );
   static final _schlechtesteStyle = CellStyle(
-    backgroundColorHex: '#FCE4D6',
+    backgroundColorHex: ExcelColor.fromHexString('FCE4D6'),
     horizontalAlign: HorizontalAlign.Right,
     numberFormat: CustomNumericNumFormat('0.00'),
   );
