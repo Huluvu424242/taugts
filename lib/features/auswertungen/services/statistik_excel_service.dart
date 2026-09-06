@@ -309,20 +309,20 @@ class StatistikExcelService {
   static final _zeilenKopfStyle = CellStyle(bold: true);
   static final _zahlStyle = CellStyle(
     horizontalAlign: HorizontalAlign.Right,
-    numberFormat: CustomNumericNumFormat('0.00'),
+    numberFormat: CustomNumericNumFormat(formatCode: '0.00'),
   );
   static final _besteStyle = CellStyle(
     backgroundColorHex: ExcelColor.fromHexString('E2F0D9'),
     horizontalAlign: HorizontalAlign.Right,
-    numberFormat: CustomNumericNumFormat('0.00'),
+    numberFormat: CustomNumericNumFormat(formatCode: '0.00'),
   );
   static final _schlechtesteStyle = CellStyle(
     backgroundColorHex: ExcelColor.fromHexString('FCE4D6'),
     horizontalAlign: HorizontalAlign.Right,
-    numberFormat: CustomNumericNumFormat('0.00'),
+    numberFormat: CustomNumericNumFormat(formatCode: '0.00'),
   );
   static final _datumStyle = CellStyle(
-    numberFormat: CustomDateTimeNumFormat('dd.mm.yyyy hh:mm'),
+    numberFormat: CustomDateTimeNumFormat(formatCode: 'dd.mm.yyyy hh:mm'),
   );
   static final _hinweisStyle = CellStyle(
     italic: true,
