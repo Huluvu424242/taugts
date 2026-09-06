@@ -52,8 +52,7 @@ class StatistikExcelService {
     for (final eintrag in daten) {
       orte[eintrag.ortId] = eintrag.ortName;
       produkte[eintrag.produktId] = eintrag.produktName;
-      matrix
-          .putIfAbsent(eintrag.produktId, () => {})[eintrag.ortId] =
+      matrix.putIfAbsent(eintrag.produktId, () => {})[eintrag.ortId] =
           eintrag.kennzahlen;
     }
 
