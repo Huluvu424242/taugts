@@ -1,6 +1,6 @@
 # Attributions
 
-Stand der Prüfung: 2. September 2026 · vorbereitete Version: 0.1.0+4
+Stand der Prüfung: 6. September 2026 · Version: 0.1.0+7
 
 ## Taugt’s?-App-Logo
 
@@ -48,6 +48,7 @@ Third-Party-Notices bleiben maßgeblich.
 - [file_picker](https://pub.dev/packages/file_picker) – MIT; plattformübergreifender Systemdialog zur Auswahl des Speicherziels
 - [share_plus](https://pub.dev/packages/share_plus) – BSD-3-Clause; Übergabe einer Exportdatei an den System-Teilen-Dialog, insbesondere unter Android
 - [package_info_plus](https://pub.dev/packages/package_info_plus) – BSD-3-Clause; Ermittlung der tatsächlich installierten App- und Buildversion für die Exportmetadaten
+- [excel_community](https://pub.dev/packages/excel_community) – MIT; lokale Erzeugung und Formatierung von `.xlsx`-Arbeitsmappen einschließlich des Liniendiagramms für den Statistikexport. Die Bibliothek ist für Android, Linux und Windows ausgewiesen und benötigt keine Netzwerkverbindung zur Dateierzeugung.
 
 ## Lokale Barcode-Erkennung
 
