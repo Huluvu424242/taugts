@@ -6,6 +6,16 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+## [0.1.0+8] - 2026-09-06
+
+### Added
+
+- Die lokalen Auswertungen lassen sich als Excel-Arbeitsmappe (`.xlsx`) speichern. Sie enthält Produktbewertungen je Produkt und Ort mit bester, schlechtester und durchschnittlicher Qualitätswertung, zusammengefasste Ortsbewertungen sowie einen historischen Ortsverlauf mit Liniendiagramm; berücksichtigt werden ausschließlich Kriterien vom Eingabetyp **Wertung**.
+
+### Fixed
+
+- Der Dateiexport über **Speichern** schreibt die ausgewählte Datei unter Android nun direkt über den System-Speicherdialog, statt den zurückgegebenen Zielort anschließend als normalen Dateisystempfad zu behandeln. Dafür ist keine allgemeine Android-Speicherberechtigung erforderlich; die bestehende Teilen-Funktion bleibt unverändert.
+
 ## [0.1.0+7] - 2026-09-05
 
 ### Added
@@ -158,7 +168,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
 - Featureorientierte Ausgangsstruktur, Startscreen und Widget-Test.
 
-[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+7...HEAD
+[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+8...HEAD
+[0.1.0+8]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+7...v0.1.0+8
 [0.1.0+7]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+6...v0.1.0+7
 [0.1.0+6]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+5...v0.1.0+6
 [0.1.0+5]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+4...v0.1.0+5
