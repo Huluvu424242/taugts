@@ -6,9 +6,9 @@ Taugt’s? ist eine Offline-first-Flutter-App zur lokalen Erfassung und Bewertun
 von Produkten, Orten und Erlebnissen. Die Datenhaltung bleibt auf dem Gerät;
 für die Kernfunktionen sind weder Konto noch Serververbindung erforderlich.
 
-Die vorbereitete Android-Version ist **0.1.0+7**.
+Die vorbereitete Android-Version ist **0.1.0+8**.
 
-## Funktionsumfang von 0.1.0+7
+## Funktionsumfang von 0.1.0+8
 
 - Produkte wie Getränke, Speisen und andere Produkte lokal anlegen, suchen,
   bearbeiten und erneut bewerten, ohne Stammdaten neu anzulegen
@@ -38,6 +38,9 @@ Die vorbereitete Android-Version ist **0.1.0+7**.
   **Bewertungen** führt direkt in die Historien-Suche
 - lokale Auswertungen zu vergleichbaren Kriterienwerten, Preis- und
   Bewertungsverläufen sowie ausdrücklich erfassten Andrangsdaten nutzen
+- die lokalen Qualitätsauswertungen als Excel-Arbeitsmappe mit
+  Produktbewertungen je Ort, zusammengefassten Ortsbewertungen und
+  historischem Ortsverlauf einschließlich Liniendiagramm speichern
 - EAN-, GTIN- und UPC-Barcodes bewusst starten, lokal scannen, bestätigen und
   einem vorhandenen oder neuen Produkt zuordnen; der Scanner ist zusätzlich
   direkt am EAN-Feld der Produkterfassung erreichbar
@@ -71,7 +74,7 @@ Die vorbereitete Android-Version ist **0.1.0+7**.
 Nach Veröffentlichung steht die APK unter
 [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) bereit:
 
-1. `taugts-0.1.0+7.apk` und die zugehörige
+1. `taugts-0.1.0+8.apk` und die zugehörige
    `.apk.sha256`-Datei herunterladen.
 2. Die SHA-256-Prüfsumme kontrollieren.
 3. Unter Android gegebenenfalls die Installation aus der verwendeten
@@ -81,22 +84,24 @@ Nach Veröffentlichung steht die APK unter
 Unter Windows lässt sich die Prüfsumme so ermitteln:
 
 ```powershell
-Get-FileHash .\taugts-0.1.0+7.apk -Algorithm SHA256
+Get-FileHash .\taugts-0.1.0+8.apk -Algorithm SHA256
 ```
 
 Der Hash muss mit dem Inhalt von
-`taugts-0.1.0+7.apk.sha256` übereinstimmen. APK-Updates funktionieren nur mit
+`taugts-0.1.0+8.apk.sha256` übereinstimmen. APK-Updates funktionieren nur mit
 demselben Release-Signierschlüssel.
 
 ### Hinweis für Updates aus älteren Vorabversionen
 
-Die lokale SQLite-Datenbank wurde für 0.1.0+7 auf eine neue Baseline
-konsolidiert und anschließend für typisierte Kriterienwerte erweitert. Für die
-während der Vorabentwicklung verwendeten älteren Datenbankschemata besteht kein
-direkter Datenbank-Upgradepfad. Wer Daten aus 0.1.0+6 oder früher behalten
-möchte, sollte **vor dem Update** einen vollständigen JSON-Export erstellen und
-dessen Wiederherstellung in einer frisch angelegten 0.1.0+7-Datenbank prüfen,
-bevor alte App-Daten gelöscht werden.
+Mit 0.1.0+7 wurde die lokale SQLite-Datenbank auf eine neue Baseline
+konsolidiert und anschließend für typisierte Kriterienwerte erweitert. Dieser
+Stand gilt auch für 0.1.0+8. Für die während der Vorabentwicklung verwendeten
+Datenbankschemata aus 0.1.0+6 und davor besteht weiterhin kein direkter
+Datenbank-Upgradepfad. Wer solche Daten behalten möchte, sollte **vor dem
+Update** einen vollständigen JSON-Export erstellen und dessen Wiederherstellung
+in einer frisch angelegten aktuellen Datenbank prüfen, bevor alte App-Daten
+gelöscht werden. Ein Update von 0.1.0+7 auf 0.1.0+8 führt keine neue
+Datenbank-Baseline ein.
 
 ## Datenschutz und lokale Daten
 
@@ -109,10 +114,12 @@ geöffnet. Die App sendet ihn nicht selbständig ab und hängt keine lokalen
 Nutzerdaten oder Diagnoselogs an.
 
 Import und Export sind ebenfalls ausdrücklich nutzerinitiierte lokale
-Dateiaktionen. Importdateien werden vor jeder Übernahme geprüft; der eigentliche
-Import erfolgt atomar, sodass ein Fehler den vorherigen fachlichen Datenbestand
-erhält. Das lokale Importprotokoll speichert keine importierten Namen, Notizen,
-Preise oder Bewertungswerte.
+Dateiaktionen. JSON- und Excel-Exporte werden lokal erzeugt und über den
+Systemdialog gespeichert; dafür benötigt Taugt’s? keine allgemeine
+Android-Dateisystemberechtigung. Importdateien werden vor jeder Übernahme
+geprüft; der eigentliche Import erfolgt atomar, sodass ein Fehler den vorherigen
+fachlichen Datenbestand erhält. Das lokale Importprotokoll speichert keine
+importierten Namen, Notizen, Preise oder Bewertungswerte.
 
 Die manuelle Orts- und Koordinateneingabe funktioniert offline. Für das Laden
 der optionalen OpenStreetMap-Kartenkacheln, das ausdrücklich gestartete Reverse
@@ -130,9 +137,14 @@ Dokumentationslinks ist eine Netzwerkverbindung erforderlich. Für Orte vom Typ
 - Import und Export müssen vor Veröffentlichung zusätzlich mit realistischen
   Datenbeständen sowie Abbruch-, Fehler-, Wiederholungs- und Rollbackfällen auf
   einem realen Android-Gerät geprüft werden.
-- Der Übergang von einer älteren Vorab-Datenbank auf 0.1.0+7 besitzt keinen
-  direkten SQLite-Migrationspfad; Datenerhalt muss über Export, frische
-  Datenbank und geprüften Import abgesichert werden.
+- Der Android-System-Speicherdialog und die mit 0.1.0+8 erzeugte
+  Excel-Arbeitsmappe einschließlich Diagramm müssen vor Veröffentlichung auf
+  einer realen Zielumgebung beziehungsweise in einer realen Tabellenkalkulation
+  manuell geprüft werden.
+- Der Übergang von einer Vorab-Datenbank aus 0.1.0+6 oder früher auf den seit
+  0.1.0+7 geltenden Baseline-Stand besitzt keinen direkten SQLite-Migrationspfad;
+  Datenerhalt muss über Export, frische Datenbank und geprüften Import
+  abgesichert werden.
 - Die systematische manuelle Prüfung mit TalkBack, großer Systemschrift,
   Gestennavigation und einem kleinen Android-Gerät ist vor einer öffentlichen
   Freigabe noch abzuschließen; siehe
@@ -218,11 +230,11 @@ Der ausschließlich manuell startbare GitHub-Actions-Workflow
 ihrer SHA-256-Prüfsumme als GitHub Release veröffentlichen.
 
 Einrichtung, Sicherheitsvorgaben und Ablauf stehen in
-[docs/android-release.md](docs/android-release.md). Für Version 0.1.0+7 liegen
+[docs/android-release.md](docs/android-release.md). Für Version 0.1.0+8 liegen
 außerdem folgende Dokumente bereit:
 
-- [Release Notes](docs/releases/0.1.0+7.md)
-- [Release-Checkliste](docs/release-checklist-0.1.0+7.md)
+- [Release Notes](docs/releases/0.1.0+8.md)
+- [Release-Checkliste](docs/release-checklist-0.1.0+8.md)
 - [Changelog](CHANGELOG.md)
 
 Der Release-Workflow darf erst nach Einrichtung der Signing-Secrets und einer
