@@ -57,6 +57,47 @@ class _OrteScreenState extends State<OrteScreen> {
     }
   }
 
+  Future<void> _ortLoeschen(Ort ort) async {
+    final repository = widget.repository;
+    if (repository is! StammdatenLoeschRepository) return;
+    final bestaetigt = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Ort löschen?'),
+        content: const Text(
+          'Der Ort wird aus dem aktiven Bestand entfernt. Historische '
+          'Erlebnisse, Bewertungen und Preise bleiben erhalten. Betroffene '
+          'Einträge werden als nicht zugeordnet angezeigt und können später '
+          'einem anderen Ort zugeordnet werden.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Löschen'),
+          ),
+        ],
+      ),
+    );
+    if (bestaetigt != true || !mounted) return;
+    try {
+      await repository.loescheOrt(ort.id);
+      if (!mounted) return;
+      _suchen(_suche.text);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ort gelöscht. Historische Daten bleiben erhalten.')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Der Ort konnte nicht gelöscht werden.')),
+      );
+    }
+  }
+
   void _ortAntippen(Ort ort) {
     if (widget.zurAuswahl) {
       Navigator.of(context).pop(ort);
@@ -155,20 +196,31 @@ class _OrteScreenState extends State<OrteScreen> {
                           ),
                           trailing: widget.zurAuswahl
                               ? const Icon(Icons.chevron_right)
-                              : IconButton(
-                                  tooltip: 'Verlauf von ${ort.name}',
-                                  icon: const Icon(Icons.history),
-                                  onPressed: () =>
-                                      Navigator.of(context).push<void>(
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          BewertungsverlaufScreen.fuerOrt(
-                                        repository: widget.repository,
-                                        ort: ort,
-                                        eigenesProfilId: widget.eigenesProfilId,
+                              : Wrap(
+                                  spacing: 4,
+                                  children: [
+                                    IconButton(
+                                      tooltip: '${ort.name} löschen',
+                                      onPressed: () => _ortLoeschen(ort),
+                                      icon: const Icon(Icons.delete_outline),
+                                    ),
+                                    IconButton(
+                                      tooltip: 'Verlauf von ${ort.name}',
+                                      icon: const Icon(Icons.history),
+                                      onPressed: () =>
+                                          Navigator.of(context).push<void>(
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              BewertungsverlaufScreen.fuerOrt(
+                                            repository: widget.repository,
+                                            ort: ort,
+                                            eigenesProfilId:
+                                                widget.eigenesProfilId,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                           onTap: () => _ortAntippen(ort),
                         );
