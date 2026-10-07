@@ -2,7 +2,8 @@ import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 
-class SqliteBewertungsRepository implements BewertungsRepository {
+class SqliteBewertungsRepository
+    implements BewertungsRepository, StammdatenLoeschRepository {
   SqliteBewertungsRepository(this.datenbank);
 
   final LokaleDatenbank datenbank;
@@ -72,7 +73,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   Future<Produkt?> ladeProdukt(String id) async {
     final rows = datenbank.verbindung.select('''
       SELECT o.*, p.* FROM objekte o
-      JOIN produkte p ON p.objekt_id = o.id WHERE o.id = ?
+      JOIN produkte p ON p.objekt_id = o.id WHERE o.id = ? AND p.geloescht = 0
     ''', [id]);
     if (rows.isEmpty) return null;
     final row = rows.single;
@@ -85,12 +86,12 @@ class SqliteBewertungsRepository implements BewertungsRepository {
     final rows = datenbank.verbindung.select('''
       SELECT o.*, p.* FROM objekte o
       JOIN produkte p ON p.objekt_id = o.id
-      WHERE ? = '%%'
+      WHERE p.geloescht = 0 AND (? = '%%'
          OR LOWER(o.name) LIKE ?
          OR LOWER(COALESCE(p.marke, '')) LIKE ?
          OR LOWER(COALESCE(p.brauerei, '')) LIKE ?
          OR LOWER(COALESCE(p.sorte, '')) LIKE ?
-         OR LOWER(COALESCE(p.barcode, '')) LIKE ?
+         OR LOWER(COALESCE(p.barcode, '')) LIKE ?)
       ORDER BY o.geaendert_am DESC, o.name COLLATE NOCASE
     ''', [suche, suche, suche, suche, suche, suche]);
     return rows.map(_produktAusZeile).toList();
@@ -103,7 +104,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
     final rows = datenbank.verbindung.select('''
       SELECT o.*, p.* FROM objekte o
       JOIN produkte p ON p.objekt_id = o.id
-      WHERE p.barcode = ? LIMIT 1
+      WHERE p.barcode = ? AND p.geloescht = 0 LIMIT 1
     ''', [wert]);
     return rows.isEmpty ? null : _produktAusZeile(rows.single);
   }
@@ -166,7 +167,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
   @override
   Future<Ort?> ladeOrt(String id) async {
     final rows = datenbank.verbindung.select(
-      'SELECT * FROM orte WHERE id = ?',
+      'SELECT * FROM orte WHERE id = ? AND geloescht = 0',
       [id],
     );
     return rows.isEmpty ? null : _ortAusZeile(rows.single);
@@ -178,11 +179,11 @@ class SqliteBewertungsRepository implements BewertungsRepository {
     final rows = datenbank.verbindung.select(
       '''
         SELECT * FROM orte
-        WHERE ? = '%%'
+        WHERE geloescht = 0 AND (? = '%%'
            OR LOWER(name) LIKE ?
            OR LOWER(typ) LIKE ?
            OR LOWER(COALESCE(adresse, '')) LIKE ?
-           OR LOWER(COALESCE(osm_referenz, '')) LIKE ?
+           OR LOWER(COALESCE(osm_referenz, '')) LIKE ?)
         ORDER BY name COLLATE NOCASE, geaendert_am DESC
       ''',
       [suche, suche, suche, suche, suche],
@@ -201,7 +202,8 @@ class SqliteBewertungsRepository implements BewertungsRepository {
     final rows = datenbank.verbindung.select(
       '''
         SELECT * FROM orte
-        WHERE LOWER(TRIM(name)) = ?
+        WHERE geloescht = 0
+          AND LOWER(TRIM(name)) = ?
           AND (? IS NULL OR id <> ?)
         ORDER BY name COLLATE NOCASE
       ''',
@@ -233,12 +235,46 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       );
 
   @override
+  Future<void> loescheProdukt(String id) async {
+    datenbank.verbindung.execute(
+      'UPDATE produkte SET geloescht = 1 WHERE objekt_id = ?',
+      [id],
+    );
+  }
+
+  @override
+  Future<void> loescheOrt(String id) async {
+    datenbank.verbindung.execute(
+      'UPDATE orte SET geloescht = 1 WHERE id = ?',
+      [id],
+    );
+  }
+
+  @override
   Future<void> speichereErlebnis(Erlebnis erlebnis) async {
     final zeitfehler = erlebnis.zeitfehler;
     if (zeitfehler.isNotEmpty) {
       throw ArgumentError.value(erlebnis, 'erlebnis', zeitfehler.join(' '));
     }
     _speichereErlebnisZeile(erlebnis);
+    final ortId = erlebnis.wirksamerOrtId;
+    if (ortId != null) {
+      datenbank.verbindung.execute(
+        'UPDATE ortsbewertungen SET ort_id = ?, geaendert_am = ? '
+        'WHERE erlebnis_id = ? AND ort_id <> ?',
+        [ortId, _zeit(erlebnis.geaendertAm), erlebnis.id, ortId],
+      );
+      datenbank.verbindung.execute(
+        'UPDATE bewertungen SET ort_id = ?, geaendert_am = ? '
+        'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?',
+        [ortId, _zeit(erlebnis.geaendertAm), erlebnis.id, ortId],
+      );
+      datenbank.verbindung.execute(
+        'UPDATE preisbeobachtungen SET ort_id = ?, geaendert_am = ? '
+        'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?',
+        [ortId, _zeit(erlebnis.geaendertAm), erlebnis.id, ortId],
+      );
+    }
   }
 
   void _speichereErlebnisZeile(Erlebnis erlebnis) {
@@ -337,7 +373,7 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       SELECT p.id AS position_id, p.erlebnis_id, p.produkt_id, p.anzahl,
         p.erstellt_am AS position_erstellt_am,
         p.geaendert_am AS position_geaendert_am,
-        o.*, pr.*, pb.id AS preis_id, pb.ort_id AS preis_ort_id,
+        o.*, pr.*, pr.geloescht AS produkt_geloescht, pb.id AS preis_id, pb.ort_id AS preis_ort_id,
         pb.beobachtet_am, pb.betrag_minor, pb.waehrung,
         pb.erstellt_am AS preis_erstellt_am,
         pb.geaendert_am AS preis_geaendert_am
@@ -360,7 +396,15 @@ class SqliteBewertungsRepository implements BewertungsRepository {
       final preisId = row['preis_id'] as String?;
       return ErlebnispositionMitProdukt(
         position: position,
-        produkt: _produktAusZeile(row),
+        produkt: (row['produkt_geloescht'] as int) == 0
+            ? _produktAusZeile(row)
+            : Produkt(
+                id: position.produktId,
+                name: 'Nicht zugeordnet',
+                produktart: Produktart.sonstiges,
+                erstelltAm: position.erstelltAm,
+                geaendertAm: position.geaendertAm,
+              ),
         preis: preisId == null
             ? null
             : Preisbeobachtung(
