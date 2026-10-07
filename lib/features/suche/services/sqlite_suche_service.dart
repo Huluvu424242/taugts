@@ -254,7 +254,7 @@ class SqliteSucheService implements SucheService {
         Suchtreffer(
           id: row['id']! as String,
           art: Suchziel.historie,
-          titel: 'Produktbewertung · ${row['produkt_name']}',
+          titel: 'Produktbewertung · ${row['produkt_name'] ?? 'Nicht zugeordnet'}',
           untertitel:
               '${row['kriterium_name']}: ${row['wert']} · ${row['ort_name'] ?? 'Ohne Ort'}',
           erlebnisId: row['erlebnis_id']! as String,
@@ -314,7 +314,7 @@ class SqliteSucheService implements SucheService {
             id: row['id']! as String,
             art: Suchziel.historie,
             titel:
-                '${row['typ'] == 'geschaeft' ? 'Geschäftsbewertung' : 'Gaststättenbewertung'} · ${row['ort_name']}',
+                '${row['typ'] == 'geschaeft' ? 'Geschäftsbewertung' : 'Gaststättenbewertung'} · ${row['ort_name'] ?? 'Nicht zugeordnet'}',
             untertitel: '${row['kriterium_name']}: ${row['wert']}',
             erlebnisId: row['erlebnis_id']! as String,
             ortId: row['ort_id']! as String,
@@ -376,7 +376,7 @@ class SqliteSucheService implements SucheService {
         Suchtreffer(
           id: row['id']! as String,
           art: Suchziel.historie,
-          titel: 'Preisbeobachtung · ${row['produkt_name']}',
+          titel: 'Preisbeobachtung · ${row['produkt_name'] ?? 'Nicht zugeordnet'}',
           untertitel:
               '${((row['betrag_minor']! as int) / 100).toStringAsFixed(2)} ${row['waehrung']} · ${row['ort_name'] ?? 'Ohne Ort'}',
           erlebnisId: row['erlebnis_id']! as String,
