@@ -4,6 +4,7 @@ import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/produkte/presentation/produkt_formular.dart';
 import 'package:taugts/features/produkte/presentation/produkte_screen.dart';
 
 class ErlebnispositionFormular extends StatefulWidget {
@@ -77,6 +78,39 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
     );
     if (produkt == null || !mounted) return;
     setState(() => _produkt = produkt);
+    await _ladeLetztenPreis();
+  }
+
+  Future<void> _produktBearbeiten() async {
+    final produkt = _produkt;
+    if (produkt == null) return;
+    final gespeichert = await Navigator.of(context).push<Produkt>(
+      MaterialPageRoute(
+        builder: (_) => ProduktFormular(
+          repository: widget.repository,
+          idGenerator: widget.idGenerator,
+          produkt: produkt,
+          barcodeScanStart: widget.barcodeScanStart,
+        ),
+      ),
+    );
+    if (gespeichert == null || !mounted) return;
+    setState(() => _produkt = gespeichert);
+    await _ladeLetztenPreis();
+  }
+
+  Future<void> _produktAnlegen() async {
+    final gespeichert = await Navigator.of(context).push<Produkt>(
+      MaterialPageRoute(
+        builder: (_) => ProduktFormular(
+          repository: widget.repository,
+          idGenerator: widget.idGenerator,
+          barcodeScanStart: widget.barcodeScanStart,
+        ),
+      ),
+    );
+    if (gespeichert == null || !mounted) return;
+    setState(() => _produkt = gespeichert);
     await _ladeLetztenPreis();
   }
 
@@ -184,6 +218,24 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
                   onTap: _produktWaehlen,
                 ),
               ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (_produkt != null)
+                    OutlinedButton.icon(
+                      onPressed: _produktBearbeiten,
+                      icon: const Icon(Icons.edit_outlined),
+                      label: const Text('Produkt bearbeiten'),
+                    ),
+                  OutlinedButton.icon(
+                    onPressed: _produktAnlegen,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Neues Produkt'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   IconButton(
