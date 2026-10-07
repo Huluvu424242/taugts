@@ -146,6 +146,44 @@ void main() {
     );
     expect(find.text('Produkt anlegen'), findsWidgets);
   });
+
+  testWidgets('Löschen erklärt Historienerhalt und kann abgebrochen werden',
+      (tester) async {
+    final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+    addTearDown(datenbank.schliessen);
+    final repository = SqliteBewertungsRepository(datenbank);
+    final zeit = DateTime.utc(2026, 9, 13);
+    const id = '21700000-0000-4000-8000-000000000101';
+    await repository.speichereProdukt(Produkt(
+      id: id,
+      name: 'Löschtest',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+    await tester.pumpWidget(MaterialApp(
+      home: ProdukteScreen(
+        repository: repository,
+        idGenerator: _FesterIdGenerator(),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Löschtest löschen'));
+    await tester.pumpAndSettle();
+    expect(find.text('Produkt löschen?'), findsOneWidget);
+    expect(find.textContaining('Historische Erlebnisse'), findsOneWidget);
+    await tester.tap(find.text('Abbrechen'));
+    await tester.pumpAndSettle();
+    expect(await repository.ladeProdukt(id), isNotNull);
+
+    await tester.tap(find.byTooltip('Löschtest löschen'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Löschen'));
+    await tester.pumpAndSettle();
+    expect(await repository.ladeProdukt(id), isNull);
+    expect(find.text('Löschtest'), findsNothing);
+  });
+
 }
 
 class _BarcodeFehlerRepository extends SqliteBewertungsRepository {
