@@ -317,7 +317,9 @@ class SuchtrefferDetailScreen extends StatelessWidget {
       null => 'Nicht zugeordnet',
     };
     if (treffer.erlebnistyp == null) return typ;
-    final zeit = zeitpunkt == null ? 'Zeit nicht erfasst' : _datumZeit(context, zeitpunkt);
+    final zeit = zeitpunkt == null
+        ? 'Zeit nicht erfasst'
+        : _datumZeit(context, zeitpunkt);
     return '$typ – $ortName – $zeit';
   }
 
