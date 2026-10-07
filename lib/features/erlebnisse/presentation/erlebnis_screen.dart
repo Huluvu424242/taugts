@@ -98,6 +98,15 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   bool get _istRestaurant => _typ == Erlebnistyp.restaurantbesuch;
   bool get _istEinkauf => _typ == Erlebnistyp.einkauf;
 
+  String get _ortLabel {
+    final ort = _ort;
+    if (ort != null) return ort.name;
+    if (_ortNichtZugeordnet) return 'Nicht zugeordnet – Ort auswählen';
+    return _istEinkauf
+        ? 'Geschäft auswählen (optional)'
+        : 'Ort auswählen (optional)';
+  }
+
   String get _typLabel => switch (_typ) {
         Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
         Erlebnistyp.einkauf => 'Einkauf',
@@ -650,14 +659,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                       ? Icons.restaurant_outlined
                       : Icons.shopping_bag_outlined,
                 ),
-                label: Text(
-                  _ort?.name ??
-                      (_ortNichtZugeordnet
-                          ? 'Nicht zugeordnet – Ort auswählen'
-                          : _istEinkauf
-                          ? 'Geschäft auswählen (optional)'
-                          : 'Ort auswählen (optional)')),
-                ),
+                label: Text(_ortLabel),
               ),
               const SizedBox(height: 16),
               Semantics(
