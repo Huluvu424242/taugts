@@ -264,41 +264,68 @@ class SuchtrefferDetailScreen extends StatelessWidget {
   final Suchtreffer treffer;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Historischer Datensatz'),
-          actions: const [
-            AppSupportMenu(contextName: SupportKontexte.suchtreffer),
+  Widget build(BuildContext context) {
+    final zeitpunkt = treffer.zeitpunkt;
+    final ortName = treffer.ortName ?? 'Nicht zugeordnet';
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Historischer Datensatz'),
+        actions: const [
+          AppSupportMenu(contextName: SupportKontexte.suchtreffer),
+        ],
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                treffer.titel,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(treffer.untertitel),
+            const SizedBox(height: 20),
+            if (treffer.produktId != null || treffer.produktName != null)
+              Text('Produkt: ${treffer.produktName ?? 'Nicht zugeordnet'}'),
+            Text('Ort: $ortName'),
+            Text(
+              'Erlebnis: ${_erlebnisText(context, ortName, zeitpunkt)}',
+            ),
+            if (zeitpunkt != null)
+              Text('Zeitpunkt: ${_datumZeit(context, zeitpunkt)}'),
+            const SizedBox(height: 16),
+            const Text(
+              'Technische Kennungen bleiben intern. Fehlende Zuordnungen werden als „Nicht zugeordnet“ angezeigt.',
+            ),
           ],
         ),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              Semantics(
-                header: true,
-                child: Text(
-                  treffer.titel,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(treffer.untertitel),
-              const SizedBox(height: 20),
-              if (treffer.zeitpunkt != null)
-                Text('Zeitpunkt: ${treffer.zeitpunkt!.toLocal()}'),
-              if (treffer.erlebnisId != null)
-                SelectableText('Erlebnis: ${treffer.erlebnisId}'),
-              if (treffer.produktId != null)
-                SelectableText('Produkt: ${treffer.produktId}'),
-              if (treffer.ortId != null)
-                SelectableText('Ort: ${treffer.ortId}'),
-              const SizedBox(height: 16),
-              const Text(
-                'Der Treffer bezeichnet genau den gespeicherten Datensatz und nennt seinen Erlebniskontext. Korrekturen desselben Datensatzes behalten dieselbe Identität.',
-              ),
-            ],
-          ),
-        ),
-      );
+      ),
+    );
+  }
+
+  String _erlebnisText(
+    BuildContext context,
+    String ortName,
+    DateTime? zeitpunkt,
+  ) {
+    final typ = switch (treffer.erlebnistyp) {
+      Erlebnistyp.einkauf => 'Einkauf',
+      Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
+      null => 'Nicht zugeordnet',
+    };
+    if (treffer.erlebnistyp == null) return typ;
+    final zeit = zeitpunkt == null ? 'Zeit nicht erfasst' : _datumZeit(context, zeitpunkt);
+    return '$typ – $ortName – $zeit';
+  }
+
+  String _datumZeit(BuildContext context, DateTime wert) {
+    final lokal = wert.toLocal();
+    final lokalisierung = MaterialLocalizations.of(context);
+    final datum = lokalisierung.formatShortDate(lokal);
+    final zeit = lokalisierung.formatTimeOfDay(TimeOfDay.fromDateTime(lokal));
+    return '$datum, $zeit';
+  }
 }
