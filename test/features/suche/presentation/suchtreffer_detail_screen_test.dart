@@ -12,8 +12,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('zeigt Produkt, Ort und Restaurantbesuch mit fachlichen Namen',
-      (tester) async {
+  testWidgets(
+    'zeigt Produkt, Ort und Restaurantbesuch mit fachlichen Namen',
+    (tester) async {
     await anzeigen(
       tester,
       Suchtreffer(
@@ -33,14 +34,21 @@ void main() {
 
     expect(find.text('Produkt: Pils Spezial'), findsOneWidget);
     expect(find.text('Ort: Zum Goldenen Fass'), findsOneWidget);
-    expect(find.textContaining('Erlebnis: Restaurantbesuch – Zum Goldenen Fass –'), findsOneWidget);
+    expect(
+      find.textContaining(
+        'Erlebnis: Restaurantbesuch – Zum Goldenen Fass –',
+      ),
+      findsOneWidget,
+    );
     expect(find.textContaining('produkt-technisch'), findsNothing);
     expect(find.textContaining('ort-technisch'), findsNothing);
     expect(find.textContaining('erlebnis-technisch'), findsNothing);
-  });
+    },
+  );
 
-  testWidgets('zeigt Einkauf und fehlende Zuordnungen verständlich',
-      (tester) async {
+  testWidgets(
+    'zeigt Einkauf und fehlende Zuordnungen verständlich',
+    (tester) async {
     await anzeigen(
       tester,
       Suchtreffer(
@@ -58,10 +66,14 @@ void main() {
 
     expect(find.text('Produkt: Nicht zugeordnet'), findsOneWidget);
     expect(find.text('Ort: Nicht zugeordnet'), findsOneWidget);
-    expect(find.textContaining('Erlebnis: Einkauf – Nicht zugeordnet –'), findsOneWidget);
+    expect(
+      find.textContaining('Erlebnis: Einkauf – Nicht zugeordnet –'),
+      findsOneWidget,
+    );
     expect(find.textContaining('produkt-technisch'), findsNothing);
     expect(find.textContaining('ort-technisch'), findsNothing);
     expect(find.textContaining('erlebnis-technisch'), findsNothing);
     expect(tester.takeException(), isNull);
-  });
+    },
+  );
 }
