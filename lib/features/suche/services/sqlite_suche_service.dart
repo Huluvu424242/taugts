@@ -210,7 +210,8 @@ class SqliteSucheService implements SucheService {
         COALESCE(b.kriterium_name, k.name, b.kriterium_id) AS kriterium_name,
         b.wert, b.herkunft_profil_id, b.erstellt_am,
         COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) AS ort_id,
-        CASE WHEN o.geloescht = 0 THEN o.name END AS ort_name, e.typ AS erlebnis_typ
+        CASE WHEN o.geloescht = 0 THEN o.name END AS ort_name,
+        e.typ AS erlebnis_typ
       FROM bewertungen b
       JOIN erlebnispositionen ep ON ep.id = b.erlebnis_position_id
       JOIN objekte p ON p.id = ep.produkt_id
@@ -262,7 +263,9 @@ class SqliteSucheService implements SucheService {
           ortId: row['ort_id'] as String?,
           produktName: row['produkt_name'] as String?,
           ortName: row['ort_name'] as String?,
-          erlebnistyp: Erlebnistyp.values.byName(row['erlebnis_typ']! as String),
+          erlebnistyp: Erlebnistyp.values.byName(
+            row['erlebnis_typ']! as String,
+          ),
           zeitpunkt: DateTime.parse(row['erstellt_am']! as String),
         ),
     ];
@@ -274,7 +277,8 @@ class SqliteSucheService implements SucheService {
     final bis = filter.bis?.toUtc().toIso8601String();
     final rows = _db.verbindung.select('''
       SELECT DISTINCT b.id, b.erlebnis_id, ob.ort_id,
-        CASE WHEN o.geloescht = 0 THEN o.name END AS ort_name, o.typ, e.typ AS erlebnis_typ,
+        CASE WHEN o.geloescht = 0 THEN o.name END AS ort_name, o.typ,
+        e.typ AS erlebnis_typ,
         COALESCE(b.kriterium_name, k.name, b.kriterium_id) AS kriterium_name,
         b.wert, b.herkunft_profil_id, ob.bewertet_am
       FROM bewertungen b
@@ -319,7 +323,9 @@ class SqliteSucheService implements SucheService {
             erlebnisId: row['erlebnis_id']! as String,
             ortId: row['ort_id']! as String,
             ortName: row['ort_name'] as String?,
-            erlebnistyp: Erlebnistyp.values.byName(row['erlebnis_typ']! as String),
+            erlebnistyp: Erlebnistyp.values.byName(
+            row['erlebnis_typ']! as String,
+          ),
             zeitpunkt: DateTime.parse(row['bewertet_am']! as String),
           ),
     ];
@@ -340,7 +346,8 @@ class SqliteSucheService implements SucheService {
       SELECT DISTINCT pb.id, pb.erlebnis_id, pb.produkt_id, pb.ort_id,
         pb.beobachtet_am, pb.betrag_minor, pb.waehrung,
         CASE WHEN pr.geloescht = 0 THEN p.name END AS produkt_name,
-        CASE WHEN o.geloescht = 0 THEN o.name END AS ort_name, e.typ AS erlebnis_typ
+        CASE WHEN o.geloescht = 0 THEN o.name END AS ort_name,
+        e.typ AS erlebnis_typ
       FROM preisbeobachtungen pb
       JOIN objekte p ON p.id = pb.produkt_id
       JOIN produkte pr ON pr.objekt_id = p.id
@@ -384,7 +391,9 @@ class SqliteSucheService implements SucheService {
           ortId: row['ort_id'] as String?,
           produktName: row['produkt_name'] as String?,
           ortName: row['ort_name'] as String?,
-          erlebnistyp: Erlebnistyp.values.byName(row['erlebnis_typ']! as String),
+          erlebnistyp: Erlebnistyp.values.byName(
+            row['erlebnis_typ']! as String,
+          ),
           zeitpunkt: DateTime.parse(row['beobachtet_am']! as String),
         ),
     ];
