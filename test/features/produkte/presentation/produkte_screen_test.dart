@@ -121,6 +121,38 @@ void main() {
     expect(gespeichert!.istUnvollstaendig, isTrue);
   });
 
+  testWidgets('gibt manuell neu angelegtes Produkt aus Auswahl zurück',
+      (tester) async {
+    final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+    addTearDown(datenbank.schliessen);
+    final repository = SqliteBewertungsRepository(datenbank);
+
+    await tester.pumpWidget(MaterialApp(
+      home: _ProduktauswahlTestStart(
+        repository: repository,
+        scanCode: '0000000000000',
+      ),
+    ));
+    await tester.tap(find.text('Produktauswahl öffnen'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Produkt anlegen').first);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Name'),
+      'Erlebnis-Pils',
+    );
+    await tester.scrollUntilVisible(
+      find.text('Produkt speichern'),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text('Produkt speichern'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ausgewählt: Erlebnis-Pils'), findsOneWidget);
+  });
+
   testWidgets('Suchfehler blockiert die manuelle Produkterfassung nicht',
       (tester) async {
     final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
