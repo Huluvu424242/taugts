@@ -64,6 +64,9 @@ class Suchtreffer {
     this.erlebnisId,
     this.produktId,
     this.ortId,
+    this.produktName,
+    this.ortName,
+    this.erlebnistyp,
     this.zeitpunkt,
   });
 
@@ -74,5 +77,8 @@ class Suchtreffer {
   final String? erlebnisId;
   final String? produktId;
   final String? ortId;
+  final String? produktName;
+  final String? ortName;
+  final Erlebnistyp? erlebnistyp;
   final DateTime? zeitpunkt;
 }
