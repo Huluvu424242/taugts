@@ -67,3 +67,13 @@ abstract interface class BewertungsRepository {
   Future<List<BewertungsverlaufEintrag>> ladeProduktverlauf(String produktId);
   Future<List<BewertungsverlaufEintrag>> ladeOrtsverlauf(String ortId);
 }
+
+
+/// Optionale Fähigkeit zur fachlichen Löschung von Stammdaten.
+///
+/// Historische Fachdaten bleiben dabei erhalten; aktive Auswahllisten blenden
+/// die gelöschten Stammdaten aus.
+abstract interface class StammdatenLoeschRepository {
+  Future<void> loescheProdukt(String id);
+  Future<void> loescheOrt(String id);
+}
