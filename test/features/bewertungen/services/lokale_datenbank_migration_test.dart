@@ -9,13 +9,13 @@ void main() {
 
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
 
-    expect(LokaleDatenbank.schemaVersion, 2);
-    expect(verbindung.userVersion, 2);
+    expect(LokaleDatenbank.schemaVersion, 3);
+    expect(verbindung.userVersion, 3);
     expect(verbindung.select('PRAGMA foreign_key_check'), isEmpty);
     datenbank.schliessen();
   });
 
-  test('Schema 2 enthält den vollständigen aktuellen Tabellenstand', () {
+  test('Schema 3 enthält den vollständigen aktuellen Tabellenstand', () {
     final verbindung = sqlite3.openInMemory();
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
 
@@ -48,6 +48,8 @@ void main() {
         'tatsaechlicher_beginn',
       }),
     );
+    expect(_spalten(verbindung, 'produkte'), contains('geloescht'));
+    expect(_spalten(verbindung, 'orte'), contains('geloescht'));
     expect(
       _spalten(verbindung, 'kriterien'),
       containsAll(<String>{'objektart', 'version', 'auswahlwerte'}),
@@ -56,7 +58,7 @@ void main() {
     datenbank.schliessen();
   });
 
-  test('Schema 2 stellt die aktuellen Standardkriterien bereit', () {
+  test('Schema 3 stellt die aktuellen Standardkriterien bereit', () {
     final verbindung = sqlite3.openInMemory();
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
 
@@ -156,7 +158,7 @@ void main() {
       'SELECT wert, text_wert FROM bewertungen WHERE id = ?',
       [bewertungId],
     ).single;
-    expect(verbindung.userVersion, 2);
+    expect(verbindung.userVersion, 3);
     expect(zeile['wert'], 4.0);
     expect(zeile['text_wert'], isNull);
     expect(verbindung.select('PRAGMA foreign_key_check'), isEmpty);
@@ -165,7 +167,7 @@ void main() {
 
   test('lehnt eine Datenbank mit höherer Schemaversion ab', () {
     final verbindung = sqlite3.openInMemory();
-    verbindung.userVersion = 3;
+    verbindung.userVersion = 4;
 
     expect(
       () => LokaleDatenbank.oeffnen(verbindung),
@@ -173,7 +175,7 @@ void main() {
         isA<StateError>().having(
           (fehler) => fehler.message,
           'message',
-          'Nicht unterstützte Schemaversion: 3',
+          'Nicht unterstützte Schemaversion: 4',
         ),
       ),
     );
