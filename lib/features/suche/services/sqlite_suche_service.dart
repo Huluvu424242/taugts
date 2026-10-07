@@ -204,14 +204,16 @@ class SqliteSucheService implements SucheService {
     final von = filter.von?.toUtc().toIso8601String();
     final bis = filter.bis?.toUtc().toIso8601String();
     final rows = _db.verbindung.select('''
-      SELECT DISTINCT b.id, b.erlebnis_id, ep.produkt_id, p.name AS produkt_name,
+      SELECT DISTINCT b.id, b.erlebnis_id, ep.produkt_id,
+        CASE WHEN pr.geloescht = 0 THEN p.name END AS produkt_name,
         COALESCE(b.kriterium_name, k.name, b.kriterium_id) AS kriterium_name,
         b.wert, b.herkunft_profil_id, b.erstellt_am,
         COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) AS ort_id,
-        o.name AS ort_name
+        CASE WHEN o.geloescht = 0 THEN o.name END AS ort_name, e.typ AS erlebnis_typ
       FROM bewertungen b
       JOIN erlebnispositionen ep ON ep.id = b.erlebnis_position_id
       JOIN objekte p ON p.id = ep.produkt_id
+      JOIN produkte pr ON pr.objekt_id = p.id
       JOIN erlebnisse e ON e.id = b.erlebnis_id
       LEFT JOIN kriterien k ON k.id = b.kriterium_id
       LEFT JOIN orte o ON o.id = COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id)
@@ -257,6 +259,9 @@ class SqliteSucheService implements SucheService {
           erlebnisId: row['erlebnis_id']! as String,
           produktId: row['produkt_id']! as String,
           ortId: row['ort_id'] as String?,
+          produktName: row['produkt_name'] as String?,
+          ortName: row['ort_name'] as String?,
+          erlebnistyp: Erlebnistyp.values.byName(row['erlebnis_typ']! as String),
           zeitpunkt: DateTime.parse(row['erstellt_am']! as String),
         ),
     ];
@@ -267,11 +272,13 @@ class SqliteSucheService implements SucheService {
     final von = filter.von?.toUtc().toIso8601String();
     final bis = filter.bis?.toUtc().toIso8601String();
     final rows = _db.verbindung.select('''
-      SELECT DISTINCT b.id, b.erlebnis_id, ob.ort_id, o.name AS ort_name, o.typ,
+      SELECT DISTINCT b.id, b.erlebnis_id, ob.ort_id,
+        CASE WHEN o.geloescht = 0 THEN o.name END AS ort_name, o.typ, e.typ AS erlebnis_typ,
         COALESCE(b.kriterium_name, k.name, b.kriterium_id) AS kriterium_name,
         b.wert, b.herkunft_profil_id, ob.bewertet_am
       FROM bewertungen b
       JOIN ortsbewertungen ob ON ob.id = b.ortsbewertung_id
+      JOIN erlebnisse e ON e.id = b.erlebnis_id
       JOIN orte o ON o.id = ob.ort_id
       LEFT JOIN kriterien k ON k.id = b.kriterium_id
       LEFT JOIN ort_kategorien ok ON ok.ort_id = ob.ort_id
@@ -310,6 +317,8 @@ class SqliteSucheService implements SucheService {
             untertitel: '${row['kriterium_name']}: ${row['wert']}',
             erlebnisId: row['erlebnis_id']! as String,
             ortId: row['ort_id']! as String,
+            ortName: row['ort_name'] as String?,
+            erlebnistyp: Erlebnistyp.values.byName(row['erlebnis_typ']! as String),
             zeitpunkt: DateTime.parse(row['bewertet_am']! as String),
           ),
     ];
@@ -329,9 +338,12 @@ class SqliteSucheService implements SucheService {
     final rows = _db.verbindung.select('''
       SELECT DISTINCT pb.id, pb.erlebnis_id, pb.produkt_id, pb.ort_id,
         pb.beobachtet_am, pb.betrag_minor, pb.waehrung,
-        p.name AS produkt_name, o.name AS ort_name
+        CASE WHEN pr.geloescht = 0 THEN p.name END AS produkt_name,
+        CASE WHEN o.geloescht = 0 THEN o.name END AS ort_name, e.typ AS erlebnis_typ
       FROM preisbeobachtungen pb
       JOIN objekte p ON p.id = pb.produkt_id
+      JOIN produkte pr ON pr.objekt_id = p.id
+      JOIN erlebnisse e ON e.id = pb.erlebnis_id
       LEFT JOIN orte o ON o.id = pb.ort_id
       LEFT JOIN produkt_kategorien pk ON pk.produkt_id = pb.produkt_id
       WHERE (? = '%%'
@@ -369,6 +381,9 @@ class SqliteSucheService implements SucheService {
           erlebnisId: row['erlebnis_id']! as String,
           produktId: row['produkt_id']! as String,
           ortId: row['ort_id'] as String?,
+          produktName: row['produkt_name'] as String?,
+          ortName: row['ort_name'] as String?,
+          erlebnistyp: Erlebnistyp.values.byName(row['erlebnis_typ']! as String),
           zeitpunkt: DateTime.parse(row['beobachtet_am']! as String),
         ),
     ];
