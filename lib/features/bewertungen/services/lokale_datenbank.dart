@@ -11,7 +11,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 2;
+  static const schemaVersion = 3;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -44,6 +44,9 @@ class LokaleDatenbank {
           case 1:
             _migriereVon1Auf2();
             aktuelleVersion = 2;
+          case 2:
+            _migriereVon2Auf3();
+            aktuelleVersion = 3;
           default:
             throw StateError(
               'Kein Migrationspfad von Schemaversion $aktuelleVersion '
@@ -81,6 +84,15 @@ class LokaleDatenbank {
       FROM bewertungen_v1
     ''');
     verbindung.execute('DROP TABLE bewertungen_v1');
+  }
+
+  void _migriereVon2Auf3() {
+    verbindung.execute(
+      'ALTER TABLE produkte ADD COLUMN geloescht INTEGER NOT NULL DEFAULT 0',
+    );
+    verbindung.execute(
+      'ALTER TABLE orte ADD COLUMN geloescht INTEGER NOT NULL DEFAULT 0',
+    );
   }
 
   void _stelleStandardkriterienBereit() {
@@ -155,7 +167,8 @@ class LokaleDatenbank {
         gebinde TEXT,
         fuellmenge_ml INTEGER,
         barcode TEXT,
-        notiz TEXT
+        notiz TEXT,
+        geloescht INTEGER NOT NULL DEFAULT 0
       )
     ''');
     verbindung.execute('''
@@ -169,7 +182,8 @@ class LokaleDatenbank {
         breitengrad REAL,
         laengengrad REAL,
         osm_referenz TEXT,
-        notiz TEXT
+        notiz TEXT,
+        geloescht INTEGER NOT NULL DEFAULT 0
       )
     ''');
     _erstelleErlebnisseTabelle();
