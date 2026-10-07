@@ -1079,4 +1079,93 @@ void main() {
       hasLength(2),
     );
   });
+
+  test('Produktlöschung erhält Erlebnisposition und erlaubt Neuzuordnung', () async {
+    const alt = '21700000-0000-4000-8000-000000000001';
+    const neu = '21700000-0000-4000-8000-000000000002';
+    const erlebnisId = '21700000-0000-4000-8000-000000000003';
+    const positionId = '21700000-0000-4000-8000-000000000004';
+    for (final eintrag in [(alt, 'Alt'), (neu, 'Neu')]) {
+      await repository.speichereProdukt(Produkt(
+        id: eintrag.$1,
+        name: eintrag.$2,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ));
+    }
+    await repository.speichereErlebnis(Erlebnis(
+      id: erlebnisId,
+      herkunftProfilId: profilId,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ));
+    await repository.speichereErlebnisposition(
+      position: ErlebnisPosition(
+        id: positionId,
+        erlebnisId: erlebnisId,
+        produktId: alt,
+        anzahl: 2,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
+
+    await repository.loescheProdukt(alt);
+
+    expect(await repository.ladeProdukt(alt), isNull);
+    expect((await repository.ladeProdukte()).map((p) => p.id), isNot(contains(alt)));
+    var position = (await repository.ladeErlebnispositionen(erlebnisId)).single;
+    expect(position.produkt.anzeigetitel, 'Nicht zugeordnet');
+    expect(position.position.anzahl, 2);
+
+    await repository.speichereErlebnisposition(
+      position: ErlebnisPosition(
+        id: positionId,
+        erlebnisId: erlebnisId,
+        produktId: neu,
+        anzahl: position.position.anzahl,
+        erstelltAm: position.position.erstelltAm,
+        geaendertAm: zeit.add(const Duration(minutes: 1)),
+      ),
+    );
+    position = (await repository.ladeErlebnispositionen(erlebnisId)).single;
+    expect(position.produkt.id, neu);
+    expect(position.position.anzahl, 2);
+  });
+
+  test('Ortlöschung erhält Historie und Erlebnis kann neu zugeordnet werden', () async {
+    const alt = '21700000-0000-4000-8000-000000000011';
+    const neu = '21700000-0000-4000-8000-000000000012';
+    const erlebnisId = '21700000-0000-4000-8000-000000000013';
+    for (final eintrag in [(alt, 'Alter Ort'), (neu, 'Neuer Ort')]) {
+      await repository.speichereOrt(Ort(
+        id: eintrag.$1,
+        name: eintrag.$2,
+        typ: Ortstyp.gastronomie,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ));
+    }
+    final erlebnis = Erlebnis(
+      id: erlebnisId,
+      ortId: alt,
+      herkunftProfilId: profilId,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereErlebnis(erlebnis);
+    await repository.loescheOrt(alt);
+
+    expect(await repository.ladeOrt(alt), isNull);
+    expect((await repository.ladeErlebnis(erlebnisId))?.ortId, alt);
+
+    await repository.speichereErlebnis(erlebnis.kopiereMit(
+      ortId: neu,
+      geaendertAm: zeit.add(const Duration(minutes: 1)),
+    ));
+    final neuZugeordnet = await repository.ladeErlebnis(erlebnisId);
+    expect(neuZugeordnet?.ortId, neu);
+    expect(neuZugeordnet?.erstelltAm, zeit);
+  });
+
 }
