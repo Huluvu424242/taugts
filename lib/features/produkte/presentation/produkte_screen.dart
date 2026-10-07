@@ -105,6 +105,47 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
     }
   }
 
+  Future<void> _produktLoeschen(Produkt produkt) async {
+    final repository = widget.repository;
+    if (repository is! StammdatenLoeschRepository) return;
+    final bestaetigt = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Produkt löschen?'),
+        content: const Text(
+          'Das Produkt wird aus dem aktiven Bestand entfernt. Historische '
+          'Erlebnisse, Bewertungen und Preise bleiben erhalten. Betroffene '
+          'Einträge werden als nicht zugeordnet angezeigt und können später '
+          'einem anderen Produkt zugeordnet werden.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Löschen'),
+          ),
+        ],
+      ),
+    );
+    if (bestaetigt != true || !mounted) return;
+    try {
+      await repository.loescheProdukt(produkt.id);
+      if (!mounted) return;
+      _laden();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Produkt gelöscht. Historische Daten bleiben erhalten.')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Das Produkt konnte nicht gelöscht werden.')),
+      );
+    }
+  }
+
   Future<void> _barcodeScannen() async {
     final barcode = await (widget.barcodeScanStart?.call(context) ??
         Navigator.of(context).push<String>(
@@ -283,6 +324,11 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
                                           : () => _erneutBewerten(produkt),
                                       icon: const Icon(
                                           Icons.rate_review_outlined),
+                                    ),
+                                    IconButton(
+                                      tooltip: '${produkt.anzeigetitel} löschen',
+                                      onPressed: () => _produktLoeschen(produkt),
+                                      icon: const Icon(Icons.delete_outline),
                                     ),
                                     IconButton(
                                       tooltip:
