@@ -82,3 +82,12 @@ Produkt- und Ortsverläufe zeigen historische Bewertungen mit Einzelwerten sowie
 Über das Support-Menü stehen **Bug melden** und **Über** zur Verfügung. Der Über-Dialog zeigt die installierte Releaseversion und verlinkt die Projektseite, die veröffentlichte Benutzerdokumentation und die offline enthaltene Barrierefreiheitserklärung. Fehler beim Öffnen externer Ziele werden in der App verständlich angezeigt.
 
 Der Bugreport wird im Browser zur Prüfung geöffnet und nicht von der App selbständig abgesendet.
+
+
+## Produkte und Orte löschen
+
+Produkte und Orte können in ihren Übersichten über die Aktion **Löschen** aus dem aktiven Bestand entfernt werden. Vorher erklärt ein Bestätigungsdialog die Folgen; mit **Abbrechen** bleibt der Datenbestand unverändert.
+
+Das Löschen entfernt **keine historischen Erlebnisse, Bewertungen, Preise oder Mengen**. Historische Einträge bleiben erhalten. Ist ihr früheres Produkt oder ihr früherer Ort gelöscht, zeigt Taugt’s? die Zuordnung als **Nicht zugeordnet** statt einer internen ID an.
+
+Eine fehlende Zuordnung kann später korrigiert werden: Öffne das betroffene Erlebnis beziehungsweise die Erlebnisposition und wähle über **Produkt auswählen** oder **Ort auswählen** einen vorhandenen Stammdatensatz. Über dieselbe Auswahl kann bei Bedarf zuerst ein neues Produkt oder ein neuer Ort angelegt werden. Beim Speichern wird nur die Zuordnung geändert; Zeitpunkt, Bewertung, Preis, Menge und die übrigen historischen Angaben bleiben erhalten.
