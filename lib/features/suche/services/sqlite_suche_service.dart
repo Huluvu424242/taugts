@@ -1,3 +1,4 @@
+import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 import 'package:taugts/features/suche/models/suchmodelle.dart';
 import 'package:taugts/features/suche/services/suche_service.dart';
