@@ -98,6 +98,10 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
       ),
     );
     if (gespeichert != null && mounted) {
+      if (widget.zurAuswahl) {
+        Navigator.of(context).pop(gespeichert);
+        return;
+      }
       _laden();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Produkt gespeichert.')),
