@@ -46,6 +46,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   late final Erlebnistyp _typ;
   Erlebnis? _gespeichertesErlebnis;
   Ort? _ort;
+  var _ortNichtZugeordnet = false;
   DateTime? _geplanterTag;
   int? _geplanteMinute;
   DateTime? _tatsaechlicherBeginn;
@@ -77,7 +78,10 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     if (ortId == null) return;
     final ort = await widget.repository.ladeOrt(ortId);
     if (!mounted) return;
-    setState(() => _ort = ort);
+    setState(() {
+      _ort = ort;
+      _ortNichtZugeordnet = ort == null;
+    });
   }
 
   @override
@@ -118,7 +122,12 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         ),
       ),
     );
-    if (ort != null && mounted) setState(() => _ort = ort);
+    if (ort != null && mounted) {
+      setState(() {
+        _ort = ort;
+        _ortNichtZugeordnet = false;
+      });
+    }
   }
 
   Future<void> _geplantenTagWaehlen() async {
@@ -643,9 +652,11 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                 ),
                 label: Text(
                   _ort?.name ??
-                      (_istEinkauf
+                      (_ortNichtZugeordnet
+                          ? 'Nicht zugeordnet – Ort auswählen'
+                          : _istEinkauf
                           ? 'Geschäft auswählen (optional)'
-                          : 'Ort auswählen (optional)'),
+                          : 'Ort auswählen (optional)')),
                 ),
               ),
               const SizedBox(height: 16),
