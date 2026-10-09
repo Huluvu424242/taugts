@@ -889,7 +889,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
             spacing: 12,
             runSpacing: 8,
             children: [
-              OutlinedButton.icon(
+              FilledButton.icon(
                 onPressed:
                     _speichert ? null : () => _persistieren(schliessen: true),
                 icon: const Icon(Icons.save_outlined),
@@ -907,13 +907,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   icon: const Icon(Icons.logout),
                   label: Text(_istEinkauf ? 'Einkauf beenden' : 'Checkout'),
                 )
-              else
-                FilledButton.icon(
-                  onPressed:
-                      _speichert ? null : () => _persistieren(schliessen: true),
-                  icon: const Icon(Icons.edit_outlined),
-                  label: const Text('Bearbeiten speichern'),
-                ),
+
             ],
           ),
         ),
