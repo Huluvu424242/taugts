@@ -89,6 +89,119 @@ void main() {
     );
   });
 
+  test('Gesamtstand sichert mehrere Produkte und Bewertungen atomar', () async {
+    const id = '22110000-0000-4000-8000-000000000001';
+    final erlebnis = Erlebnis(
+      id: id,
+      herkunftProfilId: profilId,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    final positionen = <ErlebnispositionMitProdukt>[];
+    final bewertungen = <String, List<Bewertung>>{};
+    for (var i = 1; i <= 2; i++) {
+      final produkt = Produkt(
+        id: '22110000-0000-4000-8000-00000000000${i + 1}',
+        name: 'Produkt $i',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      );
+      await repository.speichereProdukt(produkt);
+      final position = ErlebnisPosition(
+        id: '22110000-0000-4000-8000-00000000001$i',
+        erlebnisId: id,
+        produktId: produkt.id,
+        anzahl: i,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      );
+      positionen.add(ErlebnispositionMitProdukt(
+        position: position,
+        produkt: produkt,
+      ));
+      bewertungen[position.id] = [
+        Bewertung(
+          id: '22110000-0000-4000-8000-00000000002$i',
+          erlebnisId: id,
+          erlebnisPositionId: position.id,
+          kriteriumId: StandardGetraenkekriterien.gesamturteilId,
+          herkunftProfilId: profilId,
+          wert: i + 2.0,
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        ),
+      ];
+    }
+
+    await repository.speichereErlebnisGesamtstand(
+      erlebnis: erlebnis,
+      geaendertePositionen: positionen,
+      entferntePositionen: const {},
+      produktbewertungen: bewertungen,
+    );
+    expect(await repository.ladeErlebnispositionen(id), hasLength(2));
+    for (final position in positionen) {
+      expect(
+        await repository.ladeBewertungenFuerErlebnisposition(
+          position.position.id,
+        ),
+        hasLength(1),
+      );
+    }
+  });
+
+  test('Fehler bei Produktbewertung rollt sämtliche Positionen zurück',
+      () async {
+    const id = '22120000-0000-4000-8000-000000000001';
+    final erlebnis = Erlebnis(
+      id: id,
+      herkunftProfilId: profilId,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    final produkt = Produkt(
+      id: '22120000-0000-4000-8000-000000000002',
+      name: 'Fehlerfall',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereProdukt(produkt);
+    final position = ErlebnisPosition(
+      id: '22120000-0000-4000-8000-000000000003',
+      erlebnisId: id,
+      produktId: produkt.id,
+      anzahl: 1,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await expectLater(
+      repository.speichereErlebnisGesamtstand(
+        erlebnis: erlebnis,
+        geaendertePositionen: [
+          ErlebnispositionMitProdukt(position: position, produkt: produkt),
+        ],
+        entferntePositionen: const {},
+        produktbewertungen: {
+          position.id: [
+            Bewertung(
+              id: '22120000-0000-4000-8000-000000000004',
+              erlebnisId: id,
+              erlebnisPositionId: position.id,
+              kriteriumId: '22120000-0000-4000-8000-000000000099',
+              herkunftProfilId: profilId,
+              wert: 4,
+              erstelltAm: zeit,
+              geaendertAm: zeit,
+            ),
+          ],
+        },
+      ),
+      throwsA(anything),
+    );
+    expect(await repository.ladeErlebnis(id), isNull);
+    expect(await repository.ladeErlebnispositionen(id), isEmpty);
+  });
+
   test('speichert und lädt ein Produkt', () async {
     final produkt = Produkt(
       id: '2d30ae97-1a64-4bb5-a8fd-1df46be78d67',
