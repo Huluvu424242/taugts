@@ -16,7 +16,6 @@ class GaststaettenbewertungController {
 
   bool get hatWertfehler => _hatWertfehlerAktion?.call() ?? false;
 
-
   Future<bool> speichereFallsGeaendert(Erlebnis erlebnis) async {
     final aktion = _speicherAktion;
     return aktion == null ? false : aktion(erlebnis);
@@ -126,12 +125,12 @@ class _GaststaettenbewertungAbschnittState
                 final text = _lokalGespeichert && widget.controller != null
                     ? 'Bewertung im Entwurf – erst mit dem Erlebnis gespeichert.'
                     : _lokalGespeichert || snapshot.data?.vorhanden != null
-                    ? 'Für diesen $_kontext liegt eine Bewertung vor.'
-                    : snapshot.hasError
-                        ? 'Der Bewertungsstatus konnte nicht geladen werden.'
-                        : snapshot.hasData
-                            ? 'Noch keine Bewertung für diesen $_kontext.'
-                            : 'Bewertungsstatus wird geladen.';
+                        ? 'Für diesen $_kontext liegt eine Bewertung vor.'
+                        : snapshot.hasError
+                            ? 'Der Bewertungsstatus konnte nicht geladen werden.'
+                            : snapshot.hasData
+                                ? 'Noch keine Bewertung für diesen $_kontext.'
+                                : 'Bewertungsstatus wird geladen.';
                 return Text(text);
               },
             ),
