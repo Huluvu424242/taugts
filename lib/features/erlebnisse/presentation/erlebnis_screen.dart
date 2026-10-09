@@ -291,7 +291,9 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
             (eintrag) => eintrag.startsWith('Bitte einen Ort mit Besuchszeit'),
           )
               ? 'Bitte einen Inhalt für das Erlebnis erfassen.'
-              : 'Bitte Zeitangaben prüfen.',
+              : fehler.any((eintrag) => eintrag.contains('Ortsbewertung'))
+                  ? 'Bitte die Ortsbewertung prüfen.'
+                  : 'Bitte Zeitangaben prüfen.',
         ),
       ),
     );
