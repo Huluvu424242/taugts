@@ -94,12 +94,22 @@ void main() {
     await tester.tap(find.byTooltip('Pils Anzahl erhöhen, aktuell 1'));
     await tester.pumpAndSettle();
 
-    expect((await repository.ladeErlebnispositionen(erlebnis.id)).single.position.anzahl, 1);
+    expect(
+        (await repository.ladeErlebnispositionen(erlebnis.id))
+            .single
+            .position
+            .anzahl,
+        1);
     expect(find.text('2 × Pils'), findsOneWidget);
     expect(find.byTooltip('Pils Anzahl verringern, aktuell 2'), findsOneWidget);
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
-    expect((await repository.ladeErlebnispositionen(erlebnis.id)).single.position.anzahl, 2);
+    expect(
+        (await repository.ladeErlebnispositionen(erlebnis.id))
+            .single
+            .position
+            .anzahl,
+        2);
   });
 
   testWidgets('Restaurantbesuch verwendet Check-in und Checkout',
