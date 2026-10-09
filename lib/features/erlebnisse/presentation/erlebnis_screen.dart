@@ -210,7 +210,16 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       id: _id,
       typ: _typ,
       status: abgeleiteterStatus,
-      ortId: _ort?.id,
+      ortId: _ort?.id ?? _gespeichertesErlebnis?.ortId,
+      // Bestehende historische Referenzen dürfen beim Bearbeiten nicht
+      // still verschwinden, auch wenn die Stammdaten gelöscht wurden.
+      produktId: _gespeichertesErlebnis?.produktId,
+      kaufortId: _gespeichertesErlebnis?.kaufortId,
+      konsumortId: _gespeichertesErlebnis?.konsumortId,
+      preis: _gespeichertesErlebnis?.preis,
+      menge: _gespeichertesErlebnis?.menge,
+      gebinde: _gespeichertesErlebnis?.gebinde,
+      erlebtAm: _gespeichertesErlebnis?.erlebtAm,
       geplanterTag: _geplanterTag == null
           ? null
           : DateTime.utc(
