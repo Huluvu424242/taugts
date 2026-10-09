@@ -177,6 +177,41 @@ void main() {
     );
   });
 
+  testWidgets('Erlebnis bietet einen einzigen Speichern-Button',
+      (tester) async {
+    final erlebnis = await _vorbereiten(
+      repository: repository,
+      profil: profil,
+      zeit: zeit,
+      typ: Erlebnistyp.restaurantbesuch,
+      ortstyp: Ortstyp.gastronomie,
+    );
+
+    await _screenOeffnen(
+      tester: tester,
+      repository: repository,
+      profil: profil,
+      erlebnis: erlebnis,
+    );
+    expect(find.text('Speichern'), findsOneWidget);
+    expect(find.text('Bearbeiten speichern'), findsNothing);
+
+    await tester.scrollUntilVisible(
+      find.text('Gaststätte bewerten'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Gaststätte bewerten'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bewertung speichern'), findsNothing);
+    expect(
+      find.text(
+        'Die Ortsbewertung wird mit dem Erlebnis über „Speichern“ gesichert.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('Speichern legt keine leere Ortsbewertung an', (tester) async {
     final erlebnis = await _vorbereiten(
       repository: repository,
