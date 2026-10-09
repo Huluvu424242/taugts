@@ -78,7 +78,6 @@ abstract interface class StammdatenLoeschRepository {
   Future<void> loescheOrt(String id);
 }
 
- 
 /// Atomare Übernahme eines vollständigen Erlebnisentwurfs.
 abstract interface class ErlebnisGesamtstandRepository {
   Future<void> speichereErlebnisGesamtstand({
