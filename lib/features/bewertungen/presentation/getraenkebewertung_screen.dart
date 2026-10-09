@@ -6,6 +6,7 @@ import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/presentation/kriterium_eingabefeld.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/erlebnisse/services/erlebnis_entwurf_repository.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 
 class GetraenkebewertungScreen extends StatefulWidget {
@@ -399,7 +400,9 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
               label: Text(
                 _speichert
                     ? 'Bewertung wird gespeichert'
-                    : 'Bewertung speichern',
+                    : widget.repository is ErlebnisEntwurfRepository
+                        ? 'Bewertung übernehmen'
+                        : 'Bewertung speichern',
               ),
             ),
           ),
