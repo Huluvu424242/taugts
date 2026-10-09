@@ -136,7 +136,7 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
     );
     if (bestaetigt != true || !mounted) return;
     try {
-      await repository.loescheProdukt(produkt.id);
+      await (repository as StammdatenLoeschRepository).loescheProdukt(produkt.id);
       if (!mounted) return;
       _laden();
       ScaffoldMessenger.of(context).showSnackBar(
