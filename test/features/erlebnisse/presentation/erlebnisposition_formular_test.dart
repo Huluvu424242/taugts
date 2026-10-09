@@ -55,7 +55,7 @@ void main() {
         find.widgetWithText(TextFormField, 'Name'),
         'Neues Pils',
       );
-      await tester.testTextInput.hide();
+      tester.testTextInput.hide();
       await tester.drag(find.byType(ListView).last, const Offset(0, -1500));
       await tester.pumpAndSettle();
       expect(find.text('Produkt speichern'), findsOneWidget);
