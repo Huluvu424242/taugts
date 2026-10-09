@@ -214,7 +214,6 @@ void main() {
     expect(await repository.ladeProdukt(id), isNull);
     expect(find.text('Löschtest'), findsNothing);
   });
-
 }
 
 class _BarcodeFehlerRepository extends SqliteBewertungsRepository {
