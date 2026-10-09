@@ -3,7 +3,10 @@ import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart'
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 
 class SqliteBewertungsRepository
-    implements BewertungsRepository, StammdatenLoeschRepository, ErlebnisGesamtstandRepository {
+    implements
+        BewertungsRepository,
+        StammdatenLoeschRepository,
+        ErlebnisGesamtstandRepository {
   SqliteBewertungsRepository(this.datenbank);
 
   final LokaleDatenbank datenbank;
@@ -375,14 +378,16 @@ class SqliteBewertungsRepository
       throw ArgumentError(erlebnis.zeitfehler.join(' '));
     }
     if (geaendertePositionen.any(
-      (eintrag) => eintrag.position.erlebnisId != erlebnis.id,
-    ) || produktbewertungen.entries.any(
-      (eintrag) => eintrag.value.any((wert) =>
-          wert.erlebnisId != erlebnis.id ||
-          wert.erlebnisPositionId != eintrag.key ||
-          wert.herkunftProfilId != erlebnis.herkunftProfilId),
-    )) {
-      throw ArgumentError('Positionen oder Bewertungen gehören nicht zum Erlebnis.');
+          (eintrag) => eintrag.position.erlebnisId != erlebnis.id,
+        ) ||
+        produktbewertungen.entries.any(
+          (eintrag) => eintrag.value.any((wert) =>
+              wert.erlebnisId != erlebnis.id ||
+              wert.erlebnisPositionId != eintrag.key ||
+              wert.herkunftProfilId != erlebnis.herkunftProfilId),
+        )) {
+      throw ArgumentError(
+          'Positionen oder Bewertungen gehören nicht zum Erlebnis.');
     }
     Ort? bewerteterOrt;
     if (ortsbewertung != null) {
@@ -398,15 +403,18 @@ class SqliteBewertungsRepository
         final args = [ortId, _zeit(erlebnis.geaendertAm), erlebnis.id, ortId];
         datenbank.verbindung.execute(
           'UPDATE ortsbewertungen SET ort_id = ?, geaendert_am = ? '
-          'WHERE erlebnis_id = ? AND ort_id <> ?', args,
+          'WHERE erlebnis_id = ? AND ort_id <> ?',
+          args,
         );
         datenbank.verbindung.execute(
           'UPDATE bewertungen SET ort_id = ?, geaendert_am = ? '
-          'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?', args,
+          'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?',
+          args,
         );
         datenbank.verbindung.execute(
           'UPDATE preisbeobachtungen SET ort_id = ?, geaendert_am = ? '
-          'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?', args,
+          'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?',
+          args,
         );
       }
       for (final id in entferntePositionen) {
@@ -417,7 +425,8 @@ class SqliteBewertungsRepository
       }
       for (final eintrag in geaendertePositionen) {
         _speichereErlebnispositionIntern(
-          position: eintrag.position, preis: eintrag.preis,
+          position: eintrag.position,
+          preis: eintrag.preis,
         );
       }
       for (final eintrag in produktbewertungen.entries) {
@@ -524,7 +533,7 @@ class SqliteBewertungsRepository
   }
 
   @override
-Future<void> speichereErlebnisposition({
+  Future<void> speichereErlebnisposition({
     required ErlebnisPosition position,
     Preisbeobachtung? preis,
   }) async {
@@ -600,7 +609,6 @@ Future<void> speichereErlebnisposition({
         ],
       );
     }
-
   }
 
   @override
@@ -1107,7 +1115,7 @@ Future<void> speichereErlebnisposition({
   }
 
   @override
-Future<void> speichereOrtsbewertung({
+  Future<void> speichereOrtsbewertung({
     required Erlebnis erlebnis,
     required Ort ort,
     required Ortsbewertung ortsbewertung,
@@ -1201,7 +1209,6 @@ Future<void> speichereOrtsbewertung({
     for (final bewertung in bewertungen) {
       _speichereBewertungZeile(bewertung);
     }
-
   }
 
   @override
