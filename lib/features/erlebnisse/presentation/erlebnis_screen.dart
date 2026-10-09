@@ -236,13 +236,36 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         int.tryParse(_dauer.text.trim()) == null) {
       fehler.add('Die geplante Dauer muss eine ganze Minutenzahl sein.');
     }
+
+    // Eine Planung mit Datum oder ein begonnener Besuch ist bereits ein
+    // eigenständiger fachlicher Inhalt. Eine reine Ortsbewertung benötigt
+    // dagegen keine Produktposition.
+    if (_gespeichertesErlebnis == null &&
+        _geplanterTag == null &&
+        _tatsaechlicherBeginn == null &&
+        _tatsaechlichesEnde == null &&
+        _notiz.text.trim().isEmpty &&
+        !_ortsbewertungController.hatEingabe) {
+      final positionen = await widget.repository.ladeErlebnispositionen(_id);
+      if (!mounted) return false;
+      if (positionen.isEmpty) {
+        fehler.add(
+          'Bitte eine Ortsbewertung, ein Produkt, eine Notiz oder '
+          'einen Termin erfassen.',
+        );
+      }
+    }
     if (fehler.isEmpty) {
       setState(() => _zeitfehler = []);
       return true;
     }
     setState(() => _zeitfehler = fehler);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bitte Zeitangaben prüfen.')),
+      SnackBar(
+        content: Text(fehler.any((eintrag) => eintrag.startsWith('Bitte eine Ortsbewertung'))
+            ? 'Bitte einen Inhalt für das Erlebnis erfassen.'
+            : 'Bitte Zeitangaben prüfen.'),
+      ),
     );
     await WidgetsBinding.instance.endOfFrame;
     if (!mounted) return false;
