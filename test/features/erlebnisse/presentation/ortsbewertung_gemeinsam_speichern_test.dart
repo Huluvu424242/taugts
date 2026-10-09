@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
+import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 import 'package:taugts/features/bewertungen/services/sqlite_bewertungs_repository.dart';
 import 'package:taugts/features/erlebnisse/presentation/erlebnis_screen.dart';
