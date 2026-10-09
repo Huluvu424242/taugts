@@ -108,18 +108,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         Erlebnistyp.einkauf => 'Einkauf',
       };
 
-  String _statusLabel(Erlebnisstatus status) => switch (status) {
-        Erlebnisstatus.geplant => 'Geplant',
-        Erlebnisstatus.aktiv => 'Aktiv',
-        Erlebnisstatus.beendet => 'Beendet',
-      };
-
-  Erlebnisstatus get _aktuellerStatus => _tatsaechlichesEnde != null
-      ? Erlebnisstatus.beendet
-      : _tatsaechlicherBeginn != null
-          ? Erlebnisstatus.aktiv
-          : Erlebnisstatus.geplant;
-
   Future<void> _ortWaehlen() async {
     final ort = await Navigator.of(context).push<Ort>(
       MaterialPageRoute(
@@ -285,7 +273,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${_statusLabel(erlebnis.status)} gespeichert.'),
+          content: const Text('Erlebnis gespeichert.'),
         ),
       );
     } catch (_) {
@@ -313,19 +301,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       if (!mounted) return;
       _fehlerFokus.requestFocus();
     }
-  }
-
-  Future<void> _checkIn() async {
-    setState(() {
-      _tatsaechlicherBeginn ??= DateTime.now();
-      _tatsaechlichesEnde = null;
-    });
-    // Check-in verändert nur den Entwurf; dauerhaft wird gemeinsam gespeichert.
-  }
-
-  Future<void> _checkout() async {
-    setState(() => _tatsaechlichesEnde ??= DateTime.now());
-    // Checkout verändert nur den Entwurf; dauerhaft wird gemeinsam gespeichert.
   }
 
   void _positionenLaden() {
@@ -435,16 +410,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     if (mounted) _positionenLaden();
   }
 
-  String _datumText(BuildContext context, DateTime? wert) => wert == null
-      ? 'Nicht festgelegt'
-      : MaterialLocalizations.of(context).formatFullDate(wert);
-
-  String _zeitText(BuildContext context, int? minute) => minute == null
-      ? 'Uhrzeit offen'
-      : MaterialLocalizations.of(context).formatTimeOfDay(
-          TimeOfDay(hour: minute ~/ 60, minute: minute % 60),
-        );
-
   String _datumZeitText(BuildContext context, DateTime? wert) {
     if (wert == null) return 'Nicht festgelegt';
     final lokal = wert.toLocal();
@@ -453,16 +418,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       TimeOfDay.fromDateTime(lokal),
     );
     return '${lokalisierung.formatFullDate(lokal)}, $uhrzeit';
-  }
-
-  String _laufenderStatusText(BuildContext context) {
-    if (_aktuellerStatus != Erlebnisstatus.aktiv) return '';
-    final beginn = _tatsaechlicherBeginn;
-    if (beginn == null) return '';
-    final zeit = MaterialLocalizations.of(context).formatTimeOfDay(
-      TimeOfDay.fromDateTime(beginn),
-    );
-    return _istEinkauf ? 'Einkauf läuft seit $zeit' : 'Aktiv seit $zeit';
   }
 
   Widget _produktposition(ErlebnispositionMitProdukt eintrag) {
@@ -637,18 +592,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                       (fehler, _fokusFuerFehler(fehler)),
                   ],
                 ),
-              Semantics(
-                header: true,
-                child: Text(
-                  'Status: ${_statusLabel(_aktuellerStatus)}',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              if (_laufenderStatusText(context).isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(_laufenderStatusText(context)),
-              ],
-              const SizedBox(height: 16),
               TextButton.icon(
                 onPressed: _ortWaehlen,
                 icon: Icon(
@@ -815,18 +758,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                 icon: const Icon(Icons.save_outlined),
                 label: const Text('Speichern'),
               ),
-              if (_aktuellerStatus == Erlebnisstatus.geplant)
-                FilledButton.icon(
-                  onPressed: _speichert ? null : _checkIn,
-                  icon: const Icon(Icons.login),
-                  label: Text(_istEinkauf ? 'Einkauf beginnen' : 'Check-in'),
-                )
-              else if (_aktuellerStatus == Erlebnisstatus.aktiv)
-                FilledButton.icon(
-                  onPressed: _speichert ? null : _checkout,
-                  icon: const Icon(Icons.logout),
-                  label: Text(_istEinkauf ? 'Einkauf beenden' : 'Checkout'),
-                )
             ],
           ),
         ),
