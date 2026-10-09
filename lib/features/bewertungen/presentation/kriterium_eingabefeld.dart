@@ -172,7 +172,7 @@ class _KriteriumEingabefeldState extends State<KriteriumEingabefeld> {
           final zahl = double.tryParse(getrimmt.replaceAll(',', '.'));
           widget.onChanged(
             zahl == null
-                ? const KriteriumEingabewert(
+                ? KriteriumEingabewert(
                     fehler: 'Bitte eine gültige Zahl eingeben.',
                     roheEingabe: text,
                   )
