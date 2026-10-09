@@ -55,11 +55,7 @@ void main() {
         find.widgetWithText(TextFormField, 'Name'),
         'Neues Pils',
       );
-      await tester.scrollUntilVisible(
-        find.text('Produkt speichern'),
-        300,
-        scrollable: find.byType(Scrollable).last,
-      );
+      await tester.ensureVisible(find.text('Produkt speichern'));
       await tester.tap(find.text('Produkt speichern'));
       await tester.pumpAndSettle();
 
