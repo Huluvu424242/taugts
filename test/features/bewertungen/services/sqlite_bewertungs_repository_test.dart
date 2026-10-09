@@ -1261,7 +1261,8 @@ void main() {
     );
   });
 
-  test('Produktlöschung erhält Erlebnisposition und erlaubt Neuzuordnung', () async {
+  test('Produktlöschung erhält Erlebnisposition und erlaubt Neuzuordnung',
+      () async {
     const alt = '21700000-0000-4000-8000-000000000001';
     const neu = '21700000-0000-4000-8000-000000000002';
     const erlebnisId = '21700000-0000-4000-8000-000000000003';
@@ -1294,7 +1295,8 @@ void main() {
     await repository.loescheProdukt(alt);
 
     expect(await repository.ladeProdukt(alt), isNull);
-    expect((await repository.ladeProdukte()).map((p) => p.id), isNot(contains(alt)));
+    expect((await repository.ladeProdukte()).map((p) => p.id),
+        isNot(contains(alt)));
     var position = (await repository.ladeErlebnispositionen(erlebnisId)).single;
     expect(position.produkt.anzeigetitel, 'Nicht zugeordnet');
     expect(position.position.anzahl, 2);
@@ -1314,7 +1316,8 @@ void main() {
     expect(position.position.anzahl, 2);
   });
 
-  test('Ortlöschung erhält Historie und Erlebnis kann neu zugeordnet werden', () async {
+  test('Ortlöschung erhält Historie und Erlebnis kann neu zugeordnet werden',
+      () async {
     const alt = '21700000-0000-4000-8000-000000000011';
     const neu = '21700000-0000-4000-8000-000000000012';
     const erlebnisId = '21700000-0000-4000-8000-000000000013';
@@ -1348,5 +1351,4 @@ void main() {
     expect(neuZugeordnet?.ortId, neu);
     expect(neuZugeordnet?.erstelltAm, zeit);
   });
-
 }
