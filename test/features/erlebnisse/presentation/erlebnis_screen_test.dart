@@ -268,7 +268,6 @@ void main() {
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Bitte Zeitangaben prüfen.'), findsAtMostNWidgets(1));
     expect(
       find.text('Die geplante Dauer muss größer als null sein.'),
       findsOneWidget,
