@@ -24,6 +24,7 @@ void main() {
       await repository.speichereProdukt(produkt);
       final erlebnis = Erlebnis(
         id: '21900000-0000-4000-8000-000000000002',
+        herkunftProfilId: '21900000-0000-4000-8000-000000000009',
         erstelltAm: zeit,
         geaendertAm: zeit,
       );
@@ -93,6 +94,7 @@ void main() {
           idGenerator: _TestIdGenerator(),
           erlebnis: Erlebnis(
             id: '21900000-0000-4000-8000-000000000004',
+            herkunftProfilId: '21900000-0000-4000-8000-000000000009',
             erstelltAm: zeit,
             geaendertAm: zeit,
           ),
@@ -118,6 +120,6 @@ class _TestIdGenerator implements IdGenerator {
   @override
   String neueId() {
     _wert++;
-    return '21900000-0000-4000-8000-0000000000${_wert}';
+    return '21900000-0000-4000-8000-0000000000$_wert';
   }
 }
