@@ -256,25 +256,27 @@ class SqliteBewertungsRepository
     if (zeitfehler.isNotEmpty) {
       throw ArgumentError.value(erlebnis, 'erlebnis', zeitfehler.join(' '));
     }
-    _speichereErlebnisZeile(erlebnis);
-    final ortId = erlebnis.wirksamerOrtId;
-    if (ortId != null) {
-      datenbank.verbindung.execute(
-        'UPDATE ortsbewertungen SET ort_id = ?, geaendert_am = ? '
-        'WHERE erlebnis_id = ? AND ort_id <> ?',
-        [ortId, _zeit(erlebnis.geaendertAm), erlebnis.id, ortId],
-      );
-      datenbank.verbindung.execute(
-        'UPDATE bewertungen SET ort_id = ?, geaendert_am = ? '
-        'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?',
-        [ortId, _zeit(erlebnis.geaendertAm), erlebnis.id, ortId],
-      );
-      datenbank.verbindung.execute(
-        'UPDATE preisbeobachtungen SET ort_id = ?, geaendert_am = ? '
-        'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?',
-        [ortId, _zeit(erlebnis.geaendertAm), erlebnis.id, ortId],
-      );
-    }
+    datenbank.transaktion(() {
+      _speichereErlebnisZeile(erlebnis);
+      final ortId = erlebnis.wirksamerOrtId;
+      if (ortId != null) {
+        datenbank.verbindung.execute(
+          'UPDATE ortsbewertungen SET ort_id = ?, geaendert_am = ? '
+          'WHERE erlebnis_id = ? AND ort_id <> ?',
+          [ortId, _zeit(erlebnis.geaendertAm), erlebnis.id, ortId],
+        );
+        datenbank.verbindung.execute(
+          'UPDATE bewertungen SET ort_id = ?, geaendert_am = ? '
+          'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?',
+          [ortId, _zeit(erlebnis.geaendertAm), erlebnis.id, ortId],
+        );
+        datenbank.verbindung.execute(
+          'UPDATE preisbeobachtungen SET ort_id = ?, geaendert_am = ? '
+          'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?',
+          [ortId, _zeit(erlebnis.geaendertAm), erlebnis.id, ortId],
+        );
+      }
+    });
   }
 
   void _speichereErlebnisZeile(Erlebnis erlebnis) {
