@@ -6,6 +6,29 @@ import 'package:taugts/features/bewertungen/presentation/kriterium_eingabefeld.d
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 
 class GaststaettenbewertungController {
+  // Der Erlebnisbildschirm behält diesen Controller während der gesamten
+  // Bearbeitung. Er bewahrt auch ungültige Rohwerte auf, wenn Flutter das
+  // Unterformular beim Scrollen vollständig neu aufbaut.
+  String? _entwurfOrtId;
+  Map<String, KriteriumEingabewert>? _entwurfWerte;
+  String? _entwurfNotiz;
+  bool _entwurfGeaendert = false;
+  bool _entwurfValidierungAngezeigt = false;
+
+  void _merkeEntwurf({
+    required String ortId,
+    required Map<String, KriteriumEingabewert> werte,
+    required String notiz,
+    required bool geaendert,
+    required bool validierungAngezeigt,
+  }) {
+    _entwurfOrtId = ortId;
+    _entwurfWerte = Map.of(werte);
+    _entwurfNotiz = notiz;
+    _entwurfGeaendert = geaendert;
+    _entwurfValidierungAngezeigt = validierungAngezeigt;
+  }
+
   Object? _owner;
   Future<bool> Function(Erlebnis erlebnis)? _speicherAktion;
 
@@ -285,16 +308,25 @@ class _FormularState extends State<_Formular> {
       for (final wert in _bisher?.werte ?? <Bewertung>[])
         wert.kriteriumId: wert,
     };
+    final entwurf = widget.controller;
+    final gleicheOrtsbewertung = entwurf?._entwurfOrtId == widget.ort.id;
     _werte = {
       for (final kriterium in widget.daten.kriterien)
-        kriterium.id:
-            KriteriumEingabewert.ausBewertung(vorhanden[kriterium.id]),
+        kriterium.id: gleicheOrtsbewertung
+            ? entwurf?._entwurfWerte?[kriterium.id] ??
+                KriteriumEingabewert.ausBewertung(vorhanden[kriterium.id])
+            : KriteriumEingabewert.ausBewertung(vorhanden[kriterium.id]),
     };
+    _geaendert = gleicheOrtsbewertung && (entwurf?._entwurfGeaendert ?? false);
+    _validierungAngezeigt = gleicheOrtsbewertung &&
+        (entwurf?._entwurfValidierungAngezeigt ?? false);
     _kriteriumFokusse = {
       for (final kriterium in widget.daten.kriterien) kriterium.id: FocusNode(),
     };
     _notiz = TextEditingController(
-      text: _bisher?.ortsbewertung.notiz ?? '',
+      text: gleicheOrtsbewertung
+          ? entwurf?._entwurfNotiz ?? _bisher?.ortsbewertung.notiz ?? ''
+          : _bisher?.ortsbewertung.notiz ?? '',
     );
     widget.controller?._verbinde(
       this,
@@ -319,6 +351,13 @@ class _FormularState extends State<_Formular> {
 
   @override
   void dispose() {
+    widget.controller?._merkeEntwurf(
+      ortId: widget.ort.id,
+      werte: _werte,
+      notiz: _notiz.text,
+      geaendert: _geaendert,
+      validierungAngezeigt: _validierungAngezeigt,
+    );
     widget.controller?._trenne(this);
     _notiz.dispose();
     for (final fokus in _kriteriumFokusse.values) {
