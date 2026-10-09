@@ -57,7 +57,7 @@ void main() {
     // Ein inhaltsleeres neues Erlebnis darf nicht persistiert werden.
     expect(await repository.ladeErlebnisse(), isEmpty);
     expect(
-      find.textContaining('Bitte eine Ortsbewertung, ein Produkt'),
+      find.textContaining('Bitte einen Ort mit Besuchszeit'),
       findsOneWidget,
     );
 
@@ -73,6 +73,110 @@ void main() {
     expect(erlebnisse, hasLength(1));
     expect(erlebnisse.single.typ, Erlebnistyp.einkauf);
     expect(erlebnisse.single.geplanteMinute, isNull);
+  });
+
+  for (final fall in [
+    (typ: Erlebnistyp.restaurantbesuch, ortstyp: Ortstyp.gastronomie),
+    (typ: Erlebnistyp.einkauf, ortstyp: Ortstyp.geschaeft),
+  ]) {
+    testWidgets(
+      'Spontaner ${fall.typ.name} ohne Produkte und Bewertung bleibt erhalten',
+      (tester) async {
+        final ort = Ort(
+          id: '79000000-0000-4000-8000-000000000001',
+          name: 'Spontaner Testort',
+          typ: fall.ortstyp,
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        );
+        await repository.speichereOrt(ort);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ErlebnisScreen(
+              repository: repository,
+              idGenerator: _TestIdGenerator(),
+              profil: profil,
+              erlebnistyp: fall.typ,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.textContaining('auswählen (optional)'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Spontaner Testort'));
+        await tester.pumpAndSettle();
+
+        await tester.scrollUntilVisible(
+          find.text('Spontanen Besuch jetzt erfassen'),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.tap(find.text('Spontanen Besuch jetzt erfassen'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Speichern'));
+        await tester.pumpAndSettle();
+
+        final erlebnisse = await repository.ladeErlebnisse();
+        expect(erlebnisse, hasLength(1));
+        final erlebnis = erlebnisse.single;
+        expect(erlebnis.ortId, ort.id);
+        expect(erlebnis.tatsaechlicherBeginn, isNotNull);
+        expect(erlebnis.geplanterTag, isNull);
+        expect(await repository.ladeErlebnispositionen(erlebnis.id), isEmpty);
+        expect(
+          await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id),
+          isNull,
+        );
+
+        // Wiederöffnen ohne die erfasste Besuchszeit zu verlieren.
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ErlebnisScreen(
+              repository: repository,
+              idGenerator: _TestIdGenerator(),
+              profil: profil,
+              erlebnis: erlebnis,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Spontaner Testort'), findsOneWidget);
+        expect(
+          (await repository.ladeErlebnisse()).single.tatsaechlicherBeginn,
+          erlebnis.tatsaechlicherBeginn,
+        );
+      },
+    );
+  }
+
+  testWidgets('Ein Ort allein ist noch kein dokumentierter Besuch',
+      (tester) async {
+    final ort = Ort(
+      id: '79000000-0000-4000-8000-000000000002',
+      name: 'Nur Ort',
+      typ: Ortstyp.geschaeft,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereOrt(ort);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ErlebnisScreen(
+          repository: repository,
+          idGenerator: _TestIdGenerator(),
+          profil: profil,
+          erlebnistyp: Erlebnistyp.einkauf,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('auswählen (optional)'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nur Ort'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
+    expect(await repository.ladeErlebnisse(), isEmpty);
   });
 
   testWidgets('Check-in und Checkout setzen editierbare Zeiten',
