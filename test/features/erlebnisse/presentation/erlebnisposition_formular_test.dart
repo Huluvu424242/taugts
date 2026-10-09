@@ -64,15 +64,21 @@ void main() {
 
       expect(find.text('Neues Pils'), findsOneWidget);
       expect(
-        tester.widget<TextField>(
-          find.byKey(const ValueKey('positions-anzahl')),
-        ).controller?.text,
+        tester
+            .widget<TextField>(
+              find.byKey(const ValueKey('positions-anzahl')),
+            )
+            .controller
+            ?.text,
         '3',
       );
       expect(
-        tester.widget<TextField>(
-          find.widgetWithText(TextField, 'Preis (optional)'),
-        ).controller?.text,
+        tester
+            .widget<TextField>(
+              find.widgetWithText(TextField, 'Preis (optional)'),
+            )
+            .controller
+            ?.text,
         '4,20',
       );
     },
