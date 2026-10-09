@@ -281,7 +281,11 @@ class _FormularState extends State<_Formular> {
     _notiz = TextEditingController(
       text: _bisher?.ortsbewertung.notiz ?? '',
     );
-    widget.controller?._verbinde(this, _speichereFallsGeaendert, () => _hatEingabe);
+    widget.controller?._verbinde(
+      this,
+      _speichereFallsGeaendert,
+      () => _hatEingabe,
+    );
   }
 
   @override
@@ -289,7 +293,11 @@ class _FormularState extends State<_Formular> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller == widget.controller) return;
     oldWidget.controller?._trenne(this);
-    widget.controller?._verbinde(this, _speichereFallsGeaendert, () => _hatEingabe);
+    widget.controller?._verbinde(
+      this,
+      _speichereFallsGeaendert,
+      () => _hatEingabe,
+    );
   }
 
   @override
