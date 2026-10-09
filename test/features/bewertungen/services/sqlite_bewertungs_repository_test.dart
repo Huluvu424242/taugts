@@ -136,7 +136,7 @@ void main() {
     await repository.speichereErlebnisGesamtstand(
       erlebnis: erlebnis,
       geaendertePositionen: positionen,
-      entferntePositionen: const {},
+      entferntePositionen: const <String>{},
       produktbewertungen: bewertungen,
     );
     expect(await repository.ladeErlebnispositionen(id), hasLength(2));
@@ -180,7 +180,7 @@ void main() {
         geaendertePositionen: [
           ErlebnispositionMitProdukt(position: position, produkt: produkt),
         ],
-        entferntePositionen: const {},
+        entferntePositionen: const <String>{},
         produktbewertungen: {
           position.id: [
             Bewertung(
