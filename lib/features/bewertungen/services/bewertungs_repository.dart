@@ -53,7 +53,8 @@ abstract interface class BewertungsRepository {
   });
   Future<List<Bewertung>> ladeBewertungenFuerErlebnis(String erlebnisId);
   Future<List<Bewertung>> ladeBewertungenFuerErlebnisposition(
-      String positionId);
+    String positionId,
+  );
   Future<List<Bewertung>> ladeBewertungenFuerProdukt(String produktId);
   Future<OrtsbewertungMitWerten?> ladeOrtsbewertungFuerErlebnis(
     String erlebnisId,
@@ -67,7 +68,6 @@ abstract interface class BewertungsRepository {
   Future<List<BewertungsverlaufEintrag>> ladeProduktverlauf(String produktId);
   Future<List<BewertungsverlaufEintrag>> ladeOrtsverlauf(String ortId);
 }
-
 
 /// Optionale Fähigkeit zur fachlichen Löschung von Stammdaten.
 ///
