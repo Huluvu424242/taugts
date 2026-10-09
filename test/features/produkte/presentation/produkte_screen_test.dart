@@ -142,7 +142,10 @@ void main() {
       find.widgetWithText(TextFormField, 'Name'),
       'Erlebnis-Pils',
     );
-    await tester.ensureVisible(find.text('Produkt speichern'));
+    await tester.testTextInput.hide();
+    await tester.drag(find.byType(ListView).last, const Offset(0, -1500));
+    await tester.pumpAndSettle();
+    expect(find.text('Produkt speichern'), findsOneWidget);
     await tester.tap(find.text('Produkt speichern'));
     await tester.pumpAndSettle();
 
