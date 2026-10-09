@@ -15,7 +15,7 @@ class ErlebnisEntwurfRepository
     if (verwaltung is! StammdatenLoeschRepository) {
       throw UnsupportedError('Produktlöschung nicht verfügbar');
     }
-    await verwaltung.loescheProdukt(id);
+    await (verwaltung as StammdatenLoeschRepository).loescheProdukt(id);
   }
 
   @override
@@ -24,7 +24,7 @@ class ErlebnisEntwurfRepository
     if (verwaltung is! StammdatenLoeschRepository) {
       throw UnsupportedError('Ortslöschung nicht verfügbar');
     }
-    await verwaltung.loescheOrt(id);
+    await (verwaltung as StammdatenLoeschRepository).loescheOrt(id);
   }
 
   final String erlebnisId;
@@ -158,7 +158,7 @@ class ErlebnisEntwurfRepository
     if (repository is! ErlebnisGesamtstandRepository) {
       throw StateError('Gemeinsame Transaktionsspeicherung nicht verfügbar.');
     }
-    await repository.speichereErlebnisGesamtstand(
+    await (repository as ErlebnisGesamtstandRepository).speichereErlebnisGesamtstand(
       erlebnis: erlebnis,
       geaendertePositionen: _positionen.values.toList(),
       entferntePositionen: _entferntePositionen,
