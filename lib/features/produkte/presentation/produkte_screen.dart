@@ -136,16 +136,22 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
     );
     if (bestaetigt != true || !mounted) return;
     try {
-      await (repository as StammdatenLoeschRepository).loescheProdukt(produkt.id);
+      await (repository as StammdatenLoeschRepository).loescheProdukt(
+        produkt.id,
+      );
       if (!mounted) return;
       _laden();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Produkt gelöscht. Historische Daten bleiben erhalten.')),
+        const SnackBar(
+          content: Text('Produkt gelöscht. Historische Daten bleiben erhalten.'),
+        ),
       );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Das Produkt konnte nicht gelöscht werden.')),
+        const SnackBar(
+          content: Text('Das Produkt konnte nicht gelöscht werden.'),
+        ),
       );
     }
   }
