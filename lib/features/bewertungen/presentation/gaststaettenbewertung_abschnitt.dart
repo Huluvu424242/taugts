@@ -123,8 +123,9 @@ class _GaststaettenbewertungAbschnittState
           : FutureBuilder<_Daten>(
               future: _laden,
               builder: (context, snapshot) {
-                final text = _lokalGespeichert ||
-                        snapshot.data?.vorhanden != null
+                final text = _lokalGespeichert && widget.controller != null
+                    ? 'Bewertung im Entwurf – erst mit dem Erlebnis gespeichert.'
+                    : _lokalGespeichert || snapshot.data?.vorhanden != null
                     ? 'Für diesen $_kontext liegt eine Bewertung vor.'
                     : snapshot.hasError
                         ? 'Der Bewertungsstatus konnte nicht geladen werden.'
