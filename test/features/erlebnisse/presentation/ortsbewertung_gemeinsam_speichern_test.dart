@@ -177,6 +177,36 @@ void main() {
     );
   });
 
+  testWidgets('Gelöschter Ort bleibt beim erneuten Speichern historisch erhalten',
+      (tester) async {
+    final erlebnis = await _vorbereiten(
+      repository: repository,
+      profil: profil,
+      zeit: zeit,
+      typ: Erlebnistyp.restaurantbesuch,
+      ortstyp: Ortstyp.gastronomie,
+    );
+    await (repository as StammdatenLoeschRepository).loescheOrt(
+      erlebnis.ortId!,
+    );
+
+    await _screenOeffnen(
+      tester: tester,
+      repository: repository,
+      profil: profil,
+      erlebnis: erlebnis,
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Nicht zugeordnet'), findsWidgets);
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
+
+    final gespeichert = await repository.ladeErlebnis(erlebnis.id);
+    expect(gespeichert, isNotNull);
+    expect(gespeichert!.ortId, erlebnis.ortId);
+    expect(await repository.ladeOrt(erlebnis.ortId!), isNull);
+  });
+
   testWidgets('Erlebnis bietet einen einzigen Speichern-Button',
       (tester) async {
     final erlebnis = await _vorbereiten(
