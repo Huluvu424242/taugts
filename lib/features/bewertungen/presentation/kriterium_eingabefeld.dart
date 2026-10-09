@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 
 class KriteriumEingabewert {
-  const KriteriumEingabewert({this.zahl, this.text, this.fehler, this.roheEingabe});
+  const KriteriumEingabewert(
+      {this.zahl, this.text, this.fehler, this.roheEingabe});
 
   factory KriteriumEingabewert.ausBewertung(Bewertung? bewertung) =>
       KriteriumEingabewert(
@@ -13,6 +14,7 @@ class KriteriumEingabewert {
   final double? zahl;
   final String? text;
   final String? fehler;
+
   /// Auch bei einer ungültigen Zahl bleibt die ursprüngliche Eingabe erhalten.
   final String? roheEingabe;
 
