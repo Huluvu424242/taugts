@@ -143,7 +143,8 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
       _laden();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Produkt gelöscht. Historische Daten bleiben erhalten.'),
+          content:
+              Text('Produkt gelöscht. Historische Daten bleiben erhalten.'),
         ),
       );
     } catch (_) {
@@ -336,8 +337,10 @@ class _ProdukteScreenState extends State<ProdukteScreen> {
                                           Icons.rate_review_outlined),
                                     ),
                                     IconButton(
-                                      tooltip: '${produkt.anzeigetitel} löschen',
-                                      onPressed: () => _produktLoeschen(produkt),
+                                      tooltip:
+                                          '${produkt.anzeigetitel} löschen',
+                                      onPressed: () =>
+                                          _produktLoeschen(produkt),
                                       icon: const Icon(Icons.delete_outline),
                                     ),
                                     IconButton(
