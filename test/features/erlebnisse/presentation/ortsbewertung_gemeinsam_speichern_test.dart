@@ -299,7 +299,8 @@ void main() {
       skipOffstage: false,
     );
     expect(eingabefeld, findsOneWidget);
-    expect(tester.widget<TextField>(eingabefeld).controller!.text, 'keine Zahl');
+    expect(
+        tester.widget<TextField>(eingabefeld).controller!.text, 'keine Zahl');
     expect(
       tester.widget<TextField>(eingabefeld).decoration?.errorText,
       'Bitte eine gültige Zahl eingeben.',
