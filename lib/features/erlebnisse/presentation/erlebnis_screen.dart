@@ -219,7 +219,9 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       preis: _gespeichertesErlebnis?.preis,
       menge: _gespeichertesErlebnis?.menge,
       gebinde: _gespeichertesErlebnis?.gebinde,
-      erlebtAm: _gespeichertesErlebnis?.erlebtAm,
+      erlebtAm: _tatsaechlicherBeginn == null && _geplanterTag == null
+          ? _gespeichertesErlebnis?.erlebtAm
+          : null,
       geplanterTag: _geplanterTag == null
           ? null
           : DateTime.utc(
