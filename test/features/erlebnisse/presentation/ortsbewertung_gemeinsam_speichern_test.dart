@@ -178,7 +178,8 @@ void main() {
     );
   });
 
-  testWidgets('Gelöschter Ort bleibt beim erneuten Speichern historisch erhalten',
+  testWidgets(
+      'Gelöschter Ort bleibt beim erneuten Speichern historisch erhalten',
       (tester) async {
     final erlebnis = await _vorbereiten(
       repository: repository,
