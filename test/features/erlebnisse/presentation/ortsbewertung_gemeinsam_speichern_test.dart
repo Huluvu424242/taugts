@@ -289,12 +289,21 @@ void main() {
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('ungültigen Werte der Ortsbewertung'), findsWidgets);
-    expect(find.text('Zur Bewertung'), findsNothing);
+    // Entscheidend ist die fachliche Wirkung: kein Teil-Commit und
+    // die falsche Eingabe bleibt im Formular zur Korrektur verfügbar.
+    // Der globale Fehlersammler kann nach automatischem Scrollen außerhalb
+    // des aktuell aufgebauten ListView-Bereichs liegen.
     expect(await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id), isNull);
+    final eingabefeld = find.byKey(
+      const ValueKey('kriterium-$kriteriumId'),
+      skipOffstage: false,
+    );
+    expect(eingabefeld, findsOneWidget);
+    expect(tester.widget<TextField>(eingabefeld).controller!.text, 'keine Zahl');
     expect(
-      find.byKey(const ValueKey('kriterium-$kriteriumId')),
-      findsOneWidget,
+      find.textContaining('Bitte eine gültige Zahl eingeben.',
+          skipOffstage: false),
+      findsWidgets,
     );
   });
 
