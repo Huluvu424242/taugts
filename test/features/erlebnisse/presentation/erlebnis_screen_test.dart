@@ -62,6 +62,7 @@ void main() {
     );
 
     // Eine Notiz ist als eigenständiger Inhalt ausreichend.
+    await tester.drag(find.byType(ListView).last, const Offset(0, -700));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.widgetWithText(TextField, 'Notiz (optional)').first,
