@@ -84,7 +84,7 @@ class _OrteScreenState extends State<OrteScreen> {
     );
     if (bestaetigt != true || !mounted) return;
     try {
-      await repository.loescheOrt(ort.id);
+      await (repository as StammdatenLoeschRepository).loescheOrt(ort.id);
       if (!mounted) return;
       _suchen(_suche.text);
       ScaffoldMessenger.of(context).showSnackBar(
