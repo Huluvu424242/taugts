@@ -3,7 +3,7 @@ import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart'
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 
 class SqliteBewertungsRepository
-    implements BewertungsRepository, StammdatenLoeschRepository {
+    implements BewertungsRepository, StammdatenLoeschRepository, ErlebnisGesamtstandRepository {
   SqliteBewertungsRepository(this.datenbank);
 
   final LokaleDatenbank datenbank;
@@ -363,6 +363,101 @@ class SqliteBewertungsRepository
       .toList();
 
   @override
+  Future<void> speichereErlebnisGesamtstand({
+    required Erlebnis erlebnis,
+    required List<ErlebnispositionMitProdukt> geaendertePositionen,
+    required Set<String> entferntePositionen,
+    required Map<String, List<Bewertung>> produktbewertungen,
+    OrtsbewertungMitWerten? ortsbewertung,
+    List<Bewertung>? legacyBewertungen,
+  }) async {
+    if (erlebnis.zeitfehler.isNotEmpty) {
+      throw ArgumentError(erlebnis.zeitfehler.join(' '));
+    }
+    if (geaendertePositionen.any(
+      (eintrag) => eintrag.position.erlebnisId != erlebnis.id,
+    ) || produktbewertungen.entries.any(
+      (eintrag) => eintrag.value.any((wert) =>
+          wert.erlebnisId != erlebnis.id ||
+          wert.erlebnisPositionId != eintrag.key ||
+          wert.herkunftProfilId != erlebnis.herkunftProfilId),
+    )) {
+      throw ArgumentError('Positionen oder Bewertungen gehören nicht zum Erlebnis.');
+    }
+    Ort? bewerteterOrt;
+    if (ortsbewertung != null) {
+      bewerteterOrt = await ladeOrt(ortsbewertung.ortsbewertung.ortId);
+      if (bewerteterOrt == null) {
+        throw ArgumentError('Der zu bewertende Ort ist nicht mehr vorhanden.');
+      }
+    }
+    datenbank.transaktion(() {
+      _speichereErlebnisZeile(erlebnis);
+      final ortId = erlebnis.wirksamerOrtId;
+      if (ortId != null) {
+        final args = [ortId, _zeit(erlebnis.geaendertAm), erlebnis.id, ortId];
+        datenbank.verbindung.execute(
+          'UPDATE ortsbewertungen SET ort_id = ?, geaendert_am = ? '
+          'WHERE erlebnis_id = ? AND ort_id <> ?', args,
+        );
+        datenbank.verbindung.execute(
+          'UPDATE bewertungen SET ort_id = ?, geaendert_am = ? '
+          'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?', args,
+        );
+        datenbank.verbindung.execute(
+          'UPDATE preisbeobachtungen SET ort_id = ?, geaendert_am = ? '
+          'WHERE erlebnis_id = ? AND ort_id IS NOT NULL AND ort_id <> ?', args,
+        );
+      }
+      for (final id in entferntePositionen) {
+        datenbank.verbindung.execute(
+          'DELETE FROM erlebnispositionen WHERE id = ? AND erlebnis_id = ?',
+          [id, erlebnis.id],
+        );
+      }
+      for (final eintrag in geaendertePositionen) {
+        _speichereErlebnispositionIntern(
+          position: eintrag.position, preis: eintrag.preis,
+        );
+      }
+      for (final eintrag in produktbewertungen.entries) {
+        final exists = datenbank.verbindung.select(
+          'SELECT id FROM erlebnispositionen WHERE id = ? AND erlebnis_id = ?',
+          [eintrag.key, erlebnis.id],
+        );
+        if (exists.isEmpty) {
+          throw ArgumentError('Eine bewertete Position fehlt.');
+        }
+        datenbank.verbindung.execute(
+          'DELETE FROM bewertungen WHERE erlebnis_position_id = ?',
+          [eintrag.key],
+        );
+        for (final wert in eintrag.value) {
+          _speichereBewertungZeile(wert);
+        }
+      }
+      if (legacyBewertungen != null) {
+        datenbank.verbindung.execute(
+          'DELETE FROM bewertungen WHERE erlebnis_id = ? '
+          'AND erlebnis_position_id IS NULL AND ortsbewertung_id IS NULL',
+          [erlebnis.id],
+        );
+        for (final wert in legacyBewertungen) {
+          _speichereBewertungZeile(wert);
+        }
+      }
+      if (ortsbewertung != null) {
+        _speichereOrtsbewertungIntern(
+          erlebnis: erlebnis,
+          ort: bewerteterOrt!,
+          ortsbewertung: ortsbewertung.ortsbewertung,
+          bewertungen: ortsbewertung.werte,
+        );
+      }
+    });
+  }
+
+  @override
   Future<void> loescheErlebnis(String id) async {
     datenbank.verbindung.execute('DELETE FROM erlebnisse WHERE id = ?', [id]);
   }
@@ -429,10 +524,19 @@ class SqliteBewertungsRepository
   }
 
   @override
-  Future<void> speichereErlebnisposition({
+Future<void> speichereErlebnisposition({
     required ErlebnisPosition position,
     Preisbeobachtung? preis,
   }) async {
+    datenbank.transaktion(() {
+      _speichereErlebnispositionIntern(position: position, preis: preis);
+    });
+  }
+
+  void _speichereErlebnispositionIntern({
+    required ErlebnisPosition position,
+    Preisbeobachtung? preis,
+  }) {
     if (position.anzahl < 1) {
       throw ArgumentError.value(position.anzahl, 'anzahl');
     }
@@ -443,61 +547,60 @@ class SqliteBewertungsRepository
             preis.betrag.minorEinheiten < 0)) {
       throw ArgumentError('Preis und Erlebnisposition passen nicht zusammen.');
     }
-    datenbank.transaktion(() {
+    datenbank.verbindung.execute(
+      '''
+        INSERT INTO erlebnispositionen (
+          id, erlebnis_id, produkt_id, anzahl, erstellt_am, geaendert_am
+        ) VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          produkt_id = excluded.produkt_id,
+          anzahl = excluded.anzahl,
+          geaendert_am = excluded.geaendert_am
+      ''',
+      [
+        position.id,
+        position.erlebnisId,
+        position.produktId,
+        position.anzahl,
+        _zeit(position.erstelltAm),
+        _zeit(position.geaendertAm),
+      ],
+    );
+    if (preis == null) {
+      datenbank.verbindung.execute(
+        'DELETE FROM preisbeobachtungen WHERE erlebnis_position_id = ?',
+        [position.id],
+      );
+    } else {
       datenbank.verbindung.execute(
         '''
-          INSERT INTO erlebnispositionen (
-            id, erlebnis_id, produkt_id, anzahl, erstellt_am, geaendert_am
-          ) VALUES (?, ?, ?, ?, ?, ?)
-          ON CONFLICT(id) DO UPDATE SET
+          INSERT INTO preisbeobachtungen (
+            id, erlebnis_id, erlebnis_position_id, produkt_id, ort_id,
+            beobachtet_am, betrag_minor, waehrung, erstellt_am, geaendert_am
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(erlebnis_position_id) DO UPDATE SET
             produkt_id = excluded.produkt_id,
-            anzahl = excluded.anzahl,
+            ort_id = excluded.ort_id,
+            beobachtet_am = excluded.beobachtet_am,
+            betrag_minor = excluded.betrag_minor,
+            waehrung = excluded.waehrung,
             geaendert_am = excluded.geaendert_am
         ''',
         [
-          position.id,
-          position.erlebnisId,
-          position.produktId,
-          position.anzahl,
-          _zeit(position.erstelltAm),
-          _zeit(position.geaendertAm),
+          preis.id,
+          preis.erlebnisId,
+          preis.erlebnisPositionId,
+          preis.produktId,
+          preis.ortId,
+          _zeit(preis.beobachtetAm),
+          preis.betrag.minorEinheiten,
+          preis.betrag.waehrung,
+          _zeit(preis.erstelltAm),
+          _zeit(preis.geaendertAm),
         ],
       );
-      if (preis == null) {
-        datenbank.verbindung.execute(
-          'DELETE FROM preisbeobachtungen WHERE erlebnis_position_id = ?',
-          [position.id],
-        );
-      } else {
-        datenbank.verbindung.execute(
-          '''
-            INSERT INTO preisbeobachtungen (
-              id, erlebnis_id, erlebnis_position_id, produkt_id, ort_id,
-              beobachtet_am, betrag_minor, waehrung, erstellt_am, geaendert_am
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(erlebnis_position_id) DO UPDATE SET
-              produkt_id = excluded.produkt_id,
-              ort_id = excluded.ort_id,
-              beobachtet_am = excluded.beobachtet_am,
-              betrag_minor = excluded.betrag_minor,
-              waehrung = excluded.waehrung,
-              geaendert_am = excluded.geaendert_am
-          ''',
-          [
-            preis.id,
-            preis.erlebnisId,
-            preis.erlebnisPositionId,
-            preis.produktId,
-            preis.ortId,
-            _zeit(preis.beobachtetAm),
-            preis.betrag.minorEinheiten,
-            preis.betrag.waehrung,
-            _zeit(preis.erstelltAm),
-            _zeit(preis.geaendertAm),
-          ],
-        );
-      }
-    });
+    }
+
   }
 
   @override
@@ -1004,12 +1107,28 @@ class SqliteBewertungsRepository
   }
 
   @override
-  Future<void> speichereOrtsbewertung({
+Future<void> speichereOrtsbewertung({
     required Erlebnis erlebnis,
     required Ort ort,
     required Ortsbewertung ortsbewertung,
     required List<Bewertung> bewertungen,
   }) async {
+    datenbank.transaktion(() {
+      _speichereOrtsbewertungIntern(
+        erlebnis: erlebnis,
+        ort: ort,
+        ortsbewertung: ortsbewertung,
+        bewertungen: bewertungen,
+      );
+    });
+  }
+
+  void _speichereOrtsbewertungIntern({
+    required Erlebnis erlebnis,
+    required Ort ort,
+    required Ortsbewertung ortsbewertung,
+    required List<Bewertung> bewertungen,
+  }) {
     final erwarteteObjektart = switch (erlebnis.typ) {
       Erlebnistyp.restaurantbesuch => KriteriumObjektart.gastronomie,
       Erlebnistyp.einkauf => KriteriumObjektart.geschaeft,
@@ -1051,39 +1170,38 @@ class SqliteBewertungsRepository
         'Ortsbewertung, Ort, Kriterien und Erlebnis passen nicht zusammen.',
       );
     }
-    datenbank.transaktion(() {
-      _speichereErlebnisZeile(erlebnis);
-      datenbank.verbindung.execute(
-        '''
-          INSERT INTO ortsbewertungen (
-            id, erlebnis_id, ort_id, herkunft_profil_id, bewertet_am, notiz,
-            erstellt_am, geaendert_am
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-          ON CONFLICT(erlebnis_id) DO UPDATE SET
-            ort_id = excluded.ort_id,
-            bewertet_am = excluded.bewertet_am,
-            notiz = excluded.notiz,
-            geaendert_am = excluded.geaendert_am
-        ''',
-        [
-          ortsbewertung.id,
-          ortsbewertung.erlebnisId,
-          ortsbewertung.ortId,
-          ortsbewertung.herkunftProfilId,
-          _zeit(ortsbewertung.bewertetAm),
-          _leerAlsNull(ortsbewertung.notiz),
-          _zeit(ortsbewertung.erstelltAm),
-          _zeit(ortsbewertung.geaendertAm),
-        ],
-      );
-      datenbank.verbindung.execute(
-        'DELETE FROM bewertungen WHERE ortsbewertung_id = ?',
-        [ortsbewertung.id],
-      );
-      for (final bewertung in bewertungen) {
-        _speichereBewertungZeile(bewertung);
-      }
-    });
+    _speichereErlebnisZeile(erlebnis);
+    datenbank.verbindung.execute(
+      '''
+        INSERT INTO ortsbewertungen (
+          id, erlebnis_id, ort_id, herkunft_profil_id, bewertet_am, notiz,
+          erstellt_am, geaendert_am
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(erlebnis_id) DO UPDATE SET
+          ort_id = excluded.ort_id,
+          bewertet_am = excluded.bewertet_am,
+          notiz = excluded.notiz,
+          geaendert_am = excluded.geaendert_am
+      ''',
+      [
+        ortsbewertung.id,
+        ortsbewertung.erlebnisId,
+        ortsbewertung.ortId,
+        ortsbewertung.herkunftProfilId,
+        _zeit(ortsbewertung.bewertetAm),
+        _leerAlsNull(ortsbewertung.notiz),
+        _zeit(ortsbewertung.erstelltAm),
+        _zeit(ortsbewertung.geaendertAm),
+      ],
+    );
+    datenbank.verbindung.execute(
+      'DELETE FROM bewertungen WHERE ortsbewertung_id = ?',
+      [ortsbewertung.id],
+    );
+    for (final bewertung in bewertungen) {
+      _speichereBewertungZeile(bewertung);
+    }
+
   }
 
   @override
