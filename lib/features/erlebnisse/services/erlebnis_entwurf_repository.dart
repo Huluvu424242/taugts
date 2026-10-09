@@ -3,10 +3,30 @@ import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart'
 
 /// Bearbeitungszustand eines Erlebnisses. Keine der Erlebnis-Unteraktionen
 /// verändert die Datenbank vor der ausdrücklichen Gesamt-Speicheraktion.
-class ErlebnisEntwurfRepository implements BewertungsRepository {
+class ErlebnisEntwurfRepository
+    implements BewertungsRepository, StammdatenLoeschRepository {
   ErlebnisEntwurfRepository(this.basis, this.erlebnisId);
 
   final BewertungsRepository basis;
+  
+  @override
+  Future<void> loescheProdukt(String id) async {
+    final verwaltung = basis;
+    if (verwaltung is! StammdatenLoeschRepository) {
+      throw UnsupportedError('Produktlöschung nicht verfügbar');
+    }
+    await verwaltung.loescheProdukt(id);
+  }
+
+  @override
+  Future<void> loescheOrt(String id) async {
+    final verwaltung = basis;
+    if (verwaltung is! StammdatenLoeschRepository) {
+      throw UnsupportedError('Ortslöschung nicht verfügbar');
+    }
+    await verwaltung.loescheOrt(id);
+  }
+
   final String erlebnisId;
   Erlebnis? _erlebnis;
   final _positionen = <String, ErlebnispositionMitProdukt>{};
