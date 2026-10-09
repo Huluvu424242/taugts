@@ -54,6 +54,21 @@ void main() {
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
 
+    // Ein inhaltsleeres neues Erlebnis darf nicht persistiert werden.
+    expect(await repository.ladeErlebnisse(), isEmpty);
+    expect(
+      find.textContaining('Bitte eine Ortsbewertung, ein Produkt'),
+      findsOneWidget,
+    );
+
+    // Eine Notiz ist als eigenständiger Inhalt ausreichend.
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Notiz (optional)').first,
+      'Einkauf vorbereiten',
+    );
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
+
     final erlebnisse = await repository.ladeErlebnisse();
     expect(erlebnisse, hasLength(1));
     expect(erlebnisse.single.typ, Erlebnistyp.einkauf);
