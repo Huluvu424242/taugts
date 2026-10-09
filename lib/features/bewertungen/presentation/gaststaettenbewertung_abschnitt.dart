@@ -64,7 +64,14 @@ class GaststaettenbewertungAbschnitt extends StatefulWidget {
 }
 
 class _GaststaettenbewertungAbschnittState
-    extends State<GaststaettenbewertungAbschnitt> {
+    extends State<GaststaettenbewertungAbschnitt>
+    with AutomaticKeepAliveClientMixin<GaststaettenbewertungAbschnitt> {
+  // In einer scrollbaren Erlebnisansicht darf das Formular beim Scrollen
+  // nicht entsorgt werden: der zentrale Speicherbutton benötigt dessen
+  // Validierungszustand auch wenn die Ortsbewertung gerade nicht sichtbar ist.
+  @override
+  bool get wantKeepAlive => true;
+
   final _fehlerFokus = FocusNode();
   final _notizFokus = FocusNode();
   late Future<_Daten> _laden;
@@ -111,6 +118,7 @@ class _GaststaettenbewertungAbschnittState
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final ort = widget.ort;
     return ExpansionTile(
       maintainState: true,
