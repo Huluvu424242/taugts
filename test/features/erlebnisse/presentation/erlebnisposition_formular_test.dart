@@ -39,7 +39,10 @@ void main() {
           ),
         ),
       );
-      await tester.enterText(find.byKey(const ValueKey('positions-anzahl')), '3');
+      await tester.enterText(
+        find.byKey(const ValueKey('positions-anzahl')),
+        '3',
+      );
       await tester.enterText(
         find.widgetWithText(TextField, 'Preis (optional)'),
         '4,20',
@@ -48,7 +51,10 @@ void main() {
       await tester.tap(find.text('Produkt bearbeiten'));
       await tester.pumpAndSettle();
       expect(find.text('Produkt bearbeiten'), findsOneWidget);
-      await tester.enterText(find.widgetWithText(TextFormField, 'Name'), 'Neues Pils');
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Name'),
+        'Neues Pils',
+      );
       await tester.scrollUntilVisible(
         find.text('Produkt speichern'),
         300,
@@ -105,7 +111,10 @@ void main() {
 
     await tester.tap(find.text('Produkt bearbeiten'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.widgetWithText(TextFormField, 'Name'), 'Nicht gespeichert');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Name'),
+      'Nicht gespeichert',
+    );
     await tester.pageBack();
     await tester.pumpAndSettle();
 
