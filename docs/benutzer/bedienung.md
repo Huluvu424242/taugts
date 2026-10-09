@@ -73,6 +73,10 @@ Ein Restaurantbesuch führt seine Produkte als Bestellung. Mengen, Einzelpreise 
 
 Bei einem Restaurantbesuch können die Produkte und die Gaststätte im selben Vorgang, aber als getrennte Bewertungen erfasst werden. Bei einem Einkauf kann entsprechend das Geschäft getrennt von Einkaufsliste und Produktbewertungen bewertet werden. Eine ausgefüllte Gaststätten- oder Geschäftsbewertung wird beim allgemeinen **Speichern** des Erlebnisses automatisch mitgespeichert, wenn sie seit dem letzten Speichern geändert wurde. Der eigene Button **Bewertung speichern** bleibt weiterhin verfügbar. Frühere Bewertungen werden dadurch nicht überschrieben.
 
+**Gaststätten und Geschäfte können auch ohne ein einziges Produkt bewertet werden.** Wähle im Erlebnis zuerst den Ort, klappe **Gaststätte bewerten** beziehungsweise **Geschäft bewerten** auf und erfasse mindestens einen Kriterienwert oder eine Bewertungsnotiz. Anschließend genügt der allgemeine Button **Speichern**. Die Bewertung wird dem Erlebnis und dem Ort zugeordnet und ist beim erneuten Öffnen wieder vorhanden. Produkte lassen sich unabhängig davon später ergänzen.
+
+Ein neu erfasstes Erlebnis darf nicht vollständig leer sein: Für **Speichern** ist entweder eine Ortsbewertung, mindestens eine Produktposition, eine Erlebnisnotiz, ein geplanter Termin oder ein tatsächlicher Beginn beziehungsweise ein Ende erforderlich. Ein gewählter Ort allein ist noch keine Bewertung. Bereits erfasste Planungen und begonnene Erlebnisse bleiben auch ohne Produktliste gültig.
+
 ## Historien
 
 Produkt- und Ortsverläufe zeigen historische Bewertungen mit Einzelwerten sowie – soweit vorhanden – Preisen, Mengen, Orten und Erlebniszeiten. Der konkrete Erlebniszusammenhang sowie Bewertungs- und Preisbeobachtungszeitpunkte, damalige Anzahl und damaliger Preis bleiben nachvollziehbar. Dadurch werden mehrere Bewertungen desselben Produkts oder Ortes zu unterschiedlichen Zeitpunkten nicht mit aktuellen Stammdaten vermischt.
