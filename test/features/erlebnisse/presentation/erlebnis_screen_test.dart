@@ -228,7 +228,10 @@ void main() {
     await tester.tap(find.text('Checkout'));
     await tester.pumpAndSettle();
     expect(find.text('Status: Beendet'), findsOneWidget);
-    expect(find.text('Bearbeiten speichern'), findsOneWidget);
+    expect(find.text('Speichern'), findsOneWidget);
+    expect(await repository.ladeErlebnisse(), isEmpty);
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
 
     final erlebnis = (await repository.ladeErlebnisse()).single;
     expect(erlebnis.status, Erlebnisstatus.beendet);
