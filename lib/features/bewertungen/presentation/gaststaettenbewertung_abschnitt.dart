@@ -12,6 +12,10 @@ class GaststaettenbewertungController {
   bool Function()? _hatEingabeAktion;
 
   bool get hatEingabe => _hatEingabeAktion?.call() ?? false;
+  bool Function()? _hatWertfehlerAktion;
+
+  bool get hatWertfehler => _hatWertfehlerAktion?.call() ?? false;
+
 
   Future<bool> speichereFallsGeaendert(Erlebnis erlebnis) async {
     final aktion = _speicherAktion;
@@ -22,10 +26,12 @@ class GaststaettenbewertungController {
     Object owner,
     Future<bool> Function(Erlebnis erlebnis) speicherAktion,
     bool Function() hatEingabeAktion,
+    bool Function() hatWertfehlerAktion,
   ) {
     _owner = owner;
     _speicherAktion = speicherAktion;
     _hatEingabeAktion = hatEingabeAktion;
+    _hatWertfehlerAktion = hatWertfehlerAktion;
   }
 
   void _trenne(Object owner) {
@@ -33,6 +39,7 @@ class GaststaettenbewertungController {
     _owner = null;
     _speicherAktion = null;
     _hatEingabeAktion = null;
+    _hatWertfehlerAktion = null;
   }
 }
 
@@ -285,6 +292,7 @@ class _FormularState extends State<_Formular> {
       this,
       _speichereFallsGeaendert,
       () => _hatEingabe,
+      () => _hatWertfehler,
     );
   }
 
@@ -297,6 +305,7 @@ class _FormularState extends State<_Formular> {
       this,
       _speichereFallsGeaendert,
       () => _hatEingabe,
+      () => _hatWertfehler,
     );
   }
 
@@ -358,7 +367,11 @@ class _FormularState extends State<_Formular> {
   }
 
   Future<bool> _speichereFallsGeaendert(Erlebnis erlebnis) async {
-    if (!_geaendert || !_hatEingabe || _hatWertfehler) return false;
+    if (!_geaendert || !_hatEingabe) return false;
+    if (_hatWertfehler) {
+      _zeigeValidierungsfehler();
+      throw StateError('Ungültige Ortsbewertung');
+    }
     await _speichereOrtsbewertung(erlebnis);
     if (!mounted) return true;
     setState(() {
