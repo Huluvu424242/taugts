@@ -123,12 +123,11 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         Erlebnisstatus.beendet => 'Beendet',
       };
 
-  Erlebnisstatus get _aktuellerStatus =>
-      _tatsaechlichesEnde != null
-          ? Erlebnisstatus.beendet
-          : _tatsaechlicherBeginn != null
-              ? Erlebnisstatus.aktiv
-              : Erlebnisstatus.geplant;
+  Erlebnisstatus get _aktuellerStatus => _tatsaechlichesEnde != null
+      ? Erlebnisstatus.beendet
+      : _tatsaechlicherBeginn != null
+          ? Erlebnisstatus.aktiv
+          : Erlebnisstatus.geplant;
 
   Future<void> _ortWaehlen() async {
     final ort = await Navigator.of(context).push<Ort>(
@@ -347,7 +346,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         _speichert = false;
         _zeitfehler = [
           'Das Erlebnis konnte nicht vollständig gespeichert werden. '
-          'Alle Eingaben bleiben zur Korrektur erhalten.',
+              'Alle Eingaben bleiben zur Korrektur erhalten.',
         ];
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -782,7 +781,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                 label: const Text('Spontanen Besuch jetzt erfassen'),
               ),
               if (_ort == null)
-                const Text('Für einen spontanen Besuch zuerst einen Ort auswählen.'),
+                const Text(
+                    'Für einen spontanen Besuch zuerst einen Ort auswählen.'),
               ListTile(
                 key: const ValueKey('tatsaechlicher-beginn'),
                 contentPadding: EdgeInsets.zero,
@@ -931,7 +931,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   icon: const Icon(Icons.logout),
                   label: Text(_istEinkauf ? 'Einkauf beenden' : 'Checkout'),
                 )
-
             ],
           ),
         ),
