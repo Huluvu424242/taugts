@@ -464,13 +464,18 @@ class _FormularState extends State<_Formular> {
             }),
           ),
           const SizedBox(height: 8),
-          FilledButton.icon(
-            onPressed: _speichert ? null : _speichern,
-            icon: const Icon(Icons.save_outlined),
-            label: Text(
-              _gespeichert ? 'Bewertung gespeichert' : 'Bewertung speichern',
+          if (widget.controller == null)
+            FilledButton.icon(
+              onPressed: _speichert ? null : _speichern,
+              icon: const Icon(Icons.save_outlined),
+              label: Text(
+                _gespeichert ? 'Bewertung gespeichert' : 'Bewertung speichern',
+              ),
+            )
+          else
+            const Text(
+              'Die Ortsbewertung wird mit dem Erlebnis über „Speichern“ gesichert.',
             ),
-          ),
         ],
       ),
     );
