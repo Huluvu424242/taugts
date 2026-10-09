@@ -62,11 +62,7 @@ void main() {
     );
 
     // Eine Notiz ist als eigenständiger Inhalt ausreichend.
-    await tester.scrollUntilVisible(
-      find.widgetWithText(TextField, 'Notiz (optional)').first,
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.widgetWithText(TextField, 'Notiz (optional)').first,
       'Einkauf vorbereiten',
@@ -133,7 +129,8 @@ void main() {
           isNull,
         );
 
-        // Wiederöffnen ohne die erfasste Besuchszeit zu verlieren.
+        // Ein neues Widget erzeugt auch einen neuen Formularzustand.
+        await tester.pumpWidget(const SizedBox.shrink());
         await tester.pumpWidget(
           MaterialApp(
             home: ErlebnisScreen(
