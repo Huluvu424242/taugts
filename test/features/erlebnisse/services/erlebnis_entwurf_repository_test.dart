@@ -66,12 +66,14 @@ void main() {
     expect(await entwurf.ladeErlebnispositionen(erlebnisId), hasLength(1));
     expect(await repository.ladeErlebnis(erlebnisId), isNull);
     expect(await repository.ladeErlebnispositionen(erlebnisId), isEmpty);
-    expect(await repository.ladeBewertungenFuerErlebnisposition(position.id), isEmpty);
+    expect(await repository.ladeBewertungenFuerErlebnisposition(position.id),
+        isEmpty);
 
     await entwurf.uebernehmen(erlebnis);
     expect(await repository.ladeErlebnis(erlebnisId), isNotNull);
     expect(await repository.ladeErlebnispositionen(erlebnisId), hasLength(1));
-    expect(await repository.ladeBewertungenFuerErlebnisposition(position.id), hasLength(1));
+    expect(await repository.ladeBewertungenFuerErlebnisposition(position.id),
+        hasLength(1));
   });
 
   test('gescheiterter Gesamtstand bewahrt den Entwurf für Korrekturen',
@@ -119,6 +121,7 @@ void main() {
     expect(await repository.ladeErlebnis(erlebnisId), isNull);
     expect(await repository.ladeErlebnispositionen(erlebnisId), isEmpty);
     expect(await entwurf.ladeErlebnispositionen(erlebnisId), hasLength(1));
-    expect(await entwurf.ladeBewertungenFuerErlebnisposition(position.id), hasLength(1));
+    expect(await entwurf.ladeBewertungenFuerErlebnisposition(position.id),
+        hasLength(1));
   });
 }
