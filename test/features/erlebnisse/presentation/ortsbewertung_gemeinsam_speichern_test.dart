@@ -244,6 +244,60 @@ void main() {
     );
   });
 
+  testWidgets('Ungültiger Zahlenwert verhindert Gesamt-Speicherung',
+      (tester) async {
+    const kriteriumId = '22100000-0000-4000-8000-000000000099';
+    await repository.speichereKriterium(
+      Bewertungskriterium(
+        id: kriteriumId,
+        name: 'Test-Messwert',
+        eingabetyp: KriteriumEingabetyp.zahl,
+        objektart: KriteriumObjektart.gastronomie,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
+    final erlebnis = await _vorbereiten(
+      repository: repository,
+      profil: profil,
+      zeit: zeit,
+      typ: Erlebnistyp.restaurantbesuch,
+      ortstyp: Ortstyp.gastronomie,
+    );
+    await _screenOeffnen(
+      tester: tester,
+      repository: repository,
+      profil: profil,
+      erlebnis: erlebnis,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Gaststätte bewerten'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Gaststätte bewerten'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('kriterium-$kriteriumId')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('kriterium-$kriteriumId')),
+      'keine Zahl',
+    );
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('ungültigen Werte der Ortsbewertung'), findsWidgets);
+    expect(find.text('Zur Bewertung'), findsNothing);
+    expect(await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id), isNull);
+    expect(
+      find.byKey(const ValueKey('kriterium-$kriteriumId')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('Speichern legt keine leere Ortsbewertung an', (tester) async {
     final erlebnis = await _vorbereiten(
       repository: repository,
