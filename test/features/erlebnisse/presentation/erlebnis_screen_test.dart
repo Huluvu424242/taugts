@@ -145,6 +145,34 @@ void main() {
           (await repository.ladeErlebnisse()).single.tatsaechlicherBeginn,
           erlebnis.tatsaechlicherBeginn,
         );
+
+        // Die Ortsbewertung darf erst im Nachgang ergänzt werden.
+        final abschnitt = fall.typ == Erlebnistyp.einkauf
+            ? 'Geschäft bewerten'
+            : 'Gaststätte bewerten';
+        await tester.scrollUntilVisible(
+          find.text(abschnitt),
+          250,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.tap(find.text(abschnitt));
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.widgetWithText(TextField, 'Notiz (optional)').last,
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Notiz (optional)').last,
+          'Interessanter Ort für später',
+        );
+        await tester.tap(find.text('Speichern'));
+        await tester.pumpAndSettle();
+        final bewertung =
+            await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id);
+        expect(bewertung?.ortsbewertung.notiz, 'Interessanter Ort für später');
+        expect(bewertung?.ortsbewertung.ortId, ort.id);
+        expect(await repository.ladeErlebnispositionen(erlebnis.id), isEmpty);
       },
     );
   }
