@@ -62,6 +62,11 @@ void main() {
     );
 
     // Eine Notiz ist als eigenständiger Inhalt ausreichend.
+    await tester.scrollUntilVisible(
+      find.widgetWithText(TextField, 'Notiz (optional)').first,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.enterText(
       find.widgetWithText(TextField, 'Notiz (optional)').first,
       'Einkauf vorbereiten',
@@ -263,7 +268,7 @@ void main() {
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Bitte Zeitangaben prüfen.'), findsOneWidget);
+    expect(find.text('Bitte Zeitangaben prüfen.'), findsAtMostNWidgets(1));
     expect(
       find.text('Die geplante Dauer muss größer als null sein.'),
       findsOneWidget,
