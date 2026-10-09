@@ -167,8 +167,7 @@ class LokaleDatenbank {
         gebinde TEXT,
         fuellmenge_ml INTEGER,
         barcode TEXT,
-        notiz TEXT,
-        geloescht INTEGER NOT NULL DEFAULT 0
+        notiz TEXT
       )
     ''');
     verbindung.execute('''
@@ -182,8 +181,7 @@ class LokaleDatenbank {
         breitengrad REAL,
         laengengrad REAL,
         osm_referenz TEXT,
-        notiz TEXT,
-        geloescht INTEGER NOT NULL DEFAULT 0
+        notiz TEXT
       )
     ''');
     _erstelleErlebnisseTabelle();
