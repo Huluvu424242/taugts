@@ -88,7 +88,9 @@ class _OrteScreenState extends State<OrteScreen> {
       if (!mounted) return;
       _suchen(_suche.text);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ort gelöscht. Historische Daten bleiben erhalten.')),
+        const SnackBar(
+          content: Text('Ort gelöscht. Historische Daten bleiben erhalten.'),
+        ),
       );
     } catch (_) {
       if (!mounted) return;
