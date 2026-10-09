@@ -87,12 +87,15 @@ class LokaleDatenbank {
   }
 
   void _migriereVon2Auf3() {
-    verbindung.execute(
-      'ALTER TABLE produkte ADD COLUMN geloescht INTEGER NOT NULL DEFAULT 0',
-    );
-    verbindung.execute(
-      'ALTER TABLE orte ADD COLUMN geloescht INTEGER NOT NULL DEFAULT 0',
-    );
+    // Ältere Zwischenstände können die Spalte schon angelegt haben, obwohl
+    // die userVersion noch 1 oder 2 ist. Die Migration bleibt dann sicher.
+    for (final tabelle in ['produkte', 'orte']) {
+      final spalten = verbindung.select('PRAGMA table_info($tabelle)');
+      if (spalten.any((spalte) => spalte['name'] == 'geloescht')) continue;
+      verbindung.execute(
+        'ALTER TABLE $tabelle ADD COLUMN geloescht INTEGER NOT NULL DEFAULT 0',
+      );
+    }
   }
 
   void _stelleStandardkriterienBereit() {
