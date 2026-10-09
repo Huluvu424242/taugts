@@ -95,3 +95,10 @@ Produkte und Orte können in ihren Übersichten über die Aktion **Löschen** au
 Das Löschen entfernt **keine historischen Erlebnisse, Bewertungen, Preise oder Mengen**. Historische Einträge bleiben erhalten. Ist ihr früheres Produkt oder ihr früherer Ort gelöscht, zeigt Taugt’s? die Zuordnung als **Nicht zugeordnet** statt einer internen ID an.
 
 Eine fehlende Zuordnung kann später korrigiert werden: Öffne das betroffene Erlebnis beziehungsweise die Erlebnisposition und wähle über **Produkt auswählen** oder **Ort auswählen** einen vorhandenen Stammdatensatz. Über dieselbe Auswahl kann bei Bedarf zuerst ein neues Produkt oder ein neuer Ort angelegt werden. Beim Speichern wird nur die Zuordnung geändert; Zeitpunkt, Bewertung, Preis, Menge und die übrigen historischen Angaben bleiben erhalten.
+
+
+### Gemeinsames Speichern von Erlebnissen
+
+Beim Erfassen oder Bearbeiten eines Restaurantbesuchs oder Einkaufs können zunächst Produkte, Mengen, Preise und Produktbewertungen ergänzt werden. Diese Änderungen sind **bis zum allgemeinen Button „Speichern“ nur ein Entwurf**. Die Aktionen in den Unterformularen übernehmen Eingaben in den Entwurf und speichern den Erlebnis-Gesamtstand nicht selbst. Der gemeinsame Speichervorgang umfasst Basisdaten, Produktpositionen, Preise sowie vorhandene Orts- und Produktbewertungen atomar: Entweder werden alle Änderungen übernommen oder bei einem Fehler keine davon. In diesem Fall bleibt der Entwurf auf dem Bildschirm erhalten und kann korrigiert und erneut gespeichert werden.
+
+Ein spontaner Besuch mit Ort und Besuchszeit lässt sich auch ohne Produkte oder Bewertungen speichern. Eine gültige Planung ist ebenfalls ohne Produkte möglich. Check-in und Checkout ändern zunächst nur die Zeitangaben im Entwurf; der gemeinsame Button **Speichern** übernimmt sie dauerhaft. Beim Verlassen ohne diese Aktion werden Änderungen nicht übernommen. **Produkt anlegen/bearbeiten** pflegt dagegen eigenständige Stammdaten mit einem separaten Speicherweg; die übrigen ungespeicherten Erlebnisangaben bleiben erhalten.
