@@ -59,12 +59,14 @@ void main() {
     );
     expect(find.textContaining('ohne Termin'), findsOneWidget);
 
+    await tester.tap(find.text('Einkauf beginnen'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
     final gespeichert = (await repository.ladeErlebnisse()).single;
     expect(gespeichert.geplanterTag, isNull);
     expect(gespeichert.geplanteMinute, isNull);
-    expect(gespeichert.tatsaechlicherBeginn, isNull);
+    expect(gespeichert.tatsaechlicherBeginn, isNotNull);
   });
 
   testWidgets('Einkauf summiert nur erfasste Preise und ändert Mengen',
