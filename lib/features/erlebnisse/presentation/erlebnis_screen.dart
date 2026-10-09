@@ -8,6 +8,7 @@ import 'package:taugts/features/bewertungen/presentation/gaststaettenbewertung_a
 import 'package:taugts/features/bewertungen/presentation/getraenkebewertung_screen.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
 import 'package:taugts/features/erlebnisse/presentation/erlebnisposition_formular.dart';
+import 'package:taugts/features/erlebnisse/services/erlebnis_entwurf_repository.dart';
 import 'package:taugts/features/orte/presentation/orte_screen.dart';
 import 'package:taugts/features/profil/models/profil.dart';
 
@@ -54,6 +55,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   var _speichert = false;
   var _zeitfehler = <String>[];
   late Future<List<ErlebnispositionMitProdukt>> _positionen;
+  late final ErlebnisEntwurfRepository _entwurf;
 
   @override
   void initState() {
@@ -69,7 +71,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     _tatsaechlichesEnde = erlebnis?.tatsaechlichesEnde?.toLocal();
     _dauer.text = erlebnis?.geplanteDauerMinuten?.toString() ?? '';
     _notiz.text = erlebnis?.notiz ?? '';
-    _positionen = widget.repository.ladeErlebnispositionen(_id);
+    _entwurf = ErlebnisEntwurfRepository(widget.repository, _id);
+    _positionen = _entwurf.ladeErlebnispositionen(_id);
     _ladeOrt();
   }
 
@@ -119,7 +122,11 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       };
 
   Erlebnisstatus get _aktuellerStatus =>
-      _gespeichertesErlebnis?.status ?? Erlebnisstatus.geplant;
+      _tatsaechlichesEnde != null
+          ? Erlebnisstatus.beendet
+          : _tatsaechlicherBeginn != null
+              ? Erlebnisstatus.aktiv
+              : Erlebnisstatus.geplant;
 
   Future<void> _ortWaehlen() async {
     final ort = await Navigator.of(context).push<Ort>(
@@ -259,7 +266,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         _tatsaechlichesEnde == null &&
         _notiz.text.trim().isEmpty &&
         !_ortsbewertungController.hatEingabe) {
-      final positionen = await widget.repository.ladeErlebnispositionen(_id);
+      final positionen = await _entwurf.ladeErlebnispositionen(_id);
       if (!mounted) return false;
       if (positionen.isEmpty) {
         fehler.add(
@@ -315,14 +322,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     if (!await _validiere(erlebnis) || !mounted) return;
     setState(() => _speichert = true);
     try {
-      var gemeinsamGespeichert = false;
-      if (schliessen) {
-        gemeinsamGespeichert =
-            await _ortsbewertungController.speichereFallsGeaendert(erlebnis);
-      }
-      if (!gemeinsamGespeichert) {
-        await widget.repository.speichereErlebnis(erlebnis);
-      }
+      await _ortsbewertungController.speichereFallsGeaendert(erlebnis);
+      await _entwurf.uebernehmen(erlebnis);
       if (!mounted) return;
       if (schliessen) {
         Navigator.of(context).pop(erlebnis);
@@ -355,17 +356,17 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       _tatsaechlicherBeginn ??= DateTime.now();
       _tatsaechlichesEnde = null;
     });
-    await _persistieren(status: Erlebnisstatus.aktiv, schliessen: false);
+    // Check-in verändert nur den Entwurf; dauerhaft wird gemeinsam gespeichert.
   }
 
   Future<void> _checkout() async {
     setState(() => _tatsaechlichesEnde ??= DateTime.now());
-    await _persistieren(status: Erlebnisstatus.beendet, schliessen: false);
+    // Checkout verändert nur den Entwurf; dauerhaft wird gemeinsam gespeichert.
   }
 
   void _positionenLaden() {
     setState(() {
-      _positionen = widget.repository.ladeErlebnispositionen(_id);
+      _positionen = _entwurf.ladeErlebnispositionen(_id);
     });
   }
 
@@ -374,29 +375,17 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   ]) async {
     final erlebnis = _erlebnisAusEingaben();
     if (!await _validiere(erlebnis, pruefeInhalt: false) || !mounted) return;
-    try {
-      await widget.repository.speichereErlebnis(erlebnis);
-      if (!mounted) return;
-      _gespeichertesErlebnis = erlebnis;
-      final gespeichert = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (_) => ErlebnispositionFormular(
-            repository: widget.repository,
-            idGenerator: widget.idGenerator,
-            erlebnis: erlebnis,
-            vorhanden: vorhanden,
-          ),
+    final gespeichert = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => ErlebnispositionFormular(
+          repository: _entwurf,
+          idGenerator: widget.idGenerator,
+          erlebnis: erlebnis,
+          vorhanden: vorhanden,
         ),
-      );
-      if (gespeichert == true && mounted) _positionenLaden();
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Das Erlebnis konnte nicht vorbereitet werden.'),
-        ),
-      );
-    }
+      ),
+    );
+    if (gespeichert == true && mounted) _positionenLaden();
   }
 
   Future<void> _positionLoeschen(ErlebnispositionMitProdukt eintrag) async {
@@ -421,7 +410,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     );
     if (bestaetigt != true) return;
     try {
-      await widget.repository.loescheErlebnisposition(eintrag.position.id);
+      await _entwurf.loescheErlebnisposition(eintrag.position.id);
       if (!mounted) return;
       _positionenLaden();
     } catch (_) {
@@ -444,7 +433,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     if (neu < 1) return;
     setState(() => _positionenInBearbeitung.add(id));
     try {
-      await widget.repository.speichereErlebnisposition(
+      await _entwurf.speichereErlebnisposition(
         position: eintrag.position.mitAnzahl(neu, DateTime.now().toUtc()),
         preis: eintrag.preis,
       );
@@ -467,11 +456,11 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   }
 
   Future<void> _positionBewerten(ErlebnispositionMitProdukt eintrag) async {
-    final erlebnis = _gespeichertesErlebnis ?? _erlebnisAusEingaben();
+    final erlebnis = _erlebnisAusEingaben();
     await Navigator.of(context).push<Erlebnis>(
       MaterialPageRoute(
         builder: (_) => GetraenkebewertungScreen(
-          repository: widget.repository,
+          repository: _entwurf,
           idGenerator: widget.idGenerator,
           profil: widget.profil,
           erlebnis: erlebnis,
@@ -562,7 +551,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   icon: const Icon(Icons.add),
                 ),
                 FutureBuilder<List<Bewertung>>(
-                  future: widget.repository.ladeBewertungenFuerErlebnisposition(
+                  future: _entwurf.ladeBewertungenFuerErlebnisposition(
                     eintrag.position.id,
                   ),
                   builder: (context, snapshot) {
@@ -886,7 +875,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                 const SizedBox(height: 24),
                 GaststaettenbewertungAbschnitt(
                   key: ValueKey('ortsbewertung-$_id-${_ort?.id}'),
-                  repository: widget.repository,
+                  repository: _entwurf,
                   idGenerator: widget.idGenerator,
                   erlebnis: _erlebnisAusEingaben(),
                   ort: _ort,
