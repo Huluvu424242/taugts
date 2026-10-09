@@ -205,6 +205,9 @@ void main() {
     await tester.tap(find.text('Einkauf beenden'));
     await tester.pumpAndSettle();
     expect(find.text('Status: Beendet'), findsOneWidget);
+    expect((await repository.ladeErlebnis(erlebnis.id))!.tatsaechlicherBeginn, isNull);
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
     final beendet = await repository.ladeErlebnis(erlebnis.id);
     expect(beendet!.tatsaechlicherBeginn, isNotNull);
     expect(beendet.tatsaechlichesEnde, isNotNull);
