@@ -35,11 +35,9 @@ class ErlebnisScreen extends StatefulWidget {
 class _ErlebnisScreenState extends State<ErlebnisScreen> {
   final _fehlerKey = GlobalKey();
   final _fehlerFokus = FocusNode();
-  final _dauerFokus = FocusNode();
   final _beginnFokus = FocusNode();
   final _endeFokus = FocusNode();
   final _ortsBewertungFokus = FocusNode();
-  final _dauer = TextEditingController();
   final _notiz = TextEditingController();
   final _ortsbewertungController = GaststaettenbewertungController();
   final _positionenInBearbeitung = <String>{};
@@ -49,8 +47,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   Erlebnis? _gespeichertesErlebnis;
   Ort? _ort;
   var _ortNichtZugeordnet = false;
-  DateTime? _geplanterTag;
-  int? _geplanteMinute;
   DateTime? _tatsaechlicherBeginn;
   DateTime? _tatsaechlichesEnde;
   var _speichert = false;
@@ -66,11 +62,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     _id = erlebnis?.id ?? widget.idGenerator.neueId();
     _erstelltAm = erlebnis?.erstelltAm ?? DateTime.now().toUtc();
     _typ = erlebnis?.typ ?? widget.erlebnistyp!;
-    _geplanterTag = erlebnis?.geplanterTag?.toLocal();
-    _geplanteMinute = erlebnis?.geplanteMinute;
-    _tatsaechlicherBeginn = erlebnis?.tatsaechlicherBeginn?.toLocal();
+    _tatsaechlicherBeginn = (erlebnis?.tatsaechlicherBeginn ?? erlebnis?.geplanterZeitpunkt)?.toLocal();
     _tatsaechlichesEnde = erlebnis?.tatsaechlichesEnde?.toLocal();
-    _dauer.text = erlebnis?.geplanteDauerMinuten?.toString() ?? '';
     _notiz.text = erlebnis?.notiz ?? '';
     _entwurf = ErlebnisEntwurfRepository(widget.repository, _id);
     _positionen = _entwurf.ladeErlebnispositionen(_id);
@@ -90,10 +83,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
 
   @override
   void dispose() {
-    _dauer.dispose();
     _notiz.dispose();
     _fehlerFokus.dispose();
-    _dauerFokus.dispose();
     _beginnFokus.dispose();
     _endeFokus.dispose();
     _ortsBewertungFokus.dispose();
@@ -147,32 +138,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     }
   }
 
-  Future<void> _geplantenTagWaehlen() async {
-    final heute = DateTime.now();
-    final datum = await showDatePicker(
-      context: context,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      initialDate: _geplanterTag ?? heute,
-      helpText: 'Geplantes Datum wählen',
-    );
-    if (datum != null && mounted) setState(() => _geplanterTag = datum);
-  }
-
-  Future<void> _geplanteZeitWaehlen() async {
-    final minute = _geplanteMinute;
-    final zeit = await showTimePicker(
-      context: context,
-      initialTime: minute == null
-          ? TimeOfDay.now()
-          : TimeOfDay(hour: minute ~/ 60, minute: minute % 60),
-      helpText: 'Geplante Uhrzeit wählen',
-    );
-    if (zeit != null && mounted) {
-      setState(() => _geplanteMinute = zeit.hour * 60 + zeit.minute);
-    }
-  }
-
   Future<void> _tatsaechlicheZeitWaehlen({required bool beginn}) async {
     final aktuell = beginn ? _tatsaechlicherBeginn : _tatsaechlichesEnde;
     final jetzt = DateTime.now();
@@ -182,7 +147,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       lastDate: DateTime(2100),
       initialDate: aktuell ?? jetzt,
       helpText:
-          beginn ? 'Tatsächlichen Beginn wählen' : 'Tatsächliches Ende wählen',
+          beginn ? 'Beginn wählen' : 'Ende wählen',
     );
     if (datum == null || !mounted) return;
     final zeit = await showTimePicker(
@@ -207,7 +172,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   }
 
   Erlebnis _erlebnisAusEingaben({Erlebnisstatus? status}) {
-    final dauer = int.tryParse(_dauer.text.trim());
     final abgeleiteterStatus = status ??
         (_tatsaechlichesEnde != null
             ? Erlebnisstatus.beendet
@@ -227,18 +191,9 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       preis: _gespeichertesErlebnis?.preis,
       menge: _gespeichertesErlebnis?.menge,
       gebinde: _gespeichertesErlebnis?.gebinde,
-      erlebtAm: _tatsaechlicherBeginn == null && _geplanterTag == null
+      erlebtAm: _tatsaechlicherBeginn == null
           ? _gespeichertesErlebnis?.erlebtAm
           : null,
-      geplanterTag: _geplanterTag == null
-          ? null
-          : DateTime.utc(
-              _geplanterTag!.year,
-              _geplanterTag!.month,
-              _geplanterTag!.day,
-            ),
-      geplanteMinute: _geplanteMinute,
-      geplanteDauerMinuten: dauer,
       tatsaechlicherBeginn: _tatsaechlicherBeginn?.toUtc(),
       tatsaechlichesEnde: _tatsaechlichesEnde?.toUtc(),
       herkunftProfilId: widget.profil.id,
@@ -251,18 +206,12 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
 
   Future<bool> _validiere(Erlebnis erlebnis, {bool pruefeInhalt = true}) async {
     final fehler = [...erlebnis.zeitfehler];
-    if (_dauer.text.trim().isNotEmpty &&
-        int.tryParse(_dauer.text.trim()) == null) {
-      fehler.add('Die geplante Dauer muss eine ganze Minutenzahl sein.');
-    }
-
     // Ein dokumentierter Besuch mit Ort und tatsächlicher Zeit ist auch ohne
     // Produkte oder Bewertung fachlich vollständig.
     // Beim Hinzufügen der ersten Produktposition darf die Inhaltsprüfung
     // nicht verhindern, dass das notwendige Erlebnis angelegt wird.
     if (pruefeInhalt &&
         _gespeichertesErlebnis == null &&
-        _geplanterTag == null &&
         _tatsaechlicherBeginn == null &&
         _tatsaechlichesEnde == null &&
         _notiz.text.trim().isEmpty &&
@@ -272,7 +221,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       if (positionen.isEmpty) {
         fehler.add(
           'Bitte einen Ort mit Besuchszeit, eine Ortsbewertung, ein '
-          'Produkt, eine Notiz oder einen geplanten Termin erfassen.',
+          'Produkt, eine Notiz oder einen Zeitraum erfassen.',
         );
       }
     }
@@ -309,9 +258,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   }
 
   FocusNode _fokusFuerFehler(String fehler) {
-    if (fehler.contains('Dauer') || fehler.contains('Minutenzahl')) {
-      return _dauerFokus;
-    }
     if (fehler.contains('Ortsbewertung')) return _ortsBewertungFokus;
     if (fehler.contains('Ende')) return _endeFokus;
     return _beginnFokus;
@@ -716,59 +662,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
               Semantics(
                 header: true,
                 child: Text(
-                  'Planung',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Geplanter Tag (optional)'),
-                subtitle: Text(_datumText(context, _geplanterTag)),
-                trailing: const Icon(Icons.calendar_today_outlined),
-                onTap: _geplantenTagWaehlen,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton.icon(
-                      onPressed:
-                          _geplanterTag == null ? null : _geplanteZeitWaehlen,
-                      icon: const Icon(Icons.schedule),
-                      label: Text(_zeitText(context, _geplanteMinute)),
-                    ),
-                  ),
-                  if (_geplanterTag != null)
-                    IconButton(
-                      tooltip: 'Planung entfernen',
-                      onPressed: () => setState(() {
-                        _geplanterTag = null;
-                        _geplanteMinute = null;
-                      }),
-                      icon: const Icon(Icons.clear),
-                    ),
-                ],
-              ),
-              TextField(
-                controller: _dauer,
-                focusNode: _dauerFokus,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                decoration: InputDecoration(
-                  labelText: 'Geplante Dauer in Minuten (optional)',
-                  errorText: _zeitfehler.any(
-                    (fehler) =>
-                        fehler.contains('Dauer') ||
-                        fehler.contains('Minutenzahl'),
-                  )
-                      ? 'Bitte eine positive ganze Zahl eingeben.'
-                      : null,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Semantics(
-                header: true,
-                child: Text(
-                  'Tatsächliche Zeiten',
+                  'Zeitraum',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -786,19 +680,19 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                 const Text(
                     'Für einen spontanen Besuch zuerst einen Ort auswählen.'),
               ListTile(
-                key: const ValueKey('tatsaechlicher-beginn'),
+                key: const ValueKey('erlebnis-beginn'),
                 contentPadding: EdgeInsets.zero,
                 focusNode: _beginnFokus,
-                title: const Text('Tatsächlicher Beginn (optional)'),
+                title: const Text('Beginn (optional)'),
                 subtitle: Text(_datumZeitText(context, _tatsaechlicherBeginn)),
                 trailing: const Icon(Icons.login),
                 onTap: () => _tatsaechlicheZeitWaehlen(beginn: true),
               ),
               ListTile(
-                key: const ValueKey('tatsaechliches-ende'),
+                key: const ValueKey('erlebnis-ende'),
                 contentPadding: EdgeInsets.zero,
                 focusNode: _endeFokus,
-                title: const Text('Tatsächliches Ende (optional)'),
+                title: const Text('Ende (optional)'),
                 subtitle: Text(_datumZeitText(context, _tatsaechlichesEnde)),
                 trailing: const Icon(Icons.logout),
                 onTap: () => _tatsaechlicheZeitWaehlen(beginn: false),
