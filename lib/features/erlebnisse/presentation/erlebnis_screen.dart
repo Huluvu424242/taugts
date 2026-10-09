@@ -62,7 +62,9 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     _id = erlebnis?.id ?? widget.idGenerator.neueId();
     _erstelltAm = erlebnis?.erstelltAm ?? DateTime.now().toUtc();
     _typ = erlebnis?.typ ?? widget.erlebnistyp!;
-    _tatsaechlicherBeginn = (erlebnis?.tatsaechlicherBeginn ?? erlebnis?.geplanterZeitpunkt)?.toLocal();
+    _tatsaechlicherBeginn =
+        (erlebnis?.tatsaechlicherBeginn ?? erlebnis?.geplanterZeitpunkt)
+            ?.toLocal();
     _tatsaechlichesEnde = erlebnis?.tatsaechlichesEnde?.toLocal();
     _notiz.text = erlebnis?.notiz ?? '';
     _entwurf = ErlebnisEntwurfRepository(widget.repository, _id);
