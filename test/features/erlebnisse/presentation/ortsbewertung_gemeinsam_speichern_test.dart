@@ -301,9 +301,8 @@ void main() {
     expect(eingabefeld, findsOneWidget);
     expect(tester.widget<TextField>(eingabefeld).controller!.text, 'keine Zahl');
     expect(
-      find.textContaining('Bitte eine gültige Zahl eingeben.',
-          skipOffstage: false),
-      findsWidgets,
+      tester.widget<TextField>(eingabefeld).decoration?.errorText,
+      'Bitte eine gültige Zahl eingeben.',
     );
   });
 
