@@ -21,6 +21,74 @@ void main() {
 
   tearDown(() => datenbank.schliessen());
 
+  test('Teilfehler beim Speichern rollt Erlebnis und Ortsbezug zurück',
+      () async {
+    final alterOrt = Ort(
+      id: '22100000-0000-4000-8000-000000000001',
+      name: 'Alter Ort',
+      typ: Ortstyp.gastronomie,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    final neuerOrt = Ort(
+      id: '22100000-0000-4000-8000-000000000002',
+      name: 'Neuer Ort',
+      typ: Ortstyp.gastronomie,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereOrt(alterOrt);
+    await repository.speichereOrt(neuerOrt);
+    final erlebnis = Erlebnis(
+      id: '22100000-0000-4000-8000-000000000003',
+      ortId: alterOrt.id,
+      herkunftProfilId: profilId,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereErlebnis(erlebnis);
+    await repository.speichereOrtsbewertung(
+      erlebnis: erlebnis,
+      ort: alterOrt,
+      ortsbewertung: Ortsbewertung(
+        id: '22100000-0000-4000-8000-000000000004',
+        erlebnisId: erlebnis.id,
+        ortId: alterOrt.id,
+        herkunftProfilId: profilId,
+        bewertetAm: erlebnis.erlebtAm,
+        notiz: 'Historischer Besuch',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+      bewertungen: const [],
+    );
+    // Absichtlich einen Fehler nach dem Update der Erlebniszeile auslösen.
+    datenbank.verbindung.execute('''
+      CREATE TRIGGER abbrechen_ortsbewertung
+      BEFORE UPDATE OF ort_id ON ortsbewertungen
+      BEGIN
+        SELECT RAISE(ABORT, 'Simulierter Fehler');
+      END
+    ''');
+
+    await expectLater(
+      repository.speichereErlebnis(
+        erlebnis.kopiereMit(
+          ortId: neuerOrt.id,
+          geaendertAm: zeit.add(const Duration(minutes: 1)),
+        ),
+      ),
+      throwsA(isA<SqliteException>()),
+    );
+    expect((await repository.ladeErlebnis(erlebnis.id))!.ortId, alterOrt.id);
+    expect(
+      (await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id))!
+          .ortsbewertung
+          .ortId,
+      alterOrt.id,
+    );
+  });
+
   test('speichert und lädt ein Produkt', () async {
     final produkt = Produkt(
       id: '2d30ae97-1a64-4bb5-a8fd-1df46be78d67',
