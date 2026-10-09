@@ -366,12 +366,16 @@ class _ProduktFormularState extends State<ProduktFormular> {
                 _textfeld(_notiz, 'Notiz (optional)',
                     maxLength: 1000, maxLines: 4),
                 const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: _speichert ? null : _speichern,
-                  child: Text(_speichert ? 'Speichert …' : 'Produkt speichern'),
-                ),
               ],
             ),
+          ),
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          minimum: const EdgeInsets.all(16),
+          child: FilledButton(
+            onPressed: _speichert ? null : _speichern,
+            child: Text(_speichert ? 'Speichert …' : 'Produkt speichern'),
           ),
         ),
       );
