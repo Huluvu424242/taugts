@@ -165,14 +165,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       (await repository.ladeErlebnispositionen(erlebnis.id))
-          .singleWhere((e) => e.produkt.name == 'Brot').position.anzahl,
+          .singleWhere((e) => e.produkt.name == 'Brot')
+          .position
+          .anzahl,
       1,
     );
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
     expect(
       (await repository.ladeErlebnispositionen(erlebnis.id))
-          .singleWhere((e) => e.produkt.name == 'Brot').position.anzahl,
+          .singleWhere((e) => e.produkt.name == 'Brot')
+          .position
+          .anzahl,
       2,
     );
   });
@@ -207,7 +211,8 @@ void main() {
     await tester.tap(find.text('Einkauf beenden'));
     await tester.pumpAndSettle();
     expect(find.text('Status: Beendet'), findsOneWidget);
-    expect((await repository.ladeErlebnis(erlebnis.id))!.tatsaechlicherBeginn, isNull);
+    expect((await repository.ladeErlebnis(erlebnis.id))!.tatsaechlicherBeginn,
+        isNull);
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
     final beendet = await repository.ladeErlebnis(erlebnis.id);
