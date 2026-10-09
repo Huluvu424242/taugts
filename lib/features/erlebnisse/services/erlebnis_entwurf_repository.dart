@@ -8,7 +8,7 @@ class ErlebnisEntwurfRepository
   ErlebnisEntwurfRepository(this.basis, this.erlebnisId);
 
   final BewertungsRepository basis;
-  
+
   @override
   Future<void> loescheProdukt(String id) async {
     final verwaltung = basis;
@@ -98,9 +98,11 @@ class ErlebnisEntwurfRepository
     required ErlebnisPosition position,
     required List<Bewertung> bewertungen,
   }) async {
-    if (erlebnis.id != erlebnisId || position.erlebnisId != erlebnisId ||
-        bewertungen.any((wert) => wert.erlebnisPositionId != position.id ||
-          wert.erlebnisId != erlebnisId)) {
+    if (erlebnis.id != erlebnisId ||
+        position.erlebnisId != erlebnisId ||
+        bewertungen.any((wert) =>
+            wert.erlebnisPositionId != position.id ||
+            wert.erlebnisId != erlebnisId)) {
       throw ArgumentError('Produktbewertung gehört nicht zum Erlebnis');
     }
     _produktbewertungen[position.id] = List.of(bewertungen);
@@ -109,9 +111,10 @@ class ErlebnisEntwurfRepository
   @override
   Future<List<Bewertung>> ladeBewertungenFuerErlebnisposition(
     String positionId,
-  ) => _produktbewertungen.containsKey(positionId)
-      ? Future.value(List.of(_produktbewertungen[positionId]!))
-      : basis.ladeBewertungenFuerErlebnisposition(positionId);
+  ) =>
+      _produktbewertungen.containsKey(positionId)
+          ? Future.value(List.of(_produktbewertungen[positionId]!))
+          : basis.ladeBewertungenFuerErlebnisposition(positionId);
 
   @override
   Future<void> speichereOrtsbewertung({
@@ -120,7 +123,8 @@ class ErlebnisEntwurfRepository
     required Ortsbewertung ortsbewertung,
     required List<Bewertung> bewertungen,
   }) async {
-    if (erlebnis.id != erlebnisId || ortsbewertung.erlebnisId != erlebnisId ||
+    if (erlebnis.id != erlebnisId ||
+        ortsbewertung.erlebnisId != erlebnisId ||
         ort.id != ortsbewertung.ortId) {
       throw ArgumentError('Ortsbewertung gehört nicht zum Erlebnis');
     }
@@ -134,9 +138,10 @@ class ErlebnisEntwurfRepository
   @override
   Future<OrtsbewertungMitWerten?> ladeOrtsbewertungFuerErlebnis(
     String id,
-  ) => id == erlebnisId && _ortsbewertungGeaendert
-      ? Future.value(_ortsbewertung)
-      : basis.ladeOrtsbewertungFuerErlebnis(id);
+  ) =>
+      id == erlebnisId && _ortsbewertungGeaendert
+          ? Future.value(_ortsbewertung)
+          : basis.ladeOrtsbewertungFuerErlebnis(id);
 
   @override
   Future<void> speichereGetraenkebewertung({
@@ -158,7 +163,8 @@ class ErlebnisEntwurfRepository
     if (repository is! ErlebnisGesamtstandRepository) {
       throw StateError('Gemeinsame Transaktionsspeicherung nicht verfügbar.');
     }
-    await (repository as ErlebnisGesamtstandRepository).speichereErlebnisGesamtstand(
+    await (repository as ErlebnisGesamtstandRepository)
+        .speichereErlebnisGesamtstand(
       erlebnis: erlebnis,
       geaendertePositionen: _positionen.values.toList(),
       entferntePositionen: _entferntePositionen,
@@ -176,16 +182,19 @@ class ErlebnisEntwurfRepository
   }
 
   @override
-  Future<void> speichereProdukt(Produkt produkt) => basis.speichereProdukt(produkt);
+  Future<void> speichereProdukt(Produkt produkt) =>
+      basis.speichereProdukt(produkt);
 
   @override
   Future<Produkt?> ladeProdukt(String id) => basis.ladeProdukt(id);
 
   @override
-  Future<List<Produkt>> ladeProdukte({String suchtext = ''}) => basis.ladeProdukte(suchtext: suchtext);
+  Future<List<Produkt>> ladeProdukte({String suchtext = ''}) =>
+      basis.ladeProdukte(suchtext: suchtext);
 
   @override
-  Future<Produkt?> ladeProduktMitBarcode(String barcode) => basis.ladeProduktMitBarcode(barcode);
+  Future<Produkt?> ladeProduktMitBarcode(String barcode) =>
+      basis.ladeProduktMitBarcode(barcode);
 
   @override
   Future<void> speichereOrt(Ort ort) => basis.speichereOrt(ort);
@@ -194,14 +203,17 @@ class ErlebnisEntwurfRepository
   Future<Ort?> ladeOrt(String id) => basis.ladeOrt(id);
 
   @override
-  Future<List<Ort>> ladeOrte({String suchtext = ''}) => basis.ladeOrte(suchtext: suchtext);
+  Future<List<Ort>> ladeOrte({String suchtext = ''}) =>
+      basis.ladeOrte(suchtext: suchtext);
 
   @override
   Future<List<Ort>> findeAehnlicheOrte({
     required String name,
     String? adresse,
     String? ausgenommenId,
-  }) => basis.findeAehnlicheOrte(name: name, adresse: adresse, ausgenommenId: ausgenommenId);
+  }) =>
+      basis.findeAehnlicheOrte(
+          name: name, adresse: adresse, ausgenommenId: ausgenommenId);
 
   @override
   Future<List<Erlebnis>> ladeErlebnisse() => basis.ladeErlebnisse();
@@ -216,43 +228,54 @@ class ErlebnisEntwurfRepository
   Future<Preisbeobachtung?> ladeLetztenPreis({
     required String produktId,
     required String waehrung,
-  }) => basis.ladeLetztenPreis(produktId: produktId, waehrung: waehrung);
+  }) =>
+      basis.ladeLetztenPreis(produktId: produktId, waehrung: waehrung);
 
   @override
-  Future<void> speichereKriterium(Bewertungskriterium kriterium) => basis.speichereKriterium(kriterium);
+  Future<void> speichereKriterium(Bewertungskriterium kriterium) =>
+      basis.speichereKriterium(kriterium);
 
   @override
-  Future<void> sortiereKriterien(List<String> kriteriumIds) => basis.sortiereKriterien(kriteriumIds);
+  Future<void> sortiereKriterien(List<String> kriteriumIds) =>
+      basis.sortiereKriterien(kriteriumIds);
 
   @override
-  Future<bool> entferneKriterium(String kriteriumId) => basis.entferneKriterium(kriteriumId);
+  Future<bool> entferneKriterium(String kriteriumId) =>
+      basis.entferneKriterium(kriteriumId);
 
   @override
-  Future<List<Bewertungskriterium>> ladeKriterien({bool nurAktive = false}) => basis.ladeKriterien(nurAktive: nurAktive);
+  Future<List<Bewertungskriterium>> ladeKriterien({bool nurAktive = false}) =>
+      basis.ladeKriterien(nurAktive: nurAktive);
 
   @override
   Future<List<Bewertungskriterium>> ladeAktiveKriterienFuerObjektart(
     KriteriumObjektart objektart,
-  ) => basis.ladeAktiveKriterienFuerObjektart(objektart);
+  ) =>
+      basis.ladeAktiveKriterienFuerObjektart(objektart);
 
   @override
-  Future<List<Bewertungskriterium>> ladeAktiveGetraenkekriterien() => basis.ladeAktiveGetraenkekriterien();
+  Future<List<Bewertungskriterium>> ladeAktiveGetraenkekriterien() =>
+      basis.ladeAktiveGetraenkekriterien();
 
   @override
   Future<List<Bewertungskriterium>> ladeAktiveKriterienFuerProduktart(
     Produktart produktart,
-  ) => basis.ladeAktiveKriterienFuerProduktart(produktart);
+  ) =>
+      basis.ladeAktiveKriterienFuerProduktart(produktart);
 
   @override
-  Future<void> speichereBewertung(Bewertung bewertung) => basis.speichereBewertung(bewertung);
+  Future<void> speichereBewertung(Bewertung bewertung) =>
+      basis.speichereBewertung(bewertung);
 
   @override
-  Future<List<Bewertung>> ladeBewertungenFuerProdukt(String produktId) => basis.ladeBewertungenFuerProdukt(produktId);
+  Future<List<Bewertung>> ladeBewertungenFuerProdukt(String produktId) =>
+      basis.ladeBewertungenFuerProdukt(produktId);
 
   @override
-  Future<List<BewertungsverlaufEintrag>> ladeProduktverlauf(String produktId) => basis.ladeProduktverlauf(produktId);
+  Future<List<BewertungsverlaufEintrag>> ladeProduktverlauf(String produktId) =>
+      basis.ladeProduktverlauf(produktId);
 
   @override
-  Future<List<BewertungsverlaufEintrag>> ladeOrtsverlauf(String ortId) => basis.ladeOrtsverlauf(ortId);
-
+  Future<List<BewertungsverlaufEintrag>> ladeOrtsverlauf(String ortId) =>
+      basis.ladeOrtsverlauf(ortId);
 }
