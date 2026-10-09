@@ -38,6 +38,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   final _dauerFokus = FocusNode();
   final _beginnFokus = FocusNode();
   final _endeFokus = FocusNode();
+  final _ortsBewertungFokus = FocusNode();
   final _dauer = TextEditingController();
   final _notiz = TextEditingController();
   final _ortsbewertungController = GaststaettenbewertungController();
@@ -95,6 +96,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     _dauerFokus.dispose();
     _beginnFokus.dispose();
     _endeFokus.dispose();
+    _ortsBewertungFokus.dispose();
     super.dispose();
   }
 
@@ -309,6 +311,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     if (fehler.contains('Dauer') || fehler.contains('Minutenzahl')) {
       return _dauerFokus;
     }
+    if (fehler.contains('Ortsbewertung')) return _ortsBewertungFokus;
     if (fehler.contains('Ende')) return _endeFokus;
     return _beginnFokus;
   }
@@ -340,14 +343,28 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       );
     } catch (_) {
       if (!mounted) return;
-      setState(() => _speichert = false);
+      setState(() {
+        _speichert = false;
+        _zeitfehler = [
+          'Das Erlebnis konnte nicht vollständig gespeichert werden. '
+          'Alle Eingaben bleiben zur Korrektur erhalten.',
+        ];
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Das Erlebnis konnte nicht vollständig gespeichert werden.',
+            'Speichern fehlgeschlagen. Der Erlebnisentwurf bleibt erhalten.',
           ),
         ),
       );
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+      final ziel = _fehlerKey.currentContext;
+      if (ziel != null && ziel.mounted) {
+        await Scrollable.ensureVisible(ziel);
+      }
+      if (!mounted) return;
+      _fehlerFokus.requestFocus();
     }
   }
 
@@ -873,13 +890,16 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
               ),
               if (_istRestaurant || _istEinkauf) ...[
                 const SizedBox(height: 24),
-                GaststaettenbewertungAbschnitt(
-                  key: ValueKey('ortsbewertung-$_id-${_ort?.id}'),
-                  repository: _entwurf,
-                  idGenerator: widget.idGenerator,
-                  erlebnis: _erlebnisAusEingaben(),
-                  ort: _ort,
-                  controller: _ortsbewertungController,
+                Focus(
+                  focusNode: _ortsBewertungFokus,
+                  child: GaststaettenbewertungAbschnitt(
+                    key: ValueKey('ortsbewertung-$_id-${_ort?.id}'),
+                    repository: _entwurf,
+                    idGenerator: widget.idGenerator,
+                    erlebnis: _erlebnisAusEingaben(),
+                    ort: _ort,
+                    controller: _ortsbewertungController,
+                  ),
                 ),
               ],
             ],
