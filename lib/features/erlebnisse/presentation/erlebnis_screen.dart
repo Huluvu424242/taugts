@@ -262,9 +262,13 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     setState(() => _zeitfehler = fehler);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(fehler.any((eintrag) => eintrag.startsWith('Bitte eine Ortsbewertung'))
-            ? 'Bitte einen Inhalt für das Erlebnis erfassen.'
-            : 'Bitte Zeitangaben prüfen.'),
+        content: Text(
+          fehler.any(
+            (eintrag) => eintrag.startsWith('Bitte eine Ortsbewertung'),
+          )
+              ? 'Bitte einen Inhalt für das Erlebnis erfassen.'
+              : 'Bitte Zeitangaben prüfen.',
+        ),
       ),
     );
     await WidgetsBinding.instance.endOfFrame;
