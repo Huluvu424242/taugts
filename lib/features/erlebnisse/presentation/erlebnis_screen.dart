@@ -257,6 +257,9 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         );
       }
     }
+    if (_ortsbewertungController.hatWertfehler) {
+      fehler.add('Bitte die ungültigen Werte der Ortsbewertung korrigieren.');
+    }
     if (fehler.isEmpty) {
       setState(() => _zeitfehler = []);
       return true;
@@ -296,6 +299,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     Erlebnisstatus? status,
     required bool schliessen,
   }) async {
+    if (_speichert) return;
     final erlebnis = _erlebnisAusEingaben(status: status);
     if (!await _validiere(erlebnis) || !mounted) return;
     setState(() => _speichert = true);
