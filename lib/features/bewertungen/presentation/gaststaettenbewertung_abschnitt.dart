@@ -9,6 +9,10 @@ class GaststaettenbewertungController {
   Object? _owner;
   Future<bool> Function(Erlebnis erlebnis)? _speicherAktion;
 
+  bool Function()? _hatEingabeAktion;
+
+  bool get hatEingabe => _hatEingabeAktion?.call() ?? false;
+
   Future<bool> speichereFallsGeaendert(Erlebnis erlebnis) async {
     final aktion = _speicherAktion;
     return aktion == null ? false : aktion(erlebnis);
@@ -17,15 +21,18 @@ class GaststaettenbewertungController {
   void _verbinde(
     Object owner,
     Future<bool> Function(Erlebnis erlebnis) speicherAktion,
+    bool Function() hatEingabeAktion,
   ) {
     _owner = owner;
     _speicherAktion = speicherAktion;
+    _hatEingabeAktion = hatEingabeAktion;
   }
 
   void _trenne(Object owner) {
     if (!identical(_owner, owner)) return;
     _owner = null;
     _speicherAktion = null;
+    _hatEingabeAktion = null;
   }
 }
 
@@ -274,7 +281,7 @@ class _FormularState extends State<_Formular> {
     _notiz = TextEditingController(
       text: _bisher?.ortsbewertung.notiz ?? '',
     );
-    widget.controller?._verbinde(this, _speichereFallsGeaendert);
+    widget.controller?._verbinde(this, _speichereFallsGeaendert, () => _hatEingabe);
   }
 
   @override
@@ -282,7 +289,7 @@ class _FormularState extends State<_Formular> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller == widget.controller) return;
     oldWidget.controller?._trenne(this);
-    widget.controller?._verbinde(this, _speichereFallsGeaendert);
+    widget.controller?._verbinde(this, _speichereFallsGeaendert, () => _hatEingabe);
   }
 
   @override
