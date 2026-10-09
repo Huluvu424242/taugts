@@ -85,10 +85,97 @@ void main() {
             await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id);
         expect(gespeichert, isNotNull);
         expect(gespeichert!.ortsbewertung.notiz, fall.notiz);
+        expect(gespeichert.ortsbewertung.erlebnisId, erlebnis.id);
+        expect(gespeichert.ortsbewertung.ortId, erlebnis.ortId);
+        expect(await repository.ladeErlebnispositionen(erlebnis.id), isEmpty);
         expect(find.text('Zur Bewertung'), findsOneWidget);
+
+        // Auch nach erneutem Öffnen ist die Ortsbewertung noch vorhanden.
+        await _screenOeffnen(
+          tester: tester,
+          repository: repository,
+          profil: profil,
+          erlebnis: (await repository.ladeErlebnisse()).single,
+        );
+        await tester.scrollUntilVisible(
+          find.text(fall.abschnitt),
+          300,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.tap(find.text(fall.abschnitt));
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.widgetWithText(TextField, 'Notiz (optional)').last,
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(find.text(fall.notiz), findsOneWidget);
       },
     );
   }
+
+  testWidgets('Produktposition bleibt bei gemeinsamer Ortsbewertung erhalten',
+      (tester) async {
+    final erlebnis = await _vorbereiten(
+      repository: repository,
+      profil: profil,
+      zeit: zeit,
+      typ: Erlebnistyp.restaurantbesuch,
+      ortstyp: Ortstyp.gastronomie,
+    );
+    final produkt = Produkt(
+      id: '77000000-0000-4000-8000-000000000001',
+      name: 'Testgetränk',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    );
+    await repository.speichereProdukt(produkt);
+    await repository.speichereErlebnisposition(
+      position: ErlebnisPosition(
+        id: '78000000-0000-4000-8000-000000000001',
+        erlebnisId: erlebnis.id,
+        produktId: produkt.id,
+        anzahl: 2,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
+
+    await _screenOeffnen(
+      tester: tester,
+      repository: repository,
+      profil: profil,
+      erlebnis: erlebnis,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Gaststätte bewerten'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Gaststätte bewerten'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.widgetWithText(TextField, 'Notiz (optional)').last,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Notiz (optional)').last,
+      'Mit Bestellung bewertet',
+    );
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
+
+    final positionen = await repository.ladeErlebnispositionen(erlebnis.id);
+    expect(positionen, hasLength(1));
+    expect(positionen.single.position.anzahl, 2);
+    expect(
+      (await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id))!
+          .ortsbewertung
+          .notiz,
+      'Mit Bestellung bewertet',
+    );
+  });
 
   testWidgets('Speichern legt keine leere Ortsbewertung an', (tester) async {
     final erlebnis = await _vorbereiten(
