@@ -313,8 +313,8 @@ class _FormularState extends State<_Formular> {
     _werte = {
       for (final kriterium in widget.daten.kriterien)
         kriterium.id: gleicheOrtsbewertung
-            ? entwurf?._entwurfWerte?[kriterium.id] ??
-                KriteriumEingabewert.ausBewertung(vorhanden[kriterium.id])
+            ? (entwurf?._entwurfWerte?[kriterium.id] ??
+                KriteriumEingabewert.ausBewertung(vorhanden[kriterium.id]))
             : KriteriumEingabewert.ausBewertung(vorhanden[kriterium.id]),
     };
     _geaendert = gleicheOrtsbewertung && (entwurf?._entwurfGeaendert ?? false);
