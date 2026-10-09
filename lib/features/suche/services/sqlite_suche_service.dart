@@ -255,7 +255,8 @@ class SqliteSucheService implements SucheService {
         Suchtreffer(
           id: row['id']! as String,
           art: Suchziel.historie,
-          titel: 'Produktbewertung · ${row['produkt_name'] ?? 'Nicht zugeordnet'}',
+          titel:
+              'Produktbewertung · ${row['produkt_name'] ?? 'Nicht zugeordnet'}',
           untertitel:
               '${row['kriterium_name']}: ${row['wert']} · ${row['ort_name'] ?? 'Ohne Ort'}',
           erlebnisId: row['erlebnis_id']! as String,
@@ -324,8 +325,8 @@ class SqliteSucheService implements SucheService {
             ortId: row['ort_id']! as String,
             ortName: row['ort_name'] as String?,
             erlebnistyp: Erlebnistyp.values.byName(
-            row['erlebnis_typ']! as String,
-          ),
+              row['erlebnis_typ']! as String,
+            ),
             zeitpunkt: DateTime.parse(row['bewertet_am']! as String),
           ),
     ];
@@ -383,7 +384,8 @@ class SqliteSucheService implements SucheService {
         Suchtreffer(
           id: row['id']! as String,
           art: Suchziel.historie,
-          titel: 'Preisbeobachtung · ${row['produkt_name'] ?? 'Nicht zugeordnet'}',
+          titel:
+              'Preisbeobachtung · ${row['produkt_name'] ?? 'Nicht zugeordnet'}',
           untertitel:
               '${((row['betrag_minor']! as int) / 100).toStringAsFixed(2)} ${row['waehrung']} · ${row['ort_name'] ?? 'Ohne Ort'}',
           erlebnisId: row['erlebnis_id']! as String,
