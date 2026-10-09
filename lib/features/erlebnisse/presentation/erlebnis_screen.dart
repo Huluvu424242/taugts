@@ -328,7 +328,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       await _ortsbewertungController.speichereFallsGeaendert(erlebnis);
       await _entwurf.uebernehmen(erlebnis);
       if (!mounted) return;
-      if (schliessen) {
+      if (schliessen && Navigator.of(context).canPop()) {
         Navigator.of(context).pop(erlebnis);
         return;
       }
