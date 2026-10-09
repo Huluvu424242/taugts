@@ -161,9 +161,16 @@ void main() {
     );
     await tester.tap(find.byTooltip('Brot Anzahl erhöhen, aktuell 1'));
     await tester.pumpAndSettle();
-    final positionen = await repository.ladeErlebnispositionen(erlebnis.id);
     expect(
-      positionen.singleWhere((e) => e.produkt.name == 'Brot').position.anzahl,
+      (await repository.ladeErlebnispositionen(erlebnis.id))
+          .singleWhere((e) => e.produkt.name == 'Brot').position.anzahl,
+      1,
+    );
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
+    expect(
+      (await repository.ladeErlebnispositionen(erlebnis.id))
+          .singleWhere((e) => e.produkt.name == 'Brot').position.anzahl,
       2,
     );
   });
