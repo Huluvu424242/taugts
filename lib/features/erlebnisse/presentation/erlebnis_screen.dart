@@ -230,17 +230,19 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     );
   }
 
-  Future<bool> _validiere(Erlebnis erlebnis) async {
+  Future<bool> _validiere(Erlebnis erlebnis, {bool pruefeInhalt = true}) async {
     final fehler = [...erlebnis.zeitfehler];
     if (_dauer.text.trim().isNotEmpty &&
         int.tryParse(_dauer.text.trim()) == null) {
       fehler.add('Die geplante Dauer muss eine ganze Minutenzahl sein.');
     }
 
-    // Eine Planung mit Datum oder ein begonnener Besuch ist bereits ein
-    // eigenständiger fachlicher Inhalt. Eine reine Ortsbewertung benötigt
-    // dagegen keine Produktposition.
-    if (_gespeichertesErlebnis == null &&
+    // Ein dokumentierter Besuch mit Ort und tatsächlicher Zeit ist auch ohne
+    // Produkte oder Bewertung fachlich vollständig.
+    // Beim Hinzufügen der ersten Produktposition darf die Inhaltsprüfung
+    // nicht verhindern, dass das notwendige Erlebnis angelegt wird.
+    if (pruefeInhalt &&
+        _gespeichertesErlebnis == null &&
         _geplanterTag == null &&
         _tatsaechlicherBeginn == null &&
         _tatsaechlichesEnde == null &&
@@ -250,8 +252,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       if (!mounted) return false;
       if (positionen.isEmpty) {
         fehler.add(
-          'Bitte eine Ortsbewertung, ein Produkt, eine Notiz oder '
-          'einen Termin erfassen.',
+          'Bitte einen Ort mit Besuchszeit, eine Ortsbewertung, ein '
+          'Produkt, eine Notiz oder einen geplanten Termin erfassen.',
         );
       }
     }
@@ -264,7 +266,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       SnackBar(
         content: Text(
           fehler.any(
-            (eintrag) => eintrag.startsWith('Bitte eine Ortsbewertung'),
+            (eintrag) => eintrag.startsWith('Bitte einen Ort mit Besuchszeit'),
           )
               ? 'Bitte einen Inhalt für das Erlebnis erfassen.'
               : 'Bitte Zeitangaben prüfen.',
@@ -356,7 +358,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     ErlebnispositionMitProdukt? vorhanden,
   ]) async {
     final erlebnis = _erlebnisAusEingaben();
-    if (!await _validiere(erlebnis) || !mounted) return;
+    if (!await _validiere(erlebnis, pruefeInhalt: false) || !mounted) return;
     try {
       await widget.repository.speichereErlebnis(erlebnis);
       if (!mounted) return;
@@ -748,6 +750,18 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
+              TextButton.icon(
+                onPressed: _ort == null
+                    ? null
+                    : () => setState(() {
+                          _tatsaechlicherBeginn = DateTime.now();
+                          _tatsaechlichesEnde = null;
+                        }),
+                icon: const Icon(Icons.today_outlined),
+                label: const Text('Spontanen Besuch jetzt erfassen'),
+              ),
+              if (_ort == null)
+                const Text('Für einen spontanen Besuch zuerst einen Ort auswählen.'),
               ListTile(
                 key: const ValueKey('tatsaechlicher-beginn'),
                 contentPadding: EdgeInsets.zero,
