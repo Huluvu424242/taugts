@@ -367,11 +367,13 @@ class _FormularState extends State<_Formular> {
   }
 
   Future<bool> _speichereFallsGeaendert(Erlebnis erlebnis) async {
-    if (!_geaendert || !_hatEingabe) return false;
+    // Ungültige Eingaben dürfen auch dann nicht übergangen werden, wenn
+    // aktuell kein einziger als gültig erkannter Kriterienwert vorhanden ist.
     if (_hatWertfehler) {
       _zeigeValidierungsfehler();
       throw StateError('Ungültige Ortsbewertung');
     }
+    if (!_geaendert || !_hatEingabe) return false;
     await _speichereOrtsbewertung(erlebnis);
     if (!mounted) return true;
     setState(() {
