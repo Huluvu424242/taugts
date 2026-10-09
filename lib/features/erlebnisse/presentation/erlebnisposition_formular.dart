@@ -4,6 +4,7 @@ import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart';
+import 'package:taugts/features/erlebnisse/services/erlebnis_entwurf_repository.dart';
 import 'package:taugts/features/produkte/presentation/produkt_formular.dart';
 import 'package:taugts/features/produkte/presentation/produkte_screen.dart';
 
@@ -306,7 +307,9 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
               FilledButton.icon(
                 onPressed: _speichert ? null : _speichern,
                 icon: const Icon(Icons.save_outlined),
-                label: const Text('Position speichern'),
+                label: Text(widget.repository is ErlebnisEntwurfRepository
+                    ? 'Position übernehmen'
+                    : 'Position speichern'),
               ),
             ],
           ),
