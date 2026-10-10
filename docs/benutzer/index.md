@@ -1,6 +1,6 @@
 # Benutzerdokumentation
 
-Diese Dokumentation richtet sich an Nutzerinnen und Nutzer von **Taugt’s?**. Sie beschreibt den aktuell ausgelieferten Funktionsumfang der vorbereiteten Android-Version **0.1.0+8**.
+Diese Dokumentation richtet sich an Nutzerinnen und Nutzer von **Taugt’s?**. Sie unterscheidet den letzten dokumentierten offiziellen Release **0.1.0+8** (6. September 2026) von zusätzlichen Funktionen auf dem aktuellen Entwicklungsstand **`master`**. Die unter [Unreleased](https://github.com/Huluvu424242/taugts/blob/master/CHANGELOG.md) aufgeführten Änderungen sind noch keinem neuen offiziellen Release zugeordnet.
 
 Taugt’s? speichert Produkte, Orte, Erlebnisse und Bewertungen lokal auf dem Gerät. Für die Kernfunktionen sind weder ein Konto noch eine Serververbindung erforderlich.
 
