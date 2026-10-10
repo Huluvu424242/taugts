@@ -111,9 +111,8 @@ class ImportStrategieService {
       for (final eintrag in importNachId.entries) {
         final lokal = lokalNachId[eintrag.key];
         if (lokal == null) {
-          final aktion = entscheidungen.entscheidungen[
-            '$sammlung|${eintrag.key}|${eintrag.key}'
-          ];
+          final aktion = entscheidungen
+              .entscheidungen['$sammlung|${eintrag.key}|${eintrag.key}'];
           if (aktion == ImportKonfliktAktion.ueberspringen &&
               strategie != ImportStrategie.bestandErsetzen) {
             uebersprungen++;
@@ -130,9 +129,8 @@ class ImportStrategieService {
         }
         final konflikt = _identitaetsKonflikt(sammlung, eintrag.value, lokal);
         if (konflikt != null) konflikte.add(konflikt);
-        final aktion = entscheidungen.entscheidungen[
-          '$sammlung|${eintrag.key}|${eintrag.key}'
-        ];
+        final aktion = entscheidungen
+            .entscheidungen['$sammlung|${eintrag.key}|${eintrag.key}'];
         if (strategie == ImportStrategie.bestandErsetzen) {
           aktualisieren++;
         } else if (aktion == ImportKonfliktAktion.lokaleVersion ||
@@ -228,7 +226,8 @@ class ImportStrategieService {
   Map<String, Map<String, Object?>> _nachId(
     String sammlung,
     List<Map<String, Object?>> werte,
-  ) => {
+  ) =>
+      {
         for (final wert in werte)
           if (_identitaet(sammlung, wert).isNotEmpty)
             _identitaet(sammlung, wert): wert,
@@ -236,15 +235,12 @@ class ImportStrategieService {
 
   String _identitaet(String sammlung, Map<String, Object?> wert) =>
       switch (sammlung) {
-        'kategorieZuordnungen' =>
-          '${wert['kategorieId']}:${wert['zielId']}',
-        'objektTags' =>
-          '${wert['objektId']}:${wert['normalisiert']}',
+        'kategorieZuordnungen' => '${wert['kategorieId']}:${wert['zielId']}',
+        'objektTags' => '${wert['objektId']}:${wert['normalisiert']}',
         'objektKlassifikationsmerkmale' =>
           '${wert['objektId']}:${wert['dimension']}:${wert['schluessel']}',
         'kategorieKriteriensetRegeln' => '${wert['kategorieId']}',
-        'kategorieKriterien' =>
-          '${wert['kategorieId']}:${wert['kriteriumId']}',
+        'kategorieKriterien' => '${wert['kategorieId']}:${wert['kriteriumId']}',
         _ => wert['id'] as String? ?? '',
       };
 
