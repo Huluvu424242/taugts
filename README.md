@@ -6,7 +6,7 @@ Taugt’s? ist eine Offline-first-Flutter-App zur lokalen Erfassung und Bewertun
 von Produkten, Orten und Erlebnissen. Die Datenhaltung bleibt auf dem Gerät;
 für die Kernfunktionen sind weder Konto noch Serververbindung erforderlich.
 
-Die vorbereitete Android-Version ist **0.1.0+8**.
+**Letzter dokumentierter offizieller Release:** 0.1.0+8 (6. September 2026). Der aktuelle Entwicklungsstand auf `master` enthält zusätzliche, noch unveröffentlichte Änderungen. Diese sind in [Unreleased](CHANGELOG.md) beschrieben; die im Folgenden aufgeführten Funktionen von 0.1.0+8 sind deshalb nicht mit allen Funktionen auf `master` gleichzusetzen.
 
 ## Funktionsumfang von 0.1.0+8
 
@@ -68,6 +68,20 @@ Die vorbereitete Android-Version ist **0.1.0+8**.
   Projekt-Changelog synchron
 - lokales Profil als Herkunftskennung verwenden
 - Offline-Barrierefreiheitserklärung und kontextbezogene Bug-Meldung nutzen
+
+## Zusätzliche Funktionen auf master (noch nicht veröffentlicht)
+
+Gegenüber 0.1.0+8 enthält der aktuelle Entwicklungsstand folgende Änderungen:
+
+- Produkte und Orte können aus dem aktiven Bestand gelöscht werden, ohne historische Preise, Bewertungen oder Erlebnisse zu entfernen. Fehlende Zuordnungen lassen sich über die Erlebnisbearbeitung nachträglich korrigieren.
+- Bewertungsdetails zeigen verständliche Namen und einen Erlebniskontext statt technischer IDs.
+- Aus einer Erlebnisposition heraus lassen sich Produkte direkt bearbeiten oder neu erfassen.
+- Besuche und Einkäufe lassen sich bei einem gewählten Ort auch ohne Produktposition erfassen; eine Ortsbewertung kann ebenfalls ohne Produkte gespeichert werden.
+- Erlebnisdaten einschließlich Produktpositionen, Preisen und Bewertungen werden über einen gemeinsamen Speichervorgang als Einheit übernommen; bei Fehlern bleiben die Entwurfsänderungen zur Korrektur erhalten.
+- Der Erlebniszeitraum verwendet einen bearbeitbaren Beginn und ein Ende. Die vorherigen getrennten Plan-/Ist-Zeiten wurden konsolidiert.
+- Ein separater, manuell auszulösender Workflow kann nach ausdrücklicher Freigabe eine signierte **Test-APK** vom aktuellen `master` bereitstellen. Dies ist kein offizielles Release; siehe [Test-APK-Dokumentation](docs/entwicklung/android-test-apk.md).
+
+Diese Funktionen sind **nicht Bestandteil der bereits veröffentlichten APK 0.1.0+8**. Vor einem Test-Update ist ein JSON-Backup empfehlenswert; die derzeitige Datenbankmigration und das JSON-Austauschformat sind in der [Datenhaltungsdokumentation](docs/benutzer/datenhaltung.md) beschrieben.
 
 ## Installation unter Android
 
