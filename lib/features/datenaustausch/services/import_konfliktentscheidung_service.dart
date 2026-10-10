@@ -1,6 +1,8 @@
 import 'package:taugts/features/datenaustausch/services/import_konfliktanalyse_service.dart';
 
 enum ImportKonfliktArt {
+  neuerDatensatz,
+  unveraendert,
   versionskonflikt,
   identitaetskonflikt,
   fachlicheDublette
@@ -95,6 +97,7 @@ class ImportKonfliktentscheidungService {
     required Map<String, Object?> importDokument,
     required Map<String, Object?> lokalesDokument,
     required ImportKonfliktAnalyse analyse,
+    bool alleEintraege = false,
   }) {
     final konflikte = <ImportEinzelKonflikt>[];
 
@@ -103,7 +106,53 @@ class ImportKonfliktentscheidungService {
       final lokalNachId = _nachId(sammlung, _liste(lokalesDokument, sammlung));
       for (final eintrag in importNachId.entries) {
         final lokal = lokalNachId[eintrag.key];
-        if (lokal == null || _gleich(eintrag.value, lokal)) continue;
+        if (lokal == null) {
+          if (alleEintraege) {
+            final kannUeberspringen = const {
+              'bewertungen',
+              'preisbeobachtungen',
+              'objektTags',
+              'objektKlassifikationsmerkmale',
+              'kategorieKriteriensetRegeln',
+              'kategorieKriterien',
+            }.contains(sammlung);
+            konflikte.add(
+              ImportEinzelKonflikt(
+                schluessel: '$sammlung|${eintrag.key}|${eintrag.key}',
+                art: ImportKonfliktArt.neuerDatensatz,
+                sammlung: sammlung,
+                importId: eintrag.key,
+                lokaleId: '',
+                unterschiede: const [],
+                kontext: _kontext(eintrag.value, null),
+                erlaubteAktionen: kannUeberspringen
+                    ? const {
+                        ImportKonfliktAktion.importVersion,
+                        ImportKonfliktAktion.ueberspringen,
+                      }
+                    : const {ImportKonfliktAktion.importVersion},
+              ),
+            );
+          }
+          continue;
+        }
+        if (_gleich(eintrag.value, lokal)) {
+          if (alleEintraege) {
+            konflikte.add(
+              ImportEinzelKonflikt(
+                schluessel: '$sammlung|${eintrag.key}|${eintrag.key}',
+                art: ImportKonfliktArt.unveraendert,
+                sammlung: sammlung,
+                importId: eintrag.key,
+                lokaleId: eintrag.key,
+                unterschiede: const [],
+                kontext: _kontext(eintrag.value, lokal),
+                erlaubteAktionen: const {ImportKonfliktAktion.lokaleVersion},
+              ),
+            );
+          }
+          continue;
+        }
         final importWert = eintrag.value;
         final identitaetskonflikt =
             (_istHistorisch(sammlung) &&
