@@ -370,6 +370,76 @@ void main() {
     );
   });
 
+  test('Ersatz übernimmt Kategorien, Tags und Kriterienset-Regeln atomar', () {
+    final dokument = vollstaendigesDokument();
+    dokument['kategorien'] = [
+      {
+        'id': '10000000-0000-4000-8000-000000000001',
+        'name': 'Produkt',
+        'zielart': 'objekt',
+        'elternKategorieId': null,
+        'istStandard': true,
+        'erstelltAm': '1970-01-01T00:00:00.000Z',
+        'geaendertAm': '1970-01-01T00:00:00.000Z',
+      },
+    ];
+    dokument['kategorieZuordnungen'] = [
+      {
+        'kategorieId': '10000000-0000-4000-8000-000000000001',
+        'zielId': 'produkt-1',
+      },
+    ];
+    dokument['objektTags'] = [
+      {'objektId': 'produkt-1', 'normalisiert': 'lokal', 'text': 'Lokal'},
+    ];
+    dokument['objektKlassifikationsmerkmale'] = [
+      {
+        'objektId': 'produkt-1',
+        'dimension': 'hersteller',
+        'schluessel': '',
+        'wert': 'Testmarke',
+      },
+    ];
+    dokument['kategorieKriteriensetRegeln'] = [
+      {
+        'kategorieId': '10000000-0000-4000-8000-000000000001',
+        'fallbackObjektart': 'produkt',
+        'modus': 'ergaenzen',
+        'version': 1,
+      },
+    ];
+    dokument['kategorieKriterien'] = [
+      {
+        'kategorieId': '10000000-0000-4000-8000-000000000001',
+        'kriteriumId': 'kriterium-1',
+        'reihenfolge': 10,
+      },
+    ];
+    for (var i = 0; i < 2; i++) {
+      service.ausfuehren(
+        datenbank: datenbank,
+        importDokument: dokument,
+        strategie: ImportStrategie.bestandErsetzen,
+      );
+    }
+    for (final tabelle in const {
+      'kategorien': 1,
+      'produkt_kategorien': 1,
+      'objekt_tags': 1,
+      'objekt_klassifikationsmerkmale': 1,
+      'kategorie_kriterienset_regeln': 1,
+      'kategorie_kriterien': 1,
+    }.entries) {
+      expect(
+        datenbank.verbindung
+            .select('SELECT COUNT(*) AS n FROM ${tabelle.key}')
+            .single['n'],
+        tabelle.value,
+        reason: tabelle.key,
+      );
+    }
+  });
+
   test('weist zusammengeführte Datensätze getrennt von Aktualisierungen aus',
       () {
     final import = leeresDokument(profile: [
