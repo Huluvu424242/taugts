@@ -1,26 +1,33 @@
 # Bekannte Einschränkungen und Hilfe
 
-## Bekannte Einschränkungen von 0.1.0+3
+## Versionsstand
 
-- Import und Export sind noch nicht enthalten.
-- Geschäfte können innerhalb eines Einkaufs noch nicht getrennt bewertet werden.
-- Windows und Linux sind noch nicht Bestandteil des veröffentlichten Releases.
-- Barcode, Standort und Karte müssen vor einer öffentlichen Freigabe noch auf den vorgesehenen realen Zielgeräten manuell geprüft werden.
-- Die systematische manuelle Prüfung mit TalkBack, großer Systemschrift, Gestennavigation und einem kleinen Android-Gerät ist noch abzuschließen.
-- Vor Neuinstallation oder Wechsel des Signierschlüssels gibt es noch keinen Exportweg für die lokal gespeicherten Daten.
+Die **letzte hier dokumentierte offizielle Android-Version ist 0.1.0+8**. Der aktuelle Entwicklungsstand auf `master` besitzt zusätzliche, noch unveröffentlichte Funktionen; siehe [Changelog](https://github.com/Huluvu424242/taugts/blob/master/CHANGELOG.md) unter `[Unreleased]`. Beschreibungen von `master` sind keine Zusage, dass diese Funktionen bereits in der installierten APK verfügbar sind.
+
+## Bekannte Einschränkungen
+
+- Windows und Linux gehören weiterhin nicht zum veröffentlichten Funktionsumfang.
+- Barcode-Scanner, Standortermittlung, Karte und Reverse Geocoding müssen vor einer öffentlichen Freigabe auf den vorgesehenen realen Geräten manuell geprüft werden.
+- Import, Export und der Android-Speicherdialog sind mit realistischen Datenbeständen sowie Abbruch- und Fehlerfällen auf einem echten Gerät zu prüfen. Dasselbe gilt für den Excel-Export einschließlich des Diagramms in einer Tabellenkalkulation.
+- Eine systematische manuelle Prüfung mit TalkBack, großer Systemschrift, Gestennavigation und kleinem Android-Gerät steht noch aus; siehe [Story #30](https://github.com/Huluvu424242/taugts/issues/30).
+- Datenbanken aus 0.1.0+6 oder älteren Vorabversionen besitzen keinen direkten SQLite-Upgradepfad auf die ab 0.1.0+7 eingeführte Baseline. Vor dem Update einen JSON-Export sichern und dessen Import prüfen.
+- Für Änderungen aus `master` ist kein neues offizielles Release festgelegt. Eine [Test-APK](../entwicklung/android-test-apk.md) kann nur über den gesondert freizugebenden manuellen Workflow erstellt werden.
+
+## Hilfe zu Daten und Erlebnissen
+
+- [Installation und Updates](installation.md)
+- [Bedienung, Erlebnisse und Bewertungen](bedienung.md)
+- [Datenschutz, JSON-Import und -Export sowie Migration](datenhaltung.md)
+- [Auswertungen und Excel-Export](auswertungen.md)
 
 ## Projekt und Dokumentation
 
-Im App-Menü führt **Über** direkt zur **Projektseite** auf GitHub und zur veröffentlichten **Projektdokumentation**. Beide Ziele werden im externen Browser geöffnet. Kann ein Ziel nicht geöffnet werden, bleibt der Über-Dialog geöffnet und zeigt eine verständliche Fehlermeldung.
+Im App-Menü führt **Über** zur **Projektseite** auf GitHub und zur veröffentlichten **Projektdokumentation**. Beide Ziele werden extern geöffnet. Kann ein Ziel nicht geöffnet werden, bleibt der Dialog offen und zeigt einen verständlichen Fehler.
 
 ## Fehler melden
 
-Taugt’s? bietet in der App eine kontextbezogene Funktion **Bug melden**. Sie bereitet einen Bericht mit App-Version und Aufrufkontext vor und öffnet ihn zur Prüfung auf GitHub. Erst dort entscheidest du, ob der Bericht abgesendet wird.
-
-Alternativ können Fehler direkt über die [Issues des Projekts](https://github.com/Huluvu424242/taugts/issues) gemeldet werden.
-
-Bitte keine Passwörter, Tokens oder unnötigen personenbezogenen Daten in Fehlerberichte aufnehmen.
+Über **Bug melden** wird ein Bericht mit App-Version und Aufrufkontext vorbereitet und zur Prüfung auf GitHub geöffnet. Erst dort entscheidet der Nutzer über das Absenden. Alternativ können Fehler über die [GitHub-Issues](https://github.com/Huluvu424242/taugts/issues) erfasst werden. Bitte keine Passwörter, Tokens oder unnötigen personenbezogenen Daten mitsenden.
 
 ## Barrierefreiheit
 
-Der aktuelle Stand und bekannte Barrieren sind in der [Barrierefreiheitserklärung](../barrierefreiheit.md) dokumentiert. Barrierefreiheitsprobleme können ebenfalls über die Bug-Meldung der App gemeldet werden.
+Umsetzungsstand und bekannte Barrieren stehen in der [Barrierefreiheitserklärung](../barrierefreiheit.md). Barrierefreiheitsprobleme können ebenfalls in der App gemeldet werden.
