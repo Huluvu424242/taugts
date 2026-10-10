@@ -49,9 +49,9 @@ void main() {
       db.verbindung.execute(
         '''
           INSERT INTO erlebnisse (
-            id, typ, status, ort_id, erstellt_am, geaendert_am,
-            herkunft_profil_id, ist_entwurf
-          ) VALUES (?, 'restaurantbesuch', 'beendet', ?, ?, ?, ?, 0)
+            id, typ, ort_id, erstellt_am, geaendert_am,
+            herkunft_profil_id
+          ) VALUES (?, 'restaurantbesuch', ?, ?, ?, ?)
         ''',
         [eintrag.$1, eintrag.$2, jetzt, jetzt, profil],
       );
