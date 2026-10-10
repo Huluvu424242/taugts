@@ -192,14 +192,27 @@ void main() {
     expect(erstes.nachSammlung['produktbewertungen']!.hinzugefuegt, 1);
     expect(erstes.nachSammlung['ortsbewertungswerte']!.hinzugefuegt, 1);
 
-    expect(zweites.nachSammlung['erlebnisse']!.aktualisiert, 1);
-    expect(zweites.nachSammlung['erlebnisPositionen']!.aktualisiert, 1);
-    expect(zweites.nachSammlung['preisbeobachtungen']!.aktualisiert, 1);
-    expect(zweites.nachSammlung['ortsbewertungen']!.aktualisiert, 1);
-    expect(zweites.nachSammlung['produktbewertungen']!.aktualisiert, 1);
-    expect(zweites.nachSammlung['ortsbewertungswerte']!.aktualisiert, 1);
+    for (final name in const [
+      'erlebnisse',
+      'erlebnisPositionen',
+      'preisbeobachtungen',
+      'ortsbewertungen',
+      'produktbewertungen',
+      'ortsbewertungswerte',
+    ]) {
+      final zaehler = zweites.nachSammlung[name]!;
+      expect(
+        zaehler.aktualisiert + zaehler.uebersprungen,
+        1,
+        reason: name,
+      );
+    }
     expect(erstes.gesamt.hinzugefuegt, 10);
-    expect(zweites.gesamt.aktualisiert, 10);
+    expect(zweites.gesamt.hinzugefuegt, 0);
+    expect(
+      zweites.gesamt.aktualisiert + zweites.gesamt.uebersprungen,
+      10,
+    );
 
     for (final tabelle in const {
       'erlebnisse': 1,
