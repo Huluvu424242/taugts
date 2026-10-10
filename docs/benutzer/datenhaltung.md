@@ -46,6 +46,14 @@ Mit 0.1.0+7 wurde die während der Vorabentwicklung entstandene SQLite-Migration
 
 Wer Daten aus einer solchen älteren Vorabversion behalten möchte, sollte **vor dem Update** einen vollständigen JSON-Export erstellen und sicher aufbewahren. Die Wiederherstellung dieses Exports in einer frisch angelegten aktuellen Datenbank muss vor dem Löschen der alten App-Daten geprüft werden. Ein Update von 0.1.0+7 auf 0.1.0+8 führt keine neue Datenbank-Baseline ein.
 
+## Gelöschte Stammdaten und Historien auf master
+
+Seit Story #217 können Produkte und Orte aus den aktiven Stammdaten gelöscht werden. Erlebnisse, Preise, Mengen und Bewertungswerte bleiben dabei als historische Beobachtungen erhalten. Kann eine bisherige Produkt- oder Ortszuordnung nicht mehr aufgelöst werden, wird dies als **Nicht zugeordnet** angezeigt. Eine neue Zuordnung kann bewusst in der Erlebnis- beziehungsweise Positionsbearbeitung gewählt werden. Historische Inhalte werden dabei nicht automatisch gelöscht oder rückwirkend neu berechnet.
+
+## Gemeinsame Speicherung eines Erlebnisses auf master
+
+Produktpositionen, Mengen, Preise und Bewertungen werden während der geöffneten Erlebnisbearbeitung zunächst als **temporärer Entwurf im Arbeitsspeicher** gehalten. Erst **Speichern** übernimmt Erlebnis, Positionen und zugehörige Bewertungen in einer SQLite-Transaktion. Ein Fehler führt zum Rollback des gesamten Vorgangs; die Eingaben bleiben im noch geöffneten Formular verfügbar. Das Verlassen ohne gemeinsames Speichern verwirft die noch nicht dauerhaft übernommenen Erlebnisänderungen. **Separat bearbeitete Produkt-Stammdaten** werden dagegen eigenständig gespeichert und sind nicht Bestandteil dieser Transaktion.
+
 ## Einheitlicher Erlebniszeitraum
 
 Seit Story #228 wird für jeden Einkauf und Restaurantbesuch nur ein Beginn und ein Ende gespeichert. Die Zeiten sind vor, während und nach dem Ereignis jederzeit bearbeitbar; der letzte Stand ist maßgeblich. Plan-/Ist-Zeitfelder sowie Entwurfs- oder Durchführungsstatus werden nicht mehr gesondert gespeichert.
