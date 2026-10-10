@@ -19,7 +19,7 @@ void main() {
         [profil, null, jetzt, jetzt],
       );
       db.verbindung.execute(
-        "INSERT INTO erlebnisse (id, typ, status, erstellt_am, geaendert_am, herkunft_profil_id, ist_entwurf) VALUES ('e', 'einkauf', 'geplant', ?, ?, ?, 0)",
+        "INSERT INTO erlebnisse (id, typ, erstellt_am, geaendert_am, herkunft_profil_id) VALUES ('e', 'einkauf', ?, ?, ?)",
         [jetzt, jetzt, profil],
       );
       db.verbindung.execute(
