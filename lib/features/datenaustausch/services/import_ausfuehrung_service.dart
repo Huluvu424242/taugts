@@ -4,8 +4,8 @@ import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_alias_repository.dart';
 import 'package:taugts/features/datenaustausch/services/import_dubletten_merge_service.dart';
-import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_klassifikation_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_protokoll_repository.dart';
 import 'package:taugts/features/datenaustausch/services/import_strategie_service.dart';
 
