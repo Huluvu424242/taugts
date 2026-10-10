@@ -346,7 +346,7 @@ void main() {
       [produktId],
     );
     expect(erlebnisse, hasLength(1));
-    expect(erlebnisse.single['erlebt_am'], zeit.toIso8601String());
+    expect(erlebnisse.single['beginn'], zeit.toIso8601String());
   });
 
   test('bewahrt mehrere Bewertungen mit Herkunftsprofil', () async {
