@@ -134,8 +134,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
       initialDate: aktuell ?? jetzt,
-      helpText:
-          beginn ? 'Beginn wählen' : 'Ende wählen',
+      helpText: beginn ? 'Beginn wählen' : 'Ende wählen',
     );
     if (datum == null || !mounted) return;
     final zeit = await showTimePicker(
