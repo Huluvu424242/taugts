@@ -2,11 +2,11 @@
 
 ## Status und Freigabe
 
-Die GitHub Action `Dart-Formatierung Arbeitsbranch` liegt unter `.github/workflows/kiagent-dart-format-branch.yml`. **Ihre bloße Bereitstellung ist keine Ausführungsfreigabe.** Sie darf erst nach menschlicher Prüfung und Merge dieses Werkzeugketten-PRs und anschließend gesonderter ausdrücklicher Freigabe nach [AGENTS / Sicherheit](https://github.com/Huluvu424242/taugts/blob/master/agent-rules/05-security-tooling.md) verwendet werden. Die bestehende freigegebene Action `Flutter-Prüfungen` bleibt unverändert.
+Die GitHub Action `Dart-Formatierung Arbeitsbranch` liegt unter `.github/workflows/kiagent-dart-format-branch.yml`. **Am 10. Oktober 2026 hat der Projektverantwortliche die dauerhafte Verwendung der geprüften, unveränderten Workflow-Version ausdrücklich freigegeben.** Maßgeblich ist ausschließlich der genaue Eintrag im [Freigabeverzeichnis der AGENTS-Sicherheitsregeln](https://github.com/Huluvu424242/taugts/blob/master/agent-rules/05-security-tooling.md) mit Git-Blob-SHA `5e8e1321ae9f3b54408b28106ff64d1f768d2c82`. Die Freigabe darf erst nach Merge des Dokumentations-PRs in `master` verwendet werden und erlischt bei Änderungen der dort festgelegten Gültigkeitsmerkmale. Die bestehende Freigabe für `Flutter-Prüfungen` bleibt unverändert.
 
 ## Bedienkonzept
 
-Nach gesonderter Freigabe wird die Action über **Actions → Dart-Formatierung Arbeitsbranch → Run workflow** gestartet. Als **Workflow-Quellbranch** ist `master` zu wählen; das separate Pflichtfeld `branch` gibt den vorhandenen **Ziel-Arbeitsbranch** an (z. B. `bug/234-json-schema-version-3`). Optional kann der erwartete Commit-SHA als `expected_sha` angegeben werden. Ein anderer Workflow-Quellbranch oder ein unzulässiger Zielbranch wird abgewiesen.
+Bei gültiger, im Harness dokumentierter Freigabe wird die Action über **Actions → Dart-Formatierung Arbeitsbranch → Run workflow** gestartet. Als **Workflow-Quellbranch** ist `master` zu wählen; das separate Pflichtfeld `branch` gibt den vorhandenen **Ziel-Arbeitsbranch** an (z. B. `bug/234-json-schema-version-3`). Optional kann der erwartete Commit-SHA als `expected_sha` angegeben werden. Ein anderer Workflow-Quellbranch oder ein unzulässiger Zielbranch wird abgewiesen.
 
 Erlaubte Zielbranch-Präfixe sind `story/`, `bug/`, `feature/`, `fix/`, `docs/` und `chore/`. `master`, `release/*` und beliebige andere Branches werden nicht beschrieben. Der Workflow formatiert nur vorhandene Dart-Dateien in `lib/` und `test/`. Ohne Änderung entsteht kein Commit. Andernfalls entsteht genau ein Commit `style: Dart-Formatierung (automatisiert)` auf dem gewählten Branch. Danach muss weiterhin die unabhängige Action **Flutter-Prüfungen** erfolgreich durchlaufen.
 
@@ -41,4 +41,4 @@ Erlaubte Zielbranch-Präfixe sind `story/`, `bug/`, `feature/`, `fix/`, `docs/` 
 
 ## Deaktivierung und Rollback
 
-Bis zur ausdrücklich erteilten Freigabe bleibt der Workflow ungenutzt. Für eine Deaktivierung oder Anpassung der Werkzeugkette ist der reguläre Story-/PR-Weg erforderlich. Ein unerwünschter Formatierungscommit wird über einen eigenen, nachvollziehbaren Revert-Commit auf dem Arbeitsbranch rückgängig gemacht, nicht per Force-Push. Die bestehende read-only-CI wird hiervon nicht verändert.
+Nach der dokumentierten Freigabe darf die Action ausschließlich innerhalb des definierten Berechtigungsrahmens ausgeführt werden. Für eine Deaktivierung oder Anpassung der Werkzeugkette ist der reguläre Story-/PR-Weg erforderlich. Ein unerwünschter Formatierungscommit wird über einen eigenen, nachvollziehbaren Revert-Commit auf dem Arbeitsbranch rückgängig gemacht, nicht per Force-Push. Die bestehende read-only-CI wird hiervon nicht verändert.
