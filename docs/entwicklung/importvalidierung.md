@@ -12,7 +12,7 @@ Die Prüfung erfolgt bewusst von außen nach innen:
 4. Wurzelobjekt, Formatkennung `taugts-export` und Schemaversion prüfen.
 5. Unterstützte ältere Versionen ausschließlich im Speicher vorwärts migrieren.
 6. Pflichtsammlungen, Datensatzformen, IDs, Datentypen, Enumwerte, Zeitstempel und Dezimaldarstellungen prüfen.
-7. Fachliche Regeln für Erlebnisstatus, Zeitkombinationen, Anzahl, Preise, Währung, Kriterienversionen und typisierte Kriterienwerte prüfen.
+7. Fachliche Regeln für den Erlebniszeitraum, Zeitkombinationen, Anzahl, Preise, Währung, Kriterienversionen und typisierte Kriterienwerte prüfen.
 8. Erst danach alle Referenzen zwischen Profilen, Objekten, Orten, Erlebnissen, Positionen, Preisen, Bewertungen, Ortsbewertungen und Kategorien prüfen.
 
 Ein ungültiger Import liefert strukturierte Fehler mit Code, JSON-Pfad und verständlicher Nachricht. Ein normalisiertes Dokument wird nur zurückgegeben, wenn keine Fehler vorliegen.
@@ -81,9 +81,13 @@ Zusätzliche unbekannte optionale Felder innerhalb einer unterstützten Schemave
 
 Die vorhandenen historischen Fixtures bleiben erhalten und werden über die Vorwärtsmigration auf Format 2 geprüft:
 
-- `schema/fixtures/taugts-export-v0-migrierbar.json`: unterstützte Vorabversion mit Migration über Version 1 auf Version 2,
+- `schema/fixtures/taugts-export-v0-migrierbar.json`: unterstützte Vorabversion mit Migration über Version 1 auf Version 3,
 - `schema/fixtures/taugts-export-v1-gueltig.json`: gültiges Version-1-Dokument, das auf Version 2 migriert wird,
 - `schema/fixtures/taugts-export-v1-verwaist.json`: syntaktisch korrekter Datensatz mit fehlenden Referenzzielen,
 - `schema/fixtures/taugts-export-v1-fachlich-ungueltig.json`: ungültige Kombination aus Erlebnisstatus und Zeitangaben.
 
 Die Tests prüfen außerdem beschädigtes JSON, eine zu neue Schemaversion, ungültige Preis-/Währungswerte, Kriterienversionen, typisierte textuelle Auswahlwerte, Vorwärtskompatibilität unbekannter optionaler Felder sowie Größen- und Tiefengrenzen.
+
+### Exportversion 3 – Ein gemeinsamer Zeitraum
+
+Die Migration 2 → 3 bildet je Erlebnis die früheren Plan-/Ist-Daten auf `beginn` und `ende` ab. Vorhandene tatsächliche Beginnzeiten haben Vorrang; ersatzweise wird das geplante Datum samt geplanter Uhrzeit (ohne Uhrzeit: 00:00 UTC) verwendet. Das frühere tatsächliche Ende wird nur mit vorhandenem tatsächlichem Beginn übernommen. Die Felder `status`, `istEntwurf`, `geplanterTag`, `geplanteMinute`, `geplanteDauerMinuten`, `tatsaechlicherBeginn` und `tatsaechlichesEnde` werden aus dem resultierenden Importdatensatz entfernt. Die Ursprungsdatei bleibt unangetastet.
