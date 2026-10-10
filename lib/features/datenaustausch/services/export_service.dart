@@ -103,7 +103,7 @@ class ExportService {
 
   List<Map<String, Object?>> _objekte() {
     final zeilen = datenbank.verbindung.select('''
-      SELECT o.*, p.marke, p.produktart, p.brauerei, p.sorte,
+      SELECT o.*, p.geloescht AS geloescht, p.marke, p.produktart, p.brauerei, p.sorte,
         p.alkoholgehalt, p.herkunft, p.gebinde, p.fuellmenge_ml,
         p.barcode, p.notiz
       FROM objekte o LEFT JOIN produkte p ON p.objekt_id = o.id ORDER BY o.id
@@ -113,6 +113,7 @@ class ExportService {
               'id': z['id'],
               'name': z['name'],
               'art': z['art'],
+              'geloescht': z['geloescht'] == 1,
               'produktart': z['produktart'],
               'marke': z['marke'],
               'brauerei': z['brauerei'],
@@ -134,6 +135,7 @@ class ExportService {
             'id': z['id'],
             'name': z['name'],
             'typ': z['typ'],
+            'geloescht': z['geloescht'] == 1,
             'adresse': z['adresse'],
             'breitengrad': _dezimal(z['breitengrad']),
             'laengengrad': _dezimal(z['laengengrad']),
