@@ -88,20 +88,29 @@ void main() {
     }
   });
 
-  test('Kategorie- und Klassifikationsdaten bestehen einen vollständigen Roundtrip', () {
+  test(
+      'Kategorie- und Klassifikationsdaten bestehen einen vollständigen Roundtrip',
+      () {
     const produkt = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
     const kategorie = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
     datenbank.verbindung.execute(
       'INSERT INTO objekte (id, name, art, erstellt_am, geaendert_am) '
       'VALUES (?, ?, ?, ?, ?)',
-      [produkt, 'Testbier', 'produkt',
-        '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z'],
+      [
+        produkt,
+        'Testbier',
+        'produkt',
+        '2026-09-01T00:00:00.000Z',
+        '2026-09-01T00:00:00.000Z'
+      ],
     );
     datenbank.verbindung.execute(
-      'INSERT INTO produkte (objekt_id) VALUES (?)', [produkt],
+      'INSERT INTO produkte (objekt_id) VALUES (?)',
+      [produkt],
     );
     datenbank.verbindung.execute(
-      'UPDATE produkte SET geloescht = 1 WHERE objekt_id = ?', [produkt],
+      'UPDATE produkte SET geloescht = 1 WHERE objekt_id = ?',
+      [produkt],
     );
     datenbank.verbindung.execute(
       'INSERT INTO kategorien (id, name, bereich, ist_standard) '
@@ -110,11 +119,13 @@ void main() {
     );
     datenbank.verbindung.execute(
       'INSERT INTO produkt_kategorien (produkt_id, kategorie_id) '
-      'VALUES (?, ?)', [produkt, kategorie],
+      'VALUES (?, ?)',
+      [produkt, kategorie],
     );
     datenbank.verbindung.execute(
       'INSERT INTO objekt_tags (objekt_id, normalisiert, text) '
-      'VALUES (?, ?, ?)', [produkt, 'regional', 'Regional'],
+      'VALUES (?, ?, ?)',
+      [produkt, 'regional', 'Regional'],
     );
     datenbank.verbindung.execute(
       'INSERT INTO objekt_klassifikationsmerkmale '
@@ -129,11 +140,13 @@ void main() {
     );
 
     final text = ExportService(
-      datenbank, appVersion: '0.1.0-test',
+      datenbank,
+      appVersion: '0.1.0-test',
       jetzt: () => DateTime.utc(2026, 10, 10),
     ).erzeugeJson();
     final validierung = const ImportValidierungsService().validiere(text);
-    expect(validierung.istGueltig, isTrue, reason: validierung.fehler.toString());
+    expect(validierung.istGueltig, isTrue,
+        reason: validierung.fehler.toString());
 
     final neu = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     addTearDown(neu.schliessen);
@@ -146,9 +159,9 @@ void main() {
       ExportService(neu, appVersion: '0.1.0-test').erzeugeJson(),
     ) as Map<String, Object?>;
     expect(
-      neu.verbindung
-          .select('SELECT geloescht FROM produkte WHERE objekt_id = ?', [produkt])
-          .single['geloescht'],
+      neu.verbindung.select(
+          'SELECT geloescht FROM produkte WHERE objekt_id = ?',
+          [produkt]).single['geloescht'],
       1,
     );
     for (final name in const [
@@ -172,8 +185,13 @@ void main() {
     datenbank.verbindung.execute(
       'INSERT INTO objekte (id, name, art, erstellt_am, geaendert_am) '
       'VALUES (?, ?, ?, ?, ?)',
-      [id, 'Allgemeines Objekt', 'allgemein',
-        '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z'],
+      [
+        id,
+        'Allgemeines Objekt',
+        'allgemein',
+        '2026-09-01T00:00:00.000Z',
+        '2026-09-01T00:00:00.000Z'
+      ],
     );
     final dokument = const ImportValidierungsService().validiere(
       ExportService(datenbank, appVersion: '0.1.0-test').erzeugeJson(),
@@ -188,8 +206,7 @@ void main() {
     );
     expect(
       ziel.verbindung
-          .select('SELECT art FROM objekte WHERE id = ?', [id])
-          .single['art'],
+          .select('SELECT art FROM objekte WHERE id = ?', [id]).single['art'],
       'allgemein',
     );
     expect(ziel.verbindung.select('SELECT * FROM produkte'), isEmpty);
