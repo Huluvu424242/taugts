@@ -61,8 +61,8 @@ void main() {
       typ: Erlebnistyp.restaurantbesuch,
       ortId: '98000000-0000-4000-8000-000000000012',
       herkunftProfilId: 'importiert',
-      tatsaechlicherBeginn: zeit,
-      tatsaechlichesEnde: zeit.add(const Duration(hours: 2)),
+      beginn: zeit,
+      ende: zeit.add(const Duration(hours: 2)),
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
@@ -157,11 +157,11 @@ void main() {
     final erlebnis = Erlebnis(
       id: '98000000-0000-4000-8000-000000000031',
       typ: Erlebnistyp.einkauf,
-      status: Erlebnisstatus.beendet,
+
       ortId: ort.id,
       herkunftProfilId: 'eigen',
-      tatsaechlicherBeginn: zeit,
-      tatsaechlichesEnde: zeit.add(const Duration(minutes: 45)),
+      beginn: zeit,
+      ende: zeit.add(const Duration(minutes: 45)),
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
