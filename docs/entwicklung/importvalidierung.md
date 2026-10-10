@@ -42,6 +42,8 @@ Es bestehen drei explizite Vorwärtsmigrationen:
 
 Die Migrationen finden ausschließlich im Arbeitsspeicher statt und verändern weder die Eingabedatei noch lokale Daten.
 
+Zusätzlich werden innerhalb der weiter unterstützten Formatversion 3 die optionalen Sammlungen `objektTags`, `objektKlassifikationsmerkmale`, `kategorieKriteriensetRegeln` und `kategorieKriterien` auf leere Listen vorbelegt, wenn sie in älteren Exporten noch nicht vorkommen. Entsprechend wird ein nicht vorhandener Löschstatus bei Produkten und Orten mit `false` ergänzt. Die neuen Sammlungen werden hinsichtlich ihrer Feldtypen, eindeutigen Identitäten und Beziehungen geprüft; fehlerhafte Referenzen verhindern die Importausführung. Das ergänzte Austauschschema bildet sie als optionale, aber typisierte Sammlungen ab.
+
 Jede künftige Schemaversion benötigt eine explizite, getestete Migration von der jeweils unterstützten Vorgängerversion. Fehlt eine notwendige Migrationsstufe, wird die Datei abgewiesen.
 
 ## Typisierte Bewertungswerte
