@@ -290,7 +290,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   }
                   final aktive = snapshot.data!
-                      .where((e) => e.status == Erlebnisstatus.aktiv)
+                      .where((e) => e.beginn != null &&
+                          !e.beginn!.isAfter(DateTime.now()) &&
+                          (e.ende == null || !e.ende!.isBefore(DateTime.now())))
                       .toList(growable: false);
                   if (aktive.isEmpty) return const SizedBox.shrink();
                   final genauEins = aktive.length == 1;
