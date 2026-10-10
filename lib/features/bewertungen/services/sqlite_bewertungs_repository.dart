@@ -1287,9 +1287,6 @@ class SqliteBewertungsRepository
 
   String _zeit(DateTime wert) => wert.toUtc().toIso8601String();
 
-  String _datum(DateTime wert) => '${wert.year.toString().padLeft(4, '0')}-'
-      '${wert.month.toString().padLeft(2, '0')}-'
-      '${wert.day.toString().padLeft(2, '0')}';
 
   String? _optionaleZeit(DateTime? wert) => wert == null ? null : _zeit(wert);
 
