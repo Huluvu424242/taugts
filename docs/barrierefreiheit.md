@@ -1,6 +1,6 @@
 # Barrierefreiheit und Bug-Meldung
 
-Letzter inhaltlicher Barrierefreiheits-Prüfstand: 2. September 2026. Dokumentationsabgleich mit dem Entwicklungsstand `master`: 10. Oktober 2026. Letzter dokumentierter offizieller Release: 0.1.0+8; 0.1.0+9 ist vorbereitet, aber noch nicht veröffentlicht. Die folgenden Aussagen sind **keine** Bestätigung einer abgeschlossenen manuellen Barrierefreiheitsprüfung.
+Letzter inhaltlicher Barrierefreiheits-Prüfstand: 2. September 2026. Dokumentationsabgleich mit dem Entwicklungsstand `master`: 10. Oktober 2026. Der letzte offizielle Release ist vor Freigabe auf GitHub Releases zu prüfen; 0.1.0+10 ist vorbereitet, aber noch nicht veröffentlicht. Die folgenden Aussagen sind **keine** Bestätigung einer abgeschlossenen manuellen Barrierefreiheitsprüfung.
 
 Taugt’s? stellt die gemeinsamen Grundgerüst-Funktionen für Barrierefreiheit und
 Bug-Meldungen vollständig innerhalb der App bereit.
@@ -110,7 +110,7 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 Der Getränkebewertungsbogen ist ausdrücklich einzubeziehen. Die gebündelte
 Prüfung wird in
 [Story #30](https://github.com/Huluvu424242/taugts/issues/30) verfolgt. Solange
-diese Punkte offen sind, wird weder für den letzten dokumentierten Release 0.1.0+8 noch für den für 0.1.0+9 vorbereiteten Stand ein vollständig manuell bestätigter Barrierefreiheitsstatus behauptet. Historische Releaseprüfungen stehen in den zugehörigen [Release-Checklisten](release-checklist-0.1.0+8.md).
+diese Punkte offen sind, wird weder für den bisherigen offiziellen Stand noch für den für 0.1.0+10 vorbereiteten Stand ein vollständig manuell bestätigter Barrierefreiheitsstatus behauptet. Historische Releaseprüfungen stehen in den zugehörigen [Release-Checklisten](release-checklist-0.1.0+8.md).
 
 ## Bug-Meldung
 
