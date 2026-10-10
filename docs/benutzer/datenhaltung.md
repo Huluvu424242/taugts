@@ -30,7 +30,7 @@ Alternativ kann **Import bevorzugen** gewählt werden: Dann werden vorhandene Da
 
 **Gesamten lokalen Datenbestand ersetzen** ist ein destruktiver Sonderfall. Die Vorschau zeigt die Anzahl lokaler Fachdaten, die beim Ersatz zunächst entfernt und anschließend durch die Datensätze der Importdatei ersetzt werden. Vorher wird ein Sicherungsexport angeboten. Wenn lokale Daten vorhanden sind, verlangt ein eigenständiger Dialog mit Checkbox die ausdrückliche Bestätigung. Eine Datei ohne Fachdaten ist für diesen Modus gesperrt. Fachliche Daten werden in derselben Transaktion gelöscht und neu eingespielt; bei Fehlern wird der vorherige Zustand wiederhergestellt. App-Einstellungen und außerhalb der Fachdatenbank gespeicherte Dateien werden nicht gelöscht.
 
-Die Die Vorschau zeigt, wie viele Datensätze hinzugefügt, aktualisiert, behalten oder entfernt würden. Bei **Bestand ersetzen** warnt Taugt’s? ausdrücklich vor Datenverlust und bietet vorher einen Sicherungsexport an.
+Die Vorschau zeigt, wie viele Datensätze hinzugefügt, aktualisiert, behalten oder entfernt würden.
 
 Erkennt Taugt’s? abweichende Versionen, widersprüchliche historische Identitäten oder mögliche fachliche Dubletten, können diese Konflikte einzeln betrachtet werden. Unterschiede zwischen lokaler und importierter Version werden gegenübergestellt. Je Konflikttyp stehen nur zulässige Entscheidungen zur Verfügung; bei einem Identitätswiderspruch wird **Beide behalten** beispielsweise nicht angeboten. Eine Entscheidung kann auf weitere Konflikte derselben Art und Datensammlung übertragen und jederzeit vor der Ausführung geändert werden.
 
