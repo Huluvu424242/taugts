@@ -254,6 +254,9 @@ class ImportAusfuehrungService {
   }
 
   void _ersetzeBestand(LokaleDatenbank datenbank) {
+    // Verweise auf frühere lokale IDs dürfen nach einem vollständigen
+    // Bestandsersatz keine IDs des neuen Importbestands umschreiben.
+    datenbank.verbindung.execute('DELETE FROM import_aliases');
     for (final tabelle in const [
       'bewertungen',
       'ortsbewertungen',
