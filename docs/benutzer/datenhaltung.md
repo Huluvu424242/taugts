@@ -48,9 +48,9 @@ Kann eine Datei nicht geschrieben, geteilt oder geprüft werden, zeigt Taugt’s
 
 ## Hinweis für Daten aus 0.1.0+6 und früher
 
-Mit 0.1.0+7 wurde die während der Vorabentwicklung entstandene SQLite-Migrationshistorie auf eine neue produktive Baseline konsolidiert und anschließend für typisierte Kriterienwerte weiterentwickelt. Dieser Baseline-Stand gilt auch für 0.1.0+8. Lokale Datenbanken aus älteren Vorabständen, insbesondere aus 0.1.0+6 und davor, besitzen keinen direkten Datenbank-Upgradepfad auf den aktuellen Stand.
+Mit 0.1.0+7 wurde die während der Vorabentwicklung entstandene SQLite-Migrationshistorie auf eine neue produktive Baseline konsolidiert und anschließend für typisierte Kriterienwerte weiterentwickelt. Dieser Baseline-Stand gilt auch für die vorbereitete Version 0.1.0+9; diese führt regulär Schema 3 auf 4 weiter. Lokale Datenbanken aus älteren Vorabständen, insbesondere aus 0.1.0+6 und davor, besitzen keinen direkten Datenbank-Upgradepfad auf den aktuellen Stand.
 
-Wer Daten aus einer solchen älteren Vorabversion behalten möchte, sollte **vor dem Update** einen vollständigen JSON-Export erstellen und sicher aufbewahren. Die Wiederherstellung dieses Exports in einer frisch angelegten aktuellen Datenbank muss vor dem Löschen der alten App-Daten geprüft werden. Ein Update von 0.1.0+7 auf 0.1.0+8 führt keine neue Datenbank-Baseline ein.
+Wer Daten aus einer solchen älteren Vorabversion behalten möchte, sollte **vor dem Update** einen vollständigen JSON-Export erstellen und sicher aufbewahren. Die Wiederherstellung dieses Exports in einer frisch angelegten aktuellen Datenbank muss vor dem Löschen der alten App-Daten geprüft werden. Ein Update von 0.1.0+8 auf 0.1.0+9 erfordert die reguläre Migration der SQLite-Struktur von Schema 3 auf 4. Vor dem Update wird ein geprüfter JSON-Export empfohlen.
 
 ## Gelöschte Stammdaten und Historien auf master
 
