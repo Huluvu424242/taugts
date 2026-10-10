@@ -504,7 +504,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         _istFehler = true;
         _importProtokoll = protokoll;
         _status = fehler is StateError &&
-                fehler.message.toString().startsWith('Bestandsersatz nicht möglich:')
+                fehler.message
+                    .toString()
+                    .startsWith('Bestandsersatz nicht möglich:')
             ? '${fehler.message} Die lokalen Daten wurden nicht verändert.'
             : 'Import fehlgeschlagen. Alle fachlichen Änderungen wurden zurückgerollt.';
       });
@@ -554,10 +556,10 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
 
   String _strategieName(ImportStrategie strategie) => switch (strategie) {
         ImportStrategie.bestandErsetzen =>
-            'Gesamten lokalen Datenbestand ersetzen',
+          'Gesamten lokalen Datenbestand ersetzen',
         ImportStrategie.importBevorzugen => 'Import bevorzugen',
         ImportStrategie.lokalBevorzugen =>
-            'Bestehende Daten behalten und ergänzen (empfohlen)',
+          'Bestehende Daten behalten und ergänzen (empfohlen)',
       };
 
   String _aktionsName(ImportKonfliktAktion aktion) => switch (aktion) {
@@ -665,12 +667,12 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         ],
         const SizedBox(height: 20),
         FilledButton.icon(
-          onPressed:
-              _laeuft || !_alleKonflikteEntschieden ||
-                      (_strategie == ImportStrategie.bestandErsetzen &&
-                          !_ersatzdateiHatFachdaten)
-                  ? null
-                  : _importBestaetigen,
+          onPressed: _laeuft ||
+                  !_alleKonflikteEntschieden ||
+                  (_strategie == ImportStrategie.bestandErsetzen &&
+                      !_ersatzdateiHatFachdaten)
+              ? null
+              : _importBestaetigen,
           icon: const Icon(Icons.download_done_outlined),
           label: Text(_strategie == ImportStrategie.bestandErsetzen
               ? 'Bestand ersetzen und importieren'
