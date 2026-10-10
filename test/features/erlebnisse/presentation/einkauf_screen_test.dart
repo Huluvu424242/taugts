@@ -30,7 +30,7 @@ void main() {
 
   tearDown(() => datenbank.schliessen());
 
-  testWidgets('Einkauf kann ohne Termin geplant und begonnen werden',
+  testWidgets('Einkauf lässt sich ohne Planungsabschnitt erfassen',
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -43,30 +43,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-
-    final scrollable = find.byType(Scrollable).first;
-    await tester.scrollUntilVisible(
-      find.text('Einkaufsliste'),
-      300,
-      scrollable: scrollable,
-    );
-    expect(find.text('Einkaufsliste'), findsOneWidget);
-    expect(find.text('Einkauf beginnen'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.textContaining('ohne Termin'),
-      100,
-      scrollable: scrollable,
-    );
-    expect(find.textContaining('ohne Termin'), findsOneWidget);
-
-    await tester.tap(find.text('Einkauf beginnen'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Speichern'));
-    await tester.pumpAndSettle();
-    final gespeichert = (await repository.ladeErlebnisse()).single;
-
-
-    expect(gespeichert.beginn, isNotNull);
+    expect(find.text('Zeitraum'), findsOneWidget);
+    expect(find.text('Beginn (optional)'), findsOneWidget);
+    expect(find.text('Ende (optional)'), findsOneWidget);
+    expect(find.text('Planung'), findsNothing);
+    expect(find.text('Einkauf beginnen'), findsNothing);
+    expect(find.text('Speichern'), findsOneWidget);
   });
 
   testWidgets('Einkauf summiert nur erfasste Preise und ändert Mengen',
@@ -181,44 +163,37 @@ void main() {
     );
   });
 
-  testWidgets('Einkauf beginnen und beenden setzt tatsächliche Zeiten',
+  testWidgets('Gespeicherter Einkaufszeitraum bleibt bearbeitbar',
       (tester) async {
     final erlebnis = Erlebnis(
       id: '22222222-2222-4222-8222-222222222222',
       typ: Erlebnistyp.einkauf,
       herkunftProfilId: profil.id,
+      beginn: zeit,
+      ende: zeit.add(const Duration(minutes: 45)),
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
     await repository.speichereErlebnis(erlebnis);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: ErlebnisScreen(
-          repository: repository,
-          idGenerator: _TestIdGenerator(),
-          profil: profil,
-          erlebnis: erlebnis,
-        ),
+    await tester.pumpWidget(MaterialApp(
+      home: ErlebnisScreen(
+        repository: repository,
+        idGenerator: _TestIdGenerator(),
+        profil: profil,
+        erlebnis: erlebnis,
       ),
-    );
+    ));
     await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Einkauf beginnen'));
-    await tester.pumpAndSettle();
-    expect(find.text('Einkauf beenden'), findsOneWidget);
-    expect(find.textContaining('Einkauf läuft seit'), findsOneWidget);
-
-    await tester.tap(find.text('Einkauf beenden'));
-    await tester.pumpAndSettle();
-    expect(find.text('Status: Beendet'), findsOneWidget);
-    expect((await repository.ladeErlebnis(erlebnis.id))!.beginn,
-        isNull);
+    expect(find.text('Zeitraum'), findsOneWidget);
+    expect(find.text('Beginn (optional)'), findsOneWidget);
+    expect(find.text('Ende (optional)'), findsOneWidget);
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
-    final beendet = await repository.ladeErlebnis(erlebnis.id);
-    expect(beendet!.beginn, isNotNull);
-    expect(beendet.ende, isNotNull);
+    final gespeichert = await repository.ladeErlebnis(erlebnis.id);
+    expect(gespeichert!.beginn, zeit);
+    expect(gespeichert.ende, zeit.add(const Duration(minutes: 45)));
   });
+
 }
 
 class _TestIdGenerator implements IdGenerator {
