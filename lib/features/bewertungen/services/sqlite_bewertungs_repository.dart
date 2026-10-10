@@ -286,24 +286,18 @@ class SqliteBewertungsRepository
     datenbank.verbindung.execute(
       '''
         INSERT INTO erlebnisse (
-          id, typ, status, ort_id, geplanter_tag, geplante_minute,
-          geplante_dauer_minuten, tatsaechlicher_beginn, tatsaechliches_ende,
-          erstellt_am, geaendert_am, herkunft_profil_id, notiz, ist_entwurf,
-          produkt_id, kaufort_id, konsumort_id, erlebt_am, preis, menge, gebinde
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          id, typ, ort_id, beginn, ende, erstellt_am, geaendert_am,
+          herkunft_profil_id, notiz, ist_entwurf, produkt_id, kaufort_id,
+          konsumort_id, preis, menge, gebinde
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
           typ = excluded.typ,
-          status = excluded.status,
           ort_id = excluded.ort_id,
-          geplanter_tag = excluded.geplanter_tag,
-          geplante_minute = excluded.geplante_minute,
-          geplante_dauer_minuten = excluded.geplante_dauer_minuten,
-          tatsaechlicher_beginn = excluded.tatsaechlicher_beginn,
-          tatsaechliches_ende = excluded.tatsaechliches_ende,
+          beginn = excluded.beginn,
+          ende = excluded.ende,
           produkt_id = excluded.produkt_id,
           kaufort_id = excluded.kaufort_id,
           konsumort_id = excluded.konsumort_id,
-          erlebt_am = excluded.erlebt_am,
           geaendert_am = excluded.geaendert_am,
           preis = excluded.preis,
           menge = excluded.menge,
@@ -312,27 +306,13 @@ class SqliteBewertungsRepository
           ist_entwurf = excluded.ist_entwurf
       ''',
       [
-        erlebnis.id,
-        erlebnis.typ.name,
-        erlebnis.status.name,
-        erlebnis.ortId,
-        erlebnis.geplanterTag == null ? null : _datum(erlebnis.geplanterTag!),
-        erlebnis.geplanteMinute,
-        erlebnis.geplanteDauerMinuten,
-        _optionaleZeit(erlebnis.tatsaechlicherBeginn),
-        _optionaleZeit(erlebnis.tatsaechlichesEnde),
-        _zeit(erlebnis.erstelltAm),
-        _zeit(erlebnis.geaendertAm),
-        erlebnis.herkunftProfilId,
-        _leerAlsNull(erlebnis.notiz),
-        erlebnis.istEntwurf ? 1 : 0,
-        erlebnis.produktId,
-        erlebnis.kaufortId,
-        erlebnis.konsumortId,
-        _zeit(erlebnis.erlebtAm),
-        erlebnis.preis,
-        erlebnis.menge,
-        _leerAlsNull(erlebnis.gebinde),
+        erlebnis.id, erlebnis.typ.name, erlebnis.ortId,
+        _optionaleZeit(erlebnis.beginn), _optionaleZeit(erlebnis.ende),
+        _zeit(erlebnis.erstelltAm), _zeit(erlebnis.geaendertAm),
+        erlebnis.herkunftProfilId, _leerAlsNull(erlebnis.notiz),
+        erlebnis.istEntwurf ? 1 : 0, erlebnis.produktId,
+        erlebnis.kaufortId, erlebnis.konsumortId, erlebnis.preis,
+        erlebnis.menge, _leerAlsNull(erlebnis.gebinde),
       ],
     );
   }
@@ -350,7 +330,7 @@ class SqliteBewertungsRepository
   Future<List<Erlebnis>> ladeErlebnisse() async => datenbank.verbindung
       .select(
         'SELECT * FROM erlebnisse '
-        'ORDER BY COALESCE(tatsaechlicher_beginn, geplanter_tag, erstellt_am) '
+        'ORDER BY COALESCE(beginn, erstellt_am) '
         'DESC, geaendert_am DESC',
       )
       .map(_erlebnisAusZeile)
@@ -653,20 +633,13 @@ class SqliteBewertungsRepository
   Erlebnis _erlebnisAusZeile(Map<String, Object?> row) => Erlebnis(
         id: row['id'] as String,
         typ: Erlebnistyp.values.byName(row['typ'] as String),
-        status: Erlebnisstatus.values.byName(row['status'] as String),
         ortId: row['ort_id'] as String?,
-        geplanterTag: _optionalesDatum(row['geplanter_tag'] as String?),
-        geplanteMinute: row['geplante_minute'] as int?,
-        geplanteDauerMinuten: row['geplante_dauer_minuten'] as int?,
-        tatsaechlicherBeginn:
-            _optionalesDatum(row['tatsaechlicher_beginn'] as String?),
-        tatsaechlichesEnde:
-            _optionalesDatum(row['tatsaechliches_ende'] as String?),
+        beginn: _optionalesDatum(row['beginn'] as String?),
+        ende: _optionalesDatum(row['ende'] as String?),
         produktId: row['produkt_id'] as String?,
         kaufortId: row['kaufort_id'] as String?,
         konsumortId: row['konsumort_id'] as String?,
         herkunftProfilId: row['herkunft_profil_id'] as String,
-        erlebtAm: _optionalesDatum(row['erlebt_am'] as String?),
         erstelltAm: DateTime.parse(row['erstellt_am'] as String),
         geaendertAm: DateTime.parse(row['geaendert_am'] as String),
         preis: (row['preis'] as num?)?.toDouble(),
