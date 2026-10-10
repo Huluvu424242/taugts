@@ -274,6 +274,50 @@ void main() {
     expect(db.verbindung.select('SELECT id FROM profile').single['id'], neu);
   });
 
+  testWidgets('verwirft eine durch lokale Änderungen veraltete Importvorschau',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+    addTearDown(db.schliessen);
+    const id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    db.verbindung.execute(
+      'INSERT INTO profile VALUES (?, ?, ?, ?)',
+      [id, 'Vorher', '2026-09-01T00:00:00.000Z',
+        '2026-09-01T00:00:00.000Z'],
+    );
+    final export = ExportService(db, appVersion: '0.0.0-test');
+    final dokument = Map<String, Object?>.from(
+      jsonDecode(export.erzeugeJson()) as Map,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: DatenaustauschScreen(
+        exportService: export,
+        exportZielService: _NichtVerwendetesExportZiel(),
+        importQuelleService: _FesteImportQuelle(jsonEncode(dokument)),
+      ),
+    ));
+    await tester.tap(find.text('Importdatei auswählen und prüfen'));
+    await tester.pumpAndSettle();
+    db.verbindung.execute(
+      'UPDATE profile SET anzeigename = ? WHERE id = ?', ['Nachher', id],
+    );
+    final aktion = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
+    );
+    aktion.onPressed!();
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('seit der Vorschau verändert'),
+      findsOneWidget,
+    );
+    expect(
+      db.verbindung.select('SELECT anzeigename FROM profile').single['anzeigename'],
+      'Nachher',
+    );
+    expect(const ImportAusfuehrungService().ladeProtokoll(db), isEmpty);
+  });
+
   testWidgets(
     'sperrt weitere Aktionen und verändert bei abgebrochener Auswahl nichts',
     (tester) async {
