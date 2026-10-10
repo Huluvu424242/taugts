@@ -79,6 +79,14 @@ class ImportKlassifikationService {
       );
     }
     for (final wert in _liste(dokument, 'kategorieZuordnungen')) {
+      final id = ImportKonfliktentscheidungService.identitaet(
+        'kategorieZuordnungen', wert,
+      );
+      final auswahl = explizit['kategorieZuordnungen|$id|$id'];
+      if (auswahl == ImportKonfliktAktion.ueberspringen ||
+          auswahl == ImportKonfliktAktion.lokaleVersion) {
+        continue;
+      }
       final kategorie = db.select(
         'SELECT bereich FROM kategorien WHERE id = ?',
         [wert['kategorieId']],
