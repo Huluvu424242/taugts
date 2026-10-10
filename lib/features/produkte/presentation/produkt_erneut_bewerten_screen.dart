@@ -66,9 +66,7 @@ class _ProduktErneutBewertenScreenState
     final entwurf = Erlebnis(
       id: widget.idGenerator.neueId(),
       typ: typ,
-      status: Erlebnisstatus.geplant,
-      geplanterTag: DateTime.utc(jetzt.year, jetzt.month, jetzt.day),
-      geplanteMinute: jetzt.hour * 60 + jetzt.minute,
+      beginn: utcJetzt,
       herkunftProfilId: widget.profil.id,
       istEntwurf: true,
       erstelltAm: utcJetzt,
