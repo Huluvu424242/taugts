@@ -867,36 +867,36 @@ class ImportValidierungsService {
       schluessel.clear();
       for (var i = 0; i < werte.length; i++) {
         final wert = werte[i];
-        final pfad = '\$.$name[' '\$i]';
+        final pfad = r'$.' '$name[' '$i]';
         String key;
         switch (name) {
           case 'objektTags':
-            _uuid(wert, 'objektId', '\$pfad.objektId', fehler);
-            _text(wert, 'normalisiert', '\$pfad.normalisiert', fehler, nichtLeer: true);
-            _text(wert, 'text', '\$pfad.text', fehler, nichtLeer: true);
+            _uuid(wert, 'objektId', '$pfad.objektId', fehler);
+            _text(wert, 'normalisiert', '$pfad.normalisiert', fehler, nichtLeer: true);
+            _text(wert, 'text', '$pfad.text', fehler, nichtLeer: true);
             key = '${wert['objektId']}|${wert['normalisiert']}';
           case 'objektKlassifikationsmerkmale':
-            _uuid(wert, 'objektId', '\$pfad.objektId', fehler);
+            _uuid(wert, 'objektId', '$pfad.objektId', fehler);
             _enumWert(
               wert, 'dimension', {'herkunft', 'hersteller', 'eigenschaft'},
-              '\$pfad.dimension', fehler,
+              '$pfad.dimension', fehler,
             );
-            _text(wert, 'schluessel', '\$pfad.schluessel', fehler);
-            _text(wert, 'wert', '\$pfad.wert', fehler, nichtLeer: true);
+            _text(wert, 'schluessel', '$pfad.schluessel', fehler);
+            _text(wert, 'wert', '$pfad.wert', fehler, nichtLeer: true);
             key = '${wert['objektId']}|${wert['dimension']}|${wert['schluessel']}';
           case 'kategorieKriteriensetRegeln':
-            _uuid(wert, 'kategorieId', '\$pfad.kategorieId', fehler);
+            _uuid(wert, 'kategorieId', '$pfad.kategorieId', fehler);
             _text(
-              wert, 'fallbackObjektart', '\$pfad.fallbackObjektart',
+              wert, 'fallbackObjektart', '$pfad.fallbackObjektart',
               fehler, nichtLeer: true,
             );
-            _text(wert, 'modus', '\$pfad.modus', fehler, nichtLeer: true);
-            _ganzzahl(wert, 'version', '\$pfad.version', fehler);
+            _text(wert, 'modus', '$pfad.modus', fehler, nichtLeer: true);
+            _ganzzahl(wert, 'version', '$pfad.version', fehler);
             key = '${wert['kategorieId']}';
           case 'kategorieKriterien':
-            _uuid(wert, 'kategorieId', '\$pfad.kategorieId', fehler);
-            _uuid(wert, 'kriteriumId', '\$pfad.kriteriumId', fehler);
-            _ganzzahl(wert, 'reihenfolge', '\$pfad.reihenfolge', fehler);
+            _uuid(wert, 'kategorieId', '$pfad.kategorieId', fehler);
+            _uuid(wert, 'kriteriumId', '$pfad.kriteriumId', fehler);
+            _ganzzahl(wert, 'reihenfolge', '$pfad.reihenfolge', fehler);
             key = '${wert['kategorieId']}|${wert['kriteriumId']}';
           default:
             throw StateError('Unbekannte Sammlung $name');
