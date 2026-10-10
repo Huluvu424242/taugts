@@ -6,6 +6,14 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+## [0.1.0+10] - 2026-10-10
+
+### Changed
+
+- Der JSON-Import führt Nutzer bei der Auswahl und Übernahme von Importdaten mit erweiterten Bedienelementen und Rückmeldungen; die Importausführung berücksichtigt die ergänzten Prüfungen (Änderungen seit 0.1.0+9).
+- Der separate Dart-Formatter für ungeschützte Arbeitsbranches wurde nach ausdrücklicher Freigabe unter genau dokumentierten Bedingungen zur manuellen Ausführung zugelassen. Der offizielle Android-Release-Workflow bleibt davon unberührt.
+
+
 ## [0.1.0+9] - 2026-10-10
 
 ### Added
@@ -193,7 +201,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
 - Featureorientierte Ausgangsstruktur, Startscreen und Widget-Test.
 
-[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+9...HEAD
+[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+10...HEAD
+[0.1.0+10]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+9...v0.1.0+10
 [0.1.0+9]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+8...v0.1.0+9
 [0.1.0+8]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+7...v0.1.0+8
 [0.1.0+7]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+6...v0.1.0+7
