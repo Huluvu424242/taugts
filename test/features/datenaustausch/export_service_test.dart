@@ -101,6 +101,9 @@ void main() {
       'INSERT INTO produkte (objekt_id) VALUES (?)', [produkt],
     );
     datenbank.verbindung.execute(
+      'UPDATE produkte SET geloescht = 1 WHERE objekt_id = ?', [produkt],
+    );
+    datenbank.verbindung.execute(
       'INSERT INTO kategorien (id, name, bereich, ist_standard) '
       'VALUES (?, ?, ?, ?)',
       [kategorie, 'Getränk', 'produkt', 0],
@@ -142,6 +145,12 @@ void main() {
     final danach = jsonDecode(
       ExportService(neu, appVersion: '0.1.0-test').erzeugeJson(),
     ) as Map<String, Object?>;
+    expect(
+      neu.verbindung
+          .select('SELECT geloescht FROM produkte WHERE objekt_id = ?', [produkt])
+          .single['geloescht'],
+      1,
+    );
     for (final name in const [
       'kategorien',
       'kategorieZuordnungen',
