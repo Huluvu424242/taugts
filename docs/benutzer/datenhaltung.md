@@ -65,3 +65,8 @@ Produktpositionen, Mengen, Preise und Bewertungen werden während der geöffnete
 Seit Story #228 wird für jeden Einkauf und Restaurantbesuch nur ein Beginn und ein Ende gespeichert. Die Zeiten sind vor, während und nach dem Ereignis jederzeit bearbeitbar; der letzte Stand ist maßgeblich. Plan-/Ist-Zeitfelder sowie Entwurfs- oder Durchführungsstatus werden nicht mehr gesondert gespeichert.
 
 Die SQLite-Migration 3 → 4 übernimmt vorrangig den bisherigen tatsächlichen Beginn, andernfalls den geplanten Zeitpunkt. Ein tatsächliches Ende wird nur bei vorhandenem tatsächlichen Beginn übernommen. Die neue JSON-Exportversion 3 nutzt ebenfalls `beginn` und `ende`; ältere Formate 0–2 werden beim Einlesen migriert. Eine Sicherung vor dem Update ist weiterhin empfehlenswert.
+
+
+## Alle lokalen Daten löschen
+
+Im Bereich **Import/Export** gibt es die Aktion **Alle Daten löschen**. Sie entfernt nach ausdrücklicher Bestätigung den vollständigen lokalen Fachdatenbestand (unter anderem Produkte, Orte, Erlebnisse, Bewertungen, Kriterien, Klassifikationen, Historien und Importprotokolle) aus der App. Die Löschung kann nicht rückgängig gemacht werden. **Abbrechen** lässt alle Daten unverändert. Sichere deshalb zuvor wichtige Daten über **Export speichern**. Bereits außerhalb der App gespeicherte Exportdateien werden durch die Löschaktion nicht entfernt.
