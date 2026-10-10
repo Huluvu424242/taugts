@@ -47,7 +47,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   String? _status;
   bool _istFehler = false;
   ImportKonfliktAnalyse? _analyse;
-  ImportStrategie _strategie = ImportStrategie.importBevorzugen;
+  ImportStrategie _strategie = ImportStrategie.lokalBevorzugen;
   ImportStrategiePlan? _strategiePlan;
   Map<String, Object?>? _importDokument;
   Map<String, Object?>? _lokalesDokument;
@@ -55,6 +55,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   List<ImportEinzelKonflikt> _konflikte = const [];
   ImportKonfliktEntscheidungsStand _entscheidungsStand =
       const ImportKonfliktEntscheidungsStand();
+  final Set<String> _manuelleEntscheidungen = <String>{};
   final Set<String> _aufTypAnwenden = <String>{};
   final Map<String, Map<String, DublettenFeldQuelle>> _mergeFeldauswahl = {};
   final Map<String, ImportDublettenMergeErgebnis> _mergePlaene = {};
@@ -125,6 +126,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       _importFehler = const [];
       _konflikte = const [];
       _entscheidungsStand = const ImportKonfliktEntscheidungsStand();
+      _manuelleEntscheidungen.clear();
       _aufTypAnwenden.clear();
       _mergeFeldauswahl.clear();
       _mergePlaene.clear();
@@ -171,6 +173,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         _lokalesDokument = lokal;
         _strategiePlan = _planeStrategie(analyse);
         _konflikte = konflikte;
+        _entscheidungsStand = _standardEntscheidungen(konflikte);
         _status = 'Import geprüft. Die Vorschau verändert keine lokalen Daten.';
       });
     } catch (_) {
@@ -199,11 +202,35 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         ),
       );
 
+  ImportKonfliktEntscheidungsStand _standardEntscheidungen(
+    List<ImportEinzelKonflikt> konflikte, {
+    ImportKonfliktEntscheidungsStand? bisher,
+  }) {
+    final werte = <String, ImportKonfliktAktion>{};
+    for (final konflikt in konflikte) {
+      if (bisher != null &&
+          _manuelleEntscheidungen.contains(konflikt.schluessel) &&
+          bisher.fuer(konflikt) != null) {
+        werte[konflikt.schluessel] = bisher.fuer(konflikt)!;
+      } else if (konflikt.art == ImportKonfliktArt.versionskonflikt) {
+        werte[konflikt.schluessel] =
+            _strategie == ImportStrategie.importBevorzugen
+                ? ImportKonfliktAktion.importVersion
+                : ImportKonfliktAktion.lokaleVersion;
+      }
+    }
+    return ImportKonfliktEntscheidungsStand(Map.unmodifiable(werte));
+  }
+
   void _strategieAendern(ImportStrategie? strategie) {
     if (strategie == null || _analyse == null) return;
     setState(() {
       _strategie = strategie;
       _strategiePlan = _planeStrategie(_analyse!);
+      _entscheidungsStand = _standardEntscheidungen(
+        _konflikte,
+        bisher: _entscheidungsStand,
+      );
     });
   }
 
@@ -244,6 +271,16 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         alleKonflikte: _konflikte,
         aufGleichenTypAnwenden: _aufTypAnwenden.contains(konflikt.schluessel),
       );
+      _manuelleEntscheidungen.add(konflikt.schluessel);
+      if (_aufTypAnwenden.contains(konflikt.schluessel)) {
+        for (final weiterer in _konflikte) {
+          if (weiterer.art == konflikt.art &&
+              weiterer.sammlung == konflikt.sammlung &&
+              weiterer.erlaubteAktionen.contains(aktion)) {
+            _manuelleEntscheidungen.add(weiterer.schluessel);
+          }
+        }
+      }
       if (aktion == ImportKonfliktAktion.zusammenfuehren &&
           _kannZusammenfuehren(konflikt)) {
         _mergeFeldauswahl.putIfAbsent(konflikt.schluessel, () => {});
@@ -271,7 +308,20 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   }
 
   bool get _alleKonflikteEntschieden =>
-      _entscheidungsStand.entscheidungen.length >= _konflikte.length;
+      _strategie == ImportStrategie.bestandErsetzen ||
+      _konflikte.every(
+        (konflikt) => _entscheidungsStand.fuer(konflikt) != null,
+      );
+
+  int get _offeneKonflikte => _strategie == ImportStrategie.bestandErsetzen
+      ? 0
+      : _konflikte
+          .where((konflikt) => _entscheidungsStand.fuer(konflikt) == null)
+          .length;
+
+  int get _zuLoeschendeDatensaetze => _strategiePlan?.sammlungen
+          .fold<int>(0, (summe, s) => summe + s.entfernen) ??
+      0;
 
   Future<void> _importBestaetigen() async {
     if (_laeuft || _importDokument == null || _lokalesDokument == null) return;
@@ -321,7 +371,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         datenbank: widget.exportService.datenbank,
         importDokument: dokument,
         strategie: _strategie,
-        entscheidungen: _entscheidungsStand,
+        entscheidungen: _strategie == ImportStrategie.bestandErsetzen
+            ? const ImportKonfliktEntscheidungsStand()
+            : _entscheidungsStand,
         aliase: neueAliase,
         zusammengefuehrtNachSammlung: mergesNachSammlung,
       );
@@ -399,9 +451,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   }
 
   String _strategieName(ImportStrategie strategie) => switch (strategie) {
-        ImportStrategie.bestandErsetzen => 'Bestand ersetzen',
+        ImportStrategie.bestandErsetzen => 'Gesamten lokalen Datenbestand ersetzen',
         ImportStrategie.importBevorzugen => 'Import bevorzugen',
-        ImportStrategie.lokalBevorzugen => 'Lokalen Bestand bevorzugen',
+        ImportStrategie.lokalBevorzugen => 'Bestehende Daten behalten und ergänzen (empfohlen)',
       };
 
   String _aktionsName(ImportKonfliktAktion aktion) => switch (aktion) {
@@ -461,7 +513,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
           Semantics(
             liveRegion: true,
             child: Text(
-              'Warnung: Nicht in der Importdatei enthaltene lokale Datensätze werden gelöscht.',
+              'Alle vorhandenen Anwendungsdaten werden durch die ausgewählte Datei ersetzt; nicht in der Datei enthaltene Daten gehen verloren. Zu entfernende Datensätze: $_zuLoeschendeDatensaetze.',
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
@@ -488,12 +540,12 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         Text(
           'Herkunft: ${analyse.eigeneHerkunft} eigene · ${analyse.fremdeHerkunft} fremde Erlebnisse',
         ),
-        if (_konflikte.isNotEmpty) ...[
+        if (_konflikte.isNotEmpty && _strategie != ImportStrategie.bestandErsetzen) ...[
           const SizedBox(height: 16),
           Semantics(
             liveRegion: true,
             child: Text(
-              '${_entscheidungsStand.entscheidungen.length} von ${_konflikte.length} Konflikten entschieden.',
+              '$_offeneKonflikte Konflikte benötigen noch eine Entscheidung. Sichere Standardentscheidungen sind bereits vorbelegt.',
             ),
           ),
           const SizedBox(height: 8),
@@ -502,7 +554,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                 ? null
                 : () => setState(() => _konflikteBearbeiten = true),
             icon: const Icon(Icons.rule_outlined),
-            label: const Text('Konflikte einzeln entscheiden'),
+            label: const Text('Automatische Entscheidungen ansehen / anpassen'),
           ),
         ],
         const SizedBox(height: 20),
@@ -510,7 +562,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
           onPressed:
               _laeuft || !_alleKonflikteEntschieden ? null : _importBestaetigen,
           icon: const Icon(Icons.download_done_outlined),
-          label: const Text('Import verbindlich ausführen'),
+          label: Text(_strategie == ImportStrategie.bestandErsetzen
+              ? 'Bestand ersetzen und importieren'
+              : 'Import verbindlich ausführen'),
         ),
         if (!_alleKonflikteEntschieden) ...[
           const SizedBox(height: 8),
