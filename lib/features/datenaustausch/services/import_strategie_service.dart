@@ -231,12 +231,12 @@ class ImportStrategieService {
         'kategorieZuordnungen' =>
           '${wert['kategorieId']}|${wert['zielId']}',
         'objektTags' =>
-          '${wert['objektId']}|${wert['normalisiert']}',
+          '${wert['objektId']}:${wert['normalisiert']}',
         'objektKlassifikationsmerkmale' =>
-          '${wert['objektId']}|${wert['dimension']}|${wert['schluessel']}',
+          '${wert['objektId']}:${wert['dimension']}:${wert['schluessel']}',
         'kategorieKriteriensetRegeln' => '${wert['kategorieId']}',
         'kategorieKriterien' =>
-          '${wert['kategorieId']}|${wert['kriteriumId']}',
+          '${wert['kategorieId']}:${wert['kriteriumId']}',
         _ => wert['id'] as String? ?? '',
       };
 
