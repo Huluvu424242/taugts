@@ -239,13 +239,13 @@ class _Verlaufskarte extends StatelessWidget {
     String zeit(DateTime wert) => lokalisierung.formatTimeOfDay(
           TimeOfDay.fromDateTime(wert.toLocal()),
         );
-    if (erlebnis.tatsaechlicherBeginn == null) {
+    if (erlebnis.beginn == null) {
       return 'Zeitpunkt nicht vollständig erfasst';
     }
-    if (erlebnis.tatsaechlichesEnde == null) {
-      return 'Beginn: ${zeit(erlebnis.tatsaechlicherBeginn!)}';
+    if (erlebnis.ende == null) {
+      return 'Beginn: ${zeit(erlebnis.beginn!)}';
     }
-    return 'Zeitraum: ${zeit(erlebnis.tatsaechlicherBeginn!)}–${zeit(erlebnis.tatsaechlichesEnde!)}';
+    return 'Zeitraum: ${zeit(erlebnis.beginn!)}–${zeit(erlebnis.ende!)}';
   }
 
   String _wertText(Bewertung bewertung) =>
