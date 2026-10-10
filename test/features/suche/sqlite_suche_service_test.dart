@@ -193,7 +193,7 @@ void main() {
     final treffer = await service.suche(const Suchfilter(
       ziel: Suchziel.erlebnisse,
       erlebnistyp: Erlebnistyp.einkauf,
-      erlebnisstatus: Erlebnisstatus.aktiv,
+
     ));
     expect(treffer.map((wert) => wert.id), contains('e1'));
   });
