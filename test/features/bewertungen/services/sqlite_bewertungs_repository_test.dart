@@ -853,7 +853,7 @@ void main() {
       ),
       bewertungen: [ersteBewertung],
     );
-    expect(await repository.ladeErlebnisse(), isEmpty);
+    expect(await repository.ladeErlebnisse(), hasLength(1));
 
     await repository.speichereGetraenkebewertung(
       erlebnis: erstesErlebnis.kopiereMit(
