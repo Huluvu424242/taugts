@@ -128,12 +128,12 @@ class SqliteAuswertungsService implements AuswertungsService {
 
   List<ErlebnisGruppe> _erlebnisgruppen(AuswertungsFilter filter) {
     final rows = _db.verbindung.select('''
-      SELECT e.id, e.typ, e.tatsaechlicher_beginn, e.tatsaechliches_ende,
+      SELECT e.id, e.typ, e.beginn, e.ende,
         COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) AS ort_id
       FROM erlebnisse e
       WHERE (? IS NULL OR COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) = ?)
         AND (? IS NULL OR e.herkunft_profil_id = ?)
-        AND e.status = 'beendet'
+        AND e.ende IS NOT NULL
     ''', [
       filter.objektId,
       filter.objektId,
@@ -143,9 +143,9 @@ class SqliteAuswertungsService implements AuswertungsService {
     final gruppen = <String, (int, int)>{};
     for (final row in rows) {
       final beginn =
-          DateTime.tryParse(row['tatsaechlicher_beginn'] as String? ?? '');
+          DateTime.tryParse(row['beginn'] as String? ?? '');
       final ende =
-          DateTime.tryParse(row['tatsaechliches_ende'] as String? ?? '');
+          DateTime.tryParse(row['ende'] as String? ?? '');
       if (beginn == null) continue;
       final tageszeit = beginn.hour < 11
           ? 'morgens'
