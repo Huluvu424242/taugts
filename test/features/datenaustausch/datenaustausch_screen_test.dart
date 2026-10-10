@@ -155,7 +155,7 @@ void main() {
       db.verbindung.execute(
         'INSERT INTO profile (id, anzeigename, erstellt_am, geaendert_am) '
         'VALUES (?, ?, ?, ?)',
-        ['profil-1', 'Lokal', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z'],
+        ['11111111-1111-4111-8111-111111111111', 'Lokal', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z'],
       );
       final export = ExportService(db, appVersion: '0.0.0-test');
       final dokument = Map<String, Object?>.from(
@@ -184,7 +184,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         db.verbindung.select(
-          "SELECT anzeigename FROM profile WHERE id = 'profil-1'",
+          "SELECT anzeigename FROM profile WHERE id = '11111111-1111-4111-8111-111111111111'",
         ).single['anzeigename'],
         'Lokal',
       );
