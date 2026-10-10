@@ -69,6 +69,10 @@ class ImportValidierungsService {
     'ortsbewertungen',
     'kategorien',
     'kategorieZuordnungen',
+    'objektTags',
+    'objektKlassifikationsmerkmale',
+    'kategorieKriteriensetRegeln',
+    'kategorieKriterien',
   ];
 
   final ImportValidierungsGrenzen grenzen;
@@ -271,6 +275,16 @@ class ImportValidierungsService {
       }
       migriert['schemaVersion'] = 3;
     }
+    // Erweiterungen des V3-Dokuments sind optional, damit alte Exporte
+    // auch nach Aufnahme der Klassifikation importierbar bleiben.
+    for (final name in const [
+      'objektTags',
+      'objektKlassifikationsmerkmale',
+      'kategorieKriteriensetRegeln',
+      'kategorieKriterien',
+    ]) {
+      migriert.putIfAbsent(name, () => <Object?>[]);
+    }
     return migriert;
   }
 
@@ -408,6 +422,7 @@ class ImportValidierungsService {
       _liste(dokument, 'kategorieZuordnungen'),
       fehler,
     );
+    _validiereKlassifikationsDaten(dokument, fehler);
   }
 
   void _validiereProfile(
@@ -837,6 +852,65 @@ class ImportValidierungsService {
     }
   }
 
+  void _validiereKlassifikationsDaten(
+    Map<String, Object?> dokument,
+    List<ImportValidierungsFehler> fehler,
+  ) {
+    final schluessel = <String>{};
+    for (final name in const [
+      'objektTags',
+      'objektKlassifikationsmerkmale',
+      'kategorieKriteriensetRegeln',
+      'kategorieKriterien',
+    ]) {
+      final werte = _liste(dokument, name);
+      schluessel.clear();
+      for (var i = 0; i < werte.length; i++) {
+        final wert = werte[i];
+        final pfad = '\$.$name[' '\$i]';
+        String key;
+        switch (name) {
+          case 'objektTags':
+            _uuid(wert, 'objektId', '\$pfad.objektId', fehler);
+            _text(wert, 'normalisiert', '\$pfad.normalisiert', fehler, nichtLeer: true);
+            _text(wert, 'text', '\$pfad.text', fehler, nichtLeer: true);
+            key = '${wert['objektId']}|${wert['normalisiert']}';
+          case 'objektKlassifikationsmerkmale':
+            _uuid(wert, 'objektId', '\$pfad.objektId', fehler);
+            _enumWert(
+              wert, 'dimension', {'herkunft', 'hersteller', 'eigenschaft'},
+              '\$pfad.dimension', fehler,
+            );
+            _text(wert, 'schluessel', '\$pfad.schluessel', fehler);
+            _text(wert, 'wert', '\$pfad.wert', fehler, nichtLeer: true);
+            key = '${wert['objektId']}|${wert['dimension']}|${wert['schluessel']}';
+          case 'kategorieKriteriensetRegeln':
+            _uuid(wert, 'kategorieId', '\$pfad.kategorieId', fehler);
+            _text(
+              wert, 'fallbackObjektart', '\$pfad.fallbackObjektart',
+              fehler, nichtLeer: true,
+            );
+            _text(wert, 'modus', '\$pfad.modus', fehler, nichtLeer: true);
+            _ganzzahl(wert, 'version', '\$pfad.version', fehler);
+            key = '${wert['kategorieId']}';
+          case 'kategorieKriterien':
+            _uuid(wert, 'kategorieId', '\$pfad.kategorieId', fehler);
+            _uuid(wert, 'kriteriumId', '\$pfad.kriteriumId', fehler);
+            _ganzzahl(wert, 'reihenfolge', '\$pfad.reihenfolge', fehler);
+            key = '${wert['kategorieId']}|${wert['kriteriumId']}';
+          default:
+            throw StateError('Unbekannte Sammlung $name');
+        }
+        if (!schluessel.add(key)) {
+          _fehler(
+            fehler, 'doppelter_schluessel', pfad,
+            'Diese Klassifikationszuordnung ist mehrfach vorhanden.',
+          );
+        }
+      }
+    }
+  }
+
   void _validiereReferenzen(
     Map<String, Object?> dokument,
     List<ImportValidierungsFehler> fehler,
@@ -975,6 +1049,35 @@ class ImportValidierungsService {
         kriteriumNachId,
         ortsbewertungNachId,
         fehler,
+      );
+    }
+
+    for (final wert in _liste(dokument, 'objektTags')) {
+      _referenz(
+        wert['objektId'], objektIds, r'$.objektTags.objektId',
+        'Objekt', fehler,
+      );
+    }
+    for (final wert in _liste(dokument, 'objektKlassifikationsmerkmale')) {
+      _referenz(
+        wert['objektId'], objektIds, r'$.objektKlassifikationsmerkmale.objektId',
+        'Objekt', fehler,
+      );
+    }
+    for (final wert in _liste(dokument, 'kategorieKriteriensetRegeln')) {
+      _referenz(
+        wert['kategorieId'], kategorieIds,
+        r'$.kategorieKriteriensetRegeln.kategorieId', 'Kategorie', fehler,
+      );
+    }
+    for (final wert in _liste(dokument, 'kategorieKriterien')) {
+      _referenz(
+        wert['kategorieId'], kategorieIds,
+        r'$.kategorieKriterien.kategorieId', 'Kategorie', fehler,
+      );
+      _referenz(
+        wert['kriteriumId'], kriteriumIds,
+        r'$.kategorieKriterien.kriteriumId', 'Kriterium', fehler,
       );
     }
 
