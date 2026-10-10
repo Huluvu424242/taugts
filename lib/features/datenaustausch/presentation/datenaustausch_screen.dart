@@ -413,8 +413,34 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
     return ergebnis == true;
   }
 
+  bool _bestandSeitVorschauUnveraendert() {
+    final damals = _lokalesDokument;
+    if (damals == null) return false;
+    final aktuell = Map<String, Object?>.from(
+      jsonDecode(widget.exportService.erzeugeJson()) as Map,
+    );
+    for (final name in damals.keys) {
+      if (name == 'exportiertAm' || name == 'appVersion') continue;
+      if (jsonEncode(damals[name]) != jsonEncode(aktuell[name])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   Future<void> _importBestaetigen() async {
     if (_laeuft || _importDokument == null || _lokalesDokument == null) return;
+    if (!_bestandSeitVorschauUnveraendert()) {
+      setState(() {
+        _istFehler = true;
+        _status =
+            'Der lokale Bestand wurde seit der Vorschau verändert. Bitte die Importdatei erneut prüfen.';
+        _analyse = null;
+        _strategiePlan = null;
+        _importDokument = null;
+      });
+      return;
+    }
     if (_strategie == ImportStrategie.bestandErsetzen &&
         !_ersatzdateiHatFachdaten) {
       setState(() {
