@@ -159,6 +159,45 @@ void main() {
     expect(ergebnis.schemaVersion, 3);
   });
 
+  test('prüft Referenzen von Tags und Kriterienset-Zuordnungen', () {
+    final dokument = _dokument('taugts-export-v1-gueltig.json');
+    dokument['objektTags'] = [
+      {
+        'objektId': 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+        'normalisiert': 'test',
+        'text': 'Test',
+      },
+    ];
+    dokument['kategorieKriterien'] = [
+      {
+        'kategorieId': 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+        'kriteriumId': 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+        'reihenfolge': 0,
+      },
+    ];
+    final ergebnis = service.validiere(jsonEncode(dokument));
+    expect(ergebnis.istGueltig, isFalse);
+    expect(
+      ergebnis.fehler.map((fehler) => fehler.code),
+      contains('referenz_ungueltig'),
+    );
+  });
+
+  test('ältere Exportdateien erhalten leere Klassifikationssammlungen', () {
+    final ergebnis = service.validiere(
+      _fixture('taugts-export-v1-gueltig.json'),
+    );
+    expect(ergebnis.istGueltig, isTrue);
+    for (final name in const [
+      'objektTags',
+      'objektKlassifikationsmerkmale',
+      'kategorieKriteriensetRegeln',
+      'kategorieKriterien',
+    ]) {
+      expect(ergebnis.dokument![name], isEmpty, reason: name);
+    }
+  });
+
   test('Dateigröße wird vor dem JSON-Parsing begrenzt', () {
     const klein = ImportValidierungsService(
       grenzen: ImportValidierungsGrenzen(maxBytes: 8),
