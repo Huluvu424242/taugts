@@ -1,0 +1,158 @@
+name: Android Test-APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: "Android versionCode für ein Update (muss größer als die installierte Buildnummer sein)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-test-apk-master
+  cancel-in-progress: false
+
+jobs:
+  build-test-apk:
+    name: Release-signierte Test-APK vom aktuellen master
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Aktuellen master auschecken
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: master
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Tatsächlichen master-Stand und Version ermitteln
+        id: metadata
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin +refs/heads/master:refs/remotes/origin/master
+          git checkout --detach refs/remotes/origin/master
+          master_sha="$(git rev-parse HEAD)"
+          remote_sha="$(git ls-remote origin refs/heads/master | cut -f1)"
+          if [ "$master_sha" != "$remote_sha" ]; then
+            echo "::error::master hat sich beim Checkout geändert. Lauf erneut starten."
+            exit 1
+          fi
+          version="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml | head -n 1)"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+$ ]]; then
+            echo "::error::Ungültige oder fehlende Version in pubspec.yaml: $version"
+            exit 1
+          fi
+          base_code="${version##*+}"
+          if [[ ! "$BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]] || [ "${#BUILD_NUMBER}" -gt 10 ]; then
+            echo "::error::build_number muss eine positive dezimale Ganzzahl sein."
+            exit 1
+          fi
+          if (( 10#$BUILD_NUMBER > 2100000000 || 10#$BUILD_NUMBER <= 10#$base_code )); then
+            echo "::error::build_number muss größer als die pubspec-Buildnummer ($base_code) und höchstens 2100000000 sein."
+            exit 1
+          fi
+          short_sha="$(git rev-parse --short=8 HEAD)"
+          echo "sha=$master_sha" >> "$GITHUB_OUTPUT"
+          echo "short_sha=$short_sha" >> "$GITHUB_OUTPUT"
+          echo "build_name=${version%%+*}" >> "$GITHUB_OUTPUT"
+          echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Android-Test-APK"
+            echo "- Quelle: \`master\` bei Laufbeginn"
+            echo "- Commit: \`$master_sha\`"
+            echo "- pubspec-Version: \`$version\`"
+            echo "- Test-APK-Version: \`${version%%+*}+$BUILD_NUMBER\`"
+            echo "- Signierung: vorhandener Release-Keystore"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Java einrichten
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Flutter einrichten
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Abhängigkeiten laden
+        run: flutter pub get
+
+      - name: Statische Analyse
+        run: flutter analyze
+
+      - name: Tests ausführen
+        run: flutter test
+
+      - name: Android-Release-Keystore bereitstellen
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for secret_name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [ -z "${!secret_name}" ]; then
+              echo "::error::Erforderliches Signing-Secret $secret_name fehlt."
+              exit 1
+            fi
+          done
+          install -d -m 700 "$RUNNER_TEMP/android-signing"
+          (umask 077; printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/android-signing/release.jks")
+          test -s "$RUNNER_TEMP/android-signing/release.jks"
+
+      - name: Release-signierte APK bauen
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/android-signing/release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          BUILD_NAME: ${{ steps.metadata.outputs.build_name }}
+          BUILD_NUMBER: ${{ steps.metadata.outputs.build_number }}
+        run: |
+          set -euo pipefail
+          flutter build apk --release --build-name "$BUILD_NAME" --build-number "$BUILD_NUMBER"
+          test -s build/app/outputs/flutter-apk/app-release.apk
+
+      - name: APK-Signatur überprüfen
+        run: |
+          set -euo pipefail
+          apksigner_path="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name apksigner | sort -V | tail -n 1)"
+          test -n "$apksigner_path"
+          "$apksigner_path" verify --verbose build/app/outputs/flutter-apk/app-release.apk
+
+      - name: APK und Prüfsumme vorbereiten
+        env:
+          SHORT_SHA: ${{ steps.metadata.outputs.short_sha }}
+          BUILD_NUMBER: ${{ steps.metadata.outputs.build_number }}
+          MASTER_SHA: ${{ steps.metadata.outputs.sha }}
+          BUILD_NAME: ${{ steps.metadata.outputs.build_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifact
+          apk="taugts-test-${SHORT_SHA}-build${BUILD_NUMBER}.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "artifact/$apk"
+          (cd artifact && sha256sum "$apk" > "$apk.sha256")
+          printf 'master_sha=%s\nversion_name=%s\nversion_code=%s\nsigning=release\n' \
+            "$MASTER_SHA" "$BUILD_NAME" "$BUILD_NUMBER" > artifact/build-info.txt
+
+      - name: Test-APK als Artefakt hochladen
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: taugts-test-${{ steps.metadata.outputs.short_sha }}-build${{ steps.metadata.outputs.build_number }}
+          path: artifact/
+          if-no-files-found: error
+          retention-days: 5
+
+      - name: Temporären Keystore entfernen
+        if: always()
+        run: rm -f "$RUNNER_TEMP/android-signing/release.jks"
