@@ -2,13 +2,13 @@
 
 ## Offizielle Android-Version
 
-Die Version **0.1.0+9** wird derzeit für die Veröffentlichung vorbereitet; bis dahin bleibt **0.1.0+8 vom 6. September 2026** der letzte dokumentierte offizielle Release. Die APK und ihre SHA-256-Prüfsummendatei werden über [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) bereitgestellt. Die neuen Funktionen von 0.1.0+9 sind erst nach Veröffentlichung der entsprechenden APK verfügbar.
+Die Version **0.1.0+10** wird derzeit für die Veröffentlichung vorbereitet; der tatsächlich zuletzt veröffentlichte Stand ist vor Freigabe auf GitHub Releases zu prüfen. Die APK und ihre SHA-256-Prüfsummendatei werden über [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) bereitgestellt. Die neuen Funktionen von 0.1.0+10 sind erst nach Veröffentlichung der entsprechenden APK verfügbar.
 
-1. Die Datei `taugts-0.1.0+9.apk` und die zugehörige Datei `.apk.sha256` aus demselben Release herunterladen.
+1. Die Datei `taugts-0.1.0+10.apk` und die zugehörige Datei `.apk.sha256` aus demselben Release herunterladen.
 2. Die Prüfsumme kontrollieren. Unter Windows beispielsweise:
 
 ```powershell
-Get-FileHash .\taugts-0.1.0+9.apk -Algorithm SHA256
+Get-FileHash .\taugts-0.1.0+10.apk -Algorithm SHA256
 ```
 
 3. Die ermittelte SHA-256-Prüfsumme mit der veröffentlichten Prüfsummendatei vergleichen.
