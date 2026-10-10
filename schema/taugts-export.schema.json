@@ -280,6 +280,9 @@
         },
         "geaendertAm": {
           "$ref": "#/$defs/utcDateTime"
+        },
+        "geloescht": {
+          "type": "boolean"
         }
       },
       "allOf": [
@@ -371,6 +374,9 @@
         },
         "geaendertAm": {
           "$ref": "#/$defs/utcDateTime"
+        },
+        "geloescht": {
+          "type": "boolean"
         }
       }
     },
