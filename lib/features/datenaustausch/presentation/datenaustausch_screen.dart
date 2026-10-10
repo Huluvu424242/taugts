@@ -224,11 +224,11 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         werte[konflikt.schluessel] = ImportKonfliktAktion.importVersion;
       } else if (konflikt.art == ImportKonfliktArt.unveraendert) {
         werte[konflikt.schluessel] = ImportKonfliktAktion.lokaleVersion;
-      } else if (konflikt.art == ImportKonfliktArt.versionskonflikt) {
-        werte[konflikt.schluessel] =
-            _strategie == ImportStrategie.importBevorzugen
-                ? ImportKonfliktAktion.importVersion
-                : ImportKonfliktAktion.lokaleVersion;
+      } else if (konflikt.erlaubteAktionen
+          .contains(ImportKonfliktAktion.importVersion)) {
+        // Der allgemeine Importmodus bleibt lokal bevorzugend.
+        // Für tatsächliche Konflikte gilt unabhängig davon Import bevorzugen.
+        werte[konflikt.schluessel] = ImportKonfliktAktion.importVersion;
       }
     }
     return ImportKonfliktEntscheidungsStand(Map.unmodifiable(werte));
