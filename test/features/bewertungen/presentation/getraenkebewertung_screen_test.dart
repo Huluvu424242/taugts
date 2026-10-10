@@ -74,7 +74,7 @@ void main() {
       StandardGetraenkekriterien.gesamturteilId,
     );
     expect(bewertungen.single.wert, 4);
-    expect(await repository.ladeEntwuerfe(), isEmpty);
+    expect(await repository.ladeErlebnisse(), isEmpty);
   });
 
   testWidgets('zeigt optionale Intensitäten und erhält eine Notiz', (
@@ -135,7 +135,7 @@ void main() {
       find.text('Bitte eine Bewertung wählen oder eine Notiz eingeben.'),
       findsOneWidget,
     );
-    expect(await repository.ladeEntwuerfe(), hasLength(1));
+    expect(await repository.ladeErlebnisse(), hasLength(1));
   });
 
   testWidgets('zeigt für eine Speise ausschließlich passende Kriterien', (
