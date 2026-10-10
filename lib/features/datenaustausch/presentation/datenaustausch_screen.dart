@@ -319,9 +319,35 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
           .where((konflikt) => _entscheidungsStand.fuer(konflikt) == null)
           .length;
 
-  int get _zuLoeschendeDatensaetze => _strategiePlan?.sammlungen
-          .fold<int>(0, (summe, s) => summe + s.entfernen) ??
-      0;
+  int get _zuLoeschendeDatensaetze => _lokalesDokument == null
+      ? 0
+      : const [
+          'profile',
+          'objekte',
+          'orte',
+          'bewertungskriterien',
+          'erlebnisse',
+          'erlebnisPositionen',
+          'preisbeobachtungen',
+          'ortsbewertungen',
+          'bewertungen',
+        ].fold<int>(
+          0,
+          (summe, name) =>
+              summe + (_lokalesDokument![name] as List? ?? const []).length,
+        );
+
+  bool get _ersatzdateiHatFachdaten => const [
+        'profile',
+        'objekte',
+        'orte',
+        'bewertungskriterien',
+        'erlebnisse',
+        'erlebnisPositionen',
+        'preisbeobachtungen',
+        'ortsbewertungen',
+        'bewertungen',
+      ].any((name) => (_importDokument?[name] as List? ?? const []).isNotEmpty);
 
   Future<bool> _ersatzBestaetigen() async {
     final ergebnis = await showDialog<bool>(
@@ -374,6 +400,14 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
 
   Future<void> _importBestaetigen() async {
     if (_laeuft || _importDokument == null || _lokalesDokument == null) return;
+    if (_strategie == ImportStrategie.bestandErsetzen &&
+        !_ersatzdateiHatFachdaten) {
+      setState(() {
+        _istFehler = true;
+        _status = 'Ein vollständiger Ersatz durch eine leere Datei ist nicht zulässig.';
+      });
+      return;
+    }
     if (!_alleKonflikteEntschieden) {
       setState(() {
         _istFehler = true;
@@ -617,12 +651,21 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         const SizedBox(height: 20),
         FilledButton.icon(
           onPressed:
-              _laeuft || !_alleKonflikteEntschieden ? null : _importBestaetigen,
+              _laeuft || !_alleKonflikteEntschieden ||
+                      (_strategie == ImportStrategie.bestandErsetzen &&
+                          !_ersatzdateiHatFachdaten)
+                  ? null
+                  : _importBestaetigen,
           icon: const Icon(Icons.download_done_outlined),
           label: Text(_strategie == ImportStrategie.bestandErsetzen
               ? 'Bestand ersetzen und importieren'
               : 'Import verbindlich ausführen'),
         ),
+        if (_strategie == ImportStrategie.bestandErsetzen &&
+            !_ersatzdateiHatFachdaten)
+          const Text(
+            'Eine leere Importdatei darf den gesamten Bestand nicht ersetzen.',
+          ),
         if (!_alleKonflikteEntschieden) ...[
           const SizedBox(height: 8),
           const Text(
