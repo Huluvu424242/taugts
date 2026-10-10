@@ -104,7 +104,7 @@ class ImportKlassifikationService {
       final id = ImportKonfliktentscheidungService.identitaet(
         'objektTags', wert,
       );
-      final auswahl = explizit['$name|$id|$id'];
+      final auswahl = explizit['objektTags|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
           auswahl == ImportKonfliktAktion.lokaleVersion) {
         continue;
@@ -126,7 +126,7 @@ class ImportKlassifikationService {
       final id = ImportKonfliktentscheidungService.identitaet(
         'objektKlassifikationsmerkmale', wert,
       );
-      final auswahl = explizit['$name|$id|$id'];
+      final auswahl = explizit['objektKlassifikationsmerkmale|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
           auswahl == ImportKonfliktAktion.lokaleVersion) {
         continue;
@@ -149,7 +149,7 @@ class ImportKlassifikationService {
       final id = ImportKonfliktentscheidungService.identitaet(
         'kategorieKriteriensetRegeln', wert,
       );
-      final auswahl = explizit['$name|$id|$id'];
+      final auswahl = explizit['kategorieKriteriensetRegeln|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
           auswahl == ImportKonfliktAktion.lokaleVersion) {
         continue;
@@ -172,7 +172,7 @@ class ImportKlassifikationService {
       final id = ImportKonfliktentscheidungService.identitaet(
         'kategorieKriterien', wert,
       );
-      final auswahl = explizit['$name|$id|$id'];
+      final auswahl = explizit['kategorieKriterien|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
           auswahl == ImportKonfliktAktion.lokaleVersion) {
         continue;
