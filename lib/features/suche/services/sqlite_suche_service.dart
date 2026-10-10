@@ -166,8 +166,7 @@ class SqliteSucheService implements SucheService {
           id: row['id']! as String,
           art: Suchziel.erlebnisse,
           titel: row['typ'] == 'einkauf' ? 'Einkauf' : 'Restaurantbesuch',
-          untertitel:
-              '${row['ort_name'] ?? 'Ohne Ort'} · ${row['zeit']}',
+          untertitel: '${row['ort_name'] ?? 'Ohne Ort'} · ${row['zeit']}',
           erlebnisId: row['id']! as String,
           ortId: row['ort_id'] as String?,
           zeitpunkt: DateTime.tryParse(row['zeit']! as String),
