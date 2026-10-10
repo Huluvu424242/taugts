@@ -33,7 +33,7 @@ void main() {
       id: '81000000-0000-4000-8000-000000000002',
       ortId: ort.id,
       herkunftProfilId: profilId,
-      tatsaechlicherBeginn: zeit,
+      beginn: zeit,
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
