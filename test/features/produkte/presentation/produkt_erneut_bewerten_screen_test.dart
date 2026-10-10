@@ -39,9 +39,9 @@ void main() {
     final erlebnis = Erlebnis(
       id: 'erlebnis-1',
       typ: Erlebnistyp.einkauf,
-      status: Erlebnisstatus.geplant,
-      geplanterTag: DateTime.utc(2026, 9, 1),
-      geplanteMinute: 12 * 60,
+
+      beginn: DateTime.utc(2026, 9, 1),
+
       herkunftProfilId: profil.id,
       istEntwurf: true,
       erstelltAm: zeit,
