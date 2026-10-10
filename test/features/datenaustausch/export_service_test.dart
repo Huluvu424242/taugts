@@ -6,6 +6,8 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_validierungs_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_ausfuehrung_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_strategie_service.dart';
 
 void main() {
   late LokaleDatenbank datenbank;
@@ -83,6 +85,76 @@ void main() {
       'kategorieZuordnungen',
     ]) {
       expect(dokument[schluessel], isA<List<Object?>>(), reason: schluessel);
+    }
+  });
+
+  test('Kategorie- und Klassifikationsdaten bestehen einen vollständigen Roundtrip', () {
+    const produkt = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    const kategorie = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+    datenbank.verbindung.execute(
+      'INSERT INTO objekte (id, name, art, erstellt_am, geaendert_am) '
+      'VALUES (?, ?, ?, ?, ?)',
+      [produkt, 'Testbier', 'produkt',
+        '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z'],
+    );
+    datenbank.verbindung.execute(
+      'INSERT INTO produkte (objekt_id) VALUES (?)', [produkt],
+    );
+    datenbank.verbindung.execute(
+      'INSERT INTO kategorien (id, name, bereich, ist_standard) '
+      'VALUES (?, ?, ?, ?)',
+      [kategorie, 'Getränk', 'produkt', 0],
+    );
+    datenbank.verbindung.execute(
+      'INSERT INTO produkt_kategorien (produkt_id, kategorie_id) '
+      'VALUES (?, ?)', [produkt, kategorie],
+    );
+    datenbank.verbindung.execute(
+      'INSERT INTO objekt_tags (objekt_id, normalisiert, text) '
+      'VALUES (?, ?, ?)', [produkt, 'regional', 'Regional'],
+    );
+    datenbank.verbindung.execute(
+      'INSERT INTO objekt_klassifikationsmerkmale '
+      '(objekt_id, dimension, schluessel, wert) VALUES (?, ?, ?, ?)',
+      [produkt, 'hersteller', '', 'Brauerei'],
+    );
+    datenbank.verbindung.execute(
+      'INSERT INTO kategorie_kriterienset_regeln '
+      '(kategorie_id, fallback_objektart, modus, version) '
+      'VALUES (?, ?, ?, ?)',
+      [kategorie, 'getraenk', 'erweitern', 1],
+    );
+
+    final text = ExportService(
+      datenbank, appVersion: '0.1.0-test',
+      jetzt: () => DateTime.utc(2026, 10, 10),
+    ).erzeugeJson();
+    final validierung = const ImportValidierungsService().validiere(text);
+    expect(validierung.istGueltig, isTrue, reason: validierung.fehler.toString());
+
+    final neu = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+    addTearDown(neu.schliessen);
+    const ImportAusfuehrungService().ausfuehren(
+      datenbank: neu,
+      importDokument: validierung.dokument!,
+      strategie: ImportStrategie.bestandErsetzen,
+    );
+    final danach = jsonDecode(
+      ExportService(neu, appVersion: '0.1.0-test').erzeugeJson(),
+    ) as Map<String, Object?>;
+    for (final name in const [
+      'kategorien',
+      'kategorieZuordnungen',
+      'objektTags',
+      'objektKlassifikationsmerkmale',
+      'kategorieKriteriensetRegeln',
+      'kategorieKriterien',
+    ]) {
+      expect(
+        danach[name],
+        (jsonDecode(text) as Map<String, Object?>)[name],
+        reason: name,
+      );
     }
   });
 
