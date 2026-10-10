@@ -114,6 +114,7 @@ void main() {
       final dokument = Map<String, Object?>.from(
         jsonDecode(exportService.erzeugeJson()) as Map,
       );
+      dokument['bewertungskriterien'] = <Object?>[];
       final profile = (dokument['profile'] as List).cast<Map>();
       if (profile.isNotEmpty) {
         // Derselbe Datensatz ist vorhanden; die Vorschau benötigt
@@ -160,6 +161,7 @@ void main() {
       final dokument = Map<String, Object?>.from(
         jsonDecode(export.erzeugeJson()) as Map,
       );
+      dokument['bewertungskriterien'] = <Object?>[];
       final profile = (dokument['profile'] as List).cast<Map>();
       dokument['profile'] = [
         for (final profil in profile)
