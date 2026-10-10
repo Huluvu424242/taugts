@@ -171,8 +171,8 @@ void main() {
     _stelleAlteErlebnistabelleBereit(db);
     const profil = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
     const zeit = '2026-09-01T00:00:00.000Z';
-    db.execute('INSERT INTO profile VALUES (?, NULL, ?, ?)',
-        [profil, zeit, zeit]);
+    db.execute(
+        'INSERT INTO profile VALUES (?, NULL, ?, ?)', [profil, zeit, zeit]);
     db.execute('''
       INSERT INTO erlebnisse (
         id, typ, status, geplanter_tag, geplante_minute,
@@ -187,17 +187,24 @@ void main() {
       ) VALUES ('ist', 'restaurantbesuch', 'beendet',
         '2026-11-01', 600, ?, ?, ?, ?, ?)
     ''', [
-      '2026-10-01T18:00:00.000Z', '2026-10-01T20:00:00.000Z',
-      zeit, zeit, profil,
+      '2026-10-01T18:00:00.000Z',
+      '2026-10-01T20:00:00.000Z',
+      zeit,
+      zeit,
+      profil,
     ]);
     db.userVersion = 3;
     LokaleDatenbank.oeffnen(db);
-    final plan = db.select(
-      "SELECT beginn, ende FROM erlebnisse WHERE id = 'plan'",
-    ).single;
-    final ist = db.select(
-      "SELECT beginn, ende FROM erlebnisse WHERE id = 'ist'",
-    ).single;
+    final plan = db
+        .select(
+          "SELECT beginn, ende FROM erlebnisse WHERE id = 'plan'",
+        )
+        .single;
+    final ist = db
+        .select(
+          "SELECT beginn, ende FROM erlebnisse WHERE id = 'ist'",
+        )
+        .single;
     expect(plan['beginn'], '2026-11-01T14:30:00.000Z');
     expect(plan['ende'], isNull);
     expect(ist['beginn'], '2026-10-01T18:00:00.000Z');
@@ -250,7 +257,6 @@ void _stelleAlteErlebnistabelleBereit(Database verbindung) {
   ''');
   verbindung.execute('PRAGMA foreign_keys = ON');
 }
-
 
 Set<String> _spalten(Database verbindung, String tabelle) => verbindung
     .select('PRAGMA table_info($tabelle)')
