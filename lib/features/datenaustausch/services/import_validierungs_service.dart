@@ -843,6 +843,9 @@ class ImportValidierungsService {
         '$pfad.elternKategorieId',
         fehler,
       );
+      if (wert.containsKey('istStandard')) {
+        _bool(wert, 'istStandard', '$pfad.istStandard', fehler);
+      }
       _zeitstempel(wert, pfad, fehler);
     }
     for (var i = 0; i < zuordnungen.length; i++) {
@@ -886,12 +889,17 @@ class ImportValidierungsService {
             key = '${wert['objektId']}|${wert['dimension']}|${wert['schluessel']}';
           case 'kategorieKriteriensetRegeln':
             _uuid(wert, 'kategorieId', '$pfad.kategorieId', fehler);
-            _text(
-              wert, 'fallbackObjektart', '$pfad.fallbackObjektart',
-              fehler, nichtLeer: true,
+            _enumWert(
+              wert, 'fallbackObjektart', {
+                'getraenk', 'speise', 'sonstigesProdukt',
+                'gastronomie', 'geschaeft',
+              }, '$pfad.fallbackObjektart', fehler,
             );
-            _text(wert, 'modus', '$pfad.modus', fehler, nichtLeer: true);
-            _ganzzahl(wert, 'version', '$pfad.version', fehler);
+            _enumWert(
+              wert, 'modus', {'erweitern', 'ersetzen'},
+              '$pfad.modus', fehler,
+            );
+            _ganzzahl(wert, 'version', '$pfad.version', fehler, minimum: 1);
             key = '${wert['kategorieId']}';
           case 'kategorieKriterien':
             _uuid(wert, 'kategorieId', '$pfad.kategorieId', fehler);
@@ -1098,6 +1106,38 @@ class ImportValidierungsService {
           '$pfad.elternKategorieId',
           'Eine Kategorie darf nicht ihr eigener Elternknoten sein.',
         );
+      }
+    }
+
+    for (var i = 0; i < kategorien.length; i++) {
+      final kategorie = kategorien[i];
+      final id = kategorie['id'];
+      if (id is! String) continue;
+      final besucht = <String>{};
+      String? aktuell = id;
+      while (aktuell != null) {
+        if (!besucht.add(aktuell)) {
+          _fehler(
+            fehler, 'kategorie_zyklus',
+            r'$.kategorien[' '$i].elternKategorieId',
+            'Die Kategoriehierarchie darf keine Zyklen enthalten.',
+          );
+          break;
+        }
+        final eltern = kategorieNachId[aktuell];
+        if (eltern == null) break;
+        final elternId = eltern['elternKategorieId'];
+        if (elternId is! String) break;
+        final elternWert = kategorieNachId[elternId];
+        if (elternWert != null &&
+            elternWert['zielart'] != eltern['zielart']) {
+          _fehler(
+            fehler, 'kategorie_bereich_widerspruch',
+            r'$.kategorien[' '$i].elternKategorieId',
+            'Eine Unterkategorie muss denselben Bereich wie ihr Elternknoten besitzen.',
+          );
+        }
+        aktuell = elternId;
       }
     }
 
