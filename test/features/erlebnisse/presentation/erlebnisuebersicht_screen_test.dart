@@ -46,9 +46,9 @@ void main() {
       Erlebnis(
         id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
         typ: Erlebnistyp.restaurantbesuch,
-        status: Erlebnisstatus.aktiv,
+
         herkunftProfilId: profil.id,
-        tatsaechlicherBeginn: zeit,
+        beginn: zeit,
         erstelltAm: zeit,
         geaendertAm: zeit,
       ),
@@ -57,9 +57,9 @@ void main() {
       Erlebnis(
         id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
         typ: Erlebnistyp.einkauf,
-        status: Erlebnisstatus.geplant,
+
         herkunftProfilId: profil.id,
-        geplanterTag: DateTime.utc(2026, 9, 2),
+        beginn: DateTime.utc(2026, 9, 2),
         erstelltAm: zeit,
         geaendertAm: zeit,
       ),
@@ -68,10 +68,10 @@ void main() {
       Erlebnis(
         id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
         typ: Erlebnistyp.einkauf,
-        status: Erlebnisstatus.beendet,
+
         herkunftProfilId: profil.id,
-        tatsaechlicherBeginn: zeit.subtract(const Duration(hours: 2)),
-        tatsaechlichesEnde: zeit.subtract(const Duration(hours: 1)),
+        beginn: zeit.subtract(const Duration(hours: 2)),
+        ende: zeit.subtract(const Duration(hours: 1)),
         erstelltAm: zeit,
         geaendertAm: zeit,
       ),
