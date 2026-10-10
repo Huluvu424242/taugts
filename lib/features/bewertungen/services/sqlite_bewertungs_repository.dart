@@ -287,9 +287,9 @@ class SqliteBewertungsRepository
       '''
         INSERT INTO erlebnisse (
           id, typ, ort_id, beginn, ende, erstellt_am, geaendert_am,
-          herkunft_profil_id, notiz, ist_entwurf, produkt_id, kaufort_id,
+          herkunft_profil_id, notiz, produkt_id, kaufort_id,
           konsumort_id, preis, menge, gebinde
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
           typ = excluded.typ,
           ort_id = excluded.ort_id,
@@ -302,15 +302,14 @@ class SqliteBewertungsRepository
           preis = excluded.preis,
           menge = excluded.menge,
           gebinde = excluded.gebinde,
-          notiz = excluded.notiz,
-          ist_entwurf = excluded.ist_entwurf
+          notiz = excluded.notiz
       ''',
       [
         erlebnis.id, erlebnis.typ.name, erlebnis.ortId,
         _optionaleZeit(erlebnis.beginn), _optionaleZeit(erlebnis.ende),
         _zeit(erlebnis.erstelltAm), _zeit(erlebnis.geaendertAm),
         erlebnis.herkunftProfilId, _leerAlsNull(erlebnis.notiz),
-        erlebnis.istEntwurf ? 1 : 0, erlebnis.produktId,
+        erlebnis.produktId,
         erlebnis.kaufortId, erlebnis.konsumortId, erlebnis.preis,
         erlebnis.menge, _leerAlsNull(erlebnis.gebinde),
       ],
@@ -332,15 +331,6 @@ class SqliteBewertungsRepository
         'SELECT * FROM erlebnisse '
         'ORDER BY COALESCE(beginn, erstellt_am) '
         'DESC, geaendert_am DESC',
-      )
-      .map(_erlebnisAusZeile)
-      .toList();
-
-  @override
-  Future<List<Erlebnis>> ladeEntwuerfe() async => datenbank.verbindung
-      .select(
-        'SELECT * FROM erlebnisse WHERE ist_entwurf = 1 '
-        'ORDER BY geaendert_am DESC',
       )
       .map(_erlebnisAusZeile)
       .toList();
@@ -646,7 +636,6 @@ class SqliteBewertungsRepository
         menge: (row['menge'] as num?)?.toDouble(),
         gebinde: row['gebinde'] as String?,
         notiz: row['notiz'] as String?,
-        istEntwurf: (row['ist_entwurf'] as int) == 1,
       );
 
   @override
