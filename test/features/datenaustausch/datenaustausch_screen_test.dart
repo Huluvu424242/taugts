@@ -145,6 +145,51 @@ void main() {
   );
 
   testWidgets(
+    'behält lokalen Versionskonflikt ohne Einzelentscheidung',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 2400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+      addTearDown(db.schliessen);
+      db.verbindung.execute(
+        'INSERT INTO profile (id, anzeigename, erstellt_am, geaendert_am) '
+        'VALUES (?, ?, ?, ?)',
+        ['profil-1', 'Lokal', '2026-09-01T00:00:00Z', '2026-09-01T00:00:00Z'],
+      );
+      final export = ExportService(db, appVersion: '0.0.0-test');
+      final dokument = Map<String, Object?>.from(
+        jsonDecode(export.erzeugeJson()) as Map,
+      );
+      final profile = (dokument['profile'] as List).cast<Map>();
+      dokument['profile'] = [
+        for (final profil in profile)
+          {...Map<String, Object?>.from(profil), 'anzeigename': 'Import'},
+      ];
+      await tester.pumpWidget(MaterialApp(
+        home: DatenaustauschScreen(
+          exportService: export,
+          exportZielService: _NichtVerwendetesExportZiel(),
+          importQuelleService: _FesteImportQuelle(jsonEncode(dokument)),
+        ),
+      ));
+      await tester.tap(find.text('Importdatei auswählen und prüfen'));
+      await tester.pumpAndSettle();
+      final aktion = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
+      );
+      expect(aktion.onPressed, isNotNull);
+      aktion.onPressed!();
+      await tester.pumpAndSettle();
+      expect(
+        db.verbindung.select(
+          "SELECT anzeigename FROM profile WHERE id = 'profil-1'",
+        ).single['anzeigename'],
+        'Lokal',
+      );
+    },
+  );
+
+  testWidgets(
     'sperrt weitere Aktionen und verändert bei abgebrochener Auswahl nichts',
     (tester) async {
       final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
