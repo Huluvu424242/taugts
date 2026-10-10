@@ -1,23 +1,31 @@
 # Installation und Updates
 
-## Android
+## Offizielle Android-Version
 
-Nach Veröffentlichung wird die APK über die [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) des Projekts bereitgestellt.
+Der letzte hier dokumentierte offizielle Release ist **0.1.0+8 vom 6. September 2026**. Die APK und ihre SHA-256-Prüfsummendatei werden über [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) bereitgestellt. Änderungen im aktuellen `master` sind noch nicht automatisch in dieser veröffentlichten APK enthalten.
 
-Für Version 0.1.0+4 werden die APK und eine zugehörige SHA-256-Prüfsummendatei bereitgestellt. Vor der Installation sollte die Prüfsumme kontrolliert werden. Unter Windows kann dies beispielsweise mit folgendem Befehl erfolgen:
+1. Die Datei `taugts-0.1.0+8.apk` und die zugehörige Datei `.apk.sha256` aus demselben Release herunterladen.
+2. Die Prüfsumme kontrollieren. Unter Windows beispielsweise:
 
 ```powershell
-Get-FileHash .\taugts-0.1.0+4.apk -Algorithm SHA256
+Get-FileHash .\taugts-0.1.0+8.apk -Algorithm SHA256
 ```
 
-Der ermittelte Hash muss mit dem Inhalt der bereitgestellten `.apk.sha256`-Datei übereinstimmen.
+3. Die ermittelte SHA-256-Prüfsumme mit der veröffentlichten Prüfsummendatei vergleichen.
+4. Falls Android danach fragt, die Installation aus dem verwendeten Browser oder Dateimanager ausdrücklich erlauben und die APK installieren.
 
-Android kann bei einer manuellen APK-Installation verlangen, die Installation aus dem verwendeten Browser oder Dateimanager ausdrücklich zu erlauben. Anschließend kann die APK geöffnet und die Installation bestätigt werden.
+## Updates und Datensicherung
 
-## Updates
+Ein Update über eine vorhandene Android-Installation setzt denselben Signierschlüssel und eine höhere Android-Buildnummer voraus. **Vor jedem Test-Update einen JSON-Export erstellen**, separat aufbewahren und die Wiederherstellbarkeit prüfen. Nicht deinstallieren oder App-Daten löschen, solange diese Daten gebraucht werden.
 
-APK-Updates können über eine vorhandene Installation installiert werden, wenn sie mit demselben Release-Signierschlüssel signiert wurden. Vor einer Neuinstallation oder einem Wechsel des Signierschlüssels ist zu beachten, dass Version 0.1.0+4 noch keinen Exportweg für die lokal gespeicherten Fachdaten besitzt.
+Besonders wichtig: Die SQLite-Datenbanken aus Vorabversionen **0.1.0+6 und früher** besitzen keinen direkten Upgradepfad zur ab 0.1.0+7 konsolidierten Baseline. Für solche Daten ist ein geprüfter JSON-Export und Import in eine frisch angelegte Datenbank erforderlich. Für 0.1.0+7 → 0.1.0+8 wurde keine neue Datenbank-Baseline eingeführt.
+
+Der unveröffentlichte `master` enthält zusätzlich eine Datenmigration für den vereinheitlichten Erlebniszeitraum sowie das JSON-Austauschformat Version 3. Hinweise stehen in [Datenschutz und Datenhaltung](datenhaltung.md) und in der [Datenbankdokumentation](../architecture/datenbank.md).
+
+## Test-APK vom aktuellen master
+
+Neben offiziellen Releases existiert ein [separater Workflow für Test-APKs](../entwicklung/android-test-apk.md). Er ist ausschließlich manuell startbar und benötigt eine **gesonderte ausdrückliche Ausführungsfreigabe**. Er erstellt keine neue offizielle Version und keinen GitHub-Release-Tag. Für eine installierbare Aktualisierung muss die gewählte Test-Buildnummer größer als die bereits installierte sein; die Signatur muss zur bestehenden App passen.
 
 ## Weitere Plattformen
 
-Android ist die primäre Zielplattform. Windows und Linux werden architektonisch berücksichtigt, gehören aber noch nicht zum veröffentlichten Funktionsumfang.
+Android ist die primäre Zielplattform. Windows und Linux werden architektonisch berücksichtigt, gehören jedoch nicht zum veröffentlichten Funktionsumfang.
