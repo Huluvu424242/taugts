@@ -165,6 +165,49 @@ void main() {
     verbindung.close();
   });
 
+  test('Migration 3 nach 4 übernimmt Istzeit vor Planzeit', () {
+    final db = sqlite3.openInMemory();
+    LokaleDatenbank.oeffnen(db);
+    _stelleAlteErlebnistabelleBereit(db);
+    const profil = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+    const zeit = '2026-09-01T00:00:00.000Z';
+    db.execute('INSERT INTO profile VALUES (?, NULL, ?, ?)',
+        [profil, zeit, zeit]);
+    db.execute('''
+      INSERT INTO erlebnisse (
+        id, typ, status, geplanter_tag, geplante_minute,
+        erstellt_am, geaendert_am, herkunft_profil_id
+      ) VALUES ('plan', 'einkauf', 'geplant', '2026-11-01', 870, ?, ?, ?)
+    ''', [zeit, zeit, profil]);
+    db.execute('''
+      INSERT INTO erlebnisse (
+        id, typ, status, geplanter_tag, geplante_minute,
+        tatsaechlicher_beginn, tatsaechliches_ende,
+        erstellt_am, geaendert_am, herkunft_profil_id
+      ) VALUES ('ist', 'restaurantbesuch', 'beendet',
+        '2026-11-01', 600, ?, ?, ?, ?, ?)
+    ''', [
+      '2026-10-01T18:00:00.000Z', '2026-10-01T20:00:00.000Z',
+      zeit, zeit, profil,
+    ]);
+    db.userVersion = 3;
+    LokaleDatenbank.oeffnen(db);
+    final plan = db.select(
+      "SELECT beginn, ende FROM erlebnisse WHERE id = 'plan'",
+    ).single;
+    final ist = db.select(
+      "SELECT beginn, ende FROM erlebnisse WHERE id = 'ist'",
+    ).single;
+    expect(plan['beginn'], '2026-11-01T14:30:00.000Z');
+    expect(plan['ende'], isNull);
+    expect(ist['beginn'], '2026-10-01T18:00:00.000Z');
+    expect(ist['ende'], '2026-10-01T20:00:00.000Z');
+    expect(_spalten(db, 'erlebnisse'), isNot(contains('status')));
+    expect(_spalten(db, 'erlebnisse'), isNot(contains('geplanter_tag')));
+    expect(db.select('PRAGMA foreign_key_check'), isEmpty);
+    db.close();
+  });
+
   test('lehnt eine Datenbank mit höherer Schemaversion ab', () {
     final verbindung = sqlite3.openInMemory();
     verbindung.userVersion = 5;
