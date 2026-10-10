@@ -9,6 +9,7 @@ import 'package:taugts/features/datenaustausch/presentation/datenaustausch_scree
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_ausfuehrung_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_quelle_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_strategie_service.dart';
 
@@ -145,7 +146,7 @@ void main() {
   );
 
   testWidgets(
-    'behält lokalen Versionskonflikt ohne Einzelentscheidung',
+    'bevorzugt Import bei Versionskonflikt ohne Einzelentscheidung',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(1000, 2400));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -184,7 +185,19 @@ void main() {
         find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
       );
       expect(aktion.onPressed, isNotNull);
-      aktion.onPressed!();
+      await tester.tap(find.text('Automatische Entscheidungen ansehen / anpassen'));
+      await tester.pumpAndSettle();
+      final konfliktAuswahl =
+          tester.widget<DropdownButtonFormField<ImportKonfliktAktion>>(
+        find.byType(DropdownButtonFormField<ImportKonfliktAktion>).first,
+      );
+      expect(konfliktAuswahl.initialValue, ImportKonfliktAktion.importVersion);
+      await tester.tap(find.text('Zurück zur Importvorschau'));
+      await tester.pumpAndSettle();
+      final importAktion = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
+      );
+      importAktion.onPressed!();
       await tester.pumpAndSettle();
       expect(
         db.verbindung
@@ -192,7 +205,7 @@ void main() {
               "SELECT anzeigename FROM profile WHERE id = '11111111-1111-4111-8111-111111111111'",
             )
             .single['anzeigename'],
-        'Lokal',
+        'Import',
       );
     },
   );
