@@ -1,6 +1,6 @@
 # Versioniertes JSON-Austauschformat
 
-Taugt’s? verwendet für Sicherung und Datenaustausch ein eigenes, von der lokalen SQLite-Datenbank unabhängiges JSON-Format. Diese Dokumentation beschreibt **Schemaversion 2**. Der Export ist implementiert; Importdateien werden vor jeder späteren Übernahme durch die sichere Importvalidierung vollständig geprüft.
+Taugt’s? verwendet für Sicherung und Datenaustausch ein eigenes, von der lokalen SQLite-Datenbank unabhängiges JSON-Format. Diese Dokumentation beschreibt die aktuelle **Schemaversion 3** auf `master`. Der vollständige Export, die sichere Importvalidierung, die Konfliktvorschau und die bestätigte atomare Importausführung sind implementiert. Die Version des Austauschformats ist unabhängig von der lokalen SQLite-Schemaversion (derzeit 4).
 
 ## Kennung und Versionierung
 
@@ -9,9 +9,9 @@ Jede Datei besitzt mindestens folgende Kopfdaten:
 ```json
 {
   "format": "taugts-export",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "exportiertAm": "2026-09-05T18:15:00Z",
-  "appVersion": "0.1.0+7"
+  "appVersion": "0.1.0+8"
 }
 ```
 
@@ -23,7 +23,7 @@ Jede Datei besitzt mindestens folgende Kopfdaten:
 
 Eine Änderung, die bestehende Felder inkompatibel umdeutet oder entfernt, benötigt eine neue `schemaVersion`. Ergänzende optionale Felder dürfen innerhalb derselben Version hinzukommen, solange vorhandene Bedeutung nicht verändert wird.
 
-Schemaversion 2 wurde eingeführt, weil Bewertungskriterien neben numerischen Werten jetzt auch textuelle Werte für `Auswahl` und `Freitext` speichern können. Dafür besitzt eine Bewertung die getrennten Felder `wert` und `textWert`; genau eines davon ist gesetzt.
+Schemaversion 2 führte die Felder `wert` und `textWert` zur getrennten Speicherung numerischer und textueller Bewertungswerte ein. **Version 3** ersetzt bei Erlebnissen die früheren Status- und Plan-/Ist-Zeitfelder durch die beiden optionalen Felder `beginn` und `ende`. Eine weitere Umstellung der Bewertungskriterien ist damit nicht verbunden.
 
 ## Formales Schema und Fixtures
 
@@ -33,7 +33,7 @@ Das normative JSON Schema liegt unter:
 
 Die vorhandenen Fixtures unter `schema/fixtures/` bleiben bewusst als historische Version-0- und Version-1-Beispiele erhalten. Sie dienen vor allem dazu, die unterstützten Vorwärtsmigrationen, verwaiste Referenzen und fachlich ungültige Status-/Zeitkombinationen zu prüfen. Details stehen unter [Sichere Importvalidierung](importvalidierung.md).
 
-Das bisherige gültige Version-1-Fixture enthält dasselbe Produkt in zwei unterschiedlichen Restaurantbesuchen mit eigenständigen Erlebnispositionen, Preisbeobachtungen und Bewertungen. Damit wird ausdrücklich gezeigt, dass spätere Beobachtungen ältere Werte nicht überschreiben. Beim Import wird es zunächst auf die aktuelle Schemaversion 2 migriert.
+Das bisherige gültige Version-1-Fixture enthält dasselbe Produkt in zwei unterschiedlichen Restaurantbesuchen mit eigenständigen Erlebnispositionen, Preisbeobachtungen und Bewertungen. Damit wird ausdrücklich gezeigt, dass spätere Beobachtungen ältere Werte nicht überschreiben. Beim Import wird es über die definierten Zwischenschritte auf die aktuelle Schemaversion 3 migriert.
 
 ## Oberste Struktur
 
@@ -53,7 +53,7 @@ Alle fachlichen Sammlungen sind vorhanden, auch wenn sie leer sind:
 | `kategorien` | hierarchisch vorbereitete Kategorien |
 | `kategorieZuordnungen` | Zuordnung einer Kategorie zu Objekt oder Ort |
 
-Kategorien sind bereits im Austauschformat vorgesehen, auch wenn ihre Verwaltung erst mit der dafür vorgesehenen Fachstory vollständig in der App umgesetzt wird. Dadurch braucht das Austauschformat für die spätere Kategorisierung keinen strukturellen Bruch.
+Kategorien, Klassifikation und Kategorie-Kriteriensets sind im lokalen Fachmodell bereits umgesetzt. Das Austauschformat bildet die vorgesehenen Sammlungen und ihre Referenzen ab; ihre Versionsentwicklung bleibt unabhängig von der SQLite-Tabellenstruktur.
 
 ## IDs und Beziehungen
 
@@ -70,24 +70,16 @@ Beispiele:
 
 JSON Schema kann die Existenz einer referenzierten UUID in einer anderen Sammlung nicht vollständig ausdrücken. Deshalb prüft `ImportValidierungsService` die referenzielle Konsistenz zusätzlich und weist verwaiste oder widersprüchliche Beobachtungen ab.
 
-## Historische Erlebnisse
+## Erlebniszeitraum in Version 3
 
-Ein Erlebnis besitzt einen stabilen `typ` und `status`:
+Ein Erlebnis behält seine stabile ID und seinen Typ (`restaurantbesuch` oder `einkauf`). **Ein gespeicherter Status ist in der aktuellen Version nicht mehr vorhanden.** Statt der getrennten Planungs- und Durchführungszeiten verwendet es:
 
-- Typ: `restaurantbesuch` oder `einkauf`
-- Status: `geplant`, `aktiv` oder `beendet`
+- `beginn`: optionaler UTC-Zeitstempel für den vereinheitlichten Beginn,
+- `ende`: optionaler UTC-Zeitstempel für das Ende.
 
-Folgende Zeitinformationen bleiben getrennt:
+Ein gesetztes Ende benötigt einen Beginn und darf zeitlich nicht vor diesem liegen. Ein neuer Besuch kann auch ohne Produktpositionen erfasst werden, sofern der fachliche Kontext aus Ort und Besuchsbeginn ausreichend ist.
 
-- `geplanterTag`: Kalenderdatum im Format `YYYY-MM-DD`,
-- `geplanteMinute`: optionale Minute des Tages von `0` bis `1439`, sodass ein Einkauf bewusst nur mit Datum geplant werden kann,
-- `geplanteDauerMinuten`: optionale positive Dauer,
-- `tatsaechlicherBeginn`: optionaler UTC-Zeitstempel,
-- `tatsaechlichesEnde`: optionaler UTC-Zeitstempel.
-
-Ein später bearbeitetes Erlebnis behält seine ID. Ein tatsächlich neues Erlebnis erhält eine neue ID.
-
-Die Importvalidierung erzwingt die gleichen fachlichen Zeitregeln wie das lokale Modell: Eine geplante Uhrzeit benötigt einen Tag, ein tatsächliches Ende einen Beginn, das Ende darf nicht vor dem Beginn liegen, aktive Erlebnisse benötigen einen Beginn und beendete Erlebnisse benötigen Beginn und Ende.
+Bei der Migration älterer JSON-Dateien **2 → 3** hat der frühere `tatsaechlicherBeginn` Vorrang. Fehlt dieser, wird aus `geplanterTag` und `geplanteMinute` (ohne Uhrzeit: 00:00 UTC) ein Beginn gebildet. Die frühere tatsächliche Endzeit wird nur übernommen, wenn ein tatsächlicher Beginn vorhanden war. Alte Felder wie `status`, `istEntwurf`, `geplanterTag`, `geplanteMinute`, `geplanteDauerMinuten`, `tatsaechlicherBeginn` und `tatsaechlichesEnde` entfallen danach aus dem normalisierten Importdokument; die Ursprungsdatei bleibt unverändert.
 
 ## Erlebnispositionen und Preise
 
@@ -195,18 +187,19 @@ Profile besitzen eine stabile UUID. Erlebnisse und Bewertungen referenzieren ihr
 
 Ein optionaler bekannter Wert darf als `null` übertragen werden, wenn das Schema dies für das konkrete Feld zulässt. Erforderliche Sammlungen werden dagegen immer als Array ausgegeben und nicht weggelassen.
 
-JSON Schema erlaubt in Schemaversion 2 zusätzliche, nicht bekannte Felder. Das ist eine bewusste Vorwärtskompatibilitätsregel: Ein Leser einer unterstützten Version darf unbekannte **optionale** Felder ignorieren, muss aber zuerst Formatkennung und Schemaversion prüfen. Eine Datei mit einer unbekannten neueren `schemaVersion` darf nicht still wie eine bekannte Version behandelt werden.
+JSON Schema erlaubt auch in Schemaversion 3 zusätzliche, nicht bekannte Felder. Das ist eine bewusste Vorwärtskompatibilitätsregel: Ein Leser einer unterstützten Version darf unbekannte **optionale** Felder ignorieren, muss aber zuerst Formatkennung und Schemaversion prüfen. Eine Datei mit einer unbekannten neueren `schemaVersion` darf nicht still wie eine bekannte Version behandelt werden.
 
 `ImportValidierungsService` setzt diese Regel um: unbekannte zusätzliche Felder innerhalb einer unterstützten Version werden ignoriert; Pflichtfelder, bekannte IDs und Beziehungen werden weiterhin streng geprüft. Eine unbekannte neuere Schemaversion wird abgewiesen.
 
 ## Unterstützte Vorwärtsmigrationen
 
-Die aktuelle Version 2 unterstützt die älteren Versionen 0 und 1:
+Die aktuelle Version **3** unterstützt die älteren Versionen **0, 1 und 2**:
 
 - **0 → 1:** Die vor der ersten Austauschformatversion optional fehlenden Sammlungen `kategorien` und `kategorieZuordnungen` werden leer ergänzt.
 - **1 → 2:** Historische Bewertungen erhalten zusätzlich `textWert: null`. Der bisherige numerische `wert` bleibt unverändert erhalten.
+- **2 → 3:** Die bisherigen Plan-/Ist-Angaben werden wie oben beschrieben in `beginn` und `ende` überführt, der frühere Erlebnisstatus und die alten Zeitfelder entfernt.
 
-Damit werden vorhandene Exporte nicht umgedeutet oder verworfen. Neue textuelle Auswahl- und Freitextwerte entstehen erst in Schemaversion 2.
+Damit bleiben ältere Exportdateien über explizite Vorwärtsmigrationen einlesbar. Typisierte Auswahl- und Freitextwerte werden seit Schemaversion 2 unterstützt.
 
 Migrationen laufen ausschließlich auf einer Kopie des dekodierten Dokuments im Arbeitsspeicher. Die Eingabedatei und lokale SQLite-Daten werden dabei nicht verändert. Jede künftige Versionsstufe benötigt eine eigene getestete Vorwärtsmigration.
 
@@ -224,11 +217,7 @@ Dadurch können dasselbe Produkt und derselbe Ort über die Zeit beliebig viele 
 
 Vor der fachlichen Analyse begrenzt die Importvalidierung die Eingabe standardmäßig auf 10 MiB, 40 Verschachtelungsebenen und 250.000 JSON-Knoten. Jede fachliche Sammlung darf höchstens 50.000 Einträge enthalten. Details und Begründung stehen unter [Sichere Importvalidierung](importvalidierung.md).
 
-## Abgrenzung zu den Folgestories
+## Implementierter Importablauf
 
-Das Format, der Export und die sichere Vorvalidierung sind implementiert. Die Validierung verändert absichtlich noch keine lokalen Daten.
+Die Vorvalidierung ist schreibfrei. Danach bietet die App eine Importvorschau mit den Strategien **Bestand ersetzen**, **Import bevorzugen** und **Lokalen Bestand bevorzugen**. Identitätskonflikte und mögliche fachliche Dubletten können einzeln geprüft werden. Produkt- und Ortsdubletten können unter Beibehaltung einer kanonischen lokalen UUID und einer dauerhaften Aliasreferenz zusammengeführt werden. Erst **Import verbindlich ausführen** übernimmt den geprüften Import in einer Datenbanktransaktion; ein Fehler führt zum Rollback. Das lokale Importprotokoll hält nur Status und Zähler, keine importierten Fachinhalte.
 
-Die nachfolgenden Stories übernehmen darauf aufbauend:
-
-- #18: Importvorschau und Konfliktanalyse,
-- #19 bis #22: Konfliktbehandlung, atomare Importausführung und weitere Datenaustauschabläufe.
