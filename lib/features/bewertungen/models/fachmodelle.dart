@@ -130,7 +130,6 @@ class Erlebnis {
     this.menge,
     this.gebinde,
     this.notiz,
-    this.istEntwurf = true,
   });
 
   final String id;
@@ -146,7 +145,6 @@ class Erlebnis {
   final double? menge;
   final String? gebinde;
   final String? notiz;
-  final bool istEntwurf;
   final DateTime erstelltAm;
   final DateTime geaendertAm;
 
@@ -172,7 +170,6 @@ class Erlebnis {
     Object? beginn = _nichtGesetzt,
     Object? ende = _nichtGesetzt,
     Object? notiz = _nichtGesetzt,
-    bool? istEntwurf,
     DateTime? geaendertAm,
   }) =>
       Erlebnis(
@@ -189,7 +186,6 @@ class Erlebnis {
         menge: menge,
         gebinde: gebinde,
         notiz: identical(notiz, _nichtGesetzt) ? this.notiz : notiz as String?,
-        istEntwurf: istEntwurf ?? this.istEntwurf,
         erstelltAm: erstelltAm,
         geaendertAm: geaendertAm ?? this.geaendertAm,
       );
