@@ -23,7 +23,6 @@ enum KriteriumObjektart {
 
 enum Erlebnistyp { restaurantbesuch, einkauf }
 
-
 class BewertbaresObjekt {
   const BewertbaresObjekt({
     required this.id,
@@ -177,7 +176,9 @@ class Erlebnis {
         herkunftProfilId: herkunftProfilId,
         typ: typ ?? this.typ,
         ortId: identical(ortId, _nichtGesetzt) ? this.ortId : ortId as String?,
-        beginn: identical(beginn, _nichtGesetzt) ? this.beginn : beginn as DateTime?,
+        beginn: identical(beginn, _nichtGesetzt)
+            ? this.beginn
+            : beginn as DateTime?,
         ende: identical(ende, _nichtGesetzt) ? this.ende : ende as DateTime?,
         produktId: produktId,
         kaufortId: kaufortId,
