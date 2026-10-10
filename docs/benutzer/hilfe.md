@@ -2,7 +2,7 @@
 
 ## Versionsstand
 
-Die **letzte hier dokumentierte offizielle Android-Version ist 0.1.0+8**. Der aktuelle Entwicklungsstand auf `master` besitzt zusätzliche, noch unveröffentlichte Funktionen; siehe [Changelog](https://github.com/Huluvu424242/taugts/blob/master/CHANGELOG.md) unter `[Unreleased]`. Beschreibungen von `master` sind keine Zusage, dass diese Funktionen bereits in der installierten APK verfügbar sind.
+**0.1.0+9 ist für die Veröffentlichung vorbereitet**, aber noch nicht als offizielle APK bestätigt. Der letzte dokumentierte offizielle Release ist 0.1.0+8. Die Änderungen für 0.1.0+9 stehen im [Changelog](https://github.com/Huluvu424242/taugts/blob/master/CHANGELOG.md).
 
 ## Bekannte Einschränkungen
 
