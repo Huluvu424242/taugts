@@ -495,7 +495,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         _mergeFeldauswahl.clear();
         _konflikteBearbeiten = false;
       });
-    } catch (_) {
+    } catch (fehler) {
       final protokoll = widget.importAusfuehrungService.ladeProtokoll(
         widget.exportService.datenbank,
       );
@@ -503,8 +503,10 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       setState(() {
         _istFehler = true;
         _importProtokoll = protokoll;
-        _status =
-            'Import fehlgeschlagen. Alle fachlichen Änderungen wurden zurückgerollt.';
+        _status = fehler is StateError &&
+                fehler.message.toString().startsWith('Bestandsersatz nicht möglich:')
+            ? '${fehler.message} Die lokalen Daten wurden nicht verändert.'
+            : 'Import fehlgeschlagen. Alle fachlichen Änderungen wurden zurückgerollt.';
       });
     } finally {
       if (mounted) setState(() => _laeuft = false);
