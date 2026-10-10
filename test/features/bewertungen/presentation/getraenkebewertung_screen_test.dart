@@ -216,7 +216,7 @@ Future<Erlebnis> _speichereAusgangsdaten(
     id: '10000000-0000-4000-8000-000000000002',
     produktId: produktId,
     herkunftProfilId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-    erlebtAm: zeit,
+    beginn: zeit,
     erstelltAm: zeit,
     geaendertAm: zeit,
   );
