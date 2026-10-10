@@ -28,7 +28,10 @@ void main() {
       ExportService(datenbank, appVersion: '0.1.0+8').erzeugeJson(),
     ) as Map<String, dynamic>;
 
-    expect(versionsFeld['const'], ImportValidierungsService.aktuelleSchemaVersion);
+    expect(
+      versionsFeld['const'],
+      ImportValidierungsService.aktuelleSchemaVersion,
+    );
     expect(export['schemaVersion'], versionsFeld['const']);
     expect(schema['description'], contains('Version 3'));
 
@@ -46,7 +49,7 @@ void main() {
       'tatsaechlicherBeginn',
       'tatsaechlichesEnde',
     ]) {
-      expect(felder, isNot(contains(altesFeld)));
+      expect(felder.containsKey(altesFeld), isFalse);
     }
 
     final importErgebnis = const ImportValidierungsService().validiere(
