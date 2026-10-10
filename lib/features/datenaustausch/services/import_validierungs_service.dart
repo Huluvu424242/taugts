@@ -144,6 +144,18 @@ class ImportValidierungsService {
       );
     }
 
+    // Die Migration darf widersprüchliche Altzeiten nicht stillschweigend
+    // verwerfen. Fehler vor dem Entfernen der Legacy-Felder melden.
+    if (version < 3) {
+      _validiereAlteErlebnisZeiten(dokument, fehler);
+      if (fehler.isNotEmpty) {
+        return ImportValidierungsErgebnis(
+          fehler: List.unmodifiable(fehler),
+          urspruenglicheSchemaVersion: version,
+        );
+      }
+    }
+
     final normalisiert = _migriere(dokument, version);
     _validiereSchema(normalisiert, fehler);
     if (fehler.isEmpty) {
@@ -263,6 +275,52 @@ class ImportValidierungsService {
       migriert['schemaVersion'] = 3;
     }
     return migriert;
+  }
+
+  void _validiereAlteErlebnisZeiten(
+    Map<String, Object?> dokument,
+    List<ImportValidierungsFehler> fehler,
+  ) {
+    final erlebnisse = dokument['erlebnisse'];
+    if (erlebnisse is! List) return;
+    for (var index = 0; index < erlebnisse.length; index++) {
+      final roh = erlebnisse[index];
+      if (roh is! Map) continue;
+      final wert = _map(roh);
+      final pfad = r'$.erlebnisse[' '$index]';
+      final tag = wert['geplanterTag'];
+      final minute = wert['geplanteMinute'];
+      final beginn = wert['tatsaechlicherBeginn'];
+      final ende = wert['tatsaechlichesEnde'];
+      if (minute != null && tag == null) {
+        _fehler(
+          fehler,
+          'zeitkombination_ungueltig',
+          '$pfad.geplanteMinute',
+          'Eine geplante Uhrzeit ohne Datum lässt sich nicht übernehmen.',
+        );
+      }
+      if (ende != null && beginn == null) {
+        _fehler(
+          fehler,
+          'zeitkombination_ungueltig',
+          '$pfad.tatsaechlichesEnde',
+          'Ein tatsächliches Ende ohne Beginn lässt sich nicht übernehmen.',
+        );
+      }
+      if (beginn is String && ende is String) {
+        final von = DateTime.tryParse(beginn);
+        final bis = DateTime.tryParse(ende);
+        if (von != null && bis != null && bis.isBefore(von)) {
+          _fehler(
+            fehler,
+            'zeitreihenfolge_ungueltig',
+            '$pfad.tatsaechlichesEnde',
+            'Das Ende darf nicht vor dem Beginn liegen.',
+          );
+        }
+      }
+    }
   }
 
   Map<String, Object?> _vereinheitlicheAltenZeitraum(
