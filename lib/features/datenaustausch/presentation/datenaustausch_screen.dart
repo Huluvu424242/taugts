@@ -120,6 +120,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       _laeuft = true;
       _status = null;
       _istFehler = false;
+      _strategie = ImportStrategie.lokalBevorzugen;
       _analyse = null;
       _strategiePlan = null;
       _importDokument = null;
@@ -604,6 +605,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<ImportStrategie>(
+          key: ObjectKey(_importDokument),
           isExpanded: true,
           initialValue: _strategie,
           decoration: const InputDecoration(labelText: 'Importstrategie'),
