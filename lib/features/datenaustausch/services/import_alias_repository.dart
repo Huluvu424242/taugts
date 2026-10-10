@@ -154,12 +154,15 @@ class ImportAliasRepository {
       _ersetze(dokument, 'preisbeobachtungen', 'produktId', vonId, aufId);
       _ersetze(dokument, 'bewertungen', 'objektId', vonId, aufId);
       _ersetze(dokument, 'kategorieZuordnungen', 'zielId', vonId, aufId);
+      _ersetze(dokument, 'objektTags', 'objektId', vonId, aufId);
+      _ersetze(dokument, 'objektKlassifikationsmerkmale', 'objektId', vonId, aufId);
     } else if (sammlung == 'orte') {
       _ersetze(dokument, 'erlebnisse', 'ortId', vonId, aufId);
       _ersetze(dokument, 'preisbeobachtungen', 'ortId', vonId, aufId);
       _ersetze(dokument, 'bewertungen', 'ortId', vonId, aufId);
       _ersetze(dokument, 'bewertungen', 'objektId', vonId, aufId);
       _ersetze(dokument, 'ortsbewertungen', 'ortId', vonId, aufId);
+      _ersetze(dokument, 'kategorieZuordnungen', 'zielId', vonId, aufId);
     }
   }
 
