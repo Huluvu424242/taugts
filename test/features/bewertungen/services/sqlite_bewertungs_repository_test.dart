@@ -329,7 +329,7 @@ void main() {
       id: '65e34e0e-fb72-450d-9db7-20d42188d229',
       produktId: produktId,
       herkunftProfilId: profilId,
-      erlebtAm: zeit,
+      beginn: zeit,
       erstelltAm: zeit,
       geaendertAm: zeit,
     ));
@@ -371,7 +371,7 @@ void main() {
         id: erlebnisId,
         produktId: produktId,
         herkunftProfilId: profilId,
-        erlebtAm: zeit.add(Duration(days: index)),
+        beginn: zeit.add(Duration(days: index)),
         erstelltAm: zeit.add(Duration(days: index)),
         geaendertAm: zeit.add(Duration(days: index)),
       ));
@@ -400,7 +400,7 @@ void main() {
         id: '00000000-0000-4000-8000-000000000000',
         produktId: 'nicht-vorhanden',
         herkunftProfilId: profilId,
-        erlebtAm: zeit,
+        beginn: zeit,
         erstelltAm: zeit,
         geaendertAm: zeit,
       )),
@@ -421,7 +421,7 @@ void main() {
       id: erlebnisId,
       produktId: produktId,
       herkunftProfilId: profilId,
-      erlebtAm: zeit,
+      beginn: zeit,
       erstelltAm: zeit,
       geaendertAm: zeit,
       preis: 4.9,
@@ -439,7 +439,7 @@ void main() {
       id: erlebnisId,
       produktId: produktId,
       herkunftProfilId: profilId,
-      erlebtAm: zeit,
+      beginn: zeit,
       erstelltAm: zeit,
       geaendertAm: zeit.add(const Duration(minutes: 1)),
       notiz: 'Fortgesetzt',
@@ -455,8 +455,8 @@ void main() {
     final erlebnis = Erlebnis(
       id: '3d30ae97-1a64-4bb5-a8fd-1df46be78d69',
       typ: Erlebnistyp.einkauf,
-      status: Erlebnisstatus.geplant,
-      geplanterTag: DateTime.utc(2026, 9, 5),
+
+      beginn: DateTime.utc(2026, 9, 5),
       herkunftProfilId: profilId,
       istEntwurf: false,
       erstelltAm: zeit,
@@ -467,9 +467,8 @@ void main() {
 
     final geladen = await repository.ladeErlebnis(erlebnis.id);
     expect(geladen?.typ, Erlebnistyp.einkauf);
-    expect(geladen?.status, Erlebnisstatus.geplant);
-    expect(geladen?.geplanterTag, DateTime.utc(2026, 9, 5));
-    expect(geladen?.geplanteMinute, isNull);
+
+
     expect(geladen?.produktId, isNull);
   });
 
@@ -477,7 +476,7 @@ void main() {
     final geplant = Erlebnis(
       id: '3d30ae97-1a64-4bb5-a8fd-1df46be78d70',
       herkunftProfilId: profilId,
-      status: Erlebnisstatus.geplant,
+
       istEntwurf: false,
       erstelltAm: zeit,
       geaendertAm: zeit,
@@ -487,17 +486,17 @@ void main() {
     await expectLater(
       repository.speichereErlebnis(
         geplant.kopiereMit(
-          status: Erlebnisstatus.beendet,
-          tatsaechlicherBeginn: zeit.add(const Duration(hours: 2)),
-          tatsaechlichesEnde: zeit,
+
+          beginn: zeit.add(const Duration(hours: 2)),
+          ende: zeit,
         ),
       ),
       throwsArgumentError,
     );
 
     final unveraendert = await repository.ladeErlebnis(geplant.id);
-    expect(unveraendert?.status, Erlebnisstatus.geplant);
-    expect(unveraendert?.tatsaechlicherBeginn, isNull);
+
+    expect(unveraendert?.beginn, isNull);
   });
 
   test('speichert, lädt und bearbeitet vollständige Ortsdaten', () async {
@@ -832,7 +831,7 @@ void main() {
       id: '80000000-0000-4000-8000-000000000002',
       produktId: produktId,
       herkunftProfilId: profilId,
-      erlebtAm: zeit,
+      beginn: zeit,
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
@@ -886,7 +885,7 @@ void main() {
       id: '80000000-0000-4000-8000-000000000004',
       produktId: produktId,
       herkunftProfilId: profilId,
-      erlebtAm: spaeter,
+      beginn: spaeter,
       erstelltAm: spaeter,
       geaendertAm: spaeter,
       istEntwurf: false,
@@ -924,7 +923,7 @@ void main() {
       id: '90000000-0000-4000-8000-000000000002',
       produktId: produktId,
       herkunftProfilId: profilId,
-      erlebtAm: zeit,
+      beginn: zeit,
       erstelltAm: zeit,
       geaendertAm: zeit,
       notiz: 'Entwurf bleibt',
@@ -1152,7 +1151,7 @@ void main() {
         id: '94000000-0000-4000-8000-00000000001$index',
         ortId: ort.id,
         herkunftProfilId: profilId,
-        tatsaechlicherBeginn: zeit.add(Duration(days: index)),
+        beginn: zeit.add(Duration(days: index)),
         erstelltAm: zeit.add(Duration(days: index)),
         geaendertAm: zeit.add(Duration(days: index)),
       );
