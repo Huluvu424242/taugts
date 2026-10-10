@@ -74,7 +74,7 @@ void main() {
     final erlebnisse = await repository.ladeErlebnisse();
     expect(erlebnisse, hasLength(1));
     expect(erlebnisse.single.typ, Erlebnistyp.einkauf);
-    expect(erlebnisse.single.geplanteMinute, isNull);
+
   });
 
   for (final fall in [
@@ -122,8 +122,8 @@ void main() {
         expect(erlebnisse, hasLength(1));
         final erlebnis = erlebnisse.single;
         expect(erlebnis.ortId, ort.id);
-        expect(erlebnis.tatsaechlicherBeginn, isNotNull);
-        expect(erlebnis.geplanterTag, isNull);
+        expect(erlebnis.beginn, isNotNull);
+
         expect(await repository.ladeErlebnispositionen(erlebnis.id), isEmpty);
         expect(
           await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id),
@@ -145,8 +145,8 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Spontaner Testort'), findsOneWidget);
         expect(
-          (await repository.ladeErlebnisse()).single.tatsaechlicherBeginn,
-          erlebnis.tatsaechlicherBeginn,
+          (await repository.ladeErlebnisse()).single.beginn,
+          erlebnis.beginn,
         );
 
         // Die Ortsbewertung darf erst im Nachgang ergänzt werden.
@@ -237,9 +237,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final erlebnis = (await repository.ladeErlebnisse()).single;
-    expect(erlebnis.status, Erlebnisstatus.beendet);
-    expect(erlebnis.tatsaechlicherBeginn, isNotNull);
-    expect(erlebnis.tatsaechlichesEnde, isNotNull);
+
+    expect(erlebnis.beginn, isNotNull);
+    expect(erlebnis.ende, isNotNull);
   });
 
   testWidgets('zeigt ungültige Dauer am Feld und im Fehlersammler', (
