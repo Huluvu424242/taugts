@@ -6,6 +6,24 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+### Added
+
+- Produkte und Orte können nach Bestätigung aus den aktiven Stammdaten gelöscht werden. Historische Erlebnisse, Bewertungen und Preisbeobachtungen bleiben erhalten und ihre fehlenden Zuordnungen können später korrigiert werden (Story #217).
+- Beim Bearbeiten einer Erlebnisposition lässt sich ein ausgewähltes Produkt direkt bearbeiten oder ein neues Produkt anlegen; die Auswahl und bereits eingegebene Positionsdaten bleiben beim Abbruch erhalten (Story #219).
+- Spontane Restaurantbesuche und Einkäufe können mit Ort und Besuchsbeginn auch ohne Produkte oder Bewertungen gespeichert werden. Ortsbewertungen sind ebenfalls ohne Produktposition möglich (Story #220).
+- Ein ausschließlich manuell startbarer Workflow zur Erstellung einer release-signierten Android-Test-APK vom aktuellen `master` ist vorbereitet. Er benötigt eine gesonderte Ausführungsfreigabe, veröffentlicht kein offizielles Release und verlangt eine ausdrücklich gewählte höhere Buildnummer (Story #230).
+
+### Changed
+
+- Bewertungsdetails und Suchtreffer zeigen fachliche Produkt- und Ortsnamen sowie den Erlebnistyp mit Orts- und Zeitbezug statt technischer IDs. Nicht mehr zuordenbare Stammdaten werden verständlich gekennzeichnet (Story #218).
+- Erlebnisformulare verwenden einen gemeinsamen Speicherpunkt für Erlebnisdaten, Positionen, Preise sowie Produkt- und Ortsbewertungen. Die Änderungen werden als gemeinsamer Entwurf atomar übernommen; bei einem Fehler erfolgt ein Rollback (Story #221).
+- Restaurantbesuche und Einkäufe verwenden nur noch einen bearbeitbaren Beginn und ein Ende anstelle getrennter Plan- und Ist-Zeiten beziehungsweise persistierter Entwurfs- und Durchführungsstatus. Die Erlebnisübersicht zeigt den einheitlichen Zeitraum (Story #228).
+
+### Fixed
+
+- Beim gemeinsamen Speichern eines Erlebnisses bleiben Änderungen an Produktpositionen, Preisen und Bewertungen bei einem Fehler zur Korrektur im Entwurf erhalten; ein unvollständiger Teilstand wird nicht dauerhaft übernommen (Story #221).
+- Gelöschte Stammdaten führen in historischen Such- und Bewertungsansichten nicht mehr zur Anzeige technischer IDs, sondern werden als nicht zugeordnet dargestellt (Stories #217 und #218).
+
 ## [0.1.0+8] - 2026-09-06
 
 ### Added
