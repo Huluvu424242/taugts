@@ -106,7 +106,7 @@ class ExportService {
       SELECT o.*, p.marke, p.produktart, p.brauerei, p.sorte,
         p.alkoholgehalt, p.herkunft, p.gebinde, p.fuellmenge_ml,
         p.barcode, p.notiz
-      FROM objekte o JOIN produkte p ON p.objekt_id = o.id ORDER BY o.id
+      FROM objekte o LEFT JOIN produkte p ON p.objekt_id = o.id ORDER BY o.id
     ''');
     return zeilen
         .map((z) => {
