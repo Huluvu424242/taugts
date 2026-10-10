@@ -11,7 +11,7 @@ class LokaleDatenbank {
     return datenbank;
   }
 
-  static const schemaVersion = 3;
+  static const schemaVersion = 4;
   final Database verbindung;
 
   void schliessen() => verbindung.close();
@@ -34,7 +34,11 @@ class LokaleDatenbank {
       throw StateError('Nicht unterstützte Schemaversion: $version');
     }
 
-    transaktion(() {
+    // Beim Neubau der Erlebnistabelle müssen bestehende Kindreferenzen
+    // erhalten bleiben. Die Migration selbst läuft weiterhin atomar.
+    if (version == 3) verbindung.execute('PRAGMA foreign_keys = OFF');
+    try {
+      transaktion(() {
       var aktuelleVersion = version;
       while (aktuelleVersion < schemaVersion) {
         switch (aktuelleVersion) {
@@ -47,6 +51,9 @@ class LokaleDatenbank {
           case 2:
             _migriereVon2Auf3();
             aktuelleVersion = 3;
+          case 3:
+            _migriereVon3Auf4();
+            aktuelleVersion = 4;
           default:
             throw StateError(
               'Kein Migrationspfad von Schemaversion $aktuelleVersion '
@@ -58,6 +65,13 @@ class LokaleDatenbank {
       _stelleStandardkriterienBereit();
       verbindung.userVersion = aktuelleVersion;
     });
+    } finally {
+      if (version == 3) verbindung.execute('PRAGMA foreign_keys = ON');
+    }
+    final verletzungen = verbindung.select('PRAGMA foreign_key_check');
+    if (verletzungen.isNotEmpty) {
+      throw StateError('Fremdschlüsselverletzung nach Datenbankmigration.');
+    }
   }
 
   void _migriereVon0Auf1() {
@@ -96,6 +110,54 @@ class LokaleDatenbank {
         'ALTER TABLE $tabelle ADD COLUMN geloescht INTEGER NOT NULL DEFAULT 0',
       );
     }
+  }
+
+  void _migriereVon3Auf4() {
+    // Tatsächlicher Beginn hat Vorrang, danach die alte Planung.
+    // Die bisherige Ist-Endzeit wird nur bei vorhandenem Beginn übernommen.
+    verbindung.execute('''
+      CREATE TABLE erlebnisse_neu (
+        id TEXT PRIMARY KEY,
+        typ TEXT NOT NULL,
+        ort_id TEXT REFERENCES orte(id),
+        beginn TEXT,
+        ende TEXT,
+        erstellt_am TEXT NOT NULL,
+        geaendert_am TEXT NOT NULL,
+        herkunft_profil_id TEXT NOT NULL REFERENCES profile(id),
+        notiz TEXT,
+        ist_entwurf INTEGER NOT NULL DEFAULT 0,
+        produkt_id TEXT REFERENCES produkte(objekt_id),
+        kaufort_id TEXT REFERENCES orte(id),
+        konsumort_id TEXT REFERENCES orte(id),
+        preis REAL,
+        menge REAL,
+        gebinde TEXT
+      )
+    ''');
+    verbindung.execute('''
+      INSERT INTO erlebnisse_neu (
+        id, typ, ort_id, beginn, ende, erstellt_am, geaendert_am,
+        herkunft_profil_id, notiz, ist_entwurf, produkt_id, kaufort_id,
+        konsumort_id, preis, menge, gebinde
+      )
+      SELECT id, typ, ort_id,
+        COALESCE(tatsaechlicher_beginn,
+          CASE WHEN geplanter_tag IS NOT NULL THEN
+            substr(geplanter_tag, 1, 10) || 'T' ||
+            printf('%02d:%02d:00.000Z',
+              COALESCE(geplante_minute, 0) / 60,
+              COALESCE(geplante_minute, 0) % 60)
+          ELSE NULL END),
+        CASE WHEN tatsaechlicher_beginn IS NOT NULL
+          THEN tatsaechliches_ende ELSE NULL END,
+        erstellt_am, geaendert_am, herkunft_profil_id, notiz,
+        ist_entwurf, produkt_id, kaufort_id, konsumort_id,
+        preis, menge, gebinde
+      FROM erlebnisse
+    ''');
+    verbindung.execute('DROP TABLE erlebnisse');
+    verbindung.execute('ALTER TABLE erlebnisse_neu RENAME TO erlebnisse');
   }
 
   void _stelleStandardkriterienBereit() {
