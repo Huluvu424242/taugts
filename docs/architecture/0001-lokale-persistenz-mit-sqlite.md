@@ -38,3 +38,7 @@ Verbindung aktiviert.
 - Schema 10 ordnet jedes Bewertungskriterium einer stabilen Produktart zu.
   Bewertungen referenzieren optional die konkrete Erlebnisposition; eine
   Korrektur ersetzt nur deren Werte, weitere Erlebnisse bleiben historisch.
+
+## Schema 4: Einheitlicher Erlebniszeitraum
+
+Die Migration 3 → 4 konsolidiert die Erlebnistabelle atomar auf die optionalen UTC-Zeitstempel `beginn` und `ende`. Die Status- und getrennten Plan-/Ist-Felder entfallen. Vorhandene IDs und Referenzen müssen erhalten bleiben; die Migration prüft Fremdschlüssel nach der Umstellung. Liegt ein bisheriger tatsächlicher Beginn vor, wird dieser übernommen, andernfalls der geplante Zeitpunkt. Das tatsächliche Ende wird nur zusammen mit einem tatsächlichen Beginn übernommen. Diese einzige Zeitquelle dient Suche, Auswertungen, Historien und dem JSON-Datenaustausch.
