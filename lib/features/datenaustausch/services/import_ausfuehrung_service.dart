@@ -129,6 +129,27 @@ class ImportAusfuehrungService {
       datenbank.transaktion(() {
         aliasRepository.stelleTabelleBereit(datenbank);
         if (strategie == ImportStrategie.bestandErsetzen) {
+          // Die aktuelle JSON-Schnittstelle exportiert diese Tabellen noch
+          // nicht. Solange sie Daten enthalten, ist ein Ersatz unsicher.
+          for (final tabelle in const [
+            'kategorien',
+            'produkt_kategorien',
+            'ort_kategorien',
+            'objekt_tags',
+            'objekt_klassifikationsmerkmale',
+            'kategorie_kriterienset_regeln',
+            'kategorie_kriterien',
+          ]) {
+            final hatDaten = datenbank.verbindung
+                .select('SELECT 1 FROM $tabelle LIMIT 1')
+                .isNotEmpty;
+            if (hatDaten) {
+              throw StateError(
+                'Bestandsersatz nicht möglich: $tabelle enthält '
+                'Fachdaten, die das aktuelle Exportformat nicht unterstützt.',
+              );
+            }
+          }
           _ersetzeBestand(datenbank);
         }
         for (final sammlung in _reihenfolge) {
