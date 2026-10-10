@@ -1371,5 +1371,4 @@ class ImportValidierungsService {
     r'^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$',
   );
   static final _waehrungRegExp = RegExp(r'^[A-Z]{3}$');
-  static final _datumRegExp = RegExp(r'^\d{4}-\d{2}-\d{2}$');
 }
