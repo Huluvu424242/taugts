@@ -289,7 +289,7 @@ class ImportValidierungsService {
     return {
       for (final eintrag in alt.entries)
         if (!{
-          'status', 'geplanterTag', 'geplanteMinute',
+          'status', 'istEntwurf', 'geplanterTag', 'geplanteMinute',
           'geplanteDauerMinuten', 'tatsaechlicherBeginn',
           'tatsaechlichesEnde',
         }.contains(eintrag.key))
@@ -443,7 +443,6 @@ class ImportValidierungsService {
         '$pfad.typ',
         fehler,
       );
-      _bool(wert, 'istEntwurf', '$pfad.istEntwurf', fehler);
       _optionaleUtcZeit(wert, 'beginn', '$pfad.beginn', fehler);
       _optionaleUtcZeit(wert, 'ende', '$pfad.ende', fehler);
       _zeitstempel(wert, pfad, fehler);
