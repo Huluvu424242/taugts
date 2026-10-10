@@ -8,6 +8,7 @@ Dieser Bereich bündelt technische Informationen für Entwicklung und Wartung vo
 - [Versioniertes JSON-Austauschformat](austauschformat.md)
 - [Sichere Importvalidierung](importvalidierung.md)
 - [Android-Release](../android-release.md)
+- [Android-Test-APK vom aktuellen master](android-test-apk.md)
 - [OpenStreetMap](../openstreetmap.md)
 - [Fachliche Anforderungen](../fachliche_anforderungen.md)
 - [Architekturdokumentation](../architecture/README.md)
