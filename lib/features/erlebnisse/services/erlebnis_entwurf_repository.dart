@@ -219,9 +219,6 @@ class ErlebnisEntwurfRepository
   Future<List<Erlebnis>> ladeErlebnisse() => basis.ladeErlebnisse();
 
   @override
-  Future<List<Erlebnis>> ladeEntwuerfe() => basis.ladeEntwuerfe();
-
-  @override
   Future<void> loescheErlebnis(String id) => basis.loescheErlebnis(id);
 
   @override
