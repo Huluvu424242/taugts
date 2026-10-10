@@ -646,13 +646,13 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         ],
         const SizedBox(height: 12),
         for (final sammlung in plan.sammlungen.where(
-          (s) => s.hinzufuegen + s.aktualisieren + s.entfernen > 0,
+          (s) => s.hinzufuegen + s.aktualisieren + s.behalten + s.entfernen > 0,
         ))
           Card(
             child: ListTile(
               title: Text(sammlung.name),
               subtitle: Text(
-                'Neu: ${sammlung.hinzufuegen} · Unverändert: ${sammlung.unveraendert} · Aktualisiert: ${sammlung.aktualisieren} · Übersprungen: ${sammlung.uebersprungen} · Konflikte: ${_konflikte.where(
+                'Neu: ${sammlung.hinzufuegen} · Unverändert: ${sammlung.unveraendert} · Aktualisiert: ${sammlung.aktualisieren} · Übersprungen: ${sammlung.uebersprungen} · Lokal erhalten: ${sammlung.behalten} · Konflikte: ${_konflikte.where(
                   (k) => k.sammlung == sammlung.name &&
                       k.art != ImportKonfliktArt.neuerDatensatz &&
                       k.art != ImportKonfliktArt.unveraendert,
