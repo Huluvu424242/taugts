@@ -197,6 +197,83 @@ void main() {
     },
   );
 
+  testWidgets('Ersatz verlangt separate Checkbox und lässt Abbruch unverändert',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+    addTearDown(db.schliessen);
+    const alt = '11111111-1111-4111-8111-111111111111';
+    const neu = '22222222-2222-4222-8222-222222222222';
+    db.verbindung.execute(
+      'INSERT INTO profile VALUES (?, ?, ?, ?)',
+      [alt, 'Alt', '2026-09-01T00:00:00.000Z',
+        '2026-09-01T00:00:00.000Z'],
+    );
+    final export = ExportService(db, appVersion: '0.0.0-test');
+    final dokument = Map<String, Object?>.from(
+      jsonDecode(export.erzeugeJson()) as Map,
+    );
+    dokument['profile'] = [
+      {
+        'id': neu,
+        'anzeigename': 'Neu',
+        'erstelltAm': '2026-09-01T00:00:00.000Z',
+        'geaendertAm': '2026-09-01T00:00:00.000Z',
+      },
+    ];
+    await tester.pumpWidget(MaterialApp(
+      home: DatenaustauschScreen(
+        exportService: export,
+        exportZielService: _NichtVerwendetesExportZiel(),
+        importQuelleService: _FesteImportQuelle(jsonEncode(dokument)),
+      ),
+    ));
+    await tester.tap(find.text('Importdatei auswählen und prüfen'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(DropdownButtonFormField<ImportStrategie>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Gesamten lokalen Datenbestand ersetzen').last);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Zu entfernende Datensätze: 1'), findsOneWidget);
+
+    FilledButton ersatzAktion() => tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Bestand ersetzen und importieren').last,
+    );
+    ersatzAktion().onPressed!();
+    await tester.pumpAndSettle();
+    final dialogAktion = tester.widget<FilledButton>(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.widgetWithText(
+          FilledButton, 'Bestand ersetzen und importieren',
+        ),
+      ),
+    );
+    expect(dialogAktion.onPressed, isNull);
+    await tester.tap(find.text('Abbrechen'));
+    await tester.pumpAndSettle();
+    expect(db.verbindung.select('SELECT id FROM profile').single['id'], alt);
+
+    ersatzAktion().onPressed!();
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.text('Ich bestätige den vollständigen Ersatz der lokalen Daten'),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.widgetWithText(
+          FilledButton, 'Bestand ersetzen und importieren',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(db.verbindung.select('SELECT id FROM profile').single['id'], neu);
+  });
+
   testWidgets(
     'sperrt weitere Aktionen und verändert bei abgebrochener Auswahl nichts',
     (tester) async {
