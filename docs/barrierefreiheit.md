@@ -1,6 +1,6 @@
 # Barrierefreiheit und Bug-Meldung
 
-Stand: 2. September 2026 · vorbereitete Version: 0.1.0+5
+Letzter inhaltlicher Barrierefreiheits-Prüfstand: 2. September 2026. Dokumentationsabgleich mit dem Entwicklungsstand `master`: 10. Oktober 2026. Letzter dokumentierter offizieller Release: 0.1.0+8. Die folgenden Aussagen sind **keine** Bestätigung einer abgeschlossenen manuellen Barrierefreiheitsprüfung.
 
 Taugt’s? stellt die gemeinsamen Grundgerüst-Funktionen für Barrierefreiheit und
 Bug-Meldungen vollständig innerhalb der App bereit.
@@ -24,15 +24,10 @@ erklärte Intensitätsskalen, einen fokussierbaren Fehlersammler und eine bei
 großer Schrift erreichbare Speicheraktion. Kriterien dürfen einzeln
 ausgelassen werden; das Gesamturteil bleibt unabhängig.
 
-Die Erlebniserfassung benennt Typ und Status sichtbar und semantisch, verwendet
-beschriftete Planungs-, Beginn- und Endeaktionen und sammelt ungültige
-Zeitangaben zusätzlich in einem fokussierbaren Fehlersammler. Restaurantbesuch
+Die Erlebniserfassung benennt den Typ sichtbar und semantisch. Der aktuelle Entwicklungsstand verwendet einen einzigen bearbeitbaren Beginn und ein Ende statt getrennter Plan-/Ist-Felder und eines gespeicherten Status. Ungültige Zeitangaben werden zusätzlich in einem fokussierbaren Fehlersammler gesammelt. Restaurantbesuch
 und Einkauf sind ohne Farbcodierung unterscheidbar.
 
-Die Erlebnisübersicht gruppiert aktive, geplante und vergangene Erlebnisse mit
-semantisch erkennbaren Überschriften. Erlebnistyp, Zeitangabe, optionaler Ort
-und Positionsanzahl werden als Text ausgegeben; ein fehlender Planungstermin
-wird ausdrücklich als „Termin noch offen“ dargestellt. Lade-, Leer- und
+Die Erlebnisübersicht zeigt die vorhandenen Erlebnisse mit Typ, gemeinsamem Zeitraum, optionalem Ort und Positionsanzahl als Text. Ein fehlender Beginn oder ein fehlendes Ende bleibt erkennbar; eine gesonderte Einteilung in die früheren gespeicherten Status `geplant`, `aktiv` und `beendet` gibt es auf `master` nicht mehr. Lade-, Leer- und
 Fehlerzustände bleiben wahrnehmbar und bieten eine beschriftete Folgeaktion.
 
 Die Verwaltung der Bewertungskriterien bietet semantisch beschriftete Aktionen,
@@ -95,8 +90,8 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 - kleine Android-Bildschirmgröße einschließlich App Bar,
 - Gestennavigation und Erreichbarkeit unterer Aktionen,
 - zusammenhängender Ablauf aus Produkt, Ort, Erlebnisentwurf und Bewertung,
-- Erlebnisübersicht mit mehreren aktiven, geplanten und vergangenen Einträgen,
-  fehlenden Terminen, langen Ortsnamen und großer Schrift,
+- Erlebnisübersicht mit Einträgen mit und ohne Beginn beziehungsweise Ende,
+  langen Ortsnamen und großer Schrift,
 - Restaurantbestellung und Einkaufsliste mit Mengen-, Preis- und
   Bewertungsaktionen bei großer Schrift,
 - erneute Bewertung eines bekannten Produkts aus den vorgesehenen Einstiegen,
@@ -115,10 +110,7 @@ Vor einem öffentlichen Release bleiben folgende manuelle Prüfungen offen:
 Der Getränkebewertungsbogen ist ausdrücklich einzubeziehen. Die gebündelte
 Prüfung wird in
 [Story #30](https://github.com/Huluvu424242/taugts/issues/30) verfolgt. Solange
-diese Punkte offen sind, wird für Version 0.1.0+5 kein vollständig manuell
-bestätigter Barrierefreiheitsstatus behauptet. Der konkrete Freigabestand wird
-zusätzlich in der
-[Release-Checkliste](release-checklist-0.1.0+5.md) dokumentiert.
+diese Punkte offen sind, wird weder für den letzten dokumentierten Release 0.1.0+8 noch für den neueren `master`-Stand ein vollständig manuell bestätigter Barrierefreiheitsstatus behauptet. Historische Releaseprüfungen stehen in den zugehörigen [Release-Checklisten](release-checklist-0.1.0+8.md).
 
 ## Bug-Meldung
 
