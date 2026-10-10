@@ -50,6 +50,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   ImportStrategie _strategie = ImportStrategie.lokalBevorzugen;
   ImportStrategiePlan? _strategiePlan;
   Map<String, Object?>? _importDokument;
+  Map<String, Object?>? _originalImportDokument;
   Map<String, Object?>? _lokalesDokument;
   List<ImportValidierungsFehler> _importFehler = const [];
   List<ImportEinzelKonflikt> _konflikte = const [];
@@ -122,6 +123,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       _analyse = null;
       _strategiePlan = null;
       _importDokument = null;
+      _originalImportDokument = null;
       _lokalesDokument = null;
       _importFehler = const [];
       _konflikte = const [];
@@ -170,6 +172,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       setState(() {
         _analyse = analyse;
         _importDokument = importDokument;
+        _originalImportDokument = validierung.dokument!;
         _lokalesDokument = lokal;
         _strategiePlan = _planeStrategie(analyse);
         _konflikte = konflikte;
@@ -364,7 +367,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                   const Text(
                     'Alle vorhandenen Anwendungsdaten werden durch die ausgewählte Datei ersetzt; nicht in der Datei enthaltene Daten gehen verloren. App-Einstellungen und andere Dateien bleiben erhalten.',
                   ),
-                  Text('Zu entfernende lokale Datensätze: $_zuLoeschendeDatensaetze'),
+                  Text(
+                    'Zu entfernende lokale Datensätze: $_zuLoeschendeDatensaetze',
+                  ),
                   const Text(
                     'Vorher kannst du in der Vorschau eine Sicherung exportieren.',
                   ),
@@ -404,7 +409,8 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         !_ersatzdateiHatFachdaten) {
       setState(() {
         _istFehler = true;
-        _status = 'Ein vollständiger Ersatz durch eine leere Datei ist nicht zulässig.';
+        _status =
+            'Ein vollständiger Ersatz durch eine leere Datei ist nicht zulässig.';
       });
       return;
     }
@@ -431,7 +437,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
     });
 
     try {
-      var dokument = _tiefeKopie(_importDokument!);
+      var dokument = _tiefeKopie(_strategie == ImportStrategie.bestandErsetzen
+          ? _originalImportDokument!
+          : _importDokument!);
       final mergesNachSammlung = <String, int>{};
       final neueAliase = <ImportAliasReferenz>[];
       for (final konflikt in _konflikte) {
@@ -473,6 +481,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       );
       if (!mounted) return;
       setState(() {
+        _originalImportDokument = null;
         _importErgebnis = ergebnis;
         _importProtokoll = protokoll;
         _status = 'Import erfolgreich abgeschlossen.';
@@ -542,9 +551,11 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   }
 
   String _strategieName(ImportStrategie strategie) => switch (strategie) {
-        ImportStrategie.bestandErsetzen => 'Gesamten lokalen Datenbestand ersetzen',
+        ImportStrategie.bestandErsetzen =>
+            'Gesamten lokalen Datenbestand ersetzen',
         ImportStrategie.importBevorzugen => 'Import bevorzugen',
-        ImportStrategie.lokalBevorzugen => 'Bestehende Daten behalten und ergänzen (empfohlen)',
+        ImportStrategie.lokalBevorzugen =>
+            'Bestehende Daten behalten und ergänzen (empfohlen)',
       };
 
   String _aktionsName(ImportKonfliktAktion aktion) => switch (aktion) {
@@ -631,7 +642,8 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         Text(
           'Herkunft: ${analyse.eigeneHerkunft} eigene · ${analyse.fremdeHerkunft} fremde Erlebnisse',
         ),
-        if (_konflikte.isNotEmpty && _strategie != ImportStrategie.bestandErsetzen) ...[
+        if (_konflikte.isNotEmpty &&
+            _strategie != ImportStrategie.bestandErsetzen) ...[
           const SizedBox(height: 16),
           Semantics(
             liveRegion: true,
