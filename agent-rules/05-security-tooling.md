@@ -24,15 +24,31 @@ Die folgenden Regeln sind eine verbindliche Sicherheitsgrenze. Sie dürfen weder
 - Eine solche Story dokumentiert mindestens Zweck, Bedrohungs- und Risikoanalyse, Trigger, minimale Berechtigungen, verwendete Actions mit unveränderlichen Commit-SHAs, Inputs und Outputs, Secrets und Datenflüsse, Artefakte und Log-Aufbewahrung, Supply-Chain- und Lizenzprüfung, Laufzeit und Kosten, erlaubte Akteure und Nutzungen, Auditierbarkeit sowie Deaktivierung und Rollback.
 - Workflows dürfen keine Codeänderungen oder Commits erzeugen, sofern dies nicht gesondert in Story, Pull Request und ausdrücklicher Freigabe genehmigt wurde. Eine Workflow-Ausführung ersetzt niemals den vorgeschriebenen Pull-Request-Prozess.
 
-### Vorgesehener Formatter für KI-Agenten – noch nicht freigegeben
+### Freigegebener Formatter für KI-Agenten
 
 Für die Umsetzung von [Story #236](https://github.com/Huluvu424242/taugts/issues/236) ist die **separate** Workflow-Datei `.github/workflows/kiagent-dart-format-branch.yml` mit dem Namen `Dart-Formatierung Arbeitsbranch` vorgesehen. Sie formatiert ausschließlich versionierte Dart-Dateien unter `lib/` und `test/` auf einem vom Benutzer beziehungsweise KI-Agenten benannten ungeschützten Arbeitsbranch und kann einen Formatierungscommit erzeugen.
 
-**Status: nicht freigegeben.** Weder die Existenz der Workflow-Datei noch ihre Nennung im Harness und in der [Dokumentation](../docs/entwicklung/branch-formatierung.md) stellen eine Erlaubnis zum Auslösen dar. Die bestehende Freigabe für `Flutter-Prüfungen` gilt ausdrücklich **nicht** für diese schreibende Action. Ein KI-Agent darf den Formatter nur dann nutzen, wenn dessen **konkrete unveränderte Workflow-Version** nach menschlicher Prüfung und Merge des gesonderten Werkzeugketten-PRs ausdrücklich freigegeben und mit SHA, Trigger, Eingaben, Zielbranches, Berechtigungen, Datenzugriff, Actions, Outputs und Geltungsdauer **als eigener Freigabeeintrag** im folgenden Verzeichnis dokumentiert wurde.
+**Status: dauerhaft freigegeben für die unten exakt dokumentierte unveränderte Workflow-Version.** Diese Freigabe wurde am 10. Oktober 2026 ausdrücklich vom Projektverantwortlichen erteilt. Sie gilt nur mit den dort beschriebenen Einschränkungen und ersetzt keine Freigabe für andere Actions. Jede Änderung eines Gültigkeitsmerkmals setzt die Freigabe bis zu einer erneuten ausdrücklichen Genehmigung außer Kraft.
 
-Die zulässige Abfolge ist: **Story #236 → separater Werkzeugketten-PR → menschliche Prüfung und Merge → konkrete ausdrückliche Ausführungsfreigabe mit dokumentiertem Eintrag → gegebenenfalls manuelle Ausführung → unabhängige, erfolgreiche Flutter-Prüfungen auf dem aktualisierten Head-SHA.** Solange dieser Freigabeeintrag fehlt, ist die Durchführung gesperrt; das Formatierungsergebnis kann nicht durch Vermutungen über einen Workflow-Lauf ersetzt werden.
+Die Voraussetzungen **Story #236 → separater Werkzeugketten-PR → menschliche Prüfung und Merge** sind für die hier freigegebene Workflow-Version bereits erfüllt. Nach Übernahme des nachfolgenden Freigabeeintrags in `master` ist die **manuelle Ausführung** unter seinen Bedingungen zulässig; anschließend müssen die unabhängigen **Flutter-Prüfungen** auf dem aktualisierten Head-SHA erfolgreich sein. Solange dieser Freigabeeintrag nur auf einem Arbeitsbranch steht, darf die Action noch nicht verwendet werden.
 
 ### Freigabeverzeichnis für selbständige Ausführungen
+
+## Dauerfreigabe: Dart-Formatierung Arbeitsbranch (10. Oktober 2026)
+
+- **Repository:** `Huluvu424242/taugts`
+- **Workflow:** `Dart-Formatierung Arbeitsbranch`
+- **Datei und freigegebene Version:** `.github/workflows/kiagent-dart-format-branch.yml`, Git-Blob-SHA `5e8e1321ae9f3b54408b28106ff64d1f768d2c82`
+- **Geltung:** dauerhaft ab Eintragung dieses Freigabevermerks in `master`, bis zum Widerruf oder zur Änderung eines der nachfolgend benannten Gültigkeitsmerkmale
+- **Erlaubte selbständige Ausführung:** ausschließlich manuell durch `workflow_dispatch` mit Workflow-Quellbranch `master`; Ziel ist genau der vom Agenten benannte, bestehende ungeschützte Arbeitsbranch mit Präfix `story/`, `bug/`, `feature/`, `fix/`, `docs/` oder `chore/`. Geschützte `master`- und `release/*`-Branches sind ausgeschlossen. Keine automatische Ausführung und keine Freigabe für geänderte Workflow-Versionen.
+- **Inputs:** `branch` (Pflicht, konkreter Ziel-Arbeitsbranch) und `expected_sha` (optionaler SHA-Schutz; bei Agentenausführung mit dem vorher ermittelten exakten Branch-Head-SHA zu befüllen). Ein abweichender Branch-SHA muss zum Abbruch ohne Push führen.
+- **Zweck und zugelassene Änderungen:** nur `dart format lib test` für bereits versionierte `.dart`-Dateien unter `lib/` und `test/`; ohne Änderungen kein Commit, sonst genau ein Formatierungscommit auf dem gewählten Arbeitsbranch. Keine fachlichen Änderungen und kein Force-Push.
+- **Runner und Toolchain:** `ubuntu-latest`, maximal 20 Minuten; Flutter `3.47.7` (stable). `actions/checkout` v6 auf SHA `d23441a48e516b6c34aea4fa41551a30e30af803`; `subosito/flutter-action` v2 auf SHA `1a449444c387b1966244ae4d4f8c696479add0b2`.
+- **Berechtigungen und Datenzugriff:** Workflow-Standard `permissions: {}`; nur der Formatter-Job erhält `contents: write`. Eingelesen wird Repository-Quelltext des Zielbranches; `GITHUB_TOKEN` wird ausschließlich für den abschließenden Push bereitgestellt. Keine projektspezifischen Secrets, keine Anmeldedaten, kein `flutter pub get`, keine Tests und keine fremden Zielrepositorys.
+- **Ausgaben und Artefakte:** GitHub-Actions-Status, Logs und Job-Zusammenfassung; optional genau ein Commit auf dem Ziel-Arbeitsbranch, keine eigenen Artefakte. GitHub-Standardaufbewahrung für Logs.
+- **Nachprüfung:** unveränderten Formatierungsumfang und den exakten neuen Head-SHA kontrollieren; anschließend die separat freigegebene Action `Flutter-Prüfungen` auf dem neuen SHA vollständig erfolgreich ausführen. Falls keine Formatierung nötig war, bleibt der Branch unverändert.
+- **Audit und Widerruf:** Freigabe am **10. Oktober 2026** ausdrücklich durch den Projektverantwortlichen im Chat erteilt. Workflow-Version, Ausführender, Eingaben, Branch, SHA und Commit müssen über Actions und PR nachvollziehbar bleiben. Widerruf oder Änderungen an Workflow, verwendeten Actions/SHAs, Trigger, Berechtigungen, Inputs, Outputs, Secrets, Datenzugriff, Artefakten, Runner oder Zweck beenden diese Freigabe. Keine eigenmächtige Anpassung von GitHub-Projekteinstellungen.
+- **Risikobegrenzung:** Der Formatter besitzt bewusst schreibenden Repositoryzugriff. Er startet ausschließlich vom unveränderten `master`-Workflow, validiert Branch-Name und erwartete Ausgangsspitze, formatiert nur versionierte Dart-Dateien, prüft vor dem Push die unveränderte Remote-Spitze und schreibt ohne Force-Push. Der Formatierungscommit kann über einen nachvollziehbaren Revert-Commit auf dem Arbeitsbranch zurückgenommen werden.
 
 Folgende Freigabe ist erteilt:
 
