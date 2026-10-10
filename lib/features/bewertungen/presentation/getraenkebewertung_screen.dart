@@ -274,7 +274,6 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
     ];
     final erlebnis = widget.erlebnis.kopiereMit(
       notiz: notiz.isEmpty ? null : notiz,
-      istEntwurf: false,
       geaendertAm: jetzt,
     );
 
