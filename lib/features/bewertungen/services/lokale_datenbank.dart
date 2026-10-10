@@ -126,7 +126,6 @@ class LokaleDatenbank {
         geaendert_am TEXT NOT NULL,
         herkunft_profil_id TEXT NOT NULL REFERENCES profile(id),
         notiz TEXT,
-        ist_entwurf INTEGER NOT NULL DEFAULT 0,
         produkt_id TEXT REFERENCES produkte(objekt_id),
         kaufort_id TEXT REFERENCES orte(id),
         konsumort_id TEXT REFERENCES orte(id),
@@ -138,7 +137,7 @@ class LokaleDatenbank {
     verbindung.execute('''
       INSERT INTO erlebnisse_neu (
         id, typ, ort_id, beginn, ende, erstellt_am, geaendert_am,
-        herkunft_profil_id, notiz, ist_entwurf, produkt_id, kaufort_id,
+        herkunft_profil_id, notiz, produkt_id, kaufort_id,
         konsumort_id, preis, menge, gebinde
       )
       SELECT id, typ, ort_id,
@@ -152,7 +151,7 @@ class LokaleDatenbank {
         CASE WHEN tatsaechlicher_beginn IS NOT NULL
           THEN tatsaechliches_ende ELSE NULL END,
         erstellt_am, geaendert_am, herkunft_profil_id, notiz,
-        ist_entwurf, produkt_id, kaufort_id, konsumort_id,
+        produkt_id, kaufort_id, konsumort_id,
         preis, menge, gebinde
       FROM erlebnisse
     ''');
