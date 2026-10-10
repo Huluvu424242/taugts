@@ -39,11 +39,8 @@ void main() {
     final erlebnis = Erlebnis(
       id: 'erlebnis-1',
       typ: Erlebnistyp.einkauf,
-
       beginn: DateTime.utc(2026, 9, 1),
-
       herkunftProfilId: profil.id,
-
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
