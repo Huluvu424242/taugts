@@ -1309,37 +1309,6 @@ class ImportValidierungsService {
     return DateTime.tryParse(wert)?.toUtc();
   }
 
-  void _optionalesDatum(
-    Map<String, Object?> wert,
-    String feld,
-    String pfad,
-    List<ImportValidierungsFehler> fehler,
-  ) {
-    final inhalt = wert[feld];
-    if (inhalt == null) return;
-    if (inhalt is! String || !_datumRegExp.hasMatch(inhalt)) {
-      _fehler(
-        fehler,
-        'datum_ungueltig',
-        pfad,
-        'Das Feld „$feld“ muss ein Datum im Format YYYY-MM-DD sein.',
-      );
-      return;
-    }
-    final teile = inhalt.split('-').map(int.parse).toList();
-    final datum = DateTime.utc(teile[0], teile[1], teile[2]);
-    if (datum.year != teile[0] ||
-        datum.month != teile[1] ||
-        datum.day != teile[2]) {
-      _fehler(
-        fehler,
-        'datum_ungueltig',
-        pfad,
-        'Das Feld „$feld“ enthält kein gültiges Kalenderdatum.',
-      );
-    }
-  }
-
   void _textListe(
     Map<String, Object?> wert,
     String feld,
