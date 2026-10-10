@@ -418,7 +418,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       setState(() {
         _istFehler = true;
         _status =
-            'Vor dem Import müssen alle Konflikte ausdrücklich entschieden werden.';
+            'Vor dem Import müssen alle entscheidungspflichtigen Konflikte entschieden werden.';
       });
       return;
     }
@@ -598,6 +598,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<ImportStrategie>(
+          isExpanded: true,
           initialValue: _strategie,
           decoration: const InputDecoration(labelText: 'Importstrategie'),
           items: ImportStrategie.values
@@ -681,7 +682,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         if (!_alleKonflikteEntschieden) ...[
           const SizedBox(height: 8),
           const Text(
-            'Der Import kann erst ausgeführt werden, wenn alle Konflikte entschieden sind.',
+            'Der Import kann erst ausgeführt werden, wenn alle entscheidungspflichtigen Konflikte entschieden sind.',
           ),
         ],
       ],
