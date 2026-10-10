@@ -199,7 +199,7 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          'Registriere einen Restaurantbesuch oder Einkauf. Geplante und laufende Erlebnisse kannst du später hier fortsetzen.',
+                          'Registriere einen Restaurantbesuch oder Einkauf. Du kannst jedes Erlebnis jederzeit bearbeiten.',
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
@@ -213,40 +213,16 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
                 );
               }
 
-              final aktive = _sortiere(
-                erlebnisse.where((e) => e.status == Erlebnisstatus.aktiv),
-                aufsteigend: true,
-              );
-              final geplante = _sortiere(
-                erlebnisse.where((e) => e.status == Erlebnisstatus.geplant),
-                aufsteigend: true,
-              );
-              final vergangene = _sortiere(
-                erlebnisse.where((e) => e.status == Erlebnisstatus.beendet),
-                aufsteigend: false,
-              );
+              final sortierte = _sortiere(erlebnisse, aufsteigend: false);
 
               return ListView(
                 padding: const EdgeInsets.only(bottom: 104),
                 children: [
-                  if (aktive.isNotEmpty)
-                    _Gruppe(
-                      titel: 'Aktiv',
-                      erlebnisse: aktive,
-                      eintragBuilder: _eintrag,
-                    ),
-                  if (geplante.isNotEmpty)
-                    _Gruppe(
-                      titel: 'Geplant',
-                      erlebnisse: geplante,
-                      eintragBuilder: _eintrag,
-                    ),
-                  if (vergangene.isNotEmpty)
-                    _Gruppe(
-                      titel: 'Vergangen',
-                      erlebnisse: vergangene,
-                      eintragBuilder: _eintrag,
-                    ),
+                  _Gruppe(
+                    titel: 'Alle Erlebnisse',
+                    erlebnisse: sortierte,
+                    eintragBuilder: _eintrag,
+                  ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: FilledButton.icon(
@@ -281,8 +257,7 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
     return liste;
   }
 
-  DateTime? _sortierZeit(Erlebnis erlebnis) =>
-      erlebnis.tatsaechlicherBeginn ?? erlebnis.geplanterZeitpunkt;
+  DateTime? _sortierZeit(Erlebnis erlebnis) => erlebnis.beginn;
 
   Widget _eintrag(Erlebnis erlebnis) => FutureBuilder<_EintragDetails>(
         future: _detailsLaden(erlebnis),
@@ -335,34 +310,19 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
       };
 
   String _zeitLabel(BuildContext context, Erlebnis erlebnis) {
+    final beginn = erlebnis.beginn;
+    if (beginn == null) return 'Zeitraum noch offen';
     final localizations = MaterialLocalizations.of(context);
-    if (erlebnis.status == Erlebnisstatus.aktiv) {
-      final beginn = erlebnis.tatsaechlicherBeginn;
-      if (beginn == null) return 'aktiv';
-      return 'seit ${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(beginn.toLocal()))}';
-    }
-    if (erlebnis.status == Erlebnisstatus.beendet) {
-      final beginn = erlebnis.tatsaechlicherBeginn;
-      final ende = erlebnis.tatsaechlichesEnde;
-      if (beginn == null) return 'vergangen';
-      final datum = localizations.formatShortDate(beginn.toLocal());
-      if (ende == null) return datum;
-      final startZeit = localizations.formatTimeOfDay(
-        TimeOfDay.fromDateTime(beginn.toLocal()),
-      );
-      final endZeit = localizations.formatTimeOfDay(
-        TimeOfDay.fromDateTime(ende.toLocal()),
-      );
-      return '$datum · $startZeit–$endZeit';
-    }
-    final geplant = erlebnis.geplanterZeitpunkt;
-    if (geplant == null) return 'Termin noch offen';
-    final datum = localizations.formatShortDate(geplant.toLocal());
-    if (erlebnis.geplanteMinute == null) return datum;
-    final zeit = localizations.formatTimeOfDay(
-      TimeOfDay.fromDateTime(geplant.toLocal()),
+    final datum = localizations.formatShortDate(beginn.toLocal());
+    final startZeit = localizations.formatTimeOfDay(
+      TimeOfDay.fromDateTime(beginn.toLocal()),
     );
-    return '$datum · $zeit';
+    final ende = erlebnis.ende;
+    if (ende == null) return '$datum · $startZeit';
+    final endZeit = localizations.formatTimeOfDay(
+      TimeOfDay.fromDateTime(ende.toLocal()),
+    );
+    return '$datum · $startZeit–$endZeit';
   }
 }
 
