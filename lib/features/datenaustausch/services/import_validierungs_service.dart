@@ -893,29 +893,44 @@ class ImportValidierungsService {
         switch (name) {
           case 'objektTags':
             _uuid(wert, 'objektId', '$pfad.objektId', fehler);
-            _text(wert, 'normalisiert', '$pfad.normalisiert', fehler, nichtLeer: true);
+            _text(wert, 'normalisiert', '$pfad.normalisiert', fehler,
+                nichtLeer: true);
             _text(wert, 'text', '$pfad.text', fehler, nichtLeer: true);
             key = '${wert['objektId']}|${wert['normalisiert']}';
           case 'objektKlassifikationsmerkmale':
             _uuid(wert, 'objektId', '$pfad.objektId', fehler);
             _enumWert(
-              wert, 'dimension', {'herkunft', 'hersteller', 'eigenschaft'},
-              '$pfad.dimension', fehler,
+              wert,
+              'dimension',
+              {'herkunft', 'hersteller', 'eigenschaft'},
+              '$pfad.dimension',
+              fehler,
             );
             _text(wert, 'schluessel', '$pfad.schluessel', fehler);
             _text(wert, 'wert', '$pfad.wert', fehler, nichtLeer: true);
-            key = '${wert['objektId']}|${wert['dimension']}|${wert['schluessel']}';
+            key =
+                '${wert['objektId']}|${wert['dimension']}|${wert['schluessel']}';
           case 'kategorieKriteriensetRegeln':
             _uuid(wert, 'kategorieId', '$pfad.kategorieId', fehler);
             _enumWert(
-              wert, 'fallbackObjektart', {
-                'getraenk', 'speise', 'sonstigesProdukt',
-                'gastronomie', 'geschaeft',
-              }, '$pfad.fallbackObjektart', fehler,
+              wert,
+              'fallbackObjektart',
+              {
+                'getraenk',
+                'speise',
+                'sonstigesProdukt',
+                'gastronomie',
+                'geschaeft',
+              },
+              '$pfad.fallbackObjektart',
+              fehler,
             );
             _enumWert(
-              wert, 'modus', {'erweitern', 'ersetzen'},
-              '$pfad.modus', fehler,
+              wert,
+              'modus',
+              {'erweitern', 'ersetzen'},
+              '$pfad.modus',
+              fehler,
             );
             _ganzzahl(wert, 'version', '$pfad.version', fehler, minimum: 1);
             key = '${wert['kategorieId']}';
@@ -929,7 +944,9 @@ class ImportValidierungsService {
         }
         if (!schluessel.add(key)) {
           _fehler(
-            fehler, 'doppelter_schluessel', pfad,
+            fehler,
+            'doppelter_schluessel',
+            pfad,
             'Diese Klassifikationszuordnung ist mehrfach vorhanden.',
           );
         }
@@ -1080,30 +1097,45 @@ class ImportValidierungsService {
 
     for (final wert in _liste(dokument, 'objektTags')) {
       _referenz(
-        wert['objektId'], objektIds, r'$.objektTags.objektId',
-        'Objekt', fehler,
+        wert['objektId'],
+        objektIds,
+        r'$.objektTags.objektId',
+        'Objekt',
+        fehler,
       );
     }
     for (final wert in _liste(dokument, 'objektKlassifikationsmerkmale')) {
       _referenz(
-        wert['objektId'], objektIds, r'$.objektKlassifikationsmerkmale.objektId',
-        'Objekt', fehler,
+        wert['objektId'],
+        objektIds,
+        r'$.objektKlassifikationsmerkmale.objektId',
+        'Objekt',
+        fehler,
       );
     }
     for (final wert in _liste(dokument, 'kategorieKriteriensetRegeln')) {
       _referenz(
-        wert['kategorieId'], kategorieIds,
-        r'$.kategorieKriteriensetRegeln.kategorieId', 'Kategorie', fehler,
+        wert['kategorieId'],
+        kategorieIds,
+        r'$.kategorieKriteriensetRegeln.kategorieId',
+        'Kategorie',
+        fehler,
       );
     }
     for (final wert in _liste(dokument, 'kategorieKriterien')) {
       _referenz(
-        wert['kategorieId'], kategorieIds,
-        r'$.kategorieKriterien.kategorieId', 'Kategorie', fehler,
+        wert['kategorieId'],
+        kategorieIds,
+        r'$.kategorieKriterien.kategorieId',
+        'Kategorie',
+        fehler,
       );
       _referenz(
-        wert['kriteriumId'], kriteriumIds,
-        r'$.kategorieKriterien.kriteriumId', 'Kriterium', fehler,
+        wert['kriteriumId'],
+        kriteriumIds,
+        r'$.kategorieKriterien.kriteriumId',
+        'Kriterium',
+        fehler,
       );
     }
 
@@ -1136,7 +1168,8 @@ class ImportValidierungsService {
       while (aktuell != null) {
         if (!besucht.add(aktuell)) {
           _fehler(
-            fehler, 'kategorie_zyklus',
+            fehler,
+            'kategorie_zyklus',
             r'$.kategorien[' '$i].elternKategorieId',
             'Die Kategoriehierarchie darf keine Zyklen enthalten.',
           );
@@ -1147,10 +1180,10 @@ class ImportValidierungsService {
         final elternId = eltern['elternKategorieId'];
         if (elternId is! String) break;
         final elternWert = kategorieNachId[elternId];
-        if (elternWert != null &&
-            elternWert['zielart'] != eltern['zielart']) {
+        if (elternWert != null && elternWert['zielart'] != eltern['zielart']) {
           _fehler(
-            fehler, 'kategorie_bereich_widerspruch',
+            fehler,
+            'kategorie_bereich_widerspruch',
             r'$.kategorien[' '$i].elternKategorieId',
             'Eine Unterkategorie muss denselben Bereich wie ihr Elternknoten besitzen.',
           );
