@@ -50,13 +50,13 @@ class ExportService {
       .toList();
 
   List<Map<String, Object?>> _kategorieZuordnungen() => [
-        for (final z in _zeilen('produkt_kategorien'))
+        for (final z in _zeilenOhneId('produkt_kategorien'))
           {'kategorieId': z['kategorie_id'], 'zielId': z['produkt_id']},
-        for (final z in _zeilen('ort_kategorien'))
+        for (final z in _zeilenOhneId('ort_kategorien'))
           {'kategorieId': z['kategorie_id'], 'zielId': z['ort_id']},
       ];
 
-  List<Map<String, Object?>> _objektTags() => _zeilen('objekt_tags')
+  List<Map<String, Object?>> _objektTags() => _zeilenOhneId('objekt_tags')
       .map((z) => {
             'objektId': z['objekt_id'],
             'normalisiert': z['normalisiert'],
@@ -65,7 +65,7 @@ class ExportService {
       .toList();
 
   List<Map<String, Object?>> _objektKlassifikationsmerkmale() =>
-      _zeilen('objekt_klassifikationsmerkmale')
+      _zeilenOhneId('objekt_klassifikationsmerkmale')
           .map((z) => {
                 'objektId': z['objekt_id'],
                 'dimension': z['dimension'],
@@ -75,7 +75,7 @@ class ExportService {
           .toList();
 
   List<Map<String, Object?>> _kategorieKriteriensetRegeln() =>
-      _zeilen('kategorie_kriterienset_regeln')
+      _zeilenOhneId('kategorie_kriterienset_regeln')
           .map((z) => {
                 'kategorieId': z['kategorie_id'],
                 'fallbackObjektart': z['fallback_objektart'],
@@ -84,7 +84,7 @@ class ExportService {
               })
           .toList();
 
-  List<Map<String, Object?>> _kategorieKriterien() => _zeilen('kategorie_kriterien')
+  List<Map<String, Object?>> _kategorieKriterien() => _zeilenOhneId('kategorie_kriterien')
       .map((z) => {
             'kategorieId': z['kategorie_id'],
             'kriteriumId': z['kriterium_id'],
@@ -244,6 +244,12 @@ class ExportService {
             'geaendertAm': z['geaendert_am'],
           })
       .toList();
+
+  List<Map<String, Object?>> _zeilenOhneId(String tabelle) =>
+      datenbank.verbindung
+          .select('SELECT * FROM $tabelle ORDER BY rowid')
+          .map((zeile) => Map<String, Object?>.from(zeile))
+          .toList();
 
   List<Map<String, Object?>> _zeilen(String tabelle) => datenbank.verbindung
       .select('SELECT * FROM $tabelle ORDER BY id')
