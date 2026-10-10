@@ -15,7 +15,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Changed
 
-- Der JSON-Import ergänzt neue Datensätze standardmäßig ohne Überschreiben, belegt sichere Versionsentscheidungen automatisch vor und bietet einen getrennt bestätigten atomaren vollständigen Bestandsersatz. JSON-Export und -Import berücksichtigen nun auch Kategorien, Zuordnungen, Klassifikationen, Kriterienset-Regeln, allgemeine Objekte und den Löschstatus von Produkten und Orten (Story #249).
+- Der JSON-Import ergänzt neue Datensätze standardmäßig ohne Überschreiben, belegt sichere Versionsentscheidungen automatisch vor und bietet einen getrennt bestätigten atomaren vollständigen Bestandsersatz einschließlich Sicherungsangebot und Rollback. Konfliktfreie Importe benötigen keine manuellen Einzelbestätigungen; fachliche Dubletten und harte Identitätskonflikte werden nicht automatisch zusammengeführt. JSON-Export und -Import berücksichtigen nun auch Kategorien, Zuordnungen, Klassifikationen, Kriterienset-Regeln, allgemeine Objekte und den Löschstatus von Produkten und Orten; das Austauschformat bleibt bei Schemaversion 3 (Story #249).
 
 - Für KI-Agenten steht ein gesonderter, ausschließlich manuell startbarer Dart-Formatter für ungeschützte Arbeitsbranches bereit (Story #236). Seine Ausführung ist **nicht freigegeben**; die dokumentierten Sicherheits- und Freigaberegeln gelten unverändert. Der bisherige Workflow `Flutter-Prüfungen` bleibt davon getrennt.
 - Bewertungsdetails und Suchtreffer zeigen fachliche Produkt- und Ortsnamen sowie den Erlebnistyp mit Orts- und Zeitbezug statt technischer IDs. Nicht mehr zuordenbare Stammdaten werden verständlich gekennzeichnet (Story #218).
