@@ -45,3 +45,9 @@ Kann eine Datei nicht geschrieben, geteilt oder geprüft werden, zeigt Taugt’s
 Mit 0.1.0+7 wurde die während der Vorabentwicklung entstandene SQLite-Migrationshistorie auf eine neue produktive Baseline konsolidiert und anschließend für typisierte Kriterienwerte weiterentwickelt. Dieser Baseline-Stand gilt auch für 0.1.0+8. Lokale Datenbanken aus älteren Vorabständen, insbesondere aus 0.1.0+6 und davor, besitzen keinen direkten Datenbank-Upgradepfad auf den aktuellen Stand.
 
 Wer Daten aus einer solchen älteren Vorabversion behalten möchte, sollte **vor dem Update** einen vollständigen JSON-Export erstellen und sicher aufbewahren. Die Wiederherstellung dieses Exports in einer frisch angelegten aktuellen Datenbank muss vor dem Löschen der alten App-Daten geprüft werden. Ein Update von 0.1.0+7 auf 0.1.0+8 führt keine neue Datenbank-Baseline ein.
+
+## Einheitlicher Erlebniszeitraum
+
+Seit Story #228 wird für jeden Einkauf und Restaurantbesuch nur ein Beginn und ein Ende gespeichert. Die Zeiten sind vor, während und nach dem Ereignis jederzeit bearbeitbar; der letzte Stand ist maßgeblich. Plan-/Ist-Zeitfelder sowie Entwurfs- oder Durchführungsstatus werden nicht mehr gesondert gespeichert.
+
+Die SQLite-Migration 3 → 4 übernimmt vorrangig den bisherigen tatsächlichen Beginn, andernfalls den geplanten Zeitpunkt. Ein tatsächliches Ende wird nur bei vorhandenem tatsächlichen Beginn übernommen. Die neue JSON-Exportversion 3 nutzt ebenfalls `beginn` und `ende`; ältere Formate 0–2 werden beim Einlesen migriert. Eine Sicherung vor dem Update ist weiterhin empfehlenswert.
