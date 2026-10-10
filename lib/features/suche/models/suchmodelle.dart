@@ -18,7 +18,6 @@ class Suchfilter {
     this.produktId,
     this.herkunftProfilId,
     this.erlebnistyp,
-    this.erlebnisstatus,
     this.historienart,
     this.von,
     this.bis,
@@ -33,7 +32,6 @@ class Suchfilter {
   final String? produktId;
   final String? herkunftProfilId;
   final Erlebnistyp? erlebnistyp;
-  final Erlebnisstatus? erlebnisstatus;
   final Historienart? historienart;
   final DateTime? von;
   final DateTime? bis;
@@ -47,7 +45,6 @@ class Suchfilter {
       produktId != null ||
       herkunftProfilId != null ||
       erlebnistyp != null ||
-      erlebnisstatus != null ||
       historienart != null ||
       von != null ||
       bis != null ||
