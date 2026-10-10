@@ -362,6 +362,13 @@ class ImportAusfuehrungService {
         }),
         existiert,
       );
+      if (wert['art'] != 'produkt') {
+        db.verbindung.execute(
+          'DELETE FROM produkte WHERE objekt_id = ?',
+          [wert['id']],
+        );
+        return;
+      }
       final produktExistiert = db.verbindung.select(
         'SELECT 1 FROM produkte WHERE objekt_id = ?',
         [wert['id']],
