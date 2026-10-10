@@ -1,5 +1,6 @@
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 import 'package:taugts/features/datenaustausch/services/import_strategie_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
 
 /// Ergänzt den bestehenden transaktionalen Import um Klassifikationsdaten.
 /// Aufruf ausschließlich innerhalb der Import-Transaktion.
@@ -26,9 +27,11 @@ class ImportKlassifikationService {
     required LokaleDatenbank datenbank,
     required Map<String, Object?> dokument,
     required ImportStrategie strategie,
+    required ImportKonfliktEntscheidungsStand entscheidungen,
   }) {
     final db = datenbank.verbindung;
     final bevorzugtLokal = strategie == ImportStrategie.lokalBevorzugen;
+    final explizit = entscheidungen.entscheidungen;
 
     // Elternrelationen erst nach Anlage aller Kategorien setzen:
     // dadurch sind auch unsortierte hierarchische Exporte importierbar.
@@ -38,6 +41,11 @@ class ImportKlassifikationService {
         .map((zeile) => zeile['id'] as String)
         .toSet();
     for (final kategorie in kategorien) {
+      final auswahl = explizit['kategorien|${kategorie['id']}|${kategorie['id']}'];
+      if (auswahl == ImportKonfliktAktion.ueberspringen ||
+          auswahl == ImportKonfliktAktion.lokaleVersion) {
+        continue;
+      }
       _schreibe(
         datenbank,
         'kategorien',
@@ -49,12 +57,19 @@ class ImportKlassifikationService {
           'eltern_id': null,
           'ist_standard': kategorie['istStandard'] == true ? 1 : 0,
         },
-        bevorzugtLokal: bevorzugtLokal,
+        bevorzugtLokal: auswahl != ImportKonfliktAktion.importVersion &&
+            bevorzugtLokal,
       );
     }
     for (final kategorie in kategorien) {
+      final auswahl = explizit['kategorien|${kategorie['id']}|${kategorie['id']}'];
+      if (auswahl == ImportKonfliktAktion.ueberspringen ||
+          auswahl == ImportKonfliktAktion.lokaleVersion) {
+        continue;
+      }
       if (kategorie['elternKategorieId'] == null) continue;
       if (bevorzugtLokal &&
+          auswahl != ImportKonfliktAktion.importVersion &&
           vorhandeneKategorieIds.contains(kategorie['id'])) {
         continue;
       }
@@ -86,6 +101,14 @@ class ImportKlassifikationService {
       );
     }
     for (final wert in _liste(dokument, 'objektTags')) {
+      final id = ImportKonfliktentscheidungService.identitaet(
+        '$name', wert,
+      );
+      final auswahl = explizit['$name|$id|$id'];
+      if (auswahl == ImportKonfliktAktion.ueberspringen ||
+          auswahl == ImportKonfliktAktion.lokaleVersion) {
+        continue;
+      }
       _schreibe(
         datenbank,
         'objekt_tags',
@@ -95,10 +118,19 @@ class ImportKlassifikationService {
           'normalisiert': wert['normalisiert'],
           'text': wert['text'],
         },
-        bevorzugtLokal: bevorzugtLokal,
+        bevorzugtLokal: auswahl != ImportKonfliktAktion.importVersion &&
+            bevorzugtLokal,
       );
     }
     for (final wert in _liste(dokument, 'objektKlassifikationsmerkmale')) {
+      final id = ImportKonfliktentscheidungService.identitaet(
+        '$name', wert,
+      );
+      final auswahl = explizit['$name|$id|$id'];
+      if (auswahl == ImportKonfliktAktion.ueberspringen ||
+          auswahl == ImportKonfliktAktion.lokaleVersion) {
+        continue;
+      }
       _schreibe(
         datenbank,
         'objekt_klassifikationsmerkmale',
@@ -109,10 +141,19 @@ class ImportKlassifikationService {
           'schluessel': wert['schluessel'],
           'wert': wert['wert'],
         },
-        bevorzugtLokal: bevorzugtLokal,
+        bevorzugtLokal: auswahl != ImportKonfliktAktion.importVersion &&
+            bevorzugtLokal,
       );
     }
     for (final wert in _liste(dokument, 'kategorieKriteriensetRegeln')) {
+      final id = ImportKonfliktentscheidungService.identitaet(
+        '$name', wert,
+      );
+      final auswahl = explizit['$name|$id|$id'];
+      if (auswahl == ImportKonfliktAktion.ueberspringen ||
+          auswahl == ImportKonfliktAktion.lokaleVersion) {
+        continue;
+      }
       _schreibe(
         datenbank,
         'kategorie_kriterienset_regeln',
@@ -123,10 +164,19 @@ class ImportKlassifikationService {
           'modus': wert['modus'],
           'version': wert['version'],
         },
-        bevorzugtLokal: bevorzugtLokal,
+        bevorzugtLokal: auswahl != ImportKonfliktAktion.importVersion &&
+            bevorzugtLokal,
       );
     }
     for (final wert in _liste(dokument, 'kategorieKriterien')) {
+      final id = ImportKonfliktentscheidungService.identitaet(
+        '$name', wert,
+      );
+      final auswahl = explizit['$name|$id|$id'];
+      if (auswahl == ImportKonfliktAktion.ueberspringen ||
+          auswahl == ImportKonfliktAktion.lokaleVersion) {
+        continue;
+      }
       _schreibe(
         datenbank,
         'kategorie_kriterien',
@@ -136,7 +186,8 @@ class ImportKlassifikationService {
           'kriterium_id': wert['kriteriumId'],
           'reihenfolge': wert['reihenfolge'],
         },
-        bevorzugtLokal: bevorzugtLokal,
+        bevorzugtLokal: auswahl != ImportKonfliktAktion.importVersion &&
+            bevorzugtLokal,
       );
     }
   }
