@@ -36,7 +36,7 @@ void main() {
     final erlebnis = Erlebnis(
       id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
       typ: Erlebnistyp.restaurantbesuch,
-      status: Erlebnisstatus.geplant,
+
       herkunftProfilId: profil.id,
       erstelltAm: zeit,
       geaendertAm: zeit,
