@@ -80,7 +80,7 @@ Zusätzliche unbekannte optionale Felder innerhalb einer unterstützten Schemave
 
 ## Test-Fixtures
 
-Die vorhandenen historischen Fixtures bleiben erhalten und werden über die Vorwärtsmigration auf Format 3 geprüft:
+Die vorhandenen historischen Fixtures bleiben erhalten und werden über die Vorwärtsmigration auf Format 3 geprüft. Beachte den derzeit noch auf Format 2 stehenden Stand der formalen Datei `schema/taugts-export.schema.json` (siehe [JSON-Austauschformat](austauschformat.md)):
 
 - `schema/fixtures/taugts-export-v0-migrierbar.json`: unterstützte Vorabversion mit Migration über Version 1 auf Version 3,
 - `schema/fixtures/taugts-export-v1-gueltig.json`: gültiges Version-1-Dokument, das auf Version 3 migriert wird,
