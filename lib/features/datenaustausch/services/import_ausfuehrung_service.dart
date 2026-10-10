@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
+import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_alias_repository.dart';
 import 'package:taugts/features/datenaustausch/services/import_dubletten_merge_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
@@ -127,6 +130,9 @@ class ImportAusfuehrungService {
   }) {
     final zeitpunkt = (ausgefuehrtAm ?? DateTime.now()).toUtc();
     final ergebnis = <String, ImportErgebnisZaehler>{};
+    final lokalerStand = jsonDecode(
+      ExportService(datenbank, appVersion: 'lokaler-vergleich').erzeugeJson(),
+    ) as Map<String, dynamic>;
 
     try {
       datenbank.transaktion(() {
@@ -167,6 +173,15 @@ class ImportAusfuehrungService {
               continue;
             }
             final existiert = _existiert(datenbank, sammlung, zielId);
+            if (existiert &&
+                strategie != ImportStrategie.bestandErsetzen &&
+                aktion != ImportKonfliktAktion.importVersion &&
+                _identischZumBestand(
+                  sammlung, zielId, wert, lokalerStand,
+                )) {
+              ergebnis[ergebnisSammlung] = zaehler.plus(uebersprungen: 1);
+              continue;
+            }
             if (existiert &&
                 strategie == ImportStrategie.lokalBevorzugen &&
                 aktion != ImportKonfliktAktion.importVersion) {
@@ -321,6 +336,38 @@ class ImportAusfuehrungService {
       }
     }
     return null;
+  }
+
+  bool _identischZumBestand(
+    String sammlung,
+    String id,
+    Map<String, Object?> importWert,
+    Map<String, dynamic> lokalerStand,
+  ) {
+    for (final roh in lokalerStand[sammlung] as List? ?? const []) {
+      if (roh is Map && roh['id'] == id) {
+        return _gleich(Map<String, Object?>.from(roh), importWert);
+      }
+    }
+    return false;
+  }
+
+  bool _gleich(Object? a, Object? b) {
+    if (a is Map && b is Map) {
+      if (a.length != b.length) return false;
+      for (final key in a.keys) {
+        if (!b.containsKey(key) || !_gleich(a[key], b[key])) return false;
+      }
+      return true;
+    }
+    if (a is List && b is List) {
+      if (a.length != b.length) return false;
+      for (var i = 0; i < a.length; i++) {
+        if (!_gleich(a[i], b[i])) return false;
+      }
+      return true;
+    }
+    return a == b;
   }
 
   bool _existiert(LokaleDatenbank db, String sammlung, String id) {
