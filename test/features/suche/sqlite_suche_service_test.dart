@@ -113,7 +113,6 @@ void main() {
       id: 'e-historie',
       herkunftProfilId: profilId,
       typ: Erlebnistyp.restaurantbesuch,
-
       ortId: 'o-historie',
       beginn: jetzt,
       erstelltAm: jetzt,
@@ -183,7 +182,6 @@ void main() {
       id: 'e1',
       herkunftProfilId: profilId,
       typ: Erlebnistyp.einkauf,
-
       beginn: jetzt,
       erstelltAm: jetzt,
       geaendertAm: jetzt,
@@ -193,7 +191,6 @@ void main() {
     final treffer = await service.suche(const Suchfilter(
       ziel: Suchziel.erlebnisse,
       erlebnistyp: Erlebnistyp.einkauf,
-
     ));
     expect(treffer.map((wert) => wert.id), contains('e1'));
   });
