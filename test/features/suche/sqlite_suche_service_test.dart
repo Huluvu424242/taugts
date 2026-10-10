@@ -113,9 +113,9 @@ void main() {
       id: 'e-historie',
       herkunftProfilId: profilId,
       typ: Erlebnistyp.restaurantbesuch,
-      status: Erlebnisstatus.aktiv,
+
       ortId: 'o-historie',
-      tatsaechlicherBeginn: jetzt,
+      beginn: jetzt,
       erstelltAm: jetzt,
       geaendertAm: jetzt,
     ));
@@ -183,8 +183,8 @@ void main() {
       id: 'e1',
       herkunftProfilId: profilId,
       typ: Erlebnistyp.einkauf,
-      status: Erlebnisstatus.aktiv,
-      tatsaechlicherBeginn: jetzt,
+
+      beginn: jetzt,
       erstelltAm: jetzt,
       geaendertAm: jetzt,
     ));
