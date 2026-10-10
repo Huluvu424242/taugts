@@ -87,6 +87,7 @@ class ImportKonfliktentscheidungService {
     'bewertungen',
     'ortsbewertungen',
     'kategorien',
+    'kategorieZuordnungen',
     'objektTags',
     'objektKlassifikationsmerkmale',
     'kategorieKriteriensetRegeln',
@@ -115,6 +116,7 @@ class ImportKonfliktentscheidungService {
               'objektKlassifikationsmerkmale',
               'kategorieKriteriensetRegeln',
               'kategorieKriterien',
+              'kategorieZuordnungen',
             }.contains(sammlung);
             konflikte.add(
               ImportEinzelKonflikt(
@@ -333,6 +335,8 @@ class ImportKonfliktentscheidungService {
 
   static String identitaet(String sammlung, Map<String, Object?> wert) =>
       switch (sammlung) {
+        'kategorieZuordnungen' =>
+          '${wert['kategorieId']}:${wert['zielId']}',
         'objektTags' =>
           '${wert['objektId']}:${wert['normalisiert']}',
         'objektKlassifikationsmerkmale' =>
