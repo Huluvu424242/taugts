@@ -1,3 +1,5 @@
+import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
+
 enum ImportStrategie { bestandErsetzen, importBevorzugen, lokalBevorzugen }
 
 class ImportStrategieSammlung {
@@ -7,6 +9,8 @@ class ImportStrategieSammlung {
     required this.aktualisieren,
     required this.behalten,
     required this.entfernen,
+    this.unveraendert = 0,
+    this.uebersprungen = 0,
   });
 
   final String name;
@@ -14,6 +18,8 @@ class ImportStrategieSammlung {
   final int aktualisieren;
   final int behalten;
   final int entfernen;
+  final int unveraendert;
+  final int uebersprungen;
 }
 
 class ImportIdentitaetsKonflikt {
@@ -83,6 +89,8 @@ class ImportStrategieService {
     required Map<String, Object?> importDokument,
     required Map<String, Object?> lokalesDokument,
     Iterable<FachlicheDubletteHinweis> fachlicheDubletten = const [],
+    ImportKonfliktEntscheidungsStand entscheidungen =
+        const ImportKonfliktEntscheidungsStand(),
   }) {
     final ergebnisse = <ImportStrategieSammlung>[];
     final konflikte = <ImportIdentitaetsKonflikt>[];
@@ -97,6 +105,8 @@ class ImportStrategieService {
       var aktualisieren = 0;
       var behalten = 0;
       var entfernen = 0;
+      var unveraendert = 0;
+      var uebersprungen = 0;
 
       for (final eintrag in importNachId.entries) {
         final lokal = lokalNachId[eintrag.key];
@@ -105,17 +115,28 @@ class ImportStrategieService {
           continue;
         }
         if (_gleich(eintrag.value, lokal)) {
+          unveraendert++;
           behalten++;
+          uebersprungen++;
           continue;
         }
         final konflikt = _identitaetsKonflikt(sammlung, eintrag.value, lokal);
         if (konflikt != null) konflikte.add(konflikt);
-        switch (strategie) {
-          case ImportStrategie.bestandErsetzen:
-          case ImportStrategie.importBevorzugen:
-            aktualisieren++;
-          case ImportStrategie.lokalBevorzugen:
-            behalten++;
+        final aktion = entscheidungen.entscheidungen[
+          '$sammlung|${eintrag.key}|${eintrag.key}'
+        ];
+        if (strategie == ImportStrategie.bestandErsetzen) {
+          aktualisieren++;
+        } else if (aktion == ImportKonfliktAktion.lokaleVersion ||
+            aktion == ImportKonfliktAktion.ueberspringen) {
+          behalten++;
+          uebersprungen++;
+        } else if (aktion == ImportKonfliktAktion.importVersion ||
+            strategie == ImportStrategie.importBevorzugen) {
+          aktualisieren++;
+        } else {
+          behalten++;
+          uebersprungen++;
         }
       }
 
@@ -135,6 +156,8 @@ class ImportStrategieService {
           aktualisieren: aktualisieren,
           behalten: behalten,
           entfernen: entfernen,
+          unveraendert: unveraendert,
+          uebersprungen: uebersprungen,
         ),
       );
     }
