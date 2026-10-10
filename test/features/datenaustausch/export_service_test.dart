@@ -158,6 +158,34 @@ void main() {
     }
   });
 
+  test('allgemeine Objekte ohne Produktdatensatz bleiben erhalten', () {
+    const id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaab';
+    datenbank.verbindung.execute(
+      'INSERT INTO objekte (id, name, art, erstellt_am, geaendert_am) '
+      'VALUES (?, ?, ?, ?, ?)',
+      [id, 'Allgemeines Objekt', 'allgemein',
+        '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z'],
+    );
+    final dokument = const ImportValidierungsService().validiere(
+      ExportService(datenbank, appVersion: '0.1.0-test').erzeugeJson(),
+    );
+    expect(dokument.istGueltig, isTrue, reason: dokument.fehler.toString());
+    final ziel = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+    addTearDown(ziel.schliessen);
+    const ImportAusfuehrungService().ausfuehren(
+      datenbank: ziel,
+      importDokument: dokument.dokument!,
+      strategie: ImportStrategie.bestandErsetzen,
+    );
+    expect(
+      ziel.verbindung
+          .select('SELECT art FROM objekte WHERE id = ?', [id])
+          .single['art'],
+      'allgemein',
+    );
+    expect(ziel.verbindung.select('SELECT * FROM produkte'), isEmpty);
+  });
+
   test('exportiert lokale Profile ohne den Datenbestand zu verändern', () {
     datenbank.verbindung.execute(
       'INSERT INTO profile VALUES (?, ?, ?, ?)',
