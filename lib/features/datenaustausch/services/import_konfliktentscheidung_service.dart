@@ -85,6 +85,10 @@ class ImportKonfliktentscheidungService {
     'bewertungen',
     'ortsbewertungen',
     'kategorien',
+    'objektTags',
+    'objektKlassifikationsmerkmale',
+    'kategorieKriteriensetRegeln',
+    'kategorieKriterien',
   ];
 
   List<ImportEinzelKonflikt> ermittle({
@@ -95,14 +99,17 @@ class ImportKonfliktentscheidungService {
     final konflikte = <ImportEinzelKonflikt>[];
 
     for (final sammlung in _sammlungen) {
-      final importNachId = _nachId(_liste(importDokument, sammlung));
-      final lokalNachId = _nachId(_liste(lokalesDokument, sammlung));
+      final importNachId = _nachId(sammlung, _liste(importDokument, sammlung));
+      final lokalNachId = _nachId(sammlung, _liste(lokalesDokument, sammlung));
       for (final eintrag in importNachId.entries) {
         final lokal = lokalNachId[eintrag.key];
         if (lokal == null || _gleich(eintrag.value, lokal)) continue;
         final importWert = eintrag.value;
-        final identitaetskonflikt = _istHistorisch(sammlung) &&
-            !_gleicherHistorischerKontext(sammlung, importWert, lokal);
+        final identitaetskonflikt =
+            (_istHistorisch(sammlung) &&
+                !_gleicherHistorischerKontext(sammlung, importWert, lokal)) ||
+            (sammlung == 'kategorien' &&
+                importWert['zielart'] != lokal['zielart']);
         final art = identitaetskonflikt
             ? ImportKonfliktArt.identitaetskonflikt
             : ImportKonfliktArt.versionskonflikt;
@@ -262,12 +269,27 @@ class ImportKonfliktentscheidungService {
     String sammlung,
     String id,
   ) =>
-      _nachId(_liste(dokument, sammlung))[id];
+      _nachId(sammlung, _liste(dokument, sammlung))[id];
 
-  Map<String, Map<String, Object?>> _nachId(List<Map<String, Object?>> werte) =>
-      {
+  Map<String, Map<String, Object?>> _nachId(
+    String sammlung,
+    List<Map<String, Object?>> werte,
+  ) => {
         for (final wert in werte)
-          if (wert['id'] is String) wert['id'] as String: wert,
+          if (identitaet(sammlung, wert).isNotEmpty)
+            identitaet(sammlung, wert): wert,
+      };
+
+  static String identitaet(String sammlung, Map<String, Object?> wert) =>
+      switch (sammlung) {
+        'objektTags' =>
+          '${wert['objektId']}:${wert['normalisiert']}',
+        'objektKlassifikationsmerkmale' =>
+          '${wert['objektId']}:${wert['dimension']}:${wert['schluessel']}',
+        'kategorieKriteriensetRegeln' => '${wert['kategorieId']}',
+        'kategorieKriterien' =>
+          '${wert['kategorieId']}:${wert['kriteriumId']}',
+        _ => wert['id'] as String? ?? '',
       };
 
   List<Map<String, Object?>> _liste(
