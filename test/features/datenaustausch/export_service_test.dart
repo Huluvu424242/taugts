@@ -16,14 +16,12 @@ void main() {
 
   tearDown(() => datenbank.schliessen());
 
-  test('formales JSON-Schema stimmt mit Export und Importversion überein',
-      () {
+  test('formales JSON-Schema stimmt mit Export und Importversion überein', () {
     final schema = jsonDecode(
       File('schema/taugts-export.schema.json').readAsStringSync(),
     ) as Map<String, dynamic>;
     final eigenschaften = schema['properties'] as Map<String, dynamic>;
-    final versionsFeld =
-        eigenschaften['schemaVersion'] as Map<String, dynamic>;
+    final versionsFeld = eigenschaften['schemaVersion'] as Map<String, dynamic>;
     final export = jsonDecode(
       ExportService(datenbank, appVersion: '0.1.0+8').erzeugeJson(),
     ) as Map<String, dynamic>;
