@@ -175,7 +175,6 @@ class ImportAusfuehrungService {
             final existiert = _existiert(datenbank, sammlung, zielId);
             if (existiert &&
                 strategie != ImportStrategie.bestandErsetzen &&
-                aktion != ImportKonfliktAktion.importVersion &&
                 _identischZumBestand(
                   sammlung, zielId, wert, lokalerStand,
                 )) {
