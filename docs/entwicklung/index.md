@@ -38,6 +38,11 @@ Erst die zentrale Aktion **Speichern** ruft `uebernehmen(erlebnis)` auf. Das pro
 
 **Abgrenzung:** Die In-Memory-Eingaben eines geöffneten Erlebnisformulars sind kein dauerhaft gespeicherter Offline-Entwurf. Nach dem Verlassen ohne das gemeinsame Speichern sind diese Änderungen nicht verfügbar. Stammdatenpflege ist bewusst nicht Teil der Erlebnistransaktion und kann unabhängig gespeichert werden. Das Verhalten wird durch Widget-, Entwurfs-, Persistenz- und Rollbacktests überprüft.
 
+## Aktuelle Wartungs- und Prüfhilfen
+
+- [Formaler JSON-Schema-Vertrag](austauschformat.md#formales-schema-und-fixtures): Das Austauschformat ist auf Version 3 synchronisiert (Bug #234). Der Regressionstest schützt vor einem erneuten Auseinanderlaufen von Schema, Export und Import; die weitergehenden fachlichen Validierungen verbleiben im Importdienst.
+- [Dart-Formatierung auf Arbeitsbranches](branch-formatierung.md): Der separate Formatter aus Story #236 ist vorbereitet, aber **nicht zur Ausführung freigegeben**. Das ist von der Freigabe der lesenden `Flutter-Prüfungen` zu unterscheiden. Für eine Verwendung ist die ausdrückliche Freigabe nach `agent-rules/05-security-tooling.md` erforderlich.
+
 ## Versionsgrenze zwischen Release und Entwicklungsstand
 
 Der letzte hier dokumentierte offizielle Release ist **0.1.0+8**. Nachfolgende Änderungen sind bis zur nächsten Releasevorbereitung unter [`[Unreleased]`](https://github.com/Huluvu424242/taugts/blob/master/CHANGELOG.md) zu führen. Die Versionsangabe in `pubspec.yaml` ist kein Beleg dafür, dass ein Commit bereits als APK ausgeliefert wurde. Die [Test-APK vom aktuellen master](android-test-apk.md) ist ausdrücklich kein offizieller Release; ihre Buildnummer wird nur für den jeweiligen manuellen Test-Build überschrieben. Das in der App unter **Über → Änderungshistorie** angezeigte Changelog stammt aus dem zum jeweiligen APK-Build eingebetteten `CHANGELOG.md` und aktualisiert sich nach der Installation nicht automatisch.
