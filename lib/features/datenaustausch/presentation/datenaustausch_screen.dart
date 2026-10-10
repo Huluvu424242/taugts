@@ -115,6 +115,70 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
     });
   }
 
+  Future<void> _alleDatenLoeschen() async {
+    if (_laeuft) return;
+    final bestaetigt = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Alle lokalen Daten endgültig löschen?'),
+        content: const Text(
+          'Produkte, Orte, Erlebnisse, Bewertungen, Kriterien, '
+          'Historien sowie Importprotokolle werden unwiderruflich gelöscht. '
+          'Erstelle bei Bedarf vorher einen Export. Bereits außerhalb '
+          'der App gespeicherte Exportdateien bleiben erhalten.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Alle Daten endgültig löschen'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || bestaetigt != true) return;
+    setState(() {
+      _laeuft = true;
+      _status = null;
+      _istFehler = false;
+    });
+    try {
+      widget.importAusfuehrungService.alleLokalenDatenLoeschen(
+        widget.exportService.datenbank,
+      );
+      if (!mounted) return;
+      setState(() {
+        _status = 'Alle lokalen Daten wurden gelöscht.';
+        _analyse = null;
+        _strategiePlan = null;
+        _importDokument = null;
+        _originalImportDokument = null;
+        _lokalesDokument = null;
+        _konflikte = const [];
+        _entscheidungsStand = const ImportKonfliktEntscheidungsStand();
+        _manuelleEntscheidungen.clear();
+        _aufTypAnwenden.clear();
+        _mergeFeldauswahl.clear();
+        _mergePlaene.clear();
+        _importErgebnis = null;
+        _importProtokoll = const [];
+        _konflikteBearbeiten = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _istFehler = true;
+        _status = 'Die lokalen Daten konnten nicht gelöscht werden. '
+            'Es wurden keine Änderungen übernommen.';
+      });
+    } finally {
+      if (mounted) setState(() => _laeuft = false);
+    }
+  }
+
   Future<void> _importPruefen() async {
     final quelle = widget.importQuelleService ?? SystemImportQuelleService();
     setState(() {
@@ -1103,6 +1167,28 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                 onPressed: _laeuft ? null : _importPruefen,
                 icon: const Icon(Icons.fact_check_outlined),
                 label: const Text('Importdatei auswählen und prüfen'),
+              ),
+              const SizedBox(height: 28),
+              Semantics(
+                header: true,
+                child: Text(
+                  'Lokale Daten löschen',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Löscht den gesamten lokalen Datenbestand unwiderruflich. '
+                'Exportiere wichtige Daten vorher als Sicherung.',
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: _laeuft ? null : _alleDatenLoeschen,
+                icon: const Icon(Icons.delete_forever_outlined),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                label: const Text('Alle Daten löschen'),
               ),
               if (_laeuft) ...[
                 const SizedBox(height: 20),
