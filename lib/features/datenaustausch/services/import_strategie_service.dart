@@ -111,7 +111,15 @@ class ImportStrategieService {
       for (final eintrag in importNachId.entries) {
         final lokal = lokalNachId[eintrag.key];
         if (lokal == null) {
-          hinzufuegen++;
+          final aktion = entscheidungen.entscheidungen[
+            '$sammlung|${eintrag.key}|${eintrag.key}'
+          ];
+          if (aktion == ImportKonfliktAktion.ueberspringen &&
+              strategie != ImportStrategie.bestandErsetzen) {
+            uebersprungen++;
+          } else {
+            hinzufuegen++;
+          }
           continue;
         }
         if (_gleich(eintrag.value, lokal)) {
