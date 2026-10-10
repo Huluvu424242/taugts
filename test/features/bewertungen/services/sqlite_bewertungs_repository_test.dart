@@ -960,7 +960,7 @@ void main() {
       'SELECT * FROM erlebnisse WHERE id = ?',
       [erlebnis.id],
     ).single;
-    expect(zeile['ist_entwurf'], 1);
+    expect(zeile.keys, isNot(contains('ist_entwurf')));
     expect(zeile['notiz'], 'Entwurf bleibt');
     expect(
       await repository.ladeBewertungenFuerErlebnis(erlebnis.id),
