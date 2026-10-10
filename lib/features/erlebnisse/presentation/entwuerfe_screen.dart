@@ -80,55 +80,6 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
     }
   }
 
-  Future<void> _verwerfen(
-    Erlebnis erlebnis, {
-    bool bestaetigungUeberspringen = false,
-  }) async {
-    final bestaetigt = bestaetigungUeberspringen
-        ? true
-        : await showDialog<bool>(
-            context: context,
-            builder: (dialogContext) => AlertDialog(
-              title: const Text('Entwurf verwerfen?'),
-              content:
-                  const Text('Die bisher erfassten Angaben gehen verloren.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(false),
-                  child: const Text('Abbrechen'),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(true),
-                  child: const Text('Verwerfen'),
-                ),
-              ],
-            ),
-          );
-    if (bestaetigt != true) return;
-    try {
-      await widget.repository.loescheErlebnis(erlebnis.id);
-      if (!mounted) return;
-      setState(() {
-        _erlebnisse = widget.repository.ladeErlebnisse();
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Entwurf verworfen.')),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Der Entwurf konnte nicht verworfen werden.'),
-          action: SnackBarAction(
-            label: 'Erneut versuchen',
-            onPressed: () =>
-                _verwerfen(erlebnis, bestaetigungUeberspringen: true),
-          ),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
@@ -280,13 +231,7 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
                   ? Icons.restaurant_outlined
                   : Icons.shopping_bag_outlined,
             ),
-            trailing: erlebnis.istEntwurf
-                ? IconButton(
-                    onPressed: () => _verwerfen(erlebnis),
-                    icon: const Icon(Icons.delete_outline),
-                    tooltip: 'Entwurf verwerfen',
-                  )
-                : const Icon(Icons.chevron_right),
+            trailing: const Icon(Icons.chevron_right),
           );
         },
       );
