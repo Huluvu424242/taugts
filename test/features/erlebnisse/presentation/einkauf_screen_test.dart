@@ -193,7 +193,6 @@ void main() {
     expect(gespeichert!.beginn, zeit);
     expect(gespeichert.ende, zeit.add(const Duration(minutes: 45)));
   });
-
 }
 
 class _TestIdGenerator implements IdGenerator {
