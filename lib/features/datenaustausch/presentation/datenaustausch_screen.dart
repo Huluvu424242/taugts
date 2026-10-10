@@ -323,6 +323,55 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
           .fold<int>(0, (summe, s) => summe + s.entfernen) ??
       0;
 
+  Future<bool> _ersatzBestaetigen() async {
+    final ergebnis = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        var bestaetigt = false;
+        return StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: const Text('Gesamten Datenbestand ersetzen?'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Alle vorhandenen Anwendungsdaten werden durch die ausgewählte Datei ersetzt; nicht in der Datei enthaltene Daten gehen verloren. App-Einstellungen und andere Dateien bleiben erhalten.',
+                  ),
+                  Text('Zu entfernende lokale Datensätze: $_zuLoeschendeDatensaetze'),
+                  const Text(
+                    'Vorher kannst du in der Vorschau eine Sicherung exportieren.',
+                  ),
+                  CheckboxListTile(
+                    value: bestaetigt,
+                    title: const Text(
+                      'Ich bestätige den vollständigen Ersatz der lokalen Daten',
+                    ),
+                    onChanged: (wert) =>
+                        setDialogState(() => bestaetigt = wert ?? false),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Abbrechen'),
+              ),
+              FilledButton(
+                onPressed: bestaetigt
+                    ? () => Navigator.pop(dialogContext, true)
+                    : null,
+                child: const Text('Bestand ersetzen und importieren'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    return ergebnis == true;
+  }
+
   Future<void> _importBestaetigen() async {
     if (_laeuft || _importDokument == null || _lokalesDokument == null) return;
     if (!_alleKonflikteEntschieden) {
@@ -332,6 +381,13 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
             'Vor dem Import müssen alle Konflikte ausdrücklich entschieden werden.';
       });
       return;
+    }
+
+    if (_strategie == ImportStrategie.bestandErsetzen) {
+      if (_zuLoeschendeDatensaetze > 0 && !await _ersatzBestaetigen()) {
+        return;
+      }
+      if (!mounted) return;
     }
 
     setState(() {
@@ -345,6 +401,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       final mergesNachSammlung = <String, int>{};
       final neueAliase = <ImportAliasReferenz>[];
       for (final konflikt in _konflikte) {
+        if (_strategie == ImportStrategie.bestandErsetzen) break;
         if (_entscheidungsStand.fuer(konflikt) !=
                 ImportKonfliktAktion.zusammenfuehren ||
             !_kannZusammenfuehren(konflikt)) {
