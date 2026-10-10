@@ -378,7 +378,7 @@ class _FormularState extends State<_Formular> {
       erlebnisId: erlebnis.id,
       ortId: widget.ort.id,
       herkunftProfilId: erlebnis.herkunftProfilId,
-      bewertetAm: erlebnis.tatsaechlicherBeginn ?? erlebnis.erlebtAm,
+      bewertetAm: erlebnis.beginn ?? erlebnis.erlebtAm,
       notiz: _notiz.text.trim().isEmpty ? null : _notiz.text.trim(),
       erstelltAm: _bisher?.ortsbewertung.erstelltAm ?? jetzt,
       geaendertAm: jetzt,
