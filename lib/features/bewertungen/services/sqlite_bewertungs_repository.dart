@@ -305,13 +305,21 @@ class SqliteBewertungsRepository
           notiz = excluded.notiz
       ''',
       [
-        erlebnis.id, erlebnis.typ.name, erlebnis.ortId,
-        _optionaleZeit(erlebnis.beginn), _optionaleZeit(erlebnis.ende),
-        _zeit(erlebnis.erstelltAm), _zeit(erlebnis.geaendertAm),
-        erlebnis.herkunftProfilId, _leerAlsNull(erlebnis.notiz),
+        erlebnis.id,
+        erlebnis.typ.name,
+        erlebnis.ortId,
+        _optionaleZeit(erlebnis.beginn),
+        _optionaleZeit(erlebnis.ende),
+        _zeit(erlebnis.erstelltAm),
+        _zeit(erlebnis.geaendertAm),
+        erlebnis.herkunftProfilId,
+        _leerAlsNull(erlebnis.notiz),
         erlebnis.produktId,
-        erlebnis.kaufortId, erlebnis.konsumortId, erlebnis.preis,
-        erlebnis.menge, _leerAlsNull(erlebnis.gebinde),
+        erlebnis.kaufortId,
+        erlebnis.konsumortId,
+        erlebnis.preis,
+        erlebnis.menge,
+        _leerAlsNull(erlebnis.gebinde),
       ],
     );
   }
@@ -1275,7 +1283,6 @@ class SqliteBewertungsRepository
   }
 
   String _zeit(DateTime wert) => wert.toUtc().toIso8601String();
-
 
   String? _optionaleZeit(DateTime? wert) => wert == null ? null : _zeit(wert);
 
