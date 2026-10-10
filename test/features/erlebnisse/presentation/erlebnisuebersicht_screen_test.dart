@@ -41,12 +41,11 @@ void main() {
     expect(find.text('Erlebnis registrieren'), findsWidgets);
   });
 
-  testWidgets('Erlebnisse werden nach Status gruppiert', (tester) async {
+  testWidgets('Erlebnisse werden ohne Statusgruppen angezeigt', (tester) async {
     await repository.speichereErlebnis(
       Erlebnis(
         id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
         typ: Erlebnistyp.restaurantbesuch,
-
         herkunftProfilId: profil.id,
         beginn: zeit,
         erstelltAm: zeit,
@@ -57,7 +56,6 @@ void main() {
       Erlebnis(
         id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
         typ: Erlebnistyp.einkauf,
-
         herkunftProfilId: profil.id,
         beginn: DateTime.utc(2026, 9, 2),
         erstelltAm: zeit,
@@ -68,7 +66,6 @@ void main() {
       Erlebnis(
         id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
         typ: Erlebnistyp.einkauf,
-
         herkunftProfilId: profil.id,
         beginn: zeit.subtract(const Duration(hours: 2)),
         ende: zeit.subtract(const Duration(hours: 1)),
@@ -80,9 +77,10 @@ void main() {
     await tester.pumpWidget(_app(repository, profil));
     await tester.pumpAndSettle();
 
-    expect(find.text('Aktiv'), findsOneWidget);
-    expect(find.text('Geplant'), findsOneWidget);
-    expect(find.text('Vergangen'), findsOneWidget);
+    expect(find.text('Alle Erlebnisse'), findsOneWidget);
+    expect(find.text('Aktiv'), findsNothing);
+    expect(find.text('Geplant'), findsNothing);
+    expect(find.text('Vergangen'), findsNothing);
     expect(find.textContaining('Termin noch offen'), findsNothing);
     expect(find.textContaining('Positionen'), findsNWidgets(3));
   });
