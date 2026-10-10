@@ -266,10 +266,7 @@ class ImportValidierungsService {
       if (erlebnisse is List) {
         migriert['erlebnisse'] = [
           for (final roh in erlebnisse)
-            if (roh is Map)
-              _vereinheitlicheAltenZeitraum(_map(roh))
-            else
-              roh,
+            if (roh is Map) _vereinheitlicheAltenZeitraum(_map(roh)) else roh,
         ];
       }
       migriert['schemaVersion'] = 3;
@@ -333,22 +330,25 @@ class ImportValidierungsService {
     if (istBeginn is String) {
       beginn = istBeginn;
     } else if (planTag is String) {
-      final minuten = planMinute is int && planMinute >= 0 &&
-              planMinute < 1440
+      final minuten = planMinute is int && planMinute >= 0 && planMinute < 1440
           ? planMinute
           : 0;
       final datum = DateTime.tryParse(planTag);
       if (datum != null) {
-        beginn = DateTime.utc(datum.year, datum.month, datum.day,
-                minuten ~/ 60, minuten % 60)
+        beginn = DateTime.utc(
+                datum.year, datum.month, datum.day, minuten ~/ 60, minuten % 60)
             .toIso8601String();
       }
     }
     return {
       for (final eintrag in alt.entries)
         if (!{
-          'status', 'istEntwurf', 'geplanterTag', 'geplanteMinute',
-          'geplanteDauerMinuten', 'tatsaechlicherBeginn',
+          'status',
+          'istEntwurf',
+          'geplanterTag',
+          'geplanteMinute',
+          'geplanteDauerMinuten',
+          'tatsaechlicherBeginn',
           'tatsaechlichesEnde',
         }.contains(eintrag.key))
           eintrag.key: eintrag.value,
