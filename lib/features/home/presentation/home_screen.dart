@@ -290,7 +290,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   }
                   final aktive = snapshot.data!
-                      .where((e) => e.beginn != null &&
+                      .where((e) =>
+                          e.beginn != null &&
                           !e.beginn!.isAfter(DateTime.now()) &&
                           (e.ende == null || !e.ende!.isBefore(DateTime.now())))
                       .toList(growable: false);
