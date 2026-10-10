@@ -157,7 +157,6 @@ void main() {
     final erlebnis = Erlebnis(
       id: '98000000-0000-4000-8000-000000000031',
       typ: Erlebnistyp.einkauf,
-
       ortId: ort.id,
       herkunftProfilId: 'eigen',
       beginn: zeit,
