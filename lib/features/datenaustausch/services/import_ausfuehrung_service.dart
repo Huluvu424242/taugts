@@ -2,6 +2,7 @@ import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 import 'package:taugts/features/datenaustausch/services/import_alias_repository.dart';
 import 'package:taugts/features/datenaustausch/services/import_dubletten_merge_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_klassifikation_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_protokoll_repository.dart';
 import 'package:taugts/features/datenaustausch/services/import_strategie_service.dart';
 
@@ -57,10 +58,12 @@ class ImportAusfuehrungService {
   const ImportAusfuehrungService({
     this.protokollRepository = const ImportProtokollRepository(),
     this.aliasRepository = const ImportAliasRepository(),
+    this.klassifikationService = const ImportKlassifikationService(),
   });
 
   final ImportProtokollRepository protokollRepository;
   final ImportAliasRepository aliasRepository;
+  final ImportKlassifikationService klassifikationService;
 
   static final Set<LokaleDatenbank> _laufendeDatenbanken = <LokaleDatenbank>{};
 
@@ -129,27 +132,6 @@ class ImportAusfuehrungService {
       datenbank.transaktion(() {
         aliasRepository.stelleTabelleBereit(datenbank);
         if (strategie == ImportStrategie.bestandErsetzen) {
-          // Die aktuelle JSON-Schnittstelle exportiert diese Tabellen noch
-          // nicht. Solange sie Daten enthalten, ist ein Ersatz unsicher.
-          for (final tabelle in const [
-            'kategorien',
-            'produkt_kategorien',
-            'ort_kategorien',
-            'objekt_tags',
-            'objekt_klassifikationsmerkmale',
-            'kategorie_kriterienset_regeln',
-            'kategorie_kriterien',
-          ]) {
-            final hatDaten = datenbank.verbindung
-                .select('SELECT 1 FROM $tabelle LIMIT 1')
-                .isNotEmpty;
-            if (hatDaten) {
-              throw StateError(
-                'Bestandsersatz nicht möglich: $tabelle enthält '
-                'Fachdaten, die das aktuelle Exportformat nicht unterstützt.',
-              );
-            }
-          }
           _ersetzeBestand(datenbank);
         }
         for (final sammlung in _reihenfolge) {
@@ -202,6 +184,11 @@ class ImportAusfuehrungService {
                 : zaehler.plus(hinzugefuegt: 1);
           }
         }
+        klassifikationService.importieren(
+          datenbank: datenbank,
+          dokument: importDokument,
+          strategie: strategie,
+        );
         for (final alias in aliase) {
           aliasRepository.speichere(
             datenbank,
@@ -275,6 +262,7 @@ class ImportAusfuehrungService {
   }
 
   void _ersetzeBestand(LokaleDatenbank datenbank) {
+    klassifikationService.ersetzenVorbereiten(datenbank);
     // Verweise auf frühere lokale IDs dürfen nach einem vollständigen
     // Bestandsersatz keine IDs des neuen Importbestands umschreiben.
     datenbank.verbindung.execute('DELETE FROM import_aliases');
