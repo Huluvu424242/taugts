@@ -8,6 +8,7 @@ Taugt’s? speichert Produkte, Orte, Erlebnisse und Bewertungen lokal auf dem Ge
 
 - [Installation und Updates](installation.md)
 - [Bedienung und Funktionen](bedienung.md)
+- [Suche und Filter](suche-und-filter.md)
 - [Auswertungen und Excel-Export](auswertungen.md)
 - [Datenschutz und Datenhaltung](datenhaltung.md)
 - [Bekannte Einschränkungen und Hilfe](hilfe.md)
