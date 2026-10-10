@@ -207,8 +207,7 @@ void main() {
     const neu = '22222222-2222-4222-8222-222222222222';
     db.verbindung.execute(
       'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [alt, 'Alt', '2026-09-01T00:00:00.000Z',
-        '2026-09-01T00:00:00.000Z'],
+      [alt, 'Alt', '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z'],
     );
     final export = ExportService(db, appVersion: '0.0.0-test');
     final dokument = Map<String, Object?>.from(
@@ -240,15 +239,18 @@ void main() {
     expect(find.textContaining('Zu entfernende Datensätze:'), findsOneWidget);
 
     FilledButton ersatzAktion() => tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Bestand ersetzen und importieren').last,
-    );
+          find
+              .widgetWithText(FilledButton, 'Bestand ersetzen und importieren')
+              .last,
+        );
     ersatzAktion().onPressed!();
     await tester.pumpAndSettle();
     final dialogAktion = tester.widget<FilledButton>(
       find.descendant(
         of: find.byType(AlertDialog),
         matching: find.widgetWithText(
-          FilledButton, 'Bestand ersetzen und importieren',
+          FilledButton,
+          'Bestand ersetzen und importieren',
         ),
       ),
     );
@@ -267,7 +269,8 @@ void main() {
       find.descendant(
         of: find.byType(AlertDialog),
         matching: find.widgetWithText(
-          FilledButton, 'Bestand ersetzen und importieren',
+          FilledButton,
+          'Bestand ersetzen und importieren',
         ),
       ),
     );
@@ -284,8 +287,7 @@ void main() {
     const id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
     db.verbindung.execute(
       'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [id, 'Vorher', '2026-09-01T00:00:00.000Z',
-        '2026-09-01T00:00:00.000Z'],
+      [id, 'Vorher', '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z'],
     );
     final export = ExportService(db, appVersion: '0.0.0-test');
     final dokument = Map<String, Object?>.from(
@@ -302,7 +304,8 @@ void main() {
     await tester.tap(find.text('Importdatei auswählen und prüfen'));
     await tester.pumpAndSettle();
     db.verbindung.execute(
-      'UPDATE profile SET anzeigename = ? WHERE id = ?', ['Nachher', id],
+      'UPDATE profile SET anzeigename = ? WHERE id = ?',
+      ['Nachher', id],
     );
     final aktion = tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
@@ -314,7 +317,9 @@ void main() {
       findsOneWidget,
     );
     expect(
-      db.verbindung.select('SELECT anzeigename FROM profile').single['anzeigename'],
+      db.verbindung
+          .select('SELECT anzeigename FROM profile')
+          .single['anzeigename'],
       'Nachher',
     );
     expect(const ImportAusfuehrungService().ladeProtokoll(db), isEmpty);
