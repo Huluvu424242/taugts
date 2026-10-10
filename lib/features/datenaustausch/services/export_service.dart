@@ -90,7 +90,6 @@ class ExportService {
             'beginn': z['beginn'],
             'ende': z['ende'],
             'notiz': z['notiz'],
-            'istEntwurf': z['ist_entwurf'] == 1,
             'erstelltAm': z['erstellt_am'],
             'geaendertAm': z['geaendert_am'],
           })
