@@ -47,8 +47,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   Erlebnis? _gespeichertesErlebnis;
   Ort? _ort;
   var _ortNichtZugeordnet = false;
-  DateTime? _tatsaechlicherBeginn;
-  DateTime? _tatsaechlichesEnde;
+  DateTime? _beginn;
+  DateTime? _ende;
   var _speichert = false;
   var _zeitfehler = <String>[];
   late Future<List<ErlebnispositionMitProdukt>> _positionen;
@@ -62,10 +62,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     _id = erlebnis?.id ?? widget.idGenerator.neueId();
     _erstelltAm = erlebnis?.erstelltAm ?? DateTime.now().toUtc();
     _typ = erlebnis?.typ ?? widget.erlebnistyp!;
-    _tatsaechlicherBeginn =
-        (erlebnis?.tatsaechlicherBeginn ?? erlebnis?.geplanterZeitpunkt)
-            ?.toLocal();
-    _tatsaechlichesEnde = erlebnis?.tatsaechlichesEnde?.toLocal();
+    _beginn = erlebnis?.beginn?.toLocal();
+    _ende = erlebnis?.ende?.toLocal();
     _notiz.text = erlebnis?.notiz ?? '';
     _entwurf = ErlebnisEntwurfRepository(widget.repository, _id);
     _positionen = _entwurf.ladeErlebnispositionen(_id);
@@ -129,7 +127,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   }
 
   Future<void> _tatsaechlicheZeitWaehlen({required bool beginn}) async {
-    final aktuell = beginn ? _tatsaechlicherBeginn : _tatsaechlichesEnde;
+    final aktuell = beginn ? _beginn : _ende;
     final jetzt = DateTime.now();
     final datum = await showDatePicker(
       context: context,
@@ -154,24 +152,17 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     );
     setState(() {
       if (beginn) {
-        _tatsaechlicherBeginn = wert;
+        _beginn = wert;
       } else {
-        _tatsaechlichesEnde = wert;
+        _ende = wert;
       }
     });
   }
 
-  Erlebnis _erlebnisAusEingaben({Erlebnisstatus? status}) {
-    final abgeleiteterStatus = status ??
-        (_tatsaechlichesEnde != null
-            ? Erlebnisstatus.beendet
-            : _tatsaechlicherBeginn != null
-                ? Erlebnisstatus.aktiv
-                : Erlebnisstatus.geplant);
+  Erlebnis _erlebnisAusEingaben() {
     return Erlebnis(
       id: _id,
       typ: _typ,
-      status: abgeleiteterStatus,
       ortId: _ort?.id ?? _gespeichertesErlebnis?.ortId,
       // Bestehende historische Referenzen dürfen beim Bearbeiten nicht
       // still verschwinden, auch wenn die Stammdaten gelöscht wurden.
@@ -181,11 +172,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       preis: _gespeichertesErlebnis?.preis,
       menge: _gespeichertesErlebnis?.menge,
       gebinde: _gespeichertesErlebnis?.gebinde,
-      erlebtAm: _tatsaechlicherBeginn == null
-          ? _gespeichertesErlebnis?.erlebtAm
-          : null,
-      tatsaechlicherBeginn: _tatsaechlicherBeginn?.toUtc(),
-      tatsaechlichesEnde: _tatsaechlichesEnde?.toUtc(),
+      beginn: _beginn?.toUtc(),
+      ende: _ende?.toUtc(),
       herkunftProfilId: widget.profil.id,
       notiz: _notiz.text.trim().isEmpty ? null : _notiz.text.trim(),
       istEntwurf: false,
@@ -202,8 +190,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     // nicht verhindern, dass das notwendige Erlebnis angelegt wird.
     if (pruefeInhalt &&
         _gespeichertesErlebnis == null &&
-        _tatsaechlicherBeginn == null &&
-        _tatsaechlichesEnde == null &&
+        _beginn == null &&
+        _ende == null &&
         _notiz.text.trim().isEmpty &&
         !_ortsbewertungController.hatEingabe) {
       final positionen = await _entwurf.ladeErlebnispositionen(_id);
@@ -254,11 +242,10 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   }
 
   Future<void> _persistieren({
-    Erlebnisstatus? status,
     required bool schliessen,
   }) async {
     if (_speichert) return;
-    final erlebnis = _erlebnisAusEingaben(status: status);
+    final erlebnis = _erlebnisAusEingaben();
     if (!await _validiere(erlebnis) || !mounted) return;
     setState(() => _speichert = true);
     try {
@@ -615,8 +602,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                 onPressed: _ort == null
                     ? null
                     : () => setState(() {
-                          _tatsaechlicherBeginn = DateTime.now();
-                          _tatsaechlichesEnde = null;
+                          _beginn = DateTime.now();
+                          _ende = null;
                         }),
                 icon: const Icon(Icons.today_outlined),
                 label: const Text('Spontanen Besuch jetzt erfassen'),
@@ -629,7 +616,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                 contentPadding: EdgeInsets.zero,
                 focusNode: _beginnFokus,
                 title: const Text('Beginn (optional)'),
-                subtitle: Text(_datumZeitText(context, _tatsaechlicherBeginn)),
+                subtitle: Text(_datumZeitText(context, _beginn)),
                 trailing: const Icon(Icons.login),
                 onTap: () => _tatsaechlicheZeitWaehlen(beginn: true),
               ),
@@ -638,7 +625,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                 contentPadding: EdgeInsets.zero,
                 focusNode: _endeFokus,
                 title: const Text('Ende (optional)'),
-                subtitle: Text(_datumZeitText(context, _tatsaechlichesEnde)),
+                subtitle: Text(_datumZeitText(context, _ende)),
                 trailing: const Icon(Icons.logout),
                 onTap: () => _tatsaechlicheZeitWaehlen(beginn: false),
               ),
