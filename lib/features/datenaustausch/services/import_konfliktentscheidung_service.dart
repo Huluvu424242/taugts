@@ -215,8 +215,8 @@ class ImportKonfliktentscheidungService {
       zeitpunkt: ersterString(const [
         'bewertetAm',
         'beobachtetAm',
-        'tatsaechlicherBeginn',
-        'geplanterTag',
+        'beginn',
+        'ende',
         'erstelltAm',
       ]),
     );
@@ -235,7 +235,7 @@ class ImportKonfliktentscheidungService {
     Map<String, Object?> lokal,
   ) {
     final keys = switch (sammlung) {
-      'erlebnisse' => const ['ortId', 'tatsaechlicherBeginn', 'geplanterTag'],
+      'erlebnisse' => const ['ortId', 'beginn', 'ende'],
       'erlebnisPositionen' => const ['erlebnisId', 'produktId'],
       'preisbeobachtungen' => const [
           'erlebnisId',
