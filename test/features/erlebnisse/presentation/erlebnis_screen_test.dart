@@ -77,7 +77,6 @@ void main() {
     final erlebnisse = await repository.ladeErlebnisse();
     expect(erlebnisse, hasLength(1));
     expect(erlebnisse.single.typ, Erlebnistyp.einkauf);
-
   });
 
   for (final fall in [
@@ -236,7 +235,8 @@ void main() {
     expect(find.text('Speichern'), findsOneWidget);
   });
 
-  testWidgets('Ein Ende ohne Beginn wird zuverlässig abgefangen', (tester) async {
+  testWidgets('Ein Ende ohne Beginn wird zuverlässig abgefangen',
+      (tester) async {
     final fehler = Erlebnis(
       id: '22222222-2222-4222-8222-222222222222',
       herkunftProfilId: profil.id,
