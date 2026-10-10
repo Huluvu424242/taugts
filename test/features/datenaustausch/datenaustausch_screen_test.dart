@@ -100,6 +100,50 @@ void main() {
   );
 
   testWidgets(
+    'wählt ergänzenden Import als Standard und verlangt keine Einzelklicks',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 2400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+      addTearDown(datenbank.schliessen);
+      final exportService = ExportService(
+        datenbank,
+        appVersion: '0.0.0-test',
+      );
+      final dokument = Map<String, Object?>.from(
+        jsonDecode(exportService.erzeugeJson()) as Map,
+      );
+      final profile = (dokument['profile'] as List).cast<Map>();
+      if (profile.isNotEmpty) {
+        // Derselbe Datensatz ist vorhanden; die Vorschau benötigt
+        // keine manuell ausgewählte Entscheidung.
+        dokument['profile'] = profile
+            .map((profil) => Map<String, Object?>.from(profil))
+            .toList();
+      }
+
+      await tester.pumpWidget(MaterialApp(
+        home: DatenaustauschScreen(
+          exportService: exportService,
+          exportZielService: _NichtVerwendetesExportZiel(),
+          importQuelleService: _FesteImportQuelle(jsonEncode(dokument)),
+        ),
+      ));
+      await tester.tap(find.text('Importdatei auswählen und prüfen'));
+      await tester.pumpAndSettle();
+
+      final auswahl = tester.widget<DropdownButtonFormField<dynamic>>(
+        find.byType(DropdownButtonFormField).first,
+      );
+      expect(auswahl.initialValue.toString(), contains('lokalBevorzugen'));
+      final importButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
+      );
+      expect(importButton.onPressed, isNotNull);
+    },
+  );
+
+  testWidgets(
     'sperrt weitere Aktionen und verändert bei abgebrochener Auswahl nichts',
     (tester) async {
       final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
