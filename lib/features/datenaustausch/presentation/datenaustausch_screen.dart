@@ -679,10 +679,11 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
               title: Text(sammlung.name),
               subtitle: Text(
                 'Neu: ${sammlung.hinzufuegen} · Unverändert: ${sammlung.unveraendert} · Aktualisiert: ${sammlung.aktualisieren} · Übersprungen: ${sammlung.uebersprungen} · Lokal erhalten: ${sammlung.behalten} · Konflikte: ${_konflikte.where(
-                  (k) => k.sammlung == sammlung.name &&
-                      k.art != ImportKonfliktArt.neuerDatensatz &&
-                      k.art != ImportKonfliktArt.unveraendert,
-                ).length} · Zu löschen: ${sammlung.entfernen}',
+                      (k) =>
+                          k.sammlung == sammlung.name &&
+                          k.art != ImportKonfliktArt.neuerDatensatz &&
+                          k.art != ImportKonfliktArt.unveraendert,
+                    ).length} · Zu löschen: ${sammlung.entfernen}',
               ),
             ),
           ),
@@ -771,7 +772,8 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                 : (wert) => setState(() => _nurEchteKonflikte = wert),
           ),
           for (final konflikt in _konflikte.where(
-            (k) => !_nurEchteKonflikte ||
+            (k) =>
+                !_nurEchteKonflikte ||
                 (k.art != ImportKonfliktArt.neuerDatensatz &&
                     k.art != ImportKonfliktArt.unveraendert),
           ))
@@ -822,21 +824,21 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
               ],
               if (konflikt.art == ImportKonfliktArt.identitaetskonflikt) ...[
                 const SizedBox(height: 8),
-               Text(
-                 switch (konflikt.art) {
-                   ImportKonfliktArt.neuerDatensatz =>
-                     'Stabile ID ist lokal unbekannt. Automatisch übernehmen; überspringen ist nur bei unabhängigen Einträgen möglich.',
-                   ImportKonfliktArt.unveraendert =>
-                     'Gleiche stabile ID und identische Inhalte. Bereits vorhanden, unverändert lassen.',
-                   ImportKonfliktArt.versionskonflikt =>
-                     'Gleiche stabile ID, aber geänderter Inhalt. Die Strategie gibt die Vorbelegung vor.',
-                   ImportKonfliktArt.identitaetskonflikt =>
-                     'Gleiche stabile ID mit anderem fachlichem Bezug. Entscheidung erforderlich.',
-                   ImportKonfliktArt.fachlicheDublette =>
-                     'Ähnlicher Inhalt mit anderer ID. Keine automatische Zusammenführung.',
-                 },
-               ),
-               const SizedBox(height: 8),
+                Text(
+                  switch (konflikt.art) {
+                    ImportKonfliktArt.neuerDatensatz =>
+                      'Stabile ID ist lokal unbekannt. Automatisch übernehmen; überspringen ist nur bei unabhängigen Einträgen möglich.',
+                    ImportKonfliktArt.unveraendert =>
+                      'Gleiche stabile ID und identische Inhalte. Bereits vorhanden, unverändert lassen.',
+                    ImportKonfliktArt.versionskonflikt =>
+                      'Gleiche stabile ID, aber geänderter Inhalt. Die Strategie gibt die Vorbelegung vor.',
+                    ImportKonfliktArt.identitaetskonflikt =>
+                      'Gleiche stabile ID mit anderem fachlichem Bezug. Entscheidung erforderlich.',
+                    ImportKonfliktArt.fachlicheDublette =>
+                      'Ähnlicher Inhalt mit anderer ID. Keine automatische Zusammenführung.',
+                  },
+                ),
+                const SizedBox(height: 8),
                 Text(
                   'Die stabile ID verweist auf unterschiedliche historische Kontexte. „Beide behalten“ wird deshalb nicht angeboten.',
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
