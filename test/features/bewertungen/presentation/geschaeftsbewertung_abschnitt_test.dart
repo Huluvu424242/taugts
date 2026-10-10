@@ -34,7 +34,7 @@ void main() {
       typ: Erlebnistyp.einkauf,
       ortId: ort.id,
       herkunftProfilId: profilId,
-      tatsaechlicherBeginn: zeit,
+      beginn: zeit,
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
