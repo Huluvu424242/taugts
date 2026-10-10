@@ -106,6 +106,8 @@ erDiagram
 
 Die Klassifikationstabellen `objekt_tags` und `objekt_klassifikationsmerkmale` besitzen derzeit bewusst keinen SQLite-Fremdschlüssel, weil ihre generische `objekt_id` fachlich unterschiedliche Zielarten adressieren kann. Das ist zugleich ein dokumentiertes Integritätsdelta.
 
+Das Entfernen von Produkten oder Orten setzt in Schema 3 und höher eine Löschmarkierung, anstatt historische Beobachtungen kaskadierend zu löschen. Das folgende ER-Diagramm zeigt die logischen Beziehungen; optionale beziehungsweise nach dem Löschen nicht mehr aktiv auflösbare Zuordnungen werden in der Anwendung als **Nicht zugeordnet** kenntlich gemacht.
+
 ## Historisches Beobachtungsmodell
 
 ```mermaid
