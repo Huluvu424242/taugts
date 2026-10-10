@@ -408,7 +408,6 @@ class ImportAusfuehrungService {
             'beginn': 'beginn',
             'ende': 'ende',
             'notiz': 'notiz',
-            'istEntwurf': 'ist_entwurf',
             'erstelltAm': 'erstellt_am',
             'geaendertAm': 'geaendert_am',
           },
