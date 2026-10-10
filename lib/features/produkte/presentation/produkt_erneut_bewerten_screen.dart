@@ -68,7 +68,6 @@ class _ProduktErneutBewertenScreenState
       typ: typ,
       beginn: utcJetzt,
       herkunftProfilId: widget.profil.id,
-      istEntwurf: true,
       erstelltAm: utcJetzt,
       geaendertAm: utcJetzt,
     );
