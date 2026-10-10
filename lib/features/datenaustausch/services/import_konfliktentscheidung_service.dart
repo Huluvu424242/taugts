@@ -156,13 +156,11 @@ class ImportKonfliktentscheidungService {
           continue;
         }
         final importWert = eintrag.value;
-        final identitaetskonflikt =
-            (_istHistorisch(sammlung) &&
+        final identitaetskonflikt = (_istHistorisch(sammlung) &&
                 !_gleicherHistorischerKontext(sammlung, importWert, lokal)) ||
             (sammlung == 'kategorien' &&
                 importWert['zielart'] != lokal['zielart']) ||
-            (sammlung == 'objekte' &&
-                importWert['art'] != lokal['art']);
+            (sammlung == 'objekte' && importWert['art'] != lokal['art']);
         final art = identitaetskonflikt
             ? ImportKonfliktArt.identitaetskonflikt
             : ImportKonfliktArt.versionskonflikt;
@@ -327,7 +325,8 @@ class ImportKonfliktentscheidungService {
   Map<String, Map<String, Object?>> _nachId(
     String sammlung,
     List<Map<String, Object?>> werte,
-  ) => {
+  ) =>
+      {
         for (final wert in werte)
           if (identitaet(sammlung, wert).isNotEmpty)
             identitaet(sammlung, wert): wert,
@@ -335,15 +334,12 @@ class ImportKonfliktentscheidungService {
 
   static String identitaet(String sammlung, Map<String, Object?> wert) =>
       switch (sammlung) {
-        'kategorieZuordnungen' =>
-          '${wert['kategorieId']}:${wert['zielId']}',
-        'objektTags' =>
-          '${wert['objektId']}:${wert['normalisiert']}',
+        'kategorieZuordnungen' => '${wert['kategorieId']}:${wert['zielId']}',
+        'objektTags' => '${wert['objektId']}:${wert['normalisiert']}',
         'objektKlassifikationsmerkmale' =>
           '${wert['objektId']}:${wert['dimension']}:${wert['schluessel']}',
         'kategorieKriteriensetRegeln' => '${wert['kategorieId']}',
-        'kategorieKriterien' =>
-          '${wert['kategorieId']}:${wert['kriteriumId']}',
+        'kategorieKriterien' => '${wert['kategorieId']}:${wert['kriteriumId']}',
         _ => wert['id'] as String? ?? '',
       };
 
