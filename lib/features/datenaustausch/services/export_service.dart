@@ -84,13 +84,14 @@ class ExportService {
               })
           .toList();
 
-  List<Map<String, Object?>> _kategorieKriterien() => _zeilenOhneId('kategorie_kriterien')
-      .map((z) => {
-            'kategorieId': z['kategorie_id'],
-            'kriteriumId': z['kriterium_id'],
-            'reihenfolge': z['reihenfolge'],
-          })
-      .toList();
+  List<Map<String, Object?>> _kategorieKriterien() =>
+      _zeilenOhneId('kategorie_kriterien')
+          .map((z) => {
+                'kategorieId': z['kategorie_id'],
+                'kriteriumId': z['kriterium_id'],
+                'reihenfolge': z['reihenfolge'],
+              })
+          .toList();
 
   List<Map<String, Object?>> _profile() => _zeilen('profile')
       .map((z) => {
