@@ -147,7 +147,8 @@ class LokaleDatenbank {
             printf('%02d:%02d:00.000Z',
               COALESCE(geplante_minute, 0) / 60,
               COALESCE(geplante_minute, 0) % 60)
-          ELSE NULL END),
+          ELSE NULL END,
+          erlebt_am),
         CASE WHEN tatsaechlicher_beginn IS NOT NULL
           THEN tatsaechliches_ende ELSE NULL END,
         erstellt_am, geaendert_am, herkunft_profil_id, notiz,
