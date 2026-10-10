@@ -41,7 +41,8 @@ class ImportKlassifikationService {
         .map((zeile) => zeile['id'] as String)
         .toSet();
     for (final kategorie in kategorien) {
-      final auswahl = explizit['kategorien|${kategorie['id']}|${kategorie['id']}'];
+      final auswahl =
+          explizit['kategorien|${kategorie['id']}|${kategorie['id']}'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
           auswahl == ImportKonfliktAktion.lokaleVersion) {
         continue;
@@ -57,12 +58,13 @@ class ImportKlassifikationService {
           'eltern_id': null,
           'ist_standard': kategorie['istStandard'] == true ? 1 : 0,
         },
-        bevorzugtLokal: auswahl != ImportKonfliktAktion.importVersion &&
-            bevorzugtLokal,
+        bevorzugtLokal:
+            auswahl != ImportKonfliktAktion.importVersion && bevorzugtLokal,
       );
     }
     for (final kategorie in kategorien) {
-      final auswahl = explizit['kategorien|${kategorie['id']}|${kategorie['id']}'];
+      final auswahl =
+          explizit['kategorien|${kategorie['id']}|${kategorie['id']}'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
           auswahl == ImportKonfliktAktion.lokaleVersion) {
         continue;
@@ -80,7 +82,8 @@ class ImportKlassifikationService {
     }
     for (final wert in _liste(dokument, 'kategorieZuordnungen')) {
       final id = ImportKonfliktentscheidungService.identitaet(
-        'kategorieZuordnungen', wert,
+        'kategorieZuordnungen',
+        wert,
       );
       final auswahl = explizit['kategorieZuordnungen|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
@@ -110,7 +113,8 @@ class ImportKlassifikationService {
     }
     for (final wert in _liste(dokument, 'objektTags')) {
       final id = ImportKonfliktentscheidungService.identitaet(
-        'objektTags', wert,
+        'objektTags',
+        wert,
       );
       final auswahl = explizit['objektTags|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
@@ -126,13 +130,14 @@ class ImportKlassifikationService {
           'normalisiert': wert['normalisiert'],
           'text': wert['text'],
         },
-        bevorzugtLokal: auswahl != ImportKonfliktAktion.importVersion &&
-            bevorzugtLokal,
+        bevorzugtLokal:
+            auswahl != ImportKonfliktAktion.importVersion && bevorzugtLokal,
       );
     }
     for (final wert in _liste(dokument, 'objektKlassifikationsmerkmale')) {
       final id = ImportKonfliktentscheidungService.identitaet(
-        'objektKlassifikationsmerkmale', wert,
+        'objektKlassifikationsmerkmale',
+        wert,
       );
       final auswahl = explizit['objektKlassifikationsmerkmale|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
@@ -149,13 +154,14 @@ class ImportKlassifikationService {
           'schluessel': wert['schluessel'],
           'wert': wert['wert'],
         },
-        bevorzugtLokal: auswahl != ImportKonfliktAktion.importVersion &&
-            bevorzugtLokal,
+        bevorzugtLokal:
+            auswahl != ImportKonfliktAktion.importVersion && bevorzugtLokal,
       );
     }
     for (final wert in _liste(dokument, 'kategorieKriteriensetRegeln')) {
       final id = ImportKonfliktentscheidungService.identitaet(
-        'kategorieKriteriensetRegeln', wert,
+        'kategorieKriteriensetRegeln',
+        wert,
       );
       final auswahl = explizit['kategorieKriteriensetRegeln|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
@@ -172,13 +178,14 @@ class ImportKlassifikationService {
           'modus': wert['modus'],
           'version': wert['version'],
         },
-        bevorzugtLokal: auswahl != ImportKonfliktAktion.importVersion &&
-            bevorzugtLokal,
+        bevorzugtLokal:
+            auswahl != ImportKonfliktAktion.importVersion && bevorzugtLokal,
       );
     }
     for (final wert in _liste(dokument, 'kategorieKriterien')) {
       final id = ImportKonfliktentscheidungService.identitaet(
-        'kategorieKriterien', wert,
+        'kategorieKriterien',
+        wert,
       );
       final auswahl = explizit['kategorieKriterien|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
@@ -194,8 +201,8 @@ class ImportKlassifikationService {
           'kriterium_id': wert['kriteriumId'],
           'reihenfolge': wert['reihenfolge'],
         },
-        bevorzugtLokal: auswahl != ImportKonfliktAktion.importVersion &&
-            bevorzugtLokal,
+        bevorzugtLokal:
+            auswahl != ImportKonfliktAktion.importVersion && bevorzugtLokal,
       );
     }
   }
