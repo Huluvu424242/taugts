@@ -142,10 +142,8 @@ class SqliteAuswertungsService implements AuswertungsService {
     ]);
     final gruppen = <String, (int, int)>{};
     for (final row in rows) {
-      final beginn =
-          DateTime.tryParse(row['beginn'] as String? ?? '');
-      final ende =
-          DateTime.tryParse(row['ende'] as String? ?? '');
+      final beginn = DateTime.tryParse(row['beginn'] as String? ?? '');
+      final ende = DateTime.tryParse(row['ende'] as String? ?? '');
       if (beginn == null) continue;
       final tageszeit = beginn.hour < 11
           ? 'morgens'
