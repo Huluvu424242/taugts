@@ -15,8 +15,8 @@ class SqliteSucheService implements SucheService {
       'CREATE INDEX IF NOT EXISTS idx_objekte_name ON objekte(name)',
       'CREATE INDEX IF NOT EXISTS idx_produkte_barcode ON produkte(barcode)',
       'CREATE INDEX IF NOT EXISTS idx_orte_name ON orte(name)',
-      'CREATE INDEX IF NOT EXISTS idx_erlebnisse_typ_status ON erlebnisse(typ, status)',
-      'CREATE INDEX IF NOT EXISTS idx_erlebnisse_zeit ON erlebnisse(tatsaechlicher_beginn, erlebt_am, erstellt_am)',
+      'CREATE INDEX IF NOT EXISTS idx_erlebnisse_typ ON erlebnisse(typ)',
+      'CREATE INDEX IF NOT EXISTS idx_erlebnisse_zeit ON erlebnisse(beginn, erstellt_am)',
       'CREATE INDEX IF NOT EXISTS idx_bewertungen_erlebnis ON bewertungen(erlebnis_id)',
       'CREATE INDEX IF NOT EXISTS idx_preise_produkt_ort_zeit ON preisbeobachtungen(produkt_id, ort_id, beobachtet_am)',
     ]) {
@@ -130,8 +130,8 @@ class SqliteSucheService implements SucheService {
     final von = filter.von?.toUtc().toIso8601String();
     final bis = filter.bis?.toUtc().toIso8601String();
     final rows = _db.verbindung.select('''
-      SELECT DISTINCT e.id, e.typ, e.status,
-        COALESCE(e.tatsaechlicher_beginn, e.erlebt_am, e.geplanter_tag, e.erstellt_am) AS zeit,
+      SELECT DISTINCT e.id, e.typ,
+        COALESCE(e.beginn, e.erstellt_am) AS zeit,
         o.name AS ort_name, COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) AS ort_id
       FROM erlebnisse e
       LEFT JOIN orte o ON o.id = COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id)
@@ -139,11 +139,10 @@ class SqliteSucheService implements SucheService {
       LEFT JOIN objekte p ON p.id = ep.produkt_id
       WHERE (? = '%%' OR LOWER(COALESCE(o.name, '')) LIKE ? OR LOWER(COALESCE(p.name, '')) LIKE ?)
         AND (? IS NULL OR e.typ = ?)
-        AND (? IS NULL OR e.status = ?)
         AND (? IS NULL OR COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) = ?)
         AND (? IS NULL OR ep.produkt_id = ?)
-        AND (? IS NULL OR COALESCE(e.tatsaechlicher_beginn, e.erlebt_am, e.geplanter_tag, e.erstellt_am) >= ?)
-        AND (? IS NULL OR COALESCE(e.tatsaechlicher_beginn, e.erlebt_am, e.geplanter_tag, e.erstellt_am) <= ?)
+        AND (? IS NULL OR COALESCE(e.beginn, e.erstellt_am) >= ?)
+        AND (? IS NULL OR COALESCE(e.beginn, e.erstellt_am) <= ?)
       ORDER BY zeit DESC
       LIMIT 500
     ''', [
@@ -152,8 +151,6 @@ class SqliteSucheService implements SucheService {
       text,
       filter.erlebnistyp?.name,
       filter.erlebnistyp?.name,
-      filter.erlebnisstatus?.name,
-      filter.erlebnisstatus?.name,
       filter.ortId,
       filter.ortId,
       filter.produktId,
@@ -170,7 +167,7 @@ class SqliteSucheService implements SucheService {
           art: Suchziel.erlebnisse,
           titel: row['typ'] == 'einkauf' ? 'Einkauf' : 'Restaurantbesuch',
           untertitel:
-              '${row['status']} · ${row['ort_name'] ?? 'Ohne Ort'} · ${row['zeit']}',
+              '${row['ort_name'] ?? 'Ohne Ort'} · ${row['zeit']}',
           erlebnisId: row['id']! as String,
           ortId: row['ort_id'] as String?,
           zeitpunkt: DateTime.tryParse(row['zeit']! as String),
