@@ -36,7 +36,6 @@ void main() {
     final erlebnis = Erlebnis(
       id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
       typ: Erlebnistyp.restaurantbesuch,
-
       herkunftProfilId: profil.id,
       erstelltAm: zeit,
       geaendertAm: zeit,
@@ -130,7 +129,6 @@ void main() {
     expect(find.text('Check-in'), findsNothing);
     expect(find.text('Checkout'), findsNothing);
   });
-
 }
 
 class _TestIdGenerator implements IdGenerator {
