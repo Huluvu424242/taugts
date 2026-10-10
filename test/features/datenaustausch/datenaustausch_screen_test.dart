@@ -185,7 +185,8 @@ void main() {
         find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
       );
       expect(aktion.onPressed, isNotNull);
-      await tester.tap(find.text('Automatische Entscheidungen ansehen / anpassen'));
+      await tester
+          .tap(find.text('Automatische Entscheidungen ansehen / anpassen'));
       await tester.pumpAndSettle();
       final konfliktAuswahl =
           tester.widget<DropdownButtonFormField<ImportKonfliktAktion>>(
