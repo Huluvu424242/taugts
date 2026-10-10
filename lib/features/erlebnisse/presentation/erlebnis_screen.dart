@@ -176,7 +176,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       ende: _ende?.toUtc(),
       herkunftProfilId: widget.profil.id,
       notiz: _notiz.text.trim().isEmpty ? null : _notiz.text.trim(),
-      istEntwurf: false,
       erstelltAm: _erstelltAm,
       geaendertAm: DateTime.now().toUtc(),
     );
