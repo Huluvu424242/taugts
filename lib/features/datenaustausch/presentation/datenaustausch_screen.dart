@@ -61,6 +61,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   final Map<String, Map<String, DublettenFeldQuelle>> _mergeFeldauswahl = {};
   final Map<String, ImportDublettenMergeErgebnis> _mergePlaene = {};
   bool _konflikteBearbeiten = false;
+  bool _nurEchteKonflikte = true;
   ImportAusfuehrungsErgebnis? _importErgebnis;
   List<ImportProtokollEintrag> _importProtokoll = const [];
 
@@ -134,6 +135,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       _mergeFeldauswahl.clear();
       _mergePlaene.clear();
       _konflikteBearbeiten = false;
+      _nurEchteKonflikte = true;
       _importErgebnis = null;
     });
     try {
@@ -169,6 +171,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         importDokument: importDokument,
         lokalesDokument: lokal,
         analyse: analyse,
+        alleEintraege: true,
       );
       setState(() {
         _analyse = analyse;
@@ -217,6 +220,10 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
           _manuelleEntscheidungen.contains(konflikt.schluessel) &&
           bisher.fuer(konflikt) != null) {
         werte[konflikt.schluessel] = bisher.fuer(konflikt)!;
+      } else if (konflikt.art == ImportKonfliktArt.neuerDatensatz) {
+        werte[konflikt.schluessel] = ImportKonfliktAktion.importVersion;
+      } else if (konflikt.art == ImportKonfliktArt.unveraendert) {
+        werte[konflikt.schluessel] = ImportKonfliktAktion.lokaleVersion;
       } else if (konflikt.art == ImportKonfliktArt.versionskonflikt) {
         werte[konflikt.schluessel] =
             _strategie == ImportStrategie.importBevorzugen
@@ -574,6 +581,8 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       };
 
   String _konfliktArtName(ImportKonfliktArt art) => switch (art) {
+        ImportKonfliktArt.neuerDatensatz => 'Neuer Datensatz',
+        ImportKonfliktArt.unveraendert => 'Bereits vorhanden / unverändert',
         ImportKonfliktArt.versionskonflikt => 'Versionskonflikt',
         ImportKonfliktArt.identitaetskonflikt => 'Identitätskonflikt',
         ImportKonfliktArt.fachlicheDublette => 'Mögliche fachliche Dublette',
@@ -643,7 +652,11 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
             child: ListTile(
               title: Text(sammlung.name),
               subtitle: Text(
-                'Neu: ${sammlung.hinzufuegen} · Unverändert: ${sammlung.unveraendert} · Aktualisiert: ${sammlung.aktualisieren} · Übersprungen: ${sammlung.uebersprungen} · Konflikte: ${_konflikte.where((k) => k.sammlung == sammlung.name).length} · Zu löschen: ${sammlung.entfernen}',
+                'Neu: ${sammlung.hinzufuegen} · Unverändert: ${sammlung.unveraendert} · Aktualisiert: ${sammlung.aktualisieren} · Übersprungen: ${sammlung.uebersprungen} · Konflikte: ${_konflikte.where(
+                  (k) => k.sammlung == sammlung.name &&
+                      k.art != ImportKonfliktArt.neuerDatensatz &&
+                      k.art != ImportKonfliktArt.unveraendert,
+                ).length} · Zu löschen: ${sammlung.entfernen}',
               ),
             ),
           ),
@@ -721,7 +734,21 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
             label: const Text('Zurück zur Importvorschau'),
           ),
           const SizedBox(height: 16),
-          for (final konflikt in _konflikte)
+          SwitchListTile(
+            title: const Text('Nur Konflikte anzeigen'),
+            subtitle: const Text(
+              'Ausschalten, um auch automatisch übernommene oder bereits vorhandene Datensätze einzusehen.',
+            ),
+            value: _nurEchteKonflikte,
+            onChanged: _laeuft
+                ? null
+                : (wert) => setState(() => _nurEchteKonflikte = wert),
+          ),
+          for (final konflikt in _konflikte.where(
+            (k) => !_nurEchteKonflikte ||
+                (k.art != ImportKonfliktArt.neuerDatensatz &&
+                    k.art != ImportKonfliktArt.unveraendert),
+          ))
             _buildKonfliktKarte(context, konflikt),
           Semantics(
             liveRegion: true,
@@ -769,6 +796,21 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
               ],
               if (konflikt.art == ImportKonfliktArt.identitaetskonflikt) ...[
                 const SizedBox(height: 8),
+               Text(
+                 switch (konflikt.art) {
+                   ImportKonfliktArt.neuerDatensatz =>
+                     'Stabile ID ist lokal unbekannt. Automatisch übernehmen; überspringen ist nur bei unabhängigen Einträgen möglich.',
+                   ImportKonfliktArt.unveraendert =>
+                     'Gleiche stabile ID und identische Inhalte. Bereits vorhanden, unverändert lassen.',
+                   ImportKonfliktArt.versionskonflikt =>
+                     'Gleiche stabile ID, aber geänderter Inhalt. Die Strategie gibt die Vorbelegung vor.',
+                   ImportKonfliktArt.identitaetskonflikt =>
+                     'Gleiche stabile ID mit anderem fachlichem Bezug. Entscheidung erforderlich.',
+                   ImportKonfliktArt.fachlicheDublette =>
+                     'Ähnlicher Inhalt mit anderer ID. Keine automatische Zusammenführung.',
+                 },
+               ),
+               const SizedBox(height: 8),
                 Text(
                   'Die stabile ID verweist auf unterschiedliche historische Kontexte. „Beide behalten“ wird deshalb nicht angeboten.',
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
