@@ -9,13 +9,13 @@ void main() {
 
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
 
-    expect(LokaleDatenbank.schemaVersion, 3);
-    expect(verbindung.userVersion, 3);
+    expect(LokaleDatenbank.schemaVersion, 4);
+    expect(verbindung.userVersion, 4);
     expect(verbindung.select('PRAGMA foreign_key_check'), isEmpty);
     datenbank.schliessen();
   });
 
-  test('Schema 3 enthält den vollständigen aktuellen Tabellenstand', () {
+  test('Schema 4 enthält den vollständigen aktuellen Tabellenstand', () {
     final verbindung = sqlite3.openInMemory();
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
 
@@ -43,9 +43,8 @@ void main() {
       _spalten(verbindung, 'erlebnisse'),
       containsAll(<String>{
         'typ',
-        'status',
-        'geplanter_tag',
-        'tatsaechlicher_beginn',
+        'beginn',
+        'ende',
       }),
     );
     expect(_spalten(verbindung, 'produkte'), contains('geloescht'));
@@ -58,7 +57,7 @@ void main() {
     datenbank.schliessen();
   });
 
-  test('Schema 3 stellt die aktuellen Standardkriterien bereit', () {
+  test('Schema 4 stellt die aktuellen Standardkriterien bereit', () {
     final verbindung = sqlite3.openInMemory();
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
 
@@ -97,6 +96,7 @@ void main() {
     final verbindung = sqlite3.openInMemory();
     LokaleDatenbank.oeffnen(verbindung);
 
+    _stelleAlteErlebnistabelleBereit(verbindung);
     verbindung.execute('DROP TABLE bewertungen');
     verbindung.execute('''
       CREATE TABLE bewertungen (
@@ -158,7 +158,7 @@ void main() {
       'SELECT wert, text_wert FROM bewertungen WHERE id = ?',
       [bewertungId],
     ).single;
-    expect(verbindung.userVersion, 3);
+    expect(verbindung.userVersion, 4);
     expect(zeile['wert'], 4.0);
     expect(zeile['text_wert'], isNull);
     expect(verbindung.select('PRAGMA foreign_key_check'), isEmpty);
@@ -167,7 +167,7 @@ void main() {
 
   test('lehnt eine Datenbank mit höherer Schemaversion ab', () {
     final verbindung = sqlite3.openInMemory();
-    verbindung.userVersion = 4;
+    verbindung.userVersion = 5;
 
     expect(
       () => LokaleDatenbank.oeffnen(verbindung),
@@ -175,7 +175,7 @@ void main() {
         isA<StateError>().having(
           (fehler) => fehler.message,
           'message',
-          'Nicht unterstützte Schemaversion: 4',
+          'Nicht unterstützte Schemaversion: 5',
         ),
       ),
     );
@@ -183,6 +183,31 @@ void main() {
     verbindung.close();
   });
 }
+
+void _stelleAlteErlebnistabelleBereit(Database verbindung) {
+  verbindung.execute('PRAGMA foreign_keys = OFF');
+  verbindung.execute('DROP TABLE erlebnisse');
+  verbindung.execute('''
+    CREATE TABLE erlebnisse (
+      id TEXT PRIMARY KEY, typ TEXT NOT NULL, status TEXT NOT NULL,
+      ort_id TEXT REFERENCES orte(id), geplanter_tag TEXT,
+      geplante_minute INTEGER, geplante_dauer_minuten INTEGER,
+      tatsaechlicher_beginn TEXT, tatsaechliches_ende TEXT,
+      erstellt_am TEXT NOT NULL, geaendert_am TEXT NOT NULL,
+      herkunft_profil_id TEXT NOT NULL REFERENCES profile(id),
+      notiz TEXT, ist_entwurf INTEGER NOT NULL DEFAULT 0,
+      produkt_id TEXT REFERENCES produkte(objekt_id),
+      kaufort_id TEXT REFERENCES orte(id),
+      konsumort_id TEXT REFERENCES orte(id),
+      erlebt_am TEXT, preis REAL, menge REAL, gebinde TEXT,
+      CHECK (geplante_minute IS NULL OR
+        (geplante_minute >= 0 AND geplante_minute < 1440)),
+      CHECK (geplante_dauer_minuten IS NULL OR geplante_dauer_minuten > 0)
+    )
+  ''');
+  verbindung.execute('PRAGMA foreign_keys = ON');
+}
+
 
 Set<String> _spalten(Database verbindung, String tabelle) => verbindung
     .select('PRAGMA table_info($tabelle)')
