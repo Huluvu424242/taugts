@@ -50,7 +50,10 @@ void main() {
 
     await tester.tap(find.text('Einkauf'));
     await tester.pumpAndSettle();
-    expect(find.text('Status: Geplant'), findsOneWidget);
+    expect(find.text('Zeitraum'), findsOneWidget);
+    expect(find.text('Beginn (optional)'), findsOneWidget);
+    expect(find.text('Ende (optional)'), findsOneWidget);
+    expect(find.text('Planung'), findsNothing);
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
 
@@ -210,7 +213,7 @@ void main() {
     expect(await repository.ladeErlebnisse(), isEmpty);
   });
 
-  testWidgets('Check-in und Checkout setzen editierbare Zeiten',
+  testWidgets('Ein gemeinsamer Zeitraum ersetzt Plan- und Ist-Zeiten',
       (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -222,55 +225,26 @@ void main() {
         ),
       ),
     );
-
-    await tester.tap(find.text('Check-in'));
     await tester.pumpAndSettle();
-    expect(find.text('Status: Aktiv'), findsOneWidget);
-    expect(find.text('Checkout'), findsOneWidget);
-
-    await tester.tap(find.text('Checkout'));
-    await tester.pumpAndSettle();
-    expect(find.text('Status: Beendet'), findsOneWidget);
+    expect(find.text('Zeitraum'), findsOneWidget);
+    expect(find.text('Beginn (optional)'), findsOneWidget);
+    expect(find.text('Ende (optional)'), findsOneWidget);
+    expect(find.text('Planung'), findsNothing);
+    expect(find.text('Tatsächliche Zeiten'), findsNothing);
+    expect(find.text('Check-in'), findsNothing);
+    expect(find.text('Checkout'), findsNothing);
     expect(find.text('Speichern'), findsOneWidget);
-    expect(await repository.ladeErlebnisse(), isEmpty);
-    await tester.tap(find.text('Speichern'));
-    await tester.pumpAndSettle();
-
-    final erlebnis = (await repository.ladeErlebnisse()).single;
-
-    expect(erlebnis.beginn, isNotNull);
-    expect(erlebnis.ende, isNotNull);
   });
 
-  testWidgets('zeigt ungültige Dauer am Feld und im Fehlersammler', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: ErlebnisScreen(
-          repository: repository,
-          idGenerator: _TestIdGenerator(),
-          profil: profil,
-          erlebnistyp: Erlebnistyp.einkauf,
-        ),
-      ),
+  testWidgets('Ein Ende ohne Beginn wird zuverlässig abgefangen', (tester) async {
+    final fehler = Erlebnis(
+      id: '22222222-2222-4222-8222-222222222222',
+      herkunftProfilId: profil.id,
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+      ende: zeit,
     );
-
-    await tester.enterText(
-      find.widgetWithText(
-        TextField,
-        'Geplante Dauer in Minuten (optional)',
-      ),
-      '-5',
-    );
-    await tester.tap(find.text('Speichern'));
-    await tester.pumpAndSettle();
-
-    expect(
-      find.text('Die geplante Dauer muss größer als null sein.'),
-      findsOneWidget,
-    );
-    expect(await repository.ladeErlebnisse(), isEmpty);
+    expect(fehler.zeitfehler, contains('Ein Ende benötigt einen Beginn.'));
   });
 
   testWidgets('Gaststättenbewertung bleibt beim Ein- und Ausklappen erhalten',
