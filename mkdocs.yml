@@ -36,6 +36,7 @@ nav:
   - Entwicklerdokumentation:
       - Überblick: entwicklung/index.md
       - Dokumentationswerkzeugkette: entwicklung/dokumentationswerkzeugkette.md
+      - Dart-Formatierung Arbeitsbranches: entwicklung/branch-formatierung.md
       - JSON-Austauschformat: entwicklung/austauschformat.md
       - Sichere Importvalidierung: entwicklung/importvalidierung.md
       - Android-Release: android-release.md
