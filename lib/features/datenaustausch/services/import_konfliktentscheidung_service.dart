@@ -109,7 +109,9 @@ class ImportKonfliktentscheidungService {
             (_istHistorisch(sammlung) &&
                 !_gleicherHistorischerKontext(sammlung, importWert, lokal)) ||
             (sammlung == 'kategorien' &&
-                importWert['zielart'] != lokal['zielart']);
+                importWert['zielart'] != lokal['zielart']) ||
+            (sammlung == 'objekte' &&
+                importWert['art'] != lokal['art']);
         final art = identitaetskonflikt
             ? ImportKonfliktArt.identitaetskonflikt
             : ImportKonfliktArt.versionskonflikt;
