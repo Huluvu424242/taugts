@@ -364,9 +364,8 @@ void main() {
       throwsA(isA<StateError>()),
     );
     expect(
-      datenbank.verbindung
-          .select('SELECT name FROM kategorien WHERE id = ?', ['kategorie-1'])
-          .single['name'],
+      datenbank.verbindung.select('SELECT name FROM kategorien WHERE id = ?',
+          ['kategorie-1']).single['name'],
       'Testkategorie',
     );
   });
