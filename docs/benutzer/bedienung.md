@@ -2,11 +2,13 @@
 
 Taugt’s? dient dazu, Produkte, Orte und Erlebnisse lokal zu erfassen und zu bewerten.
 
+**Versionshinweis:** Diese Seite erläutert den aktuellen Entwicklungsstand auf `master`. Die zusätzlichen Änderungen seit dem offiziellen Release 0.1.0+8 sind unter [`[Unreleased]`](https://github.com/Huluvu424242/taugts/blob/master/CHANGELOG.md) dokumentiert und stehen nicht automatisch in der veröffentlichten APK zur Verfügung.
+
 ## Startseite
 
 Die mobile Startseite bietet die zentralen Aktionen **Jetzt bewerten**, **Erlebnis registrieren** und **Alle Erlebnisse**. Zusätzlich führt die Navigation zu Produkte, Orte, Bewertungen, Suche, Import/Export und Einstellungen. Noch nicht umgesetzte Bereiche zeigen eine verständliche Informationsseite statt einer funktionslosen Aktion.
 
-Ist genau ein Erlebnis aktiv, kann es direkt von der Startseite fortgesetzt werden. Bei mehreren aktiven Erlebnissen wird keine Auswahl automatisch vorweggenommen.
+Erlebnisse können in der Übersicht geöffnet und nachträglich bearbeitet werden. Der aktuelle Entwicklungsstand verwendet statt getrennten Planungs- und Durchführungsstatus einen gemeinsamen, bei Bedarf korrigierbaren Zeitraum.
 
 Die Kachel **Suche** öffnet denselben globalen Suchbereich wie der Eintrag **Suche** in der unteren Navigation. Die Kachel **Bewertungen** öffnet ebenfalls diesen Suchbereich, setzt ihn aber direkt auf **Bewertungen und Preise**, sodass historische Produkt-, Gaststätten- und Geschäftsbewertungen sowie Preisbeobachtungen unmittelbar durchsucht und weiter nach Historienart gefiltert werden können.
 
