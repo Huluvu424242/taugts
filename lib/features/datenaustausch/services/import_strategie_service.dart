@@ -237,7 +237,7 @@ class ImportStrategieService {
   String _identitaet(String sammlung, Map<String, Object?> wert) =>
       switch (sammlung) {
         'kategorieZuordnungen' =>
-          '${wert['kategorieId']}|${wert['zielId']}',
+          '${wert['kategorieId']}:${wert['zielId']}',
         'objektTags' =>
           '${wert['objektId']}:${wert['normalisiert']}',
         'objektKlassifikationsmerkmale' =>
