@@ -2,7 +2,7 @@
 
 ## Status und Freigabe
 
-Die GitHub Action `Dart-Formatierung Arbeitsbranch` liegt unter `.github/workflows/dart-format-branch.yml`. **Ihre bloße Bereitstellung ist keine Ausführungsfreigabe.** Sie darf erst nach menschlicher Prüfung und Merge dieses Werkzeugketten-PRs und anschließend gesonderter ausdrücklicher Freigabe nach [AGENTS / Sicherheit](../../agent-rules/05-security-tooling.md) verwendet werden. Die bestehende freigegebene Action `Flutter-Prüfungen` bleibt unverändert.
+Die GitHub Action `Dart-Formatierung Arbeitsbranch` liegt unter `.github/workflows/kiagent-dart-format-branch.yml`. **Ihre bloße Bereitstellung ist keine Ausführungsfreigabe.** Sie darf erst nach menschlicher Prüfung und Merge dieses Werkzeugketten-PRs und anschließend gesonderter ausdrücklicher Freigabe nach [AGENTS / Sicherheit](../../agent-rules/05-security-tooling.md) verwendet werden. Die bestehende freigegebene Action `Flutter-Prüfungen` bleibt unverändert.
 
 ## Bedienkonzept
 
@@ -28,7 +28,7 @@ Erlaubte Zielbranch-Präfixe sind `story/`, `bug/`, `feature/`, `fix/`, `docs/` 
 ## Technische Festlegungen
 
 - **Repository:** `Huluvu424242/taugts`
-- **Workflow:** `.github/workflows/dart-format-branch.yml`, `Dart-Formatierung Arbeitsbranch`
+- **Workflow:** `.github/workflows/kiagent-dart-format-branch.yml`, `Dart-Formatierung Arbeitsbranch`
 - **Trigger:** ausschließlich manueller `workflow_dispatch` auf `master`
 - **Inputs:** `branch` (Pflicht), `expected_sha` (optional)
 - **Runner und Laufzeit:** `ubuntu-latest`, maximal 20 Minuten; regulär nur wenige Minuten. Nutzung des GitHub-Actions-Kontingents gemäß Tarif
