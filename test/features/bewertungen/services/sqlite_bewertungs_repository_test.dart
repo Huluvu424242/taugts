@@ -430,7 +430,7 @@ void main() {
       notiz: 'Später bewerten',
     ));
 
-    var entwuerfe = await repository.ladeEntwuerfe();
+    var entwuerfe = await repository.ladeErlebnisse();
     expect(entwuerfe, hasLength(1));
     expect(entwuerfe.single.preis, 4.9);
     expect(entwuerfe.single.notiz, 'Später bewerten');
@@ -444,11 +444,11 @@ void main() {
       geaendertAm: zeit.add(const Duration(minutes: 1)),
       notiz: 'Fortgesetzt',
     ));
-    entwuerfe = await repository.ladeEntwuerfe();
+    entwuerfe = await repository.ladeErlebnisse();
     expect(entwuerfe.single.notiz, 'Fortgesetzt');
 
     await repository.loescheErlebnis(erlebnisId);
-    expect(await repository.ladeEntwuerfe(), isEmpty);
+    expect(await repository.ladeErlebnisse(), isEmpty);
   });
 
   test('speichert einen geplanten Einkauf ohne Uhrzeit und Produkt', () async {
@@ -458,7 +458,7 @@ void main() {
 
       beginn: DateTime.utc(2026, 9, 5),
       herkunftProfilId: profilId,
-      istEntwurf: false,
+
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
@@ -477,7 +477,6 @@ void main() {
       id: '3d30ae97-1a64-4bb5-a8fd-1df46be78d70',
       herkunftProfilId: profilId,
 
-      istEntwurf: false,
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
@@ -849,17 +848,17 @@ void main() {
     await repository.speichereGetraenkebewertung(
       erlebnis: erstesErlebnis.kopiereMit(
         notiz: 'Erster Eindruck',
-        istEntwurf: false,
+
         geaendertAm: zeit.add(const Duration(minutes: 1)),
       ),
       bewertungen: [ersteBewertung],
     );
-    expect(await repository.ladeEntwuerfe(), isEmpty);
+    expect(await repository.ladeErlebnisse(), isEmpty);
 
     await repository.speichereGetraenkebewertung(
       erlebnis: erstesErlebnis.kopiereMit(
         notiz: 'Korrigierter Eindruck',
-        istEntwurf: false,
+
         geaendertAm: zeit.add(const Duration(minutes: 2)),
       ),
       bewertungen: [
@@ -888,7 +887,7 @@ void main() {
       beginn: spaeter,
       erstelltAm: spaeter,
       geaendertAm: spaeter,
-      istEntwurf: false,
+
     );
     await repository.speichereGetraenkebewertung(
       erlebnis: zweitesErlebnis,
@@ -940,7 +939,7 @@ void main() {
       repository.speichereGetraenkebewertung(
         erlebnis: erlebnis.kopiereMit(
           notiz: 'Darf nicht bleiben',
-          istEntwurf: false,
+
         ),
         bewertungen: [
           Bewertung(
