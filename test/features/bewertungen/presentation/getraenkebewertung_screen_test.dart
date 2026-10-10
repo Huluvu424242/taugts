@@ -74,7 +74,7 @@ void main() {
       StandardGetraenkekriterien.gesamturteilId,
     );
     expect(bewertungen.single.wert, 4);
-    expect(await repository.ladeErlebnisse(), isEmpty);
+    expect(await repository.ladeErlebnisse(), hasLength(1));
   });
 
   testWidgets('zeigt optionale Intensitäten und erhält eine Notiz', (
