@@ -1,6 +1,6 @@
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
-import 'package:taugts/features/datenaustausch/services/import_strategie_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_konfliktentscheidung_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_strategie_service.dart';
 
 /// Ergänzt den bestehenden transaktionalen Import um Klassifikationsdaten.
 /// Aufruf ausschließlich innerhalb der Import-Transaktion.
