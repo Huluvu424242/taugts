@@ -176,7 +176,10 @@ class ImportAusfuehrungService {
             if (existiert &&
                 strategie != ImportStrategie.bestandErsetzen &&
                 _identischZumBestand(
-                  sammlung, zielId, wert, lokalerStand,
+                  sammlung,
+                  zielId,
+                  wert,
+                  lokalerStand,
                 )) {
               ergebnis[ergebnisSammlung] = zaehler.plus(uebersprungen: 1);
               continue;
