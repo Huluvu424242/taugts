@@ -54,7 +54,7 @@ class ImportValidierungsService {
     this.grenzen = const ImportValidierungsGrenzen(),
   });
 
-  static const aktuelleSchemaVersion = 2;
+  static const aktuelleSchemaVersion = 3;
   static const aeltesteUnterstuetzteSchemaVersion = 0;
 
   static const _sammlungsNamen = [
@@ -247,8 +247,56 @@ class ImportValidierungsService {
         ];
       }
       migriert['schemaVersion'] = 2;
+      aktuelleVersion = 2;
+    }
+    if (aktuelleVersion == 2) {
+      final erlebnisse = migriert['erlebnisse'];
+      if (erlebnisse is List) {
+        migriert['erlebnisse'] = [
+          for (final roh in erlebnisse)
+            if (roh is Map)
+              _vereinheitlicheAltenZeitraum(_map(roh))
+            else
+              roh,
+        ];
+      }
+      migriert['schemaVersion'] = 3;
     }
     return migriert;
+  }
+
+  Map<String, Object?> _vereinheitlicheAltenZeitraum(
+    Map<String, Object?> alt,
+  ) {
+    final istBeginn = alt['tatsaechlicherBeginn'];
+    final planTag = alt['geplanterTag'];
+    final planMinute = alt['geplanteMinute'];
+    String? beginn;
+    if (istBeginn is String) {
+      beginn = istBeginn;
+    } else if (planTag is String) {
+      final minuten = planMinute is int && planMinute >= 0 &&
+              planMinute < 1440
+          ? planMinute
+          : 0;
+      final datum = DateTime.tryParse(planTag);
+      if (datum != null) {
+        beginn = DateTime.utc(datum.year, datum.month, datum.day,
+                minuten ~/ 60, minuten % 60)
+            .toIso8601String();
+      }
+    }
+    return {
+      for (final eintrag in alt.entries)
+        if (!{
+          'status', 'geplanterTag', 'geplanteMinute',
+          'geplanteDauerMinuten', 'tatsaechlicherBeginn',
+          'tatsaechlichesEnde',
+        }.contains(eintrag.key))
+          eintrag.key: eintrag.value,
+      'beginn': beginn,
+      'ende': istBeginn is String ? alt['tatsaechlichesEnde'] : null,
+    };
   }
 
   void _validiereSchema(
@@ -395,42 +443,9 @@ class ImportValidierungsService {
         '$pfad.typ',
         fehler,
       );
-      _enumWert(
-        wert,
-        'status',
-        {'geplant', 'aktiv', 'beendet'},
-        '$pfad.status',
-        fehler,
-      );
       _bool(wert, 'istEntwurf', '$pfad.istEntwurf', fehler);
-      _optionalesDatum(wert, 'geplanterTag', '$pfad.geplanterTag', fehler);
-      _optionaleGanzzahl(
-        wert,
-        'geplanteMinute',
-        '$pfad.geplanteMinute',
-        fehler,
-        minimum: 0,
-        maximum: 1439,
-      );
-      _optionaleGanzzahl(
-        wert,
-        'geplanteDauerMinuten',
-        '$pfad.geplanteDauerMinuten',
-        fehler,
-        minimum: 1,
-      );
-      _optionaleUtcZeit(
-        wert,
-        'tatsaechlicherBeginn',
-        '$pfad.tatsaechlicherBeginn',
-        fehler,
-      );
-      _optionaleUtcZeit(
-        wert,
-        'tatsaechlichesEnde',
-        '$pfad.tatsaechlichesEnde',
-        fehler,
-      );
+      _optionaleUtcZeit(wert, 'beginn', '$pfad.beginn', fehler);
+      _optionaleUtcZeit(wert, 'ende', '$pfad.ende', fehler);
       _zeitstempel(wert, pfad, fehler);
       _validiereErlebnisZeiten(wert, pfad, fehler);
     }
@@ -441,47 +456,15 @@ class ImportValidierungsService {
     String pfad,
     List<ImportValidierungsFehler> fehler,
   ) {
-    if (wert['geplanteMinute'] != null && wert['geplanterTag'] == null) {
-      _fehler(
-        fehler,
-        'zeitkombination_ungueltig',
-        '$pfad.geplanteMinute',
-        'Eine geplante Uhrzeit benötigt einen geplanten Tag.',
-      );
-    }
-    final beginn = _parseUtc(wert['tatsaechlicherBeginn']);
-    final ende = _parseUtc(wert['tatsaechlichesEnde']);
+    final beginn = _parseUtc(wert['beginn']);
+    final ende = _parseUtc(wert['ende']);
     if (ende != null && beginn == null) {
-      _fehler(
-        fehler,
-        'zeitkombination_ungueltig',
-        '$pfad.tatsaechlichesEnde',
-        'Ein tatsächliches Ende benötigt einen Beginn.',
-      );
+      _fehler(fehler, 'zeitkombination_ungueltig', '$pfad.ende',
+          'Ein Ende benötigt einen Beginn.');
     }
     if (beginn != null && ende != null && ende.isBefore(beginn)) {
-      _fehler(
-        fehler,
-        'zeitreihenfolge_ungueltig',
-        '$pfad.tatsaechlichesEnde',
-        'Das tatsächliche Ende darf nicht vor dem Beginn liegen.',
-      );
-    }
-    if (wert['status'] == 'aktiv' && beginn == null) {
-      _fehler(
-        fehler,
-        'status_ungueltig',
-        '$pfad.status',
-        'Ein aktives Erlebnis benötigt einen tatsächlichen Beginn.',
-      );
-    }
-    if (wert['status'] == 'beendet' && (beginn == null || ende == null)) {
-      _fehler(
-        fehler,
-        'status_ungueltig',
-        '$pfad.status',
-        'Ein beendetes Erlebnis benötigt tatsächlichen Beginn und Ende.',
-      );
+      _fehler(fehler, 'zeitreihenfolge_ungueltig', '$pfad.ende',
+          'Das Ende darf nicht vor dem Beginn liegen.');
     }
   }
 
