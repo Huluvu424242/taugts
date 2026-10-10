@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_validierungs_service.dart';
 
 void main() {
   late LokaleDatenbank datenbank;
@@ -13,6 +15,45 @@ void main() {
   });
 
   tearDown(() => datenbank.schliessen());
+
+  test('formales JSON-Schema stimmt mit Export und Importversion überein',
+      () {
+    final schema = jsonDecode(
+      File('schema/taugts-export.schema.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
+    final eigenschaften = schema['properties'] as Map<String, dynamic>;
+    final versionsFeld =
+        eigenschaften['schemaVersion'] as Map<String, dynamic>;
+    final export = jsonDecode(
+      ExportService(datenbank, appVersion: '0.1.0+8').erzeugeJson(),
+    ) as Map<String, dynamic>;
+
+    expect(versionsFeld['const'], ImportValidierungsService.aktuelleSchemaVersion);
+    expect(export['schemaVersion'], versionsFeld['const']);
+    expect(schema['description'], contains('Version 3'));
+
+    final definitionen = schema[r'$defs'] as Map<String, dynamic>;
+    final erlebnis = definitionen['erlebnis'] as Map<String, dynamic>;
+    final felder = erlebnis['properties'] as Map<String, dynamic>;
+    expect(felder, containsPair('beginn', isA<Map<String, dynamic>>()));
+    expect(felder, containsPair('ende', isA<Map<String, dynamic>>()));
+    for (final altesFeld in [
+      'status',
+      'istEntwurf',
+      'geplanterTag',
+      'geplanteMinute',
+      'geplanteDauerMinuten',
+      'tatsaechlicherBeginn',
+      'tatsaechlichesEnde',
+    ]) {
+      expect(felder, isNot(contains(altesFeld)));
+    }
+
+    final importErgebnis = const ImportValidierungsService().validiere(
+      jsonEncode(export),
+    );
+    expect(importErgebnis.istGueltig, isTrue);
+  });
 
   test('erzeugt vollständigen versionierten Export auch ohne Fachdaten', () {
     final service = ExportService(
