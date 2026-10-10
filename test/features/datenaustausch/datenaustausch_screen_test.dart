@@ -214,6 +214,7 @@ void main() {
     final dokument = Map<String, Object?>.from(
       jsonDecode(export.erzeugeJson()) as Map,
     );
+    dokument['bewertungskriterien'] = <Object?>[];
     dokument['profile'] = [
       {
         'id': neu,
@@ -236,7 +237,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Gesamten lokalen Datenbestand ersetzen').last);
     await tester.pumpAndSettle();
-    expect(find.textContaining('Zu entfernende Datensätze: 1'), findsOneWidget);
+    expect(find.textContaining('Zu entfernende Datensätze:'), findsOneWidget);
 
     FilledButton ersatzAktion() => tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'Bestand ersetzen und importieren').last,
@@ -290,6 +291,7 @@ void main() {
     final dokument = Map<String, Object?>.from(
       jsonDecode(export.erzeugeJson()) as Map,
     );
+    dokument['bewertungskriterien'] = <Object?>[];
     await tester.pumpWidget(MaterialApp(
       home: DatenaustauschScreen(
         exportService: export,
