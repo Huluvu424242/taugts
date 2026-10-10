@@ -31,7 +31,7 @@ Die formale JSON-Schema-Datei liegt unter:
 
 - `schema/taugts-export.schema.json`
 
-**Bekannte Abweichung (Stand 10.10.2026):** Die Datei deklariert derzeit noch die ältere Austauschformatversion **2** (einschließlich ihrer damaligen Erlebnisfelder), während `ExportService` und `ImportValidierungsService` bereits **Version 3** mit `beginn`/`ende` verwenden. Sie ist damit derzeit **keine verlässliche normative Beschreibung des vollständigen Version-3-Exports**. Maßgeblich für dessen tatsächliche Verarbeitung sind die Implementierungen und Tests. Die formale Schema-Datei muss separat auf den Version-3-Vertrag abgeglichen und überprüft werden.
+**Formaler Schema-Vertrag:** Seit der Korrektur in [Bug #234](https://github.com/Huluvu424242/taugts/issues/234) deklariert `schema/taugts-export.schema.json` die Austauschformatversion **3**. Die Erlebniseigenschaften `beginn` und `ende` sind darin bereits abgebildet. Weitergehende fachliche Prüfungen (beispielsweise Zeitreihenfolge und referenzielle Konsistenz) erfolgen ergänzend im `ImportValidierungsService`.
 
 Die vorhandenen Fixtures unter `schema/fixtures/` bleiben bewusst als historische Version-0- und Version-1-Beispiele erhalten. Sie dienen vor allem dazu, die unterstützten Vorwärtsmigrationen, verwaiste Referenzen und fachlich ungültige Status-/Zeitkombinationen zu prüfen. Details stehen unter [Sichere Importvalidierung](importvalidierung.md).
 
