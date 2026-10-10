@@ -43,7 +43,7 @@ void main() {
       beginn: DateTime.utc(2026, 9, 1),
 
       herkunftProfilId: profil.id,
-      istEntwurf: true,
+
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
