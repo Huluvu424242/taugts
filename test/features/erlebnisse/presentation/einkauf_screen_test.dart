@@ -64,9 +64,9 @@ void main() {
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
     final gespeichert = (await repository.ladeErlebnisse()).single;
-    expect(gespeichert.geplanterTag, isNull);
-    expect(gespeichert.geplanteMinute, isNull);
-    expect(gespeichert.tatsaechlicherBeginn, isNotNull);
+
+
+    expect(gespeichert.beginn, isNotNull);
   });
 
   testWidgets('Einkauf summiert nur erfasste Preise und ändert Mengen',
@@ -211,13 +211,13 @@ void main() {
     await tester.tap(find.text('Einkauf beenden'));
     await tester.pumpAndSettle();
     expect(find.text('Status: Beendet'), findsOneWidget);
-    expect((await repository.ladeErlebnis(erlebnis.id))!.tatsaechlicherBeginn,
+    expect((await repository.ladeErlebnis(erlebnis.id))!.beginn,
         isNull);
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
     final beendet = await repository.ladeErlebnis(erlebnis.id);
-    expect(beendet!.tatsaechlicherBeginn, isNotNull);
-    expect(beendet.tatsaechlichesEnde, isNotNull);
+    expect(beendet!.beginn, isNotNull);
+    expect(beendet.ende, isNotNull);
   });
 }
 
