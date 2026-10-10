@@ -18,6 +18,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Bewertungsdetails und Suchtreffer zeigen fachliche Produkt- und Ortsnamen sowie den Erlebnistyp mit Orts- und Zeitbezug statt technischer IDs. Nicht mehr zuordenbare Stammdaten werden verständlich gekennzeichnet (Story #218).
 - Erlebnisformulare verwenden einen gemeinsamen Speicherpunkt für Erlebnisdaten, Positionen, Preise sowie Produkt- und Ortsbewertungen. Die Änderungen werden als gemeinsamer Entwurf atomar übernommen; bei einem Fehler erfolgt ein Rollback (Story #221).
 - Restaurantbesuche und Einkäufe verwenden nur noch einen bearbeitbaren Beginn und ein Ende anstelle getrennter Plan- und Ist-Zeiten beziehungsweise persistierter Entwurfs- und Durchführungsstatus. Die Erlebnisübersicht zeigt den einheitlichen Zeitraum (Story #228).
+- Die lokale SQLite-Struktur wird für den einheitlichen Erlebniszeitraum von Schema 3 auf 4 migriert. JSON-Exporte verwenden Formatversion 3 mit `beginn` und `ende`; ältere Importformate 0 bis 2 werden beim Einlesen migriert. Vor dem Update ist eine geprüfte JSON-Sicherung empfehlenswert (Story #228).
 
 ### Fixed
 
