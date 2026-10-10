@@ -1,6 +1,6 @@
 # Sichere Importvalidierung
 
-Importdateien gelten grundsätzlich als nicht vertrauenswürdig. `ImportValidierungsService` analysiert einen Text vollständig, bevor eine spätere Importstory daraus Änderungen am lokalen Bestand ableiten darf. Die Validierung selbst besitzt deshalb keinerlei Schreibzugriff auf die SQLite-Datenbank.
+Importdateien gelten grundsätzlich als nicht vertrauenswürdig. `ImportValidierungsService` analysiert einen Text vollständig, bevor die Importvorschau und anschließende bestätigte Ausführung daraus Änderungen am lokalen Bestand ableiten dürfen. Die Validierung selbst besitzt deshalb keinerlei Schreibzugriff auf die SQLite-Datenbank.
 
 ## Reihenfolge der Prüfung
 
@@ -32,12 +32,13 @@ Die Werte verhindern, dass offensichtlich unangemessen große oder extrem versch
 
 ## Versionierung und Migration
 
-Die aktuelle Austauschformatversion ist `2`. Dateien mit einer höheren Version werden abgewiesen, statt still wie eine unterstützte ältere Version interpretiert zu werden.
+Die aktuelle Austauschformatversion ist **`3`**. Dateien mit einer höheren Version werden abgewiesen, statt still wie eine unterstützte ältere Version interpretiert zu werden.
 
-Es bestehen zwei explizite Vorwärtsmigrationen:
+Es bestehen drei explizite Vorwärtsmigrationen:
 
 - **0 → 1:** Die Vorabversion 0 kann die damals noch nicht vorbereiteten Sammlungen `kategorien` und `kategorieZuordnungen` weglassen. Die Migration ergänzt beide als leere Arrays und setzt `schemaVersion` auf `1`.
-- **1 → 2:** Historische Bewertungen erhalten das neue Feld `textWert` mit `null`. Der vorhandene numerische `wert` bleibt unverändert erhalten. Dadurch werden alte Bewertungen nicht umgedeutet oder verworfen.
+- **1 → 2:** Historische Bewertungen erhalten das neue Feld `textWert` mit `null`. Der vorhandene numerische `wert` bleibt unverändert erhalten.
+- **2 → 3:** Der frühere Erlebnisstatus und die getrennten Plan-/Ist-Zeiten werden zu den optionalen Feldern `beginn` und `ende` zusammengeführt. Der tatsächliche Beginn hat Vorrang, ansonsten wird der geplante Zeitpunkt verwendet. Die bisherige tatsächliche Endzeit wird nur bei vorhandenem tatsächlichen Beginn übernommen. Dadurch werden alte Bewertungen nicht umgedeutet oder verworfen.
 
 Die Migrationen finden ausschließlich im Arbeitsspeicher statt und verändern weder die Eingabedatei noch lokale Daten.
 
@@ -71,7 +72,7 @@ Verwaiste Beobachtungen werden damit abgewiesen, bevor sie eine Importvorschau o
 
 ## Historische Daten
 
-Duplikaterkennung basiert in dieser Stufe ausschließlich auf stabilen IDs innerhalb derselben Sammlung. Zwei Preisbeobachtungen oder Bewertungen mit unterschiedlichen IDs bleiben eigenständige historische Datensätze, auch wenn sie dasselbe Produkt, denselben Ort oder einen ähnlichen Zeitraum betreffen. Die fachliche Konflikt- und Dublettenanalyse folgt in Story #18.
+Duplikaterkennung basiert in dieser Stufe ausschließlich auf stabilen IDs innerhalb derselben Sammlung. Zwei Preisbeobachtungen oder Bewertungen mit unterschiedlichen IDs bleiben eigenständige historische Datensätze, auch wenn sie dasselbe Produkt, denselben Ort oder einen ähnlichen Zeitraum betreffen. Die fachliche Konflikt- und Dublettenanalyse ist im Importprozess mit Vorschau, Konfliktentscheidung und atomarer Übernahme umgesetzt.
 
 ## Vorwärtskompatibilität
 
@@ -79,15 +80,15 @@ Zusätzliche unbekannte optionale Felder innerhalb einer unterstützten Schemave
 
 ## Test-Fixtures
 
-Die vorhandenen historischen Fixtures bleiben erhalten und werden über die Vorwärtsmigration auf Format 2 geprüft:
+Die vorhandenen historischen Fixtures bleiben erhalten und werden über die Vorwärtsmigration auf Format 3 geprüft:
 
 - `schema/fixtures/taugts-export-v0-migrierbar.json`: unterstützte Vorabversion mit Migration über Version 1 auf Version 3,
-- `schema/fixtures/taugts-export-v1-gueltig.json`: gültiges Version-1-Dokument, das auf Version 2 migriert wird,
+- `schema/fixtures/taugts-export-v1-gueltig.json`: gültiges Version-1-Dokument, das auf Version 3 migriert wird,
 - `schema/fixtures/taugts-export-v1-verwaist.json`: syntaktisch korrekter Datensatz mit fehlenden Referenzzielen,
 - `schema/fixtures/taugts-export-v1-fachlich-ungueltig.json`: ungültige Kombination aus Erlebnisstatus und Zeitangaben.
 
 Die Tests prüfen außerdem beschädigtes JSON, eine zu neue Schemaversion, ungültige Preis-/Währungswerte, Kriterienversionen, typisierte textuelle Auswahlwerte, Vorwärtskompatibilität unbekannter optionaler Felder sowie Größen- und Tiefengrenzen.
 
-### Exportversion 3 – Ein gemeinsamer Zeitraum
+### Neues Erlebnisformat ab Version 3
 
-Die Migration 2 → 3 bildet je Erlebnis die früheren Plan-/Ist-Daten auf `beginn` und `ende` ab. Vorhandene tatsächliche Beginnzeiten haben Vorrang; ersatzweise wird das geplante Datum samt geplanter Uhrzeit (ohne Uhrzeit: 00:00 UTC) verwendet. Das frühere tatsächliche Ende wird nur mit vorhandenem tatsächlichem Beginn übernommen. Die Felder `status`, `istEntwurf`, `geplanterTag`, `geplanteMinute`, `geplanteDauerMinuten`, `tatsaechlicherBeginn` und `tatsaechlichesEnde` werden aus dem resultierenden Importdatensatz entfernt. Die Ursprungsdatei bleibt unangetastet.
+Die historische Migration **2 → 3** wird ausschließlich auf einer In-Memory-Kopie durchgeführt. Sie entfernt nach der beschriebenen Übernahme die bisherigen Felder `status`, `istEntwurf`, `geplanterTag`, `geplanteMinute`, `geplanteDauerMinuten`, `tatsaechlicherBeginn` und `tatsaechlichesEnde`. Die Ursprungsdatei bleibt unangetastet. Neue Exporte besitzen stattdessen die optionalen UTC-Felder `beginn` und `ende`.
