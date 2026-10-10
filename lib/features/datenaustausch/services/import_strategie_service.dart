@@ -70,6 +70,12 @@ class ImportStrategieService {
     'preisbeobachtungen',
     'ortsbewertungen',
     'bewertungen',
+    'kategorien',
+    'kategorieZuordnungen',
+    'objektTags',
+    'objektKlassifikationsmerkmale',
+    'kategorieKriteriensetRegeln',
+    'kategorieKriterien',
   ];
 
   ImportStrategiePlan plane({
@@ -84,8 +90,8 @@ class ImportStrategieService {
     for (final sammlung in _sammlungen) {
       final importWerte = _liste(importDokument, sammlung);
       final lokaleWerte = _liste(lokalesDokument, sammlung);
-      final importNachId = _nachId(importWerte);
-      final lokalNachId = _nachId(lokaleWerte);
+      final importNachId = _nachId(sammlung, importWerte);
+      final lokalNachId = _nachId(sammlung, lokaleWerte);
 
       var hinzufuegen = 0;
       var aktualisieren = 0;
@@ -189,11 +195,26 @@ class ImportStrategieService {
   }
 
   Map<String, Map<String, Object?>> _nachId(
+    String sammlung,
     List<Map<String, Object?>> werte,
-  ) =>
-      {
+  ) => {
         for (final wert in werte)
-          if (wert['id'] is String) wert['id'] as String: wert,
+          if (_identitaet(sammlung, wert).isNotEmpty)
+            _identitaet(sammlung, wert): wert,
+      };
+
+  String _identitaet(String sammlung, Map<String, Object?> wert) =>
+      switch (sammlung) {
+        'kategorieZuordnungen' =>
+          '${wert['kategorieId']}|${wert['zielId']}',
+        'objektTags' =>
+          '${wert['objektId']}|${wert['normalisiert']}',
+        'objektKlassifikationsmerkmale' =>
+          '${wert['objektId']}|${wert['dimension']}|${wert['schluessel']}',
+        'kategorieKriteriensetRegeln' => '${wert['kategorieId']}',
+        'kategorieKriterien' =>
+          '${wert['kategorieId']}|${wert['kriteriumId']}',
+        _ => wert['id'] as String? ?? '',
       };
 
   List<Map<String, Object?>> _liste(
