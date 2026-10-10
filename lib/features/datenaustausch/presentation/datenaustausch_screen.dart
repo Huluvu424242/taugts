@@ -174,9 +174,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         _importDokument = importDokument;
         _originalImportDokument = validierung.dokument!;
         _lokalesDokument = lokal;
-        _strategiePlan = _planeStrategie(analyse);
         _konflikte = konflikte;
         _entscheidungsStand = _standardEntscheidungen(konflikte);
+        _strategiePlan = _planeStrategie(analyse);
         _status = 'Import geprüft. Die Vorschau verändert keine lokalen Daten.';
       });
     } catch (_) {
@@ -194,6 +194,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   ImportStrategiePlan _planeStrategie(ImportKonfliktAnalyse analyse) =>
       widget.importStrategieService.plane(
         strategie: _strategie,
+        entscheidungen: _entscheidungsStand,
         importDokument: _importDokument!,
         lokalesDokument: _lokalesDokument!,
         fachlicheDubletten: analyse.fachlicheDubletten.map(
@@ -229,11 +230,11 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
     if (strategie == null || _analyse == null) return;
     setState(() {
       _strategie = strategie;
-      _strategiePlan = _planeStrategie(_analyse!);
       _entscheidungsStand = _standardEntscheidungen(
         _konflikte,
         bisher: _entscheidungsStand,
       );
+      _strategiePlan = _planeStrategie(_analyse!);
     });
   }
 
@@ -284,6 +285,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
           }
         }
       }
+      _strategiePlan = _planeStrategie(_analyse!);
       if (aktion == ImportKonfliktAktion.zusammenfuehren &&
           _kannZusammenfuehren(konflikt)) {
         _mergeFeldauswahl.putIfAbsent(konflikt.schluessel, () => {});
@@ -639,7 +641,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
             child: ListTile(
               title: Text(sammlung.name),
               subtitle: Text(
-                '${sammlung.hinzufuegen} hinzufügen · ${sammlung.aktualisieren} aktualisieren · ${sammlung.behalten} behalten · ${sammlung.entfernen} entfernen',
+                'Neu: ${sammlung.hinzufuegen} · Unverändert: ${sammlung.unveraendert} · Aktualisiert: ${sammlung.aktualisieren} · Übersprungen: ${sammlung.uebersprungen} · Konflikte: ${_konflikte.where((k) => k.sammlung == sammlung.name).length} · Zu löschen: ${sammlung.entfernen}',
               ),
             ),
           ),
