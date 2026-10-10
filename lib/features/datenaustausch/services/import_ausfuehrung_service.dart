@@ -408,7 +408,7 @@ class ImportAusfuehrungService {
         }),
         existiert,
       );
-      if (wert['art'] != 'produkt') {
+      if (wert['art'] == 'allgemein') {
         db.verbindung.execute(
           'DELETE FROM produkte WHERE objekt_id = ?',
           [wert['id']],
