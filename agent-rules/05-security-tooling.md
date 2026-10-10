@@ -24,6 +24,14 @@ Die folgenden Regeln sind eine verbindliche Sicherheitsgrenze. Sie dürfen weder
 - Eine solche Story dokumentiert mindestens Zweck, Bedrohungs- und Risikoanalyse, Trigger, minimale Berechtigungen, verwendete Actions mit unveränderlichen Commit-SHAs, Inputs und Outputs, Secrets und Datenflüsse, Artefakte und Log-Aufbewahrung, Supply-Chain- und Lizenzprüfung, Laufzeit und Kosten, erlaubte Akteure und Nutzungen, Auditierbarkeit sowie Deaktivierung und Rollback.
 - Workflows dürfen keine Codeänderungen oder Commits erzeugen, sofern dies nicht gesondert in Story, Pull Request und ausdrücklicher Freigabe genehmigt wurde. Eine Workflow-Ausführung ersetzt niemals den vorgeschriebenen Pull-Request-Prozess.
 
+### Vorgesehener Formatter für KI-Agenten – noch nicht freigegeben
+
+Für die Umsetzung von [Story #236](https://github.com/Huluvu424242/taugts/issues/236) ist die **separate** Workflow-Datei `.github/workflows/kiagent-dart-format-branch.yml` mit dem Namen `Dart-Formatierung Arbeitsbranch` vorgesehen. Sie formatiert ausschließlich versionierte Dart-Dateien unter `lib/` und `test/` auf einem vom Benutzer beziehungsweise KI-Agenten benannten ungeschützten Arbeitsbranch und kann einen Formatierungscommit erzeugen.
+
+**Status: nicht freigegeben.** Weder die Existenz der Workflow-Datei noch ihre Nennung im Harness und in der [Dokumentation](../docs/entwicklung/branch-formatierung.md) stellen eine Erlaubnis zum Auslösen dar. Die bestehende Freigabe für `Flutter-Prüfungen` gilt ausdrücklich **nicht** für diese schreibende Action. Ein KI-Agent darf den Formatter nur dann nutzen, wenn dessen **konkrete unveränderte Workflow-Version** nach menschlicher Prüfung und Merge des gesonderten Werkzeugketten-PRs ausdrücklich freigegeben und mit SHA, Trigger, Eingaben, Zielbranches, Berechtigungen, Datenzugriff, Actions, Outputs und Geltungsdauer **als eigener Freigabeeintrag** im folgenden Verzeichnis dokumentiert wurde.
+
+Die zulässige Abfolge ist: **Story #236 → separater Werkzeugketten-PR → menschliche Prüfung und Merge → konkrete ausdrückliche Ausführungsfreigabe mit dokumentiertem Eintrag → gegebenenfalls manuelle Ausführung → unabhängige, erfolgreiche Flutter-Prüfungen auf dem aktualisierten Head-SHA.** Solange dieser Freigabeeintrag fehlt, ist die Durchführung gesperrt; das Formatierungsergebnis kann nicht durch Vermutungen über einen Workflow-Lauf ersetzt werden.
+
 ### Freigabeverzeichnis für selbständige Ausführungen
 
 Folgende Freigabe ist erteilt:
