@@ -426,6 +426,7 @@ class ImportAusfuehrungService {
           'id': 'objekt_id',
           'marke': 'marke',
           'produktart': 'produktart',
+          'geloescht': 'geloescht',
           'brauerei': 'brauerei',
           'sorte': 'sorte',
           'alkoholgehalt': 'alkoholgehalt',
@@ -458,6 +459,7 @@ class ImportAusfuehrungService {
             'id': 'id',
             'name': 'name',
             'typ': 'typ',
+            'geloescht': 'geloescht',
             'adresse': 'adresse',
             'breitengrad': 'breitengrad',
             'laengengrad': 'laengengrad',
@@ -542,6 +544,7 @@ class ImportAusfuehrungService {
     final ziel = <String, Object?>{};
     for (final eintrag in mapping.entries) {
       var wert = quelle[eintrag.key];
+      if (eintrag.key == 'geloescht' && wert == null) wert = false;
       if (wert is bool) wert = wert ? 1 : 0;
       ziel[eintrag.value] = wert;
     }
