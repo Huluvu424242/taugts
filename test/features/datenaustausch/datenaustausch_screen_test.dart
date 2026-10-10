@@ -394,4 +394,44 @@ void main() {
       }
     },
   );
+
+  testWidgets('Alle Daten löschen erfordert Bestätigung und leert den Bestand',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+    addTearDown(db.schliessen);
+    db.verbindung.execute(
+      'INSERT INTO profile VALUES (?, ?, ?, ?)',
+      [
+        '11111111-1111-4111-8111-111111111111',
+        'Testprofil',
+        '2026-09-01T00:00:00Z',
+        '2026-09-01T00:00:00Z',
+      ],
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: DatenaustauschScreen(
+        exportService: ExportService(db, appVersion: '0.0.0-test'),
+        exportZielService: _NichtVerwendetesExportZiel(),
+      ),
+    ));
+
+    await tester.tap(find.text('Alle Daten löschen'));
+    await tester.pumpAndSettle();
+    expect(find.text('Alle lokalen Daten endgültig löschen?'), findsOneWidget);
+    await tester.tap(find.text('Abbrechen'));
+    await tester.pumpAndSettle();
+    expect(db.verbindung.select('SELECT COUNT(*) AS n FROM profile').single['n'],
+        1);
+
+    await tester.tap(find.text('Alle Daten löschen'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Alle Daten endgültig löschen'));
+    await tester.pumpAndSettle();
+    expect(db.verbindung.select('SELECT COUNT(*) AS n FROM profile').single['n'],
+        0);
+    expect(find.text('Alle lokalen Daten wurden gelöscht.'), findsOneWidget);
+    expect(const ImportAusfuehrungService().ladeProtokoll(db), isEmpty);
+  });
 }
