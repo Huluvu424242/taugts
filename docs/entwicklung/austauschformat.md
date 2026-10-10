@@ -27,9 +27,11 @@ Schemaversion 2 führte die Felder `wert` und `textWert` zur getrennten Speicher
 
 ## Formales Schema und Fixtures
 
-Das normative JSON Schema liegt unter:
+Die formale JSON-Schema-Datei liegt unter:
 
 - `schema/taugts-export.schema.json`
+
+**Bekannte Abweichung (Stand 10.10.2026):** Die Datei deklariert derzeit noch die ältere Austauschformatversion **2** (einschließlich ihrer damaligen Erlebnisfelder), während `ExportService` und `ImportValidierungsService` bereits **Version 3** mit `beginn`/`ende` verwenden. Sie ist damit derzeit **keine verlässliche normative Beschreibung des vollständigen Version-3-Exports**. Maßgeblich für dessen tatsächliche Verarbeitung sind die Implementierungen und Tests. Die formale Schema-Datei muss separat auf den Version-3-Vertrag abgeglichen und überprüft werden.
 
 Die vorhandenen Fixtures unter `schema/fixtures/` bleiben bewusst als historische Version-0- und Version-1-Beispiele erhalten. Sie dienen vor allem dazu, die unterstützten Vorwärtsmigrationen, verwaiste Referenzen und fachlich ungültige Status-/Zeitkombinationen zu prüfen. Details stehen unter [Sichere Importvalidierung](importvalidierung.md).
 
