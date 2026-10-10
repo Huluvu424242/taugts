@@ -455,10 +455,8 @@ void main() {
     final erlebnis = Erlebnis(
       id: '3d30ae97-1a64-4bb5-a8fd-1df46be78d69',
       typ: Erlebnistyp.einkauf,
-
       beginn: DateTime.utc(2026, 9, 5),
       herkunftProfilId: profilId,
-
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
@@ -468,7 +466,6 @@ void main() {
     final geladen = await repository.ladeErlebnis(erlebnis.id);
     expect(geladen?.typ, Erlebnistyp.einkauf);
 
-
     expect(geladen?.produktId, isNull);
   });
 
@@ -476,7 +473,6 @@ void main() {
     final geplant = Erlebnis(
       id: '3d30ae97-1a64-4bb5-a8fd-1df46be78d70',
       herkunftProfilId: profilId,
-
       erstelltAm: zeit,
       geaendertAm: zeit,
     );
@@ -485,7 +481,6 @@ void main() {
     await expectLater(
       repository.speichereErlebnis(
         geplant.kopiereMit(
-
           beginn: zeit.add(const Duration(hours: 2)),
           ende: zeit,
         ),
@@ -848,7 +843,6 @@ void main() {
     await repository.speichereGetraenkebewertung(
       erlebnis: erstesErlebnis.kopiereMit(
         notiz: 'Erster Eindruck',
-
         geaendertAm: zeit.add(const Duration(minutes: 1)),
       ),
       bewertungen: [ersteBewertung],
@@ -858,7 +852,6 @@ void main() {
     await repository.speichereGetraenkebewertung(
       erlebnis: erstesErlebnis.kopiereMit(
         notiz: 'Korrigierter Eindruck',
-
         geaendertAm: zeit.add(const Duration(minutes: 2)),
       ),
       bewertungen: [
@@ -887,7 +880,6 @@ void main() {
       beginn: spaeter,
       erstelltAm: spaeter,
       geaendertAm: spaeter,
-
     );
     await repository.speichereGetraenkebewertung(
       erlebnis: zweitesErlebnis,
@@ -939,7 +931,6 @@ void main() {
       repository.speichereGetraenkebewertung(
         erlebnis: erlebnis.kopiereMit(
           notiz: 'Darf nicht bleiben',
-
         ),
         bewertungen: [
           Bewertung(
