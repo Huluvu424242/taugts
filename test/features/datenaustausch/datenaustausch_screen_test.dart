@@ -436,14 +436,16 @@ void main() {
     expect(find.text('Alle lokalen Daten endgültig löschen?'), findsOneWidget);
     await tester.tap(find.text('Abbrechen'));
     await tester.pumpAndSettle();
-    expect(db.verbindung.select('SELECT COUNT(*) AS n FROM profile').single['n'],
+    expect(
+        db.verbindung.select('SELECT COUNT(*) AS n FROM profile').single['n'],
         1);
 
     await tester.tap(find.text('Alle Daten löschen'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Alle Daten endgültig löschen'));
     await tester.pumpAndSettle();
-    expect(db.verbindung.select('SELECT COUNT(*) AS n FROM profile').single['n'],
+    expect(
+        db.verbindung.select('SELECT COUNT(*) AS n FROM profile').single['n'],
         0);
     expect(find.text('Alle lokalen Daten wurden gelöscht.'), findsOneWidget);
     expect(const ImportAusfuehrungService().ladeProtokoll(db), isEmpty);
