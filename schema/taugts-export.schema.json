@@ -356,7 +356,6 @@
         "id",
         "herkunftProfilId",
         "typ",
-        "istEntwurf",
         "erstelltAm",
         "geaendertAm"
       ],
@@ -389,9 +388,6 @@
             "null"
           ],
           "maxLength": 4000
-        },
-        "istEntwurf": {
-          "type": "boolean"
         },
         "erstelltAm": {
           "$ref": "#/$defs/utcDateTime"
