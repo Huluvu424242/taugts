@@ -239,6 +239,22 @@ class ImportAusfuehrungService {
     return result;
   }
 
+  /// Entfernt alle lokalen Fachdaten einschließlich Importhistorie.
+  /// Die Datenbankstruktur und externe Exportdateien bleiben erhalten.
+  void alleLokalenDatenLoeschen(LokaleDatenbank datenbank) {
+    if (!_laufendeDatenbanken.add(datenbank)) {
+      throw StateError('Für diese Datenbank läuft bereits ein Import.');
+    }
+    try {
+      datenbank.transaktion(() {
+        _ersetzeBestand(datenbank);
+        datenbank.verbindung.execute('DELETE FROM import_protokoll');
+      });
+    } finally {
+      _laufendeDatenbanken.remove(datenbank);
+    }
+  }
+
   List<ImportProtokollEintrag> ladeProtokoll(
     LokaleDatenbank datenbank, {
     int limit = 20,
