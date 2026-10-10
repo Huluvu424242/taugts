@@ -179,9 +179,8 @@ class ImportStrategieService {
       'herkunftProfilId',
       'bewertetAm',
       'beobachtetAm',
-      'tatsaechlicherBeginn',
-      'tatsaechlichesEnde',
-      'geplanterTag',
+      'beginn',
+      'ende',
     ];
     return {
       for (final key in schluessel)
