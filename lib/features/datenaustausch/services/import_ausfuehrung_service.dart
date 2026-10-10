@@ -188,6 +188,7 @@ class ImportAusfuehrungService {
           datenbank: datenbank,
           dokument: importDokument,
           strategie: strategie,
+          entscheidungen: entscheidungen,
         );
         for (final alias in aliase) {
           aliasRepository.speichere(
