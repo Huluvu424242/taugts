@@ -15,6 +15,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Changed
 
+- Für KI-Agenten steht ein gesonderter, ausschließlich manuell startbarer Dart-Formatter für ungeschützte Arbeitsbranches bereit (Story #236). Seine Ausführung ist **nicht freigegeben**; die dokumentierten Sicherheits- und Freigaberegeln gelten unverändert. Der bisherige Workflow `Flutter-Prüfungen` bleibt davon getrennt.
 - Bewertungsdetails und Suchtreffer zeigen fachliche Produkt- und Ortsnamen sowie den Erlebnistyp mit Orts- und Zeitbezug statt technischer IDs. Nicht mehr zuordenbare Stammdaten werden verständlich gekennzeichnet (Story #218).
 - Erlebnisformulare verwenden einen gemeinsamen Speicherpunkt für Erlebnisdaten, Positionen, Preise sowie Produkt- und Ortsbewertungen. Die Änderungen werden als gemeinsamer Entwurf atomar übernommen; bei einem Fehler erfolgt ein Rollback (Story #221).
 - Restaurantbesuche und Einkäufe verwenden nur noch einen bearbeitbaren Beginn und ein Ende anstelle getrennter Plan- und Ist-Zeiten beziehungsweise persistierter Entwurfs- und Durchführungsstatus. Die Erlebnisübersicht zeigt den einheitlichen Zeitraum (Story #228).
@@ -22,6 +23,7 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Fixed
 
+- Das formale JSON-Austauschschema deklariert jetzt wie Export und Import die Formatversion 3 und die Erlebnisfelder `beginn`/`ende`. Regressionstests prüfen die Übereinstimmung, ohne ältere Importformate umzudeuten (Bug #234).
 - Beim gemeinsamen Speichern eines Erlebnisses bleiben Änderungen an Produktpositionen, Preisen und Bewertungen bei einem Fehler zur Korrektur im Entwurf erhalten; ein unvollständiger Teilstand wird nicht dauerhaft übernommen (Story #221).
 - Gelöschte Stammdaten führen in historischen Such- und Bewertungsansichten nicht mehr zur Anzeige technischer IDs, sondern werden als nicht zugeordnet dargestellt (Stories #217 und #218).
 
