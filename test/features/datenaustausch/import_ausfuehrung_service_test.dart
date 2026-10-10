@@ -349,6 +349,28 @@ void main() {
     }
   });
 
+  test('sperrt destruktiven Ersatz bei nicht exportierten Kategorien', () {
+    datenbank.verbindung.execute(
+      'INSERT INTO kategorien (id, name, bereich) VALUES (?, ?, ?)',
+      ['kategorie-1', 'Testkategorie', 'produkt'],
+    );
+
+    expect(
+      () => service.ausfuehren(
+        datenbank: datenbank,
+        importDokument: leeresDokument(),
+        strategie: ImportStrategie.bestandErsetzen,
+      ),
+      throwsA(isA<StateError>()),
+    );
+    expect(
+      datenbank.verbindung
+          .select('SELECT name FROM kategorien WHERE id = ?', ['kategorie-1'])
+          .single['name'],
+      'Testkategorie',
+    );
+  });
+
   test('weist zusammengeführte Datensätze getrennt von Aktualisierungen aus',
       () {
     final import = leeresDokument(profile: [
