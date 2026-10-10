@@ -353,7 +353,7 @@ Future<Erlebnis> _vorbereiten({
     typ: typ,
     ortId: ort.id,
     herkunftProfilId: profil.id,
-    istEntwurf: false,
+
     erstelltAm: zeit,
     geaendertAm: zeit,
   );
