@@ -2,7 +2,7 @@
 
 ## Status und Freigabe
 
-Die GitHub Action `Dart-Formatierung Arbeitsbranch` liegt unter `.github/workflows/kiagent-dart-format-branch.yml`. **Ihre bloße Bereitstellung ist keine Ausführungsfreigabe.** Sie darf erst nach menschlicher Prüfung und Merge dieses Werkzeugketten-PRs und anschließend gesonderter ausdrücklicher Freigabe nach [AGENTS / Sicherheit](../../agent-rules/05-security-tooling.md) verwendet werden. Die bestehende freigegebene Action `Flutter-Prüfungen` bleibt unverändert.
+Die GitHub Action `Dart-Formatierung Arbeitsbranch` liegt unter `.github/workflows/kiagent-dart-format-branch.yml`. **Ihre bloße Bereitstellung ist keine Ausführungsfreigabe.** Sie darf erst nach menschlicher Prüfung und Merge dieses Werkzeugketten-PRs und anschließend gesonderter ausdrücklicher Freigabe nach [AGENTS / Sicherheit](https://github.com/Huluvu424242/taugts/blob/master/agent-rules/05-security-tooling.md) verwendet werden. Die bestehende freigegebene Action `Flutter-Prüfungen` bleibt unverändert.
 
 ## Bedienkonzept
 
