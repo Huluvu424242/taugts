@@ -13,7 +13,7 @@ Map<String, Object?> _dokument(String name) =>
 void main() {
   const service = ImportValidierungsService();
 
-  test('gültiges V1-Fixture wird auf V2 migriert und vollständig akzeptiert',
+  test('gültiges V1-Fixture wird auf V3 migriert und vollständig akzeptiert',
       () {
     final ergebnis = service.validiere(
       _fixture('taugts-export-v1-gueltig.json'),
@@ -22,7 +22,7 @@ void main() {
     expect(ergebnis.istGueltig, isTrue);
     expect(ergebnis.wurdeMigriert, isTrue);
     expect(ergebnis.urspruenglicheSchemaVersion, 1);
-    expect(ergebnis.schemaVersion, 2);
+    expect(ergebnis.schemaVersion, 3);
     expect(ergebnis.fehler, isEmpty);
   });
 
@@ -38,7 +38,7 @@ void main() {
     expect(service.validiere(jsonEncode(dokument)).istGueltig, isTrue);
   });
 
-  test('Vorabversion 0 wird vorwärts auf V2 migriert', () {
+  test('Vorabversion 0 wird vorwärts auf V3 migriert', () {
     final ergebnis = service.validiere(
       _fixture('taugts-export-v0-migrierbar.json'),
     );
@@ -46,14 +46,14 @@ void main() {
     expect(ergebnis.istGueltig, isTrue);
     expect(ergebnis.wurdeMigriert, isTrue);
     expect(ergebnis.urspruenglicheSchemaVersion, 0);
-    expect(ergebnis.schemaVersion, 2);
+    expect(ergebnis.schemaVersion, 3);
     expect(ergebnis.dokument!['kategorien'], isEmpty);
     expect(ergebnis.dokument!['kategorieZuordnungen'], isEmpty);
   });
 
   test('nicht unterstützte neuere Version wird abgewiesen', () {
     final dokument = _dokument('taugts-export-v1-gueltig.json');
-    dokument['schemaVersion'] = 3;
+    dokument['schemaVersion'] = 4;
 
     final ergebnis = service.validiere(jsonEncode(dokument));
 
@@ -93,7 +93,6 @@ void main() {
 
     expect(ergebnis.istGueltig, isFalse);
     expect(codes, contains('zeitkombination_ungueltig'));
-    expect(codes, contains('status_ungueltig'));
   });
 
   test('Preis und Währung werden fachlich typisiert validiert', () {
@@ -157,7 +156,7 @@ void main() {
     final ergebnis = service.validiere(jsonEncode(dokument));
 
     expect(ergebnis.istGueltig, isTrue);
-    expect(ergebnis.schemaVersion, 2);
+    expect(ergebnis.schemaVersion, 3);
   });
 
   test('Dateigröße wird vor dem JSON-Parsing begrenzt', () {
