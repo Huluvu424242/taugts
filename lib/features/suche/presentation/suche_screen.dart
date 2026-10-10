@@ -23,7 +23,6 @@ class _SucheScreenState extends State<SucheScreen> {
   final _text = TextEditingController();
   late Suchziel _ziel = widget.initialZiel;
   Erlebnistyp? _erlebnistyp;
-  Erlebnisstatus? _status;
   Historienart? _historienart;
   Future<List<Suchtreffer>>? _treffer;
 
@@ -44,7 +43,6 @@ class _SucheScreenState extends State<SucheScreen> {
       ziel: _ziel,
       text: _text.text,
       erlebnistyp: _ziel == Suchziel.erlebnisse ? _erlebnistyp : null,
-      erlebnisstatus: _ziel == Suchziel.erlebnisse ? _status : null,
       historienart: _ziel == Suchziel.historie ? _historienart : null,
     );
     final treffer = widget.service.suche(filter);
@@ -120,30 +118,6 @@ class _SucheScreenState extends State<SucheScreen> {
                     _suchen();
                   },
                 ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<Erlebnisstatus?>(
-                  initialValue: _status,
-                  decoration: const InputDecoration(labelText: 'Status'),
-                  items: const [
-                    DropdownMenuItem(value: null, child: Text('Alle Status')),
-                    DropdownMenuItem(
-                      value: Erlebnisstatus.geplant,
-                      child: Text('Geplant'),
-                    ),
-                    DropdownMenuItem(
-                      value: Erlebnisstatus.aktiv,
-                      child: Text('Aktiv'),
-                    ),
-                    DropdownMenuItem(
-                      value: Erlebnisstatus.beendet,
-                      child: Text('Beendet'),
-                    ),
-                  ],
-                  onChanged: (wert) {
-                    _status = wert;
-                    _suchen();
-                  },
-                ),
               ],
               if (_ziel == Suchziel.historie) ...[
                 const SizedBox(height: 12),
@@ -175,8 +149,6 @@ class _SucheScreenState extends State<SucheScreen> {
                   Chip(label: Text('Bereich: ${_zielLabel(_ziel)}')),
                   if (_erlebnistyp != null && _ziel == Suchziel.erlebnisse)
                     Chip(label: Text('Typ: ${_erlebnistyp!.name}')),
-                  if (_status != null && _ziel == Suchziel.erlebnisse)
-                    Chip(label: Text('Status: ${_status!.name}')),
                   if (_historienart != null && _ziel == Suchziel.historie)
                     Chip(label: Text('Art: ${_historieLabel(_historienart!)}')),
                 ],
