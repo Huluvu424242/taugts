@@ -38,6 +38,7 @@ nav:
       - JSON-Austauschformat: entwicklung/austauschformat.md
       - Sichere Importvalidierung: entwicklung/importvalidierung.md
       - Android-Release: android-release.md
+      - Android-Test-APK: entwicklung/android-test-apk.md
       - OpenStreetMap: openstreetmap.md
       - Fachliche Anforderungen: fachliche_anforderungen.md
   - Architektur:
