@@ -285,6 +285,18 @@ class ImportValidierungsService {
     ]) {
       migriert.putIfAbsent(name, () => <Object?>[]);
     }
+    for (final name in const ['objekte', 'orte']) {
+      final werte = migriert[name];
+      if (werte is List) {
+        migriert[name] = [
+          for (final eintrag in werte)
+            if (eintrag is Map)
+              {..._map(eintrag), 'geloescht': eintrag['geloescht'] ?? false}
+            else
+              eintrag,
+        ];
+      }
+    }
     return migriert;
   }
 
@@ -449,6 +461,9 @@ class ImportValidierungsService {
       _uuid(wert, 'id', '$pfad.id', fehler);
       _text(wert, 'name', '$pfad.name', fehler);
       _enumWert(wert, 'art', {'allgemein', 'produkt'}, '$pfad.art', fehler);
+      if (wert.containsKey('geloescht')) {
+        _bool(wert, 'geloescht', '$pfad.geloescht', fehler);
+      }
       if (wert['art'] == 'produkt') {
         _enumWert(
           wert,
@@ -485,6 +500,9 @@ class ImportValidierungsService {
       final pfad = r'$.orte[' '$i]';
       _uuid(wert, 'id', '$pfad.id', fehler);
       _text(wert, 'name', '$pfad.name', fehler, nichtLeer: true);
+      if (wert.containsKey('geloescht')) {
+        _bool(wert, 'geloescht', '$pfad.geloescht', fehler);
+      }
       _enumWert(
         wert,
         'typ',
