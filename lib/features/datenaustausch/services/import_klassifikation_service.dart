@@ -102,7 +102,7 @@ class ImportKlassifikationService {
     }
     for (final wert in _liste(dokument, 'objektTags')) {
       final id = ImportKonfliktentscheidungService.identitaet(
-        '$name', wert,
+        'objektTags', wert,
       );
       final auswahl = explizit['$name|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
@@ -124,7 +124,7 @@ class ImportKlassifikationService {
     }
     for (final wert in _liste(dokument, 'objektKlassifikationsmerkmale')) {
       final id = ImportKonfliktentscheidungService.identitaet(
-        '$name', wert,
+        'objektKlassifikationsmerkmale', wert,
       );
       final auswahl = explizit['$name|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
@@ -147,7 +147,7 @@ class ImportKlassifikationService {
     }
     for (final wert in _liste(dokument, 'kategorieKriteriensetRegeln')) {
       final id = ImportKonfliktentscheidungService.identitaet(
-        '$name', wert,
+        'kategorieKriteriensetRegeln', wert,
       );
       final auswahl = explizit['$name|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
@@ -170,7 +170,7 @@ class ImportKlassifikationService {
     }
     for (final wert in _liste(dokument, 'kategorieKriterien')) {
       final id = ImportKonfliktentscheidungService.identitaet(
-        '$name', wert,
+        'kategorieKriterien', wert,
       );
       final auswahl = explizit['$name|$id|$id'];
       if (auswahl == ImportKonfliktAktion.ueberspringen ||
