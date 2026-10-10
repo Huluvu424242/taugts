@@ -112,27 +112,25 @@ void main() {
         2);
   });
 
-  testWidgets('Restaurantbesuch verwendet Check-in und Checkout',
+  testWidgets('Restaurantbesuch nutzt einen kompakten Zeitraum',
       (tester) async {
     final erlebnis = (await repository.ladeErlebnisse()).single;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: ErlebnisScreen(
-          repository: repository,
-          idGenerator: _TestIdGenerator(),
-          profil: profil,
-          erlebnis: erlebnis,
-        ),
+    await tester.pumpWidget(MaterialApp(
+      home: ErlebnisScreen(
+        repository: repository,
+        idGenerator: _TestIdGenerator(),
+        profil: profil,
+        erlebnis: erlebnis,
       ),
-    );
+    ));
     await tester.pumpAndSettle();
-
-    expect(find.text('Check-in'), findsOneWidget);
-    await tester.tap(find.text('Check-in'));
-    await tester.pumpAndSettle();
-    expect(find.text('Checkout'), findsOneWidget);
-    expect(find.textContaining('Aktiv seit'), findsOneWidget);
+    expect(find.text('Zeitraum'), findsOneWidget);
+    expect(find.text('Beginn (optional)'), findsOneWidget);
+    expect(find.text('Ende (optional)'), findsOneWidget);
+    expect(find.text('Check-in'), findsNothing);
+    expect(find.text('Checkout'), findsNothing);
   });
+
 }
 
 class _TestIdGenerator implements IdGenerator {
