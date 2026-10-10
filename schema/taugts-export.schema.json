@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://huluvu424242.github.io/taugts/schema/taugts-export.schema.json",
   "title": "Taugt’s? Austauschformat",
-  "description": "Version 2 des stabilen, datenbankunabhängigen JSON-Austauschformats.",
+  "description": "Version 3 des stabilen, datenbankunabhängigen JSON-Austauschformats mit gemeinsamem Erlebniszeitraum.",
   "type": "object",
   "required": [
     "format",
@@ -26,7 +26,7 @@
       "const": "taugts-export"
     },
     "schemaVersion": {
-      "const": 2
+      "const": 3
     },
     "exportiertAm": {
       "$ref": "#/$defs/utcDateTime"
