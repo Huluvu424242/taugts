@@ -39,32 +39,32 @@ class LokaleDatenbank {
     if (version < 4) verbindung.execute('PRAGMA foreign_keys = OFF');
     try {
       transaktion(() {
-      var aktuelleVersion = version;
-      while (aktuelleVersion < schemaVersion) {
-        switch (aktuelleVersion) {
-          case 0:
-            _migriereVon0Auf1();
-            aktuelleVersion = 1;
-          case 1:
-            _migriereVon1Auf2();
-            aktuelleVersion = 2;
-          case 2:
-            _migriereVon2Auf3();
-            aktuelleVersion = 3;
-          case 3:
-            _migriereVon3Auf4();
-            aktuelleVersion = 4;
-          default:
-            throw StateError(
-              'Kein Migrationspfad von Schemaversion $aktuelleVersion '
-              'auf $schemaVersion vorhanden.',
-            );
+        var aktuelleVersion = version;
+        while (aktuelleVersion < schemaVersion) {
+          switch (aktuelleVersion) {
+            case 0:
+              _migriereVon0Auf1();
+              aktuelleVersion = 1;
+            case 1:
+              _migriereVon1Auf2();
+              aktuelleVersion = 2;
+            case 2:
+              _migriereVon2Auf3();
+              aktuelleVersion = 3;
+            case 3:
+              _migriereVon3Auf4();
+              aktuelleVersion = 4;
+            default:
+              throw StateError(
+                'Kein Migrationspfad von Schemaversion $aktuelleVersion '
+                'auf $schemaVersion vorhanden.',
+              );
+          }
         }
-      }
 
-      _stelleStandardkriterienBereit();
-      verbindung.userVersion = aktuelleVersion;
-    });
+        _stelleStandardkriterienBereit();
+        verbindung.userVersion = aktuelleVersion;
+      });
     } finally {
       if (version < 4) verbindung.execute('PRAGMA foreign_keys = ON');
     }
