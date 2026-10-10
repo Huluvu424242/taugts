@@ -10,6 +10,7 @@ import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_ausfuehrung_service.dart';
 import 'package:taugts/features/datenaustausch/services/import_quelle_service.dart';
+import 'package:taugts/features/datenaustausch/services/import_strategie_service.dart';
 
 class _KontrollierteImportQuelle implements ImportQuelleService {
   final completer = Completer<String?>();
@@ -132,10 +133,10 @@ void main() {
       await tester.tap(find.text('Importdatei auswählen und prüfen'));
       await tester.pumpAndSettle();
 
-      final auswahl = tester.widget<DropdownButtonFormField<dynamic>>(
-        find.byType(DropdownButtonFormField).first,
+      final auswahl = tester.widget<DropdownButtonFormField<ImportStrategie>>(
+        find.byType(DropdownButtonFormField<ImportStrategie>).first,
       );
-      expect(auswahl.initialValue.toString(), contains('lokalBevorzugen'));
+      expect(auswahl.initialValue, ImportStrategie.lokalBevorzugen);
       final importButton = tester.widget<FilledButton>(
         find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
       );
