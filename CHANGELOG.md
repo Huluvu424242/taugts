@@ -6,6 +6,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+## [0.1.0+9] - 2026-10-10
+
 ### Added
 
 - Produkte und Orte können nach Bestätigung aus den aktiven Stammdaten gelöscht werden. Historische Erlebnisse, Bewertungen und Preisbeobachtungen bleiben erhalten und ihre fehlenden Zuordnungen können später korrigiert werden (Story #217).
@@ -191,7 +193,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
 - Featureorientierte Ausgangsstruktur, Startscreen und Widget-Test.
 
-[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+8...HEAD
+[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+9...HEAD
+[0.1.0+9]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+8...v0.1.0+9
 [0.1.0+8]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+7...v0.1.0+8
 [0.1.0+7]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+6...v0.1.0+7
 [0.1.0+6]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+5...v0.1.0+6
