@@ -33,6 +33,10 @@ class ImportKlassifikationService {
     // Elternrelationen erst nach Anlage aller Kategorien setzen:
     // dadurch sind auch unsortierte hierarchische Exporte importierbar.
     final kategorien = _liste(dokument, 'kategorien');
+    final vorhandeneKategorieIds = db
+        .select('SELECT id FROM kategorien')
+        .map((zeile) => zeile['id'] as String)
+        .toSet();
     for (final kategorie in kategorien) {
       _schreibe(
         datenbank,
@@ -50,13 +54,9 @@ class ImportKlassifikationService {
     }
     for (final kategorie in kategorien) {
       if (kategorie['elternKategorieId'] == null) continue;
-      if (bevorzugtLokal) {
-        // Nur neue Kategorien erhalten die importierte Elternbeziehung.
-        final lokal = db.select(
-          'SELECT eltern_id FROM kategorien WHERE id = ?',
-          [kategorie['id']],
-        );
-        if (lokal.isEmpty || lokal.single['eltern_id'] != null) continue;
+      if (bevorzugtLokal &&
+          vorhandeneKategorieIds.contains(kategorie['id'])) {
+        continue;
       }
       db.execute(
         'UPDATE kategorien SET eltern_id = ? WHERE id = ?',
