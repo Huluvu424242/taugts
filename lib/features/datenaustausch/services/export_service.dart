@@ -25,9 +25,72 @@ class ExportService {
         'bewertungskriterien': _kriterien(),
         'bewertungen': _bewertungen(),
         'ortsbewertungen': _ortsbewertungen(),
-        'kategorien': const <Object?>[],
-        'kategorieZuordnungen': const <Object?>[],
+        'kategorien': _kategorien(),
+        'kategorieZuordnungen': _kategorieZuordnungen(),
+        'objektTags': _objektTags(),
+        'objektKlassifikationsmerkmale': _objektKlassifikationsmerkmale(),
+        'kategorieKriteriensetRegeln': _kategorieKriteriensetRegeln(),
+        'kategorieKriterien': _kategorieKriterien(),
       });
+
+  // Die Kategorie-Tabelle besitzt keine Zeitstempel. Der feste Wert
+  // kennzeichnet dies ohne bei jedem Export künstliche Änderungen zu erzeugen.
+  static const _ohneKategorieZeit = '1970-01-01T00:00:00.000Z';
+
+  List<Map<String, Object?>> _kategorien() => _zeilen('kategorien')
+      .map((z) => {
+            'id': z['id'],
+            'name': z['name'],
+            'zielart': z['bereich'] == 'ort' ? 'ort' : 'objekt',
+            'elternKategorieId': z['eltern_id'],
+            'istStandard': z['ist_standard'] == 1,
+            'erstelltAm': _ohneKategorieZeit,
+            'geaendertAm': _ohneKategorieZeit,
+          })
+      .toList();
+
+  List<Map<String, Object?>> _kategorieZuordnungen() => [
+        for (final z in _zeilen('produkt_kategorien'))
+          {'kategorieId': z['kategorie_id'], 'zielId': z['produkt_id']},
+        for (final z in _zeilen('ort_kategorien'))
+          {'kategorieId': z['kategorie_id'], 'zielId': z['ort_id']},
+      ];
+
+  List<Map<String, Object?>> _objektTags() => _zeilen('objekt_tags')
+      .map((z) => {
+            'objektId': z['objekt_id'],
+            'normalisiert': z['normalisiert'],
+            'text': z['text'],
+          })
+      .toList();
+
+  List<Map<String, Object?>> _objektKlassifikationsmerkmale() =>
+      _zeilen('objekt_klassifikationsmerkmale')
+          .map((z) => {
+                'objektId': z['objekt_id'],
+                'dimension': z['dimension'],
+                'schluessel': z['schluessel'],
+                'wert': z['wert'],
+              })
+          .toList();
+
+  List<Map<String, Object?>> _kategorieKriteriensetRegeln() =>
+      _zeilen('kategorie_kriterienset_regeln')
+          .map((z) => {
+                'kategorieId': z['kategorie_id'],
+                'fallbackObjektart': z['fallback_objektart'],
+                'modus': z['modus'],
+                'version': z['version'],
+              })
+          .toList();
+
+  List<Map<String, Object?>> _kategorieKriterien() => _zeilen('kategorie_kriterien')
+      .map((z) => {
+            'kategorieId': z['kategorie_id'],
+            'kriteriumId': z['kriterium_id'],
+            'reihenfolge': z['reihenfolge'],
+          })
+      .toList();
 
   List<Map<String, Object?>> _profile() => _zeilen('profile')
       .map((z) => {
