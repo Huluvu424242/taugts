@@ -36,7 +36,7 @@ class LokaleDatenbank {
 
     // Beim Neubau der Erlebnistabelle müssen bestehende Kindreferenzen
     // erhalten bleiben. Die Migration selbst läuft weiterhin atomar.
-    if (version == 3) verbindung.execute('PRAGMA foreign_keys = OFF');
+    if (version < 4) verbindung.execute('PRAGMA foreign_keys = OFF');
     try {
       transaktion(() {
       var aktuelleVersion = version;
@@ -66,7 +66,7 @@ class LokaleDatenbank {
       verbindung.userVersion = aktuelleVersion;
     });
     } finally {
-      if (version == 3) verbindung.execute('PRAGMA foreign_keys = ON');
+      if (version < 4) verbindung.execute('PRAGMA foreign_keys = ON');
     }
     final verletzungen = verbindung.select('PRAGMA foreign_key_check');
     if (verletzungen.isNotEmpty) {
