@@ -78,3 +78,39 @@ Die Abschlussmeldung unterscheidet verbindlich:
 
 - `Implementiert, technische Prüfung ausstehend`: Mindestens eine vorgeschriebene automatisierte Prüfung konnte weder lokal noch über CI erfolgreich ausgeführt werden.
 - `Geprüft und mergebereit`: Alle vorgeschriebenen automatisierten Prüfungen waren erfolgreich; noch offene manuelle Prüfungen sind transparent benannt und stehen dem Merge nach den Projektvorgaben nicht entgegen.
+
+## Autonomer Story-Schleifen-Workflow in ChatGPT Work
+
+### Geltung, Start und Pflichtlektüre
+
+Der im Repository versionierte [Skill `story-loop`](../agent-skills/story-loop/SKILL.md) und **alle vier** dort referenzierten Dateien sind gemäß [AGENTS.md](../AGENTS.md) vor jeder Repository-Arbeit von jedem KI-Agenten vollständig zu lesen. Dies bedeutet **nicht**, dass ein Story-Arbeitslauf automatisch gestartet werden darf. Für die Ausführung sind ein ausdrücklicher menschlicher Startauftrag, der tatsächlich installierte und freigegebene Skill in einer geeigneten ChatGPT-Work-Umgebung sowie die notwendige GitHub-Zugriffsberechtigung Voraussetzung. Die installierte Skill-Releaseversion wird vor dem Lauf geprüft und im Bericht angegeben; Repositorydateien allein belegen keine Installation oder Freigabe. Ein Skill ist kein Hintergrunddienst und garantiert keine unbegrenzte Laufzeit.
+
+**Verbindlicher Startauftrag für Taugt's (bei ausdrücklichem Aufruf):**
+
+> Führe mit dem bewusst installierten und freigegebenen ChatGPT-Skill **story-loop** einen vollständigen autonomen Story-Arbeitslauf aus.
+>
+> - **Zielrepository:** `Huluvu424242/taugts`
+> - **Zielbranch:** `master`
+> - **Maßgebliche Harness-Datei:** `AGENTS.md` (Repository-Stamm).
+> - **Stories:** alle offenen Issues mit Label `story` ohne Label `human-only`; nach jeder Iteration frisch ermitteln.
+> - **Laufende Story:** eigener Branch und PR, gegebenenfalls gestapelt; **keinen PR mergen**.
+> - **Abschluss:** nur bei erfolgreich nachgewiesenen vorgeschriebenen GitHub-Actions-Prüfungen auf dem einschlägigen Commit.
+> - **Fehler:** begrenzte Reparaturversuche, bei fortdauernder Blockade dokumentiert zurückstellen und unabhängige Stories weiterbearbeiten.
+> - **Fortsetzung:** den tatsächlichen GitHub-Zustand einschließlich offener PRs, Abhängigkeiten und Checks rekonstruieren; erfolgreich validierte PRs unangetastet lassen.
+> - **Ende:** erst wenn keine ausführbaren Stories mehr verbleiben oder die Work-Umgebung eine technische Grenze erreicht.
+> - **Ergebnis:** ausführlicher Bericht mit Issue- und PR-Links, Checks, SHAs, Abhängigkeiten, Merge-Reihenfolge, Reparaturen, neuen Defect-Issues und Blockaden.
+>
+> Lies zunächst `AGENTS.md` und **alle darin verbindlich referenzierten Regel- und Skill-Dateien einschließlich ihrer Referenzen vollständig**. Halte die projektseitigen Berechtigungs-, Workflow- und Qualitätsregeln ein, insbesondere die ausdrücklichen Freigaben für konkrete GitHub-Action-Versionen. Bei Widersprüchen in Arbeitsregeln hat der Harness Vorrang, ohne Sicherheits- oder Berechtigungsgrenzen zu überschreiten. Stelle keine wiederholten Routine-Rückfragen; falls eine Aktion nicht autorisiert ist, stelle die betroffene Story zurück.
+>
+> Dieser Startauftrag erteilt **keine** Berechtigung zum Mergen, Verändern von Repository-Einstellungen oder Ausführen nicht freigegebener Werkzeugketten.
+
+### Verbindlicher Ablauf nach dem Start
+
+1. Den aktuellen GitHub-Zustand statt früherer Chat-Erinnerungen rekonstruieren: Zielbranch, offene Stories, Labels, Kommentare, zugehörige Branches und PRs, Head-SHAs, Abhängigkeiten, Workflow-Versionen, Berechtigungen und Checks. Vorhandene geprüfte PRs nicht unnötig verändern.
+2. Ausschließlich offene **Issues** im Zielrepository mit `story` und ohne `human-only` auswählen; nach **jeder** Story-Iteration neu suchen. Abhängigkeiten belegen, zulässige unabhängige Stories bevorzugen, gesperrte Voraussetzungen respektieren. Auswahlregeln: [Story-Auswahl](../agent-skills/story-loop/references/story-selection.md).
+3. Pro Story eigenen ungeschützten Arbeitsbranch und PR erstellen beziehungsweise einen bereits vorhandenen unvollständigen Story-PR fortsetzen; unabhängige PRs gegen `master`, abhängige PRs bei Bedarf gestapelt gegen den vorherigen Arbeitsbranch. PR-Zuordnung, Closing-Keyword, Risiken und Stapelbeziehung dokumentieren. [PR-Abhängigkeiten](../agent-skills/story-loop/references/dependencies-and-prs.md) beachten. **Kein Merge, kein Auto-Merge**, auch nicht bei grünen Checks. Der separat geregelte, nur ausdrücklich beauftragbare Prozess „Gestapelter Merge“ wird dadurch nicht gestartet.
+4. Nur die nach [Sicherheit und Werkzeugketten](05-security-tooling.md) **für die exakte unveränderte Version und den konkreten Trigger** freigegebenen GitHub Actions verwenden oder indirekt auslösen. Vor jedem Push/PR/Kommentar mögliche Trigger prüfen. Pflichtprüfungen inklusive Formatierung, Analyse, Tests und erforderlichem `mkdocs build --strict` entsprechend [Qualität und Dokumentation](06-quality-documentation.md) sowie Branchschutz auf dem **einschlägigen aktuellen SHA** nachweisen. Pending, fehlend, übersprungen, abgebrochen oder fehlgeschlagen bedeutet **nicht validiert**; bei geänderter Basis erforderliche Nachprüfungen beachten.
+5. Bei Fehlern Diagnose, minimal zulässige Reparatur, neuen SHA und Checks durchführen; höchstens **drei** Reparaturzyklen, sofern eine speziellere Harness-Regel nichts anderes vorsieht. Fehlende Rechte oder Werkzeugfreigaben nicht umgehen; blockierte Story mit Versuchen und CI-Links dokumentiert zurückstellen und unabhängige Stories fortsetzen. Eigenständige Defects nach dem Bug-Issue-Prozess behandeln, Duplikate vermeiden. [Validierung und Wiederaufnahme](../agent-skills/story-loop/references/validation-and-recovery.md).
+6. Schleife fortführen, bis keine zulässig ausführbare Story mehr besteht oder eine tatsächliche technische Grenze der Work-Umgebung erreicht ist; zurückgestellte Stories im selben Lauf nicht endlos erneut versuchen. Zum Abschluss einen vollständigen [Bericht](../agent-skills/story-loop/references/reporting.md) mit Issue-/PR-Links, Branches, Basen, Head-SHAs, präzisen Check-Links und geprüften SHAs, Merge-Reihenfolge (nur als **Empfehlung**), Reparaturen, neu erfassten Defects, Blockaden, Risiken und notwendigen manuellen Schritten liefern.
+
+Dieser Workflow ist eine **Arbeitsanweisung und kein Freigabeverzeichnis**. Bei jeder Kollision mit Sicherheits-, Berechtigungs- oder Plattformgrenzen gelten die strengeren Grenzen; nicht autorisierte Aktionen unterbleiben. Die Integration dieses Workflows in den Harness startet weder die Story-Schleife noch zusätzliche GitHub Actions.
