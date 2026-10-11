@@ -71,3 +71,21 @@ Diese Freigabe gilt ausschließlich für die oben bezeichnete Version. Jede Änd
 - Abhängigkeiten und GitHub Actions auf Herkunft, Wartungszustand, Lizenz und minimale Berechtigungen prüfen.
 - GitHub Actions erhalten explizite minimale `permissions`; externe Actions möglichst auf unveränderliche Commit-SHAs festlegen.
 - Eine vermutete Offenlegung als Sicherheitsvorfall behandeln: Zugang widerrufen oder rotieren, Reichweite prüfen und bereinigen.
+
+
+## Dauerfreigabe: MkDocs-PR-Prüfung (11. Oktober 2026)
+
+- **Repository:** `Huluvu424242/taugts`.
+- **Story:** [#268](https://github.com/Huluvu424242/taugts/issues/268).
+- **Workflow:** `MkDocs-PR-Prüfung`, Datei `.github/workflows/mkdocs-pr-check.yml`, unveränderliche Git-Blob-SHA `db0e38642a6fa5f5b6c6ff928a1bc890d2d6f75b`.
+- **Freigabe:** Vom Projektverantwortlichen am 11. Oktober 2026 nach ausdrücklicher Rückfrage im Chat dauerhaft für das automatische Prüfen von Dokumentations-PRs erteilt. Die Freigabe wird **erst nach menschlicher Prüfung und Merge des separaten Werkzeugketten-PRs wirksam**. Die neue Action darf durch den initialen Werkzeugketten-PR nicht ausgelöst werden.
+- **Erlaubte Trigger und Zielbranches:** `pull_request` gegen `master` oder `release/**`, ausschließlich bei Änderungen unter `docs/**`, an `mkdocs.yml` oder `requirements-docs.txt`. Keine `push`- und keine `workflow_dispatch`-Ausführung.
+- **Zweck:** Dokumentation mit `mkdocs build --strict` vor dem Merge auf dem PR-Stand prüfen; kein Pages-Deployment.
+- **Berechtigungen:** Workflow-Default `permissions: {}`; allein der Build-Job erhält `contents: read`; Checkout ohne persistierte Zugangsdaten. Keine Schreibrechte.
+- **Inputs und Datenzugriff:** PR-Quellstand (Dokumentation, MkDocs-Konfiguration, Abhängigkeitsdefinition) und öffentlich herunterladbare, fest versionierte Python-Pakete aus `requirements-docs.txt`; Python 3.13.
+- **Secrets:** keine projektspezifischen Secrets, keine Signierschlüssel, kein Deployment-Token, kein an Skripte weitergereichter Repository-Token.
+- **Outputs/Artefakte:** ausschließlich Jobstatus und GitHub-Logs; `site/` wird im Runner temporär erzeugt, weder publiziert noch als Artefakt hochgeladen, keine Commits und kein Push. GitHub-Standardaufbewahrung der Logs.
+- **Runner und Laufzeit:** `ubuntu-latest`, Zeitlimit 15 Minuten, reguläres GitHub-Actions-Kontingent.
+- **Actions/SHAs:** `actions/checkout` v6: `d23441a48e516b6c34aea4fa41551a30e30af803`; `actions/setup-python` v6: `ece7cb06caefa5fff74198d8649806c4678c61a1`.
+- **Supply Chain/Lizenzen:** bestehende dokumentierte MkDocs-/Material-Abhängigkeiten aus `requirements-docs.txt`, keine zusätzlichen Pakete oder externen Workflows; Herkunft und Lizenzprüfung aus `docs/entwicklung/dokumentationswerkzeugkette.md` gelten weiterhin. PR-Code und Build-Abhängigkeiten sind als potenziell nicht vertrauenswürdig zu behandeln; daher lesender Job ohne Secrets.
+- **Audit/Deaktivierung/Rollback:** PR-Check und Logs sind nachvollziehbar. Änderungen am Workflow, seinen Triggern, Berechtigungen, Actions/SHAs, Datenflüssen oder Zweck beenden diese spezifische Freigabe; erneute ausdrückliche Genehmigung nötig. Deaktivierung oder Rücknahme ausschließlich nach den AGENTS-Regeln per geprüftem PR.
