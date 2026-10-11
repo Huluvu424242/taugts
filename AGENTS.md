@@ -13,8 +13,15 @@ Diese `AGENTS.md` ist der verbindliche Einstiegspunkt. Die Arbeitsregeln sind au
 5. [Sicherheit und Werkzeugketten](agent-rules/05-security-tooling.md)
 6. [Qualität und Dokumentation](agent-rules/06-quality-documentation.md)
 7. [Releasevorbereitung](agent-rules/07-release.md)
+8. [Agent-Skill: story-loop](agent-skills/story-loop/SKILL.md)
+9. [story-loop: Story-Auswahl](agent-skills/story-loop/references/story-selection.md)
+10. [story-loop: Abhängigkeiten und PRs](agent-skills/story-loop/references/dependencies-and-prs.md)
+11. [story-loop: Validierung und Wiederaufnahme](agent-skills/story-loop/references/validation-and-recovery.md)
+12. [story-loop: Abschlussbericht](agent-skills/story-loop/references/reporting.md)
 
-Eine Repository-Arbeit darf nicht begonnen werden, bevor alle genannten Regeldateien gelesen wurden.
+Eine Repository-Arbeit darf nicht begonnen werden, bevor alle genannten Regeldateien **und Skill-Dateien inklusive Referenzen** vollständig gelesen wurden. Das gilt für **jeden KI-Agenten**, auch wenn er keinen autonomen Story-Lauf ausführt. Neue verbindliche Skills und ihre Referenzen müssen hier ausdrücklich aufgenommen werden; eine bloße Ablage unter `agent-skills/` reicht nicht aus.
+
+**Lesepflicht ist keine Ausführungsfreigabe:** Das Lesen des Repository-Skills installiert oder aktiviert ihn nicht in einer Agentenplattform. `story-loop` wird nur nach ausdrücklichem Auftrag, bei tatsächlich verfügbarer/zugelassener Skill-Version und in einer geeigneten Work-Umgebung ausgeführt. Der [Story-Schleifen-Workflow](agent-rules/01-workflow.md#autonomer-story-schleifen-workflow-in-chatgpt-work) konkretisiert dies. Weder Skill noch Startauftrag erteilen neue Berechtigungen für Actions, Werkzeugketten, GitHub-Einstellungen oder Merges.
 
 ## Vor jeder Repository-Arbeit
 
