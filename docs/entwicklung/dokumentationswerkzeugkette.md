@@ -13,6 +13,10 @@ Die Projektdokumentation wird ausschließlich als Markdown unter `docs/` gepfleg
 
 Die Python-Abhängigkeiten sind in `requirements-docs.txt` fest versioniert. Änderungen daran sind wie Änderungen an der übrigen Werkzeugkette zu prüfen.
 
+## MkDocs-PR-Prüfung (vor dem Merge)
+
+Bei Änderungen unter `docs/`, an `mkdocs.yml` oder an `requirements-docs.txt` prüft der freigegebene Workflow `.github/workflows/mkdocs-pr-check.yml` Pull Requests gegen `master` und `release/**` automatisch mit `mkdocs build --strict`. Der Prüfjob besitzt lediglich `contents: read`, legt kein Release an und veröffentlicht keine Website. Sein grünes Ergebnis ist vor dem Merge erforderlich. Der separate Pages-Workflow bleibt für die Veröffentlichung auf `master` zuständig.
+
 ## Workflow `ghpage-generator.yml`
 
 ### Trigger
