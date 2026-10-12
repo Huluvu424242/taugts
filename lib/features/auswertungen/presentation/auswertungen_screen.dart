@@ -27,13 +27,47 @@ class AuswertungenScreen extends StatefulWidget {
 }
 
 class _AuswertungenScreenState extends State<AuswertungenScreen> {
+  var _filter = const AuswertungsFilter();
   late Future<AuswertungsUebersicht> _daten =
-      widget.service.berechne(const AuswertungsFilter());
+      widget.service.berechne(_filter);
   var _exportLaeuft = false;
 
   void _neuLaden() => setState(() {
-        _daten = widget.service.berechne(const AuswertungsFilter());
+        _filter = const AuswertungsFilter();
+        _daten = widget.service.berechne(_filter);
       });
+
+  Future<void> _zeitraumWaehlen() async {
+    final jetzt = DateTime.now();
+    final initial = _filter.von != null && _filter.bis != null
+        ? DateTimeRange(start: _filter.von!, end: _filter.bis!)
+        : null;
+    final zeitraum = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(1900),
+      lastDate: DateTime(jetzt.year + 1, 12, 31),
+      initialDateRange: initial,
+      helpText: 'Zeitraum für die Auswertung wählen',
+      cancelText: 'Abbrechen',
+      confirmText: 'Übernehmen',
+    );
+    if (!mounted || zeitraum == null) return;
+    setState(() {
+      _filter = AuswertungsFilter(
+        von: zeitraum.start,
+        bis: DateTime(
+          zeitraum.end.year,
+          zeitraum.end.month,
+          zeitraum.end.day,
+          23,
+          59,
+          59,
+          999,
+        ),
+      );
+      _daten = widget.service.berechne(_filter);
+    });
+  }
 
   Future<void> _exportieren() async {
     final statistikExportService = widget.statistikExportService;
@@ -116,6 +150,31 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                 children: [
                   const Text(
                     'Alle Berechnungen erfolgen lokal. Mittelwerte werden nur für Qualitätswertungen derselben Kriterienversion gebildet; fehlende Werte werden ausgelassen.',
+                  ),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: _zeitraumWaehlen,
+                            icon: const Icon(Icons.date_range),
+                            label: const Text('Zeitraum wählen'),
+                          ),
+                          if (_filter.von != null)
+                            Text(
+                              '${_filter.von!.toLocal().toString().split(' ').first} bis ${_filter.bis!.toLocal().toString().split(' ').first}',
+                            ),
+                          TextButton(
+                            onPressed: _filter.von == null ? null : _neuLaden,
+                            child: const Text('Filter zurücksetzen'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   if (widget.statistikExportService != null &&
                       widget.exportZielService != null) ...[
