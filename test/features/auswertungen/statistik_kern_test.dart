@@ -27,8 +27,14 @@ void main() {
       );
 
       expect(filter.enthaeltZeitpunkt(DateTime(2026, 1, 1)), isTrue);
-      expect(filter.enthaeltZeitpunkt(DateTime(2026, 1, 31, 23, 59, 59)), isTrue);
-      expect(filter.enthaeltZeitpunkt(DateTime(2025, 12, 31, 23, 59, 59)), isFalse);
+      expect(
+        filter.enthaeltZeitpunkt(DateTime(2026, 1, 31, 23, 59, 59)),
+        isTrue,
+      );
+      expect(
+        filter.enthaeltZeitpunkt(DateTime(2025, 12, 31, 23, 59, 59)),
+        isFalse,
+      );
       expect(filter.enthaeltZeitpunkt(DateTime(2026, 2, 1)), isFalse);
     });
 
