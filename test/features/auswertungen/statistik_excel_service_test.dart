@@ -1,5 +1,6 @@
 import 'package:excel_community/excel_community.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
 import 'package:taugts/features/auswertungen/models/statistik_export_modelle.dart';
 import 'package:taugts/features/auswertungen/services/statistik_excel_service.dart';
 
@@ -51,6 +52,37 @@ void main() {
     final datei = const StatistikExcelService().erstelle(
       daten,
       zeitpunkt: DateTime.utc(2026, 9, 6),
+      statistikTitel: 'Qualitätsverlauf',
+      gruppierung: StatistikZeitraum.monat,
+      filter: const AuswertungsFilter(
+        objektId: 'p1',
+        kategorieId: 'k1',
+        kriteriumId: 'kriterium1',
+      ),
+      filterOptionen: const AuswertungsFilterOptionen(
+        produkte: [AuswertungsFilterOption(id: 'p1', bezeichnung: 'Produkt 1')],
+        orte: [],
+        kategorien: [
+          AuswertungsFilterOption(id: 'k1', bezeichnung: 'Getränke')
+        ],
+        kriterien: [
+          AuswertungsFilterOption(id: 'kriterium1', bezeichnung: 'Geschmack'),
+        ],
+      ),
+      zeitreihe: [
+        Zeitwert(
+          zeitpunkt: DateTime.utc(2026, 9, 1),
+          wert: 3.5,
+          beschreibung: 'Geschmack · Version 1',
+          serie: 'Produkt',
+          kennzahlen: const StatistikKennzahlen(
+            anzahl: 4,
+            minimum: 2,
+            maximum: 5,
+            durchschnitt: 3.5,
+          ),
+        ),
+      ],
     );
 
     expect(datei.dateiname, 'taugts-statistik-2026-09-06.xlsx');
@@ -60,6 +92,40 @@ void main() {
     expect(
       excel.tables.keys,
       containsAll(['Produktbewertungen', 'Ortsbewertungen', 'Ortsverlauf']),
+    );
+
+    expect(
+      excel.tables.keys,
+      contains('Aktuelle Auswertung'),
+    );
+    final aktuelleAuswertung = excel['Aktuelle Auswertung'];
+    expect(
+      aktuelleAuswertung.cell(CellIndex.indexByString('B1')).value.toString(),
+      'Qualitätsverlauf',
+    );
+    expect(
+      aktuelleAuswertung.cell(CellIndex.indexByString('B2')).value.toString(),
+      'Monat',
+    );
+    expect(
+      aktuelleAuswertung.cell(CellIndex.indexByString('B4')).value.toString(),
+      'Produkt 1',
+    );
+    expect(
+      aktuelleAuswertung.cell(CellIndex.indexByString('B5')).value.toString(),
+      'Getränke',
+    );
+    expect(
+      aktuelleAuswertung.cell(CellIndex.indexByString('B6')).value.toString(),
+      'Geschmack',
+    );
+    expect(
+      aktuelleAuswertung.cell(CellIndex.indexByString('D9')).value.toString(),
+      '3.5',
+    );
+    expect(
+      aktuelleAuswertung.cell(CellIndex.indexByString('E9')).value.toString(),
+      '4',
     );
 
     final produkte = excel['Produktbewertungen'];
