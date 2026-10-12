@@ -106,6 +106,15 @@ void main() {
         {5.0, 7.0, 6.5},
       );
 
+      final besuche = await SqliteAuswertungsService(db).berechne(
+        const AuswertungsFilter(
+          objektId: 'p1',
+          objektArt: StatistikObjektart.produkt,
+        ),
+      );
+      expect(besuche.besuchverlauf, hasLength(1));
+      expect(besuche.besuchverlauf.single.wert, 1);
+
       final ausgaben = await SqliteAuswertungsService(db).berechne(
         const AuswertungsFilter(),
       );

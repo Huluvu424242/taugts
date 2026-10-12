@@ -15,7 +15,9 @@ enum _StatistikAnsicht {
   ortsqualitaet('Ortsqualität'),
   andrang('Andrang'),
   auffaelligkeiten('Bewertungsauffälligkeiten'),
-  qualitaetsvergleich('Produkt- und Ortsbewertungen vergleichen');
+  qualitaetsvergleich('Produkt- und Ortsbewertungen vergleichen'),
+  preisQualitaet('Preis und Qualität'),
+  haeufigkeit('Besuchshäufigkeit');
 
   const _StatistikAnsicht(this.titel);
 
@@ -32,6 +34,12 @@ enum _StatistikAnsicht {
             ...daten.qualitaetsverlauf,
             ...daten.ortsverlauf,
           ],
+        _StatistikAnsicht.preisQualitaet => [
+            ...daten.preisverlauf,
+            ...daten.qualitaetsverlauf,
+            ...daten.ortsverlauf,
+          ],
+        _StatistikAnsicht.haeufigkeit => daten.besuchverlauf,
       };
 }
 
@@ -290,7 +298,8 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                   : StatistikRechnung.aggregiere(
                       werte,
                       _aggregation,
-                      summieren: _ansicht == _StatistikAnsicht.ausgaben,
+                      summieren: _ansicht == _StatistikAnsicht.ausgaben ||
+                          _ansicht == _StatistikAnsicht.haeufigkeit,
                     );
               return ListView(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
@@ -536,6 +545,10 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                       _filter.objektArt == StatistikObjektart.produkt &&
                       _filter.objektId != null)
                     _preisExtrema(daten.preisverlauf),
+                  if (_ansicht == _StatistikAnsicht.preisQualitaet)
+                    const Text(
+                      'Preise und Wertungen werden in getrennten Diagrammreihen und eigenen Skalen dargestellt. Der Verlauf zeigt keine Ursache-Wirkung-Beziehung.',
+                    ),
                   const Text(
                     'Zeitliche Zusammenhänge werden als Beobachtung dargestellt. Aus Uhrzeit oder Wochentag wird kein Andrang abgeleitet und keine Ursache behauptet.',
                   ),
