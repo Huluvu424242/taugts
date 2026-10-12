@@ -3,6 +3,7 @@ import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
 import 'package:taugts/features/auswertungen/services/auswertungs_service.dart';
+import 'package:taugts/features/auswertungen/presentation/statistik_verlauf_darstellung.dart';
 import 'package:taugts/features/auswertungen/services/statistik_excel_service.dart';
 import 'package:taugts/features/auswertungen/services/statistik_export_service.dart';
 import 'package:taugts/features/datenaustausch/services/binaer_export_ziel_service.dart';
@@ -163,6 +164,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                       for (final wert in daten.preisverlauf)
                         '${wert.zeitpunkt.toLocal()}: ${wert.wert.toStringAsFixed(2)} · ${wert.beschreibung}',
                     ],
+                    verlauf: daten.preisverlauf,
                   ),
                   _Karte(
                     titel: 'Qualitätsverlauf von Produkten',
@@ -170,6 +172,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                       for (final wert in daten.qualitaetsverlauf)
                         '${wert.zeitpunkt.toLocal()}: ${wert.wert} · ${wert.beschreibung}',
                     ],
+                    verlauf: daten.qualitaetsverlauf,
                   ),
                   _Karte(
                     titel: 'Ortsbewertungen im Zeitverlauf',
@@ -177,6 +180,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                       for (final wert in daten.ortsverlauf)
                         '${wert.zeitpunkt.toLocal()}: ${wert.wert} · ${wert.beschreibung}',
                     ],
+                    verlauf: daten.ortsverlauf,
                   ),
                   _Karte(
                     titel: 'Erlebnisse nach Typ, Wochentag und Tageszeit',
@@ -191,6 +195,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                       for (final wert in daten.andrangBeobachtungen)
                         '${wert.zeitpunkt.toLocal()}: ${wert.wert} · ${wert.beschreibung}',
                     ],
+                    verlauf: daten.andrangBeobachtungen,
                   ),
                   const Text(
                     'Zeitliche Zusammenhänge werden als Beobachtung dargestellt. Aus Uhrzeit oder Wochentag wird kein Andrang abgeleitet und keine Ursache behauptet.',
@@ -204,10 +209,15 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
 }
 
 class _Karte extends StatelessWidget {
-  const _Karte({required this.titel, required this.zeilen});
+  const _Karte({
+    required this.titel,
+    required this.zeilen,
+    this.verlauf,
+  });
 
   final String titel;
   final List<String> zeilen;
+  final List<Zeitwert>? verlauf;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -230,6 +240,10 @@ class _Karte extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 6),
                     child: Text(zeile),
                   ),
+              if (verlauf != null) ...[
+                const SizedBox(height: 12),
+                StatistikVerlaufDarstellung(daten: verlauf!),
+              ],
             ],
           ),
         ),
