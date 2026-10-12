@@ -33,6 +33,10 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
   var _exportLaeuft = false;
 
   void _neuLaden() => setState(() {
+        _daten = widget.service.berechne(_filter);
+      });
+
+  void _filterZuruecksetzen() => setState(() {
         _filter = const AuswertungsFilter();
         _daten = widget.service.berechne(_filter);
       });
@@ -169,7 +173,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                               '${_filter.von!.toLocal().toString().split(' ').first} bis ${_filter.bis!.toLocal().toString().split(' ').first}',
                             ),
                           TextButton(
-                            onPressed: _filter.von == null ? null : _neuLaden,
+                            onPressed: _filter.von == null ? null : _filterZuruecksetzen,
                             child: const Text('Filter zurücksetzen'),
                           ),
                         ],
