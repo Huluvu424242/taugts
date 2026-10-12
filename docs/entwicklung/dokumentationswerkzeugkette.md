@@ -15,7 +15,7 @@ Die Python-Abhängigkeiten sind in `requirements-docs.txt` fest versioniert. Än
 
 ## MkDocs-PR-Prüfung (vor dem Merge)
 
-Bei Änderungen unter `docs/`, an `mkdocs.yml` oder an `requirements-docs.txt` prüft der freigegebene Workflow `.github/workflows/mkdocs-pr-check.yml` Pull Requests gegen `master` und `release/**` automatisch mit `mkdocs build --strict`. Der Prüfjob besitzt lediglich `contents: read`, legt kein Release an und veröffentlicht keine Website. Sein grünes Ergebnis ist vor dem Merge erforderlich. Der separate Pages-Workflow bleibt für die Veröffentlichung auf `master` zuständig.
+Bei Änderungen unter `docs/`, an `mkdocs.yml` oder an `requirements-docs.txt` prüft der freigegebene Workflow `.github/workflows/kiagent-mkdocs-pr-check.yml` Pull Requests gegen `master` und `release/**` automatisch mit `mkdocs build --strict`. Der Prüfjob besitzt lediglich `contents: read`, legt kein Release an und veröffentlicht keine Website. Sein grünes Ergebnis ist vor dem Merge erforderlich. Der separate Pages-Workflow bleibt für die Veröffentlichung auf `master` zuständig. Die exakt freigegebene, unveränderte Workflow-Version ist über Git-Blob-SHA `db0e38642a6fa5f5b6c6ff928a1bc890d2d6f75b` im [Freigabeverzeichnis](../../agent-rules/05-security-tooling.md) dokumentiert. Bei Änderung eines Gültigkeitsmerkmals ist vor erneuter KI-Nutzung eine neue Freigabe erforderlich.
 
 ## Workflow `ghpage-generator.yml`
 
