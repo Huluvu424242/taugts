@@ -39,4 +39,34 @@ void main() {
       expect(find.text('4,00'), findsOneWidget);
     },
   );
+  testWidgets('Aggregierte Verläufe zeigen Anzahl, Minimum und Maximum',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatistikVerlaufDarstellung(
+            daten: [
+              Zeitwert(
+                zeitpunkt: DateTime(2026, 5),
+                wert: 3,
+                beschreibung: 'Geschmack · Version 2',
+                kennzahlen: const StatistikKennzahlen(
+                  anzahl: 3,
+                  minimum: 1,
+                  maximum: 5,
+                  durchschnitt: 3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Mittelwert'), findsOneWidget);
+    expect(find.text('Anzahl'), findsOneWidget);
+    expect(find.text('Minimum'), findsOneWidget);
+    expect(find.text('Maximum'), findsOneWidget);
+    expect(find.textContaining('Version 2'), findsOneWidget);
+  });
 }
