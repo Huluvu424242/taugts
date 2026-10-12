@@ -19,9 +19,35 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
     final punkte = [...daten]..sort(
         (a, b) => a.zeitpunkt.compareTo(b.zeitpunkt),
       );
+    final serien = punkte.map((punkt) => punkt.serie ?? '').toSet().toList()
+      ..sort();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        for (final serie in serien)
+          ..._serienDarstellung(
+            context,
+            punkte.where((punkt) => (punkt.serie ?? '') == serie).toList(),
+            serie,
+          ),
+      ],
+    );
+  }
+
+  List<Widget> _serienDarstellung(
+    BuildContext context,
+    List<Zeitwert> punkte,
+    String serie,
+  ) =>
+      [
+        if (serie.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'Einheit: $serie',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
         Semantics(
           label: _diagrammBeschreibung(punkte),
           child: ExcludeSemantics(
@@ -59,9 +85,7 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
             ],
           ),
         ),
-      ],
-    );
-  }
+      ];
 
   String _diagrammBeschreibung(List<Zeitwert> punkte) {
     final werte = punkte.map((punkt) => punkt.wert).toList();
