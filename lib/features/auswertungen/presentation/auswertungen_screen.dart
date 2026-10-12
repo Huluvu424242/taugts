@@ -172,6 +172,59 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
     }
   }
 
+  Widget _preisExtrema(List<Zeitwert> werte) {
+    final nachWaehrung = <String, List<Zeitwert>>{};
+    for (final wert in werte) {
+      final waehrung = wert.serie?.split(' · ').last ?? '';
+      nachWaehrung.putIfAbsent(waehrung, () => []).add(wert);
+    }
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Beobachtete Preise im Zeitraum',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            for (final eintrag in nachWaehrung.entries) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Währung: ${eintrag.key}',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              for (final (titel, istMinimum) in [
+                ('Günstigster beobachteter Preis', true),
+                ('Teuerster beobachteter Preis', false),
+              ])
+                _preisExtremZeile(eintrag.value, titel, istMinimum),
+            ],
+            if (nachWaehrung.isEmpty)
+              const Text('Für diesen Zeitraum liegen keine Preise vor.'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _preisExtremZeile(
+    List<Zeitwert> werte,
+    String titel,
+    bool minimum,
+  ) {
+    if (werte.isEmpty) return const SizedBox.shrink();
+    final extrem = werte
+        .map((wert) => wert.wert)
+        .reduce(minimum ? (a, b) => a < b ? a : b : (a, b) => a > b ? a : b);
+    final passende = werte.where((wert) => wert.wert == extrem).toList();
+    final orte = passende.map((wert) => wert.beschreibung).toSet().join('; ');
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text('$titel: ${extrem.toStringAsFixed(2)} · $orte'),
+    );
+  }
+
   void _meldung(String text) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -461,6 +514,10 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                     ],
                     verlauf: punkte,
                   ),
+                  if (_ansicht == _StatistikAnsicht.preise &&
+                      _filter.objektArt == StatistikObjektart.produkt &&
+                      _filter.objektId != null)
+                    _preisExtrema(daten.preisverlauf),
                   const Text(
                     'Zeitliche Zusammenhänge werden als Beobachtung dargestellt. Aus Uhrzeit oder Wochentag wird kein Andrang abgeleitet und keine Ursache behauptet.',
                   ),

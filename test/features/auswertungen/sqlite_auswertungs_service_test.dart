@@ -68,6 +68,44 @@ void main() {
         );
       }
 
+      db.verbindung.execute(
+        'INSERT INTO orte (id, name, typ, erstellt_am, geaendert_am) VALUES (?, ?, ?, ?, ?)',
+        ['ort2', 'Markt', 'geschaeft', jetzt, jetzt],
+      );
+      db.verbindung.execute(
+        '''
+          INSERT INTO erlebnispositionen (
+            id, erlebnis_id, produkt_id, anzahl, erstellt_am, geaendert_am
+          ) VALUES ('pos4', 'e', 'p1', 1, ?, ?)
+        ''',
+        [jetzt, jetzt],
+      );
+      db.verbindung.execute(
+        '''
+          INSERT INTO preisbeobachtungen (
+            id, erlebnis_id, erlebnis_position_id, produkt_id, ort_id,
+            beobachtet_am, betrag_minor, waehrung, erstellt_am, geaendert_am
+          ) VALUES ('preis4', 'e', 'pos4', 'p1', 'ort2', ?, 650, 'EUR', ?, ?)
+        ''',
+        ['2026-09-02T13:30:00.000Z', jetzt, jetzt],
+      );
+
+      final produktspreise = await SqliteAuswertungsService(db).berechne(
+        const AuswertungsFilter(
+          objektId: 'p1',
+          objektArt: StatistikObjektart.produkt,
+        ),
+      );
+      expect(produktspreise.preisverlauf, hasLength(3));
+      expect(
+        produktspreise.preisverlauf.map((wert) => wert.serie).toSet(),
+        {'Brauhaus · EUR', 'Markt · EUR'},
+      );
+      expect(
+        produktspreise.preisverlauf.map((wert) => wert.wert).toSet(),
+        {5.0, 7.0, 6.5},
+      );
+
       final ortspreise = await SqliteAuswertungsService(db).berechne(
         const AuswertungsFilter(
           objektId: 'ort',
