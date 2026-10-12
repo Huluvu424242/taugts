@@ -58,6 +58,7 @@ class SqliteAuswertungsService
       erlebnisgruppen: _erlebnisgruppen(filter),
       andrangBeobachtungen: _andrang(filter),
       auffaelligkeiten: _auffaelligkeiten(filter),
+      besuchverlauf: _besuchverlauf(filter),
     );
   }
 
@@ -245,6 +246,63 @@ class SqliteAuswertungsService
             ),
           )
           .toList(growable: false);
+
+  List<Zeitwert> _besuchverlauf(AuswertungsFilter filter) {
+    final rows = _db.verbindung.select('''
+      SELECT DISTINCT e.id,
+        COALESCE(e.beginn, e.erstellt_am) AS ereigniszeit,
+        e.typ
+      FROM erlebnisse e
+      WHERE (? IS NULL OR
+        (? = 'ort' AND (
+          COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) = ? OR EXISTS (
+            SELECT 1 FROM preisbeobachtungen pb
+            WHERE pb.erlebnis_id = e.id AND pb.ort_id = ?
+          )
+        )) OR
+        (? = 'produkt' AND EXISTS (
+          SELECT 1 FROM erlebnispositionen ep
+          WHERE ep.erlebnis_id = e.id AND ep.produkt_id = ?
+        )))
+        AND (? IS NULL OR e.herkunft_profil_id = ?)
+        AND (? IS NULL OR EXISTS (
+          SELECT 1 FROM erlebnispositionen ep
+          JOIN produkt_kategorien pk ON pk.produkt_id = ep.produkt_id
+          WHERE ep.erlebnis_id = e.id AND pk.kategorie_id = ?
+        ) OR EXISTS (
+          SELECT 1 FROM ort_kategorien ok
+          WHERE ok.ort_id = COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id)
+            AND ok.kategorie_id = ?
+        ))
+      ORDER BY ereigniszeit
+    ''', [
+      filter.objektId,
+      filter.objektArt.name,
+      filter.objektId,
+      filter.objektId,
+      filter.objektArt.name,
+      filter.objektId,
+      filter.herkunftProfilId,
+      filter.herkunftProfilId,
+      filter.kategorieId,
+      filter.kategorieId,
+      filter.kategorieId,
+    ]);
+    final ergebnis = <Zeitwert>[];
+    for (final row in rows) {
+      final zeit = DateTime.tryParse(row['ereigniszeit'] as String? ?? '');
+      if (zeit == null || !filter.enthaeltZeitpunkt(zeit)) continue;
+      ergebnis.add(
+        Zeitwert(
+          zeitpunkt: zeit,
+          wert: 1,
+          beschreibung: '${row['typ']} · Besuch',
+          serie: 'Besuche',
+        ),
+      );
+    }
+    return ergebnis;
+  }
 
   List<ErlebnisGruppe> _erlebnisgruppen(AuswertungsFilter filter) {
     final rows = _db.verbindung.select('''

@@ -215,6 +215,7 @@ class AuswertungsUebersicht {
     required this.erlebnisgruppen,
     required this.andrangBeobachtungen,
     required this.auffaelligkeiten,
+    required this.besuchverlauf,
   });
 
   final int bewertungsanzahl;
@@ -226,4 +227,5 @@ class AuswertungsUebersicht {
   final List<ErlebnisGruppe> erlebnisgruppen;
   final List<Zeitwert> andrangBeobachtungen;
   final List<Zeitwert> auffaelligkeiten;
+  final List<Zeitwert> besuchverlauf;
 }
