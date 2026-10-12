@@ -27,6 +27,63 @@ void main() {
           profil,
         ],
       );
+      for (final produkt in [
+        ('p1', 'Pils 0,5 l'),
+        ('p2', 'Helles 0,5 l'),
+      ]) {
+        db.verbindung.execute(
+          'INSERT INTO objekte (id, name, art, erstellt_am, geaendert_am) VALUES (?, ?, ?, ?, ?)',
+          [produkt.$1, produkt.$2, 'produkt', jetzt, jetzt],
+        );
+        db.verbindung.execute(
+          'INSERT INTO produkte (objekt_id) VALUES (?)',
+          [produkt.$1],
+        );
+      }
+      db.verbindung.execute(
+        'INSERT INTO orte (id, name, typ, erstellt_am, geaendert_am) VALUES (?, ?, ?, ?, ?)',
+        ['ort', 'Brauhaus', 'gaststaette', jetzt, jetzt],
+      );
+      for (final preis in [
+        ('pos1', 'p1', 'preis1', 500, '2026-09-01T12:00:00.000Z'),
+        ('pos2', 'p1', 'preis2', 700, '2026-09-01T18:00:00.000Z'),
+        ('pos3', 'p2', 'preis3', 300, '2026-09-01T19:00:00.000Z'),
+      ]) {
+        db.verbindung.execute(
+          '''
+            INSERT INTO erlebnispositionen (
+              id, erlebnis_id, produkt_id, anzahl, erstellt_am, geaendert_am
+            ) VALUES (?, 'e', ?, 1, ?, ?)
+          ''',
+          [preis.$1, preis.$2, jetzt, jetzt],
+        );
+        db.verbindung.execute(
+          '''
+            INSERT INTO preisbeobachtungen (
+              id, erlebnis_id, erlebnis_position_id, produkt_id, ort_id,
+              beobachtet_am, betrag_minor, waehrung, erstellt_am, geaendert_am
+            ) VALUES (?, 'e', ?, ?, 'ort', ?, ?, 'EUR', ?, ?)
+          ''',
+          [preis.$3, preis.$1, preis.$2, preis.$5, preis.$4, jetzt, jetzt],
+        );
+      }
+
+      final ortspreise = await SqliteAuswertungsService(db).berechne(
+        const AuswertungsFilter(
+          objektId: 'ort',
+          objektArt: StatistikObjektart.ort,
+        ),
+      );
+      expect(ortspreise.preisverlauf, hasLength(3));
+      expect(
+        ortspreise.preisverlauf.map((wert) => wert.serie).toSet(),
+        {'Pils 0,5 l · EUR', 'Helles 0,5 l · EUR'},
+      );
+      expect(
+        ortspreise.preisverlauf.map((wert) => wert.beschreibung).toSet(),
+        {'Pils 0,5 l · Brauhaus', 'Helles 0,5 l · Brauhaus'},
+      );
+
       db.verbindung.execute(
         '''
           INSERT INTO kriterien (

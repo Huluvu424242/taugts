@@ -214,10 +214,14 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                 );
               }
               final daten = snapshot.data!;
-              final punkte = StatistikRechnung.aggregiere(
-                _ansicht.werte(daten),
-                _aggregation,
-              );
+              final werte = _ansicht.werte(daten);
+              final ortspreiseAmEinzeltermin =
+                  _ansicht == _StatistikAnsicht.preise &&
+                      _filter.objektArt == StatistikObjektart.ort &&
+                      _aggregation == StatistikZeitraum.tag;
+              final punkte = ortspreiseAmEinzeltermin
+                  ? werte
+                  : StatistikRechnung.aggregiere(werte, _aggregation);
               return ListView(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                 children: [
