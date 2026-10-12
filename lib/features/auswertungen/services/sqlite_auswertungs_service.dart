@@ -40,7 +40,7 @@ class SqliteAuswertungsService implements AuswertungsService {
         WHERE (? IS NULL OR COALESCE(ep.produkt_id, ob.ort_id) = ?)
           AND (? IS NULL OR b.herkunft_profil_id = ?)
           AND (? IS NULL OR pk.kategorie_id = ? OR ok.kategorie_id = ?)
-        ORDER BY b.erstellt_am
+        ORDER BY ereigniszeit
       ''', [
         filter.objektId,
         filter.objektId,
@@ -123,7 +123,7 @@ class SqliteAuswertungsService implements AuswertungsService {
               (row) => row['eingabetyp'] == 'wertung' && row['ort_id'] != null)
           .map(
             (row) => Zeitwert(
-              zeitpunkt: DateTime.parse(row['erstellt_am']! as String),
+              zeitpunkt: DateTime.parse(row['ereigniszeit']! as String),
               wert: (row['wert']! as num).toDouble(),
               beschreibung:
                   '${row['kriterium_name']} · Version ${row['kriterium_version']}',
