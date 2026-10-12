@@ -69,4 +69,32 @@ void main() {
     expect(find.text('Maximum'), findsOneWidget);
     expect(find.textContaining('Version 2'), findsOneWidget);
   });
+
+  testWidgets('Auffälligkeit öffnet zugehöriges Erlebnis über Callback',
+      (tester) async {
+    String? geoeffnet;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatistikVerlaufDarstellung(
+            daten: [
+              Zeitwert(
+                zeitpunkt: DateTime(2000, 1, 5, 18),
+                zeitpunktBeschriftung: 'Wochentag 3 · 18:00 Uhr',
+                wert: 2,
+                beschreibung: 'Geschmack · Version 1 · 2 von 3',
+                erlebnisIds: const ['erlebnis-1'],
+              ),
+            ],
+            onErlebnisOeffnen: (id) => geoeffnet = id,
+          ),
+        ),
+      ),
+    );
+
+    await tester.ensureVisible(find.text('Erlebnis öffnen'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Erlebnis öffnen'));
+    expect(geoeffnet, 'erlebnis-1');
+  });
 }

@@ -14,7 +14,8 @@ enum _StatistikAnsicht {
   produktqualitaet('Produktqualität'),
   ortsqualitaet('Ortsqualität'),
   andrang('Andrang'),
-  auffaelligkeiten('Bewertungsauffälligkeiten');
+  auffaelligkeiten('Bewertungsauffälligkeiten'),
+  qualitaetsvergleich('Produkt- und Ortsbewertungen vergleichen');
 
   const _StatistikAnsicht(this.titel);
 
@@ -27,6 +28,10 @@ enum _StatistikAnsicht {
         _StatistikAnsicht.ortsqualitaet => daten.ortsverlauf,
         _StatistikAnsicht.andrang => daten.andrangBeobachtungen,
         _StatistikAnsicht.auffaelligkeiten => daten.auffaelligkeiten,
+        _StatistikAnsicht.qualitaetsvergleich => [
+            ...daten.qualitaetsverlauf,
+            ...daten.ortsverlauf,
+          ],
       };
 }
 
@@ -36,6 +41,7 @@ class AuswertungenScreen extends StatefulWidget {
     this.statistikExportService,
     this.exportZielService,
     this.excelService = const StatistikExcelService(),
+    this.onErlebnisOeffnen,
     super.key,
   });
 
@@ -43,6 +49,7 @@ class AuswertungenScreen extends StatefulWidget {
   final StatistikExportService? statistikExportService;
   final BinaerExportZielService? exportZielService;
   final StatistikExcelService excelService;
+  final ValueChanged<String>? onErlebnisOeffnen;
 
   @override
   State<AuswertungenScreen> createState() => _AuswertungenScreenState();
@@ -276,7 +283,9 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                   _ansicht == _StatistikAnsicht.preise &&
                       _filter.objektArt == StatistikObjektart.ort &&
                       _aggregation == StatistikZeitraum.tag;
-              final punkte = ortspreiseAmEinzeltermin
+              final auffaelligkeitenDirekt =
+                  _ansicht == _StatistikAnsicht.auffaelligkeiten;
+              final punkte = ortspreiseAmEinzeltermin || auffaelligkeitenDirekt
                   ? werte
                   : StatistikRechnung.aggregiere(
                       werte,
@@ -521,6 +530,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                         '${wert.zeitpunkt.toLocal()}: ${wert.wert.toStringAsFixed(2)} · ${wert.beschreibung}',
                     ],
                     verlauf: punkte,
+                    onErlebnisOeffnen: widget.onErlebnisOeffnen,
                   ),
                   if (_ansicht == _StatistikAnsicht.preise &&
                       _filter.objektArt == StatistikObjektart.produkt &&
@@ -542,11 +552,13 @@ class _Karte extends StatelessWidget {
     required this.titel,
     required this.zeilen,
     this.verlauf,
+    this.onErlebnisOeffnen,
   });
 
   final String titel;
   final List<String> zeilen;
   final List<Zeitwert>? verlauf;
+  final ValueChanged<String>? onErlebnisOeffnen;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -572,7 +584,10 @@ class _Karte extends StatelessWidget {
                     ),
               if (verlauf != null) ...[
                 const SizedBox(height: 12),
-                StatistikVerlaufDarstellung(daten: verlauf!),
+                StatistikVerlaufDarstellung(
+                  daten: verlauf!,
+                  onErlebnisOeffnen: onErlebnisOeffnen,
+                ),
               ],
             ],
           ),

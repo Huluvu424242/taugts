@@ -5,10 +5,12 @@ import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
 class StatistikVerlaufDarstellung extends StatelessWidget {
   const StatistikVerlaufDarstellung({
     required this.daten,
+    this.onErlebnisOeffnen,
     super.key,
   });
 
   final List<Zeitwert> daten;
+  final ValueChanged<String>? onErlebnisOeffnen;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,7 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
             context,
             punkte.where((punkt) => (punkt.serie ?? '') == serie).toList(),
             serie,
+            onErlebnisOeffnen,
           ),
       ],
     );
@@ -38,8 +41,10 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
     BuildContext context,
     List<Zeitwert> punkte,
     String serie,
+    ValueChanged<String>? onErlebnisOeffnen,
   ) {
     final mitKennzahlen = punkte.any((punkt) => punkt.kennzahlen != null);
+    final mitErlebnissen = punkte.any((punkt) => punkt.erlebnisIds.isNotEmpty);
     return [
       if (serie.isNotEmpty)
         Padding(
@@ -79,6 +84,8 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
               DataColumn(label: Text('Maximum')),
             ],
             const DataColumn(label: Text('Beschreibung')),
+            if (mitErlebnissen)
+              const DataColumn(label: Text('Zugehörige Erlebnisse')),
           ],
           rows: [
             for (final punkt in punkte)
@@ -95,6 +102,21 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
                     DataCell(Text(_zahl(punkt.kennzahlen!.maximum))),
                   ],
                   DataCell(Text(punkt.beschreibung)),
+                  if (mitErlebnissen)
+                    DataCell(
+                      Wrap(
+                        spacing: 4,
+                        children: [
+                          for (final id in punkt.erlebnisIds)
+                            TextButton(
+                              onPressed: onErlebnisOeffnen == null
+                                  ? null
+                                  : () => onErlebnisOeffnen(id),
+                              child: const Text('Erlebnis öffnen'),
+                            ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
           ],
