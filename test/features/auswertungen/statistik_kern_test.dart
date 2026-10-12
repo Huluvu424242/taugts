@@ -106,10 +106,11 @@ void main() {
       );
 
       expect(ergebnis, hasLength(2));
-      expect(
-        ergebnis.firstWhere((wert) => wert.serie == 'EUR').wert,
-        3,
-      );
+      final euroWert = ergebnis.firstWhere((wert) => wert.serie == 'EUR');
+      expect(euroWert.wert, 3);
+      expect(euroWert.kennzahlen?.anzahl, 2);
+      expect(euroWert.kennzahlen?.minimum, 2);
+      expect(euroWert.kennzahlen?.maximum, 4);
       expect(
         ergebnis.firstWhere((wert) => wert.serie == 'CZK').wert,
         120,

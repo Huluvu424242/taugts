@@ -38,54 +38,67 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
     BuildContext context,
     List<Zeitwert> punkte,
     String serie,
-  ) =>
-      [
-        if (serie.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              'Einheit: $serie',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+  ) {
+    final mitKennzahlen = punkte.any((punkt) => punkt.kennzahlen != null);
+    return [
+      if (serie.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            'Einheit: $serie',
+            style: Theme.of(context).textTheme.titleSmall,
           ),
-        Semantics(
-          label: _diagrammBeschreibung(punkte),
-          child: ExcludeSemantics(
-            child: SizedBox(
-              height: 180,
-              child: CustomPaint(
-                painter: _VerlaufMaler(
-                  werte: [for (final punkt in punkte) punkt.wert],
-                  farbe: Theme.of(context).colorScheme.primary,
-                  hilfslinienFarbe:
-                      Theme.of(context).colorScheme.outlineVariant,
-                ),
+        ),
+      Semantics(
+        label: _diagrammBeschreibung(punkte),
+        child: ExcludeSemantics(
+          child: SizedBox(
+            height: 180,
+            child: CustomPaint(
+              painter: _VerlaufMaler(
+                werte: [for (final punkt in punkte) punkt.wert],
+                farbe: Theme.of(context).colorScheme.primary,
+                hilfslinienFarbe: Theme.of(context).colorScheme.outlineVariant,
               ),
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columns: const [
-              DataColumn(label: Text('Zeitpunkt')),
-              DataColumn(label: Text('Wert')),
-              DataColumn(label: Text('Beschreibung')),
+      ),
+      const SizedBox(height: 12),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          columns: [
+            const DataColumn(label: Text('Zeitpunkt')),
+            DataColumn(
+              label: Text(mitKennzahlen ? 'Mittelwert' : 'Wert'),
+            ),
+            if (mitKennzahlen) ...const [
+              DataColumn(label: Text('Anzahl')),
+              DataColumn(label: Text('Minimum')),
+              DataColumn(label: Text('Maximum')),
             ],
-            rows: [
-              for (final punkt in punkte)
-                DataRow(
-                  cells: [
-                    DataCell(Text(_zeitpunkt(punkt.zeitpunkt))),
-                    DataCell(Text(_zahl(punkt.wert))),
-                    DataCell(Text(punkt.beschreibung)),
+            const DataColumn(label: Text('Beschreibung')),
+          ],
+          rows: [
+            for (final punkt in punkte)
+              DataRow(
+                cells: [
+                  DataCell(Text(_zeitpunkt(punkt.zeitpunkt))),
+                  DataCell(Text(_zahl(punkt.wert))),
+                  if (mitKennzahlen) ...[
+                    DataCell(Text('${punkt.kennzahlen!.anzahl}')),
+                    DataCell(Text(_zahl(punkt.kennzahlen!.minimum))),
+                    DataCell(Text(_zahl(punkt.kennzahlen!.maximum))),
                   ],
-                ),
-            ],
-          ),
+                  DataCell(Text(punkt.beschreibung)),
+                ],
+              ),
+          ],
         ),
-      ];
+      ),
+    ];
+  }
 
   String _diagrammBeschreibung(List<Zeitwert> punkte) {
     final werte = punkte.map((punkt) => punkt.wert).toList();

@@ -138,6 +138,7 @@ class Zeitwert {
     required this.wert,
     required this.beschreibung,
     this.serie,
+    this.kennzahlen,
   });
 
   final DateTime zeitpunkt;
@@ -146,6 +147,7 @@ class Zeitwert {
 
   /// Gruppierung, die niemals mit anderen Einheiten vermischt werden darf.
   final String? serie;
+  final StatistikKennzahlen? kennzahlen;
 }
 
 class StatistikRechnung {
@@ -175,6 +177,8 @@ class StatistikRechnung {
               : StatistikKennzahlen.ausWerten(eintrag.value).durchschnitt,
           beschreibung: eintrag.key.$3,
           serie: eintrag.key.$2,
+          kennzahlen:
+              summieren ? null : StatistikKennzahlen.ausWerten(eintrag.value),
         ),
     ]..sort((a, b) {
         final zeit = a.zeitpunkt.compareTo(b.zeitpunkt);
