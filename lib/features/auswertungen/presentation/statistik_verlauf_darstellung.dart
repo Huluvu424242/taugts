@@ -84,7 +84,10 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
             for (final punkt in punkte)
               DataRow(
                 cells: [
-                  DataCell(Text(_zeitpunkt(punkt.zeitpunkt))),
+                  DataCell(
+                    Text(punkt.zeitpunktBeschriftung ??
+                        _zeitpunkt(punkt.zeitpunkt)),
+                  ),
                   DataCell(Text(_zahl(punkt.wert))),
                   if (mitKennzahlen) ...[
                     DataCell(Text('${punkt.kennzahlen!.anzahl}')),

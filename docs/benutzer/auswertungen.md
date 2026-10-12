@@ -20,6 +20,8 @@ In den Excel-Kennzahlen werden ausschließlich numerische Kriterien vom Eingabet
 
 Sind noch keine Qualitätswertungen vorhanden, wird keine irreführende leere Statistik gespeichert. Ein abgebrochener Speicherdialog wird als Abbruch und nicht als Fehler gemeldet. Bei einem technischen Fehler bleiben die lokalen Daten unverändert und der Export kann erneut versucht werden.
 
+Die Ansicht **Bewertungsauffälligkeiten** markiert wiederkehrende niedrige Wertungen als prüfbare Hypothese: Sie gruppiert nach Wochentag, Stunde sowie Kriteriums-ID und Version und verlangt, dass niedrige Werte in mindestens zwei Wochen auftreten. Als niedrig gilt hier ein gespeicherter Wert von höchstens 2; angezeigt werden nur Gruppen mit mindestens drei Beobachtungen und mindestens zwei niedrigen Werten. Die Tabelle nennt niedrige Werte und Stichprobengröße. Das ist ein Hinweis zur weiteren Prüfung, keine Aussage über Ursache und Wirkung.
+
 Andrang beziehungsweise Auslastung wird ausschließlich aus dem ausdrücklich gespeicherten Kriterium **„Andrang / Auslastung“** übernommen. Uhrzeit und Wochentag sind nur Kontext. Angezeigte Zusammenhänge sind Beobachtungen und keine Aussage über Ursache und Wirkung.
 
 Korrekturen verändern den bereits identifizierten Datensatz; gezählt werden stabile Bewertungs- und Erlebnis-IDs, nicht Bearbeitungsvorgänge.

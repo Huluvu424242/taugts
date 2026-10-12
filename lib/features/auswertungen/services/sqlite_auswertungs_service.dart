@@ -57,6 +57,7 @@ class SqliteAuswertungsService
       ortsverlauf: _ortsverlauf(filter),
       erlebnisgruppen: _erlebnisgruppen(filter),
       andrangBeobachtungen: _andrang(filter),
+      auffaelligkeiten: _auffaelligkeiten(filter),
     );
   }
 
@@ -291,6 +292,59 @@ class SqliteAuswertungsService
           gesamtdauerMinuten: entry.value.$2,
         ),
     ]..sort((a, b) => a.schluessel.compareTo(b.schluessel));
+  }
+
+  List<Zeitwert> _auffaelligkeiten(AuswertungsFilter filter) {
+    const schwelle = 2.0;
+    final gruppen = <(int, int, String, int), List<(double, DateTime)>>{};
+    final namen = <(int, int, String, int), String>{};
+    for (final row in _bewertungsRows(filter)) {
+      if (row['eingabetyp'] != 'wertung' || row['wert'] == null) continue;
+      final zeit = DateTime.tryParse(row['ereigniszeit'] as String? ?? '');
+      if (zeit == null) continue;
+      final version = row['kriterium_version']! as int;
+      final key = (
+        zeit.weekday,
+        zeit.hour,
+        row['kriterium_id']! as String,
+        version,
+      );
+      gruppen
+          .putIfAbsent(key, () => [])
+          .add(((row['wert']! as num).toDouble(), zeit));
+      namen[key] = row['kriterium_name']! as String;
+    }
+
+    final ergebnis = <Zeitwert>[];
+    for (final eintrag in gruppen.entries) {
+      final stichprobe = eintrag.value;
+      final niedrigeWertungen =
+          stichprobe.where((wert) => wert.$1 <= schwelle).toList();
+      final niedrigeWochen = niedrigeWertungen.map((wert) {
+        final zeit = wert.$2.toLocal();
+        return DateTime(zeit.year, zeit.month, zeit.day)
+            .subtract(Duration(days: zeit.weekday - DateTime.monday));
+      }).toSet();
+      if (stichprobe.length < 3 ||
+          niedrigeWertungen.length < 2 ||
+          niedrigeWochen.length < 2) {
+        continue;
+      }
+      final wochentag = eintrag.key.$1;
+      final stunde = eintrag.key.$2.toString().padLeft(2, '0');
+      ergebnis.add(
+        Zeitwert(
+          zeitpunkt: DateTime(2000, 1, 3 + wochentag - 1, eintrag.key.$2),
+          zeitpunktBeschriftung: 'Wochentag $wochentag · $stunde:00 Uhr',
+          wert: niedrigeWertungen.length.toDouble(),
+          beschreibung: '${namen[eintrag.key]} · Version ${eintrag.key.$4} · '
+              '${niedrigeWertungen.length} von ${stichprobe.length} höchstens 2 '
+              'an ${niedrigeWochen.length} Wochen',
+          serie: 'Wiederkehrende niedrige Wertungen',
+        ),
+      );
+    }
+    return ergebnis..sort((a, b) => a.zeitpunkt.compareTo(b.zeitpunkt));
   }
 
   List<Zeitwert> _andrang(AuswertungsFilter filter) {
