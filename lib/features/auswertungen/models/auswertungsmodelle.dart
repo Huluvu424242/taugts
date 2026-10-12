@@ -101,11 +101,15 @@ class Zeitwert {
     required this.zeitpunkt,
     required this.wert,
     required this.beschreibung,
+    this.serie,
   });
 
   final DateTime zeitpunkt;
   final double wert;
   final String beschreibung;
+
+  /// Gruppierung, die niemals mit anderen Einheiten vermischt werden darf.
+  final String? serie;
 }
 
 class ErlebnisGruppe {
