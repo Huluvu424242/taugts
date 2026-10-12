@@ -35,8 +35,8 @@ void main() {
       expect(find.text('Zeitpunkt'), findsOneWidget);
       expect(find.text('Wert'), findsOneWidget);
       expect(find.text('Einheit: EUR'), findsOneWidget);
-      expect(find.text('2.00'), findsOneWidget);
-      expect(find.text('4.00'), findsOneWidget);
+      expect(find.text('2,00'), findsOneWidget);
+      expect(find.text('4,00'), findsOneWidget);
     },
   );
 }

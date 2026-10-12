@@ -1,9 +1,13 @@
 enum StatistikZeitraum { tag, woche, monat, jahr }
 
+enum StatistikObjektart { produkt, ort }
+
 class AuswertungsFilter {
   const AuswertungsFilter({
     this.kategorieId,
     this.objektId,
+    this.objektArt = StatistikObjektart.produkt,
+    this.kriteriumId,
     this.herkunftProfilId,
     this.von,
     this.bis,
@@ -11,6 +15,8 @@ class AuswertungsFilter {
 
   final String? kategorieId;
   final String? objektId;
+  final StatistikObjektart objektArt;
+  final String? kriteriumId;
   final String? herkunftProfilId;
 
   /// Inklusive Untergrenze der fachlichen Ereigniszeit.
@@ -88,6 +94,30 @@ class StatistikZeitpunkt {
   }
 }
 
+class AuswertungsFilterOption {
+  const AuswertungsFilterOption({
+    required this.id,
+    required this.bezeichnung,
+  });
+
+  final String id;
+  final String bezeichnung;
+}
+
+class AuswertungsFilterOptionen {
+  const AuswertungsFilterOptionen({
+    required this.produkte,
+    required this.orte,
+    required this.kategorien,
+    required this.kriterien,
+  });
+
+  final List<AuswertungsFilterOption> produkte;
+  final List<AuswertungsFilterOption> orte;
+  final List<AuswertungsFilterOption> kategorien;
+  final List<AuswertungsFilterOption> kriterien;
+}
+
 class Durchschnittswert {
   const Durchschnittswert({
     required this.kriterium,
@@ -116,6 +146,39 @@ class Zeitwert {
 
   /// Gruppierung, die niemals mit anderen Einheiten vermischt werden darf.
   final String? serie;
+}
+
+class StatistikRechnung {
+  const StatistikRechnung._();
+
+  static List<Zeitwert> aggregiere(
+    Iterable<Zeitwert> werte,
+    StatistikZeitraum zeitraum,
+  ) {
+    final gruppen = <(DateTime, String?, String), List<double>>{};
+    for (final wert in werte) {
+      final start = StatistikZeitpunkt(
+        zeitpunkt: wert.zeitpunkt,
+        schluessel: wert.beschreibung,
+      ).runde(zeitraum);
+      gruppen.putIfAbsent(
+          (start, wert.serie, wert.beschreibung), () => []).add(wert.wert);
+    }
+
+    final ergebnis = [
+      for (final eintrag in gruppen.entries)
+        Zeitwert(
+          zeitpunkt: eintrag.key.$1,
+          wert: StatistikKennzahlen.ausWerten(eintrag.value).durchschnitt,
+          beschreibung: eintrag.key.$3,
+          serie: eintrag.key.$2,
+        ),
+    ]..sort((a, b) {
+        final zeit = a.zeitpunkt.compareTo(b.zeitpunkt);
+        return zeit != 0 ? zeit : a.beschreibung.compareTo(b.beschreibung);
+      });
+    return ergebnis;
+  }
 }
 
 class ErlebnisGruppe {

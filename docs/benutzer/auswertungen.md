@@ -2,7 +2,7 @@
 
 Die Auswertungen arbeiten vollständig offline auf den lokal gespeicherten historischen Datensätzen.
 
-Taugt’s? zeigt Anzahl und zeitliche Verläufe von Bewertungen, Preisbeobachtungen nach Ort, Qualitätsbewertungen von Produkten, Ortsbewertungen sowie Erlebnisanzahl und -dauer nach Typ, Wochentag und Tageszeit. Für die Auswertungen kann ein Zeitraum gewählt werden; ein erneutes Laden erhält den aktiven Filter. Verläufe erscheinen als Diagramm und zusätzlich als Datentabelle mit denselben Beobachtungen. Die Berechnungsschicht unterstützt außerdem Filter auf Kategorie, konkretes Objekt und Herkunft.
+Taugt’s? zeigt Anzahl und zeitliche Verläufe von Bewertungen, Preisbeobachtungen nach Ort, Qualitätsbewertungen von Produkten, Ortsbewertungen sowie Erlebnisanzahl und -dauer nach Typ, Wochentag und Tageszeit. In der Auswertungsansicht wählen Sie eine Statistik und die zeitliche Gruppierung nach Tag, Woche, Monat oder Jahr. Über die Filter wählen Sie außerdem Produkt, Ort, Kategorie und Bewertungskriterium; gelöschte Produkte und Orte werden nicht als neue Filter angeboten. Zusätzlich kann ein Zeitraum gewählt werden; ein erneutes Laden erhält die aktiven Filter. Verläufe erscheinen als Diagramm und zusätzlich als Datentabelle mit denselben aggregierten Beobachtungen. Die Berechnungsschicht unterstützt außerdem Filter auf Kategorie, konkretes Objekt und Herkunft.
 
 Durchschnittswerte werden ausschließlich für fachliche Qualitätswertungen (`wertung`) derselben Kriterien-ID und derselben Kriterienversion gebildet. Fehlende Werte werden ausgelassen und niemals als Null eingesetzt. Preis, Intensität, Ja/Nein, Zahlenfelder, Auswahl und Freitext werden nicht in einen undurchsichtigen Gesamtwert eingerechnet.
 

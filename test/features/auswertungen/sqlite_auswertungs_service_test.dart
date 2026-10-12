@@ -64,6 +64,18 @@ void main() {
       expect(version1.durchschnitt, 3.0);
       expect(version1.anzahl, 2);
 
+      final service = SqliteAuswertungsService(db);
+      final optionen = await service.ladeFilterOptionen();
+      expect(
+        optionen.kriterien.any((option) => option.bezeichnung == 'Geschmack'),
+        isTrue,
+      );
+
+      final kriteriumsGefiltert = await service.berechne(
+        const AuswertungsFilter(kriteriumId: 'unbekannt'),
+      );
+      expect(kriteriumsGefiltert.bewertungsanzahl, 0);
+
       final zeitlichGefiltert = await SqliteAuswertungsService(db).berechne(
         AuswertungsFilter(von: DateTime.utc(2026, 9, 2)),
       );
