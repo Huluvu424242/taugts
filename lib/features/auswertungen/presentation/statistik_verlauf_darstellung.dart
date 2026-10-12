@@ -101,7 +101,11 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
     final lokal = zeitpunkt.toLocal();
     final tag = lokal.day.toString().padLeft(2, '0');
     final monat = lokal.month.toString().padLeft(2, '0');
-    return '$tag.$monat.${lokal.year}';
+    final datum = '$tag.$monat.${lokal.year}';
+    if (lokal.hour == 0 && lokal.minute == 0) return datum;
+    final stunde = lokal.hour.toString().padLeft(2, '0');
+    final minute = lokal.minute.toString().padLeft(2, '0');
+    return '$datum, $stunde:$minute';
   }
 }
 

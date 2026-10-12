@@ -130,9 +130,11 @@ class SqliteAuswertungsService
   List<Zeitwert> _preisverlauf(AuswertungsFilter filter) {
     final rows = _db.verbindung.select('''
       SELECT pb.beobachtet_am, pb.betrag_minor, pb.waehrung,
-        COALESCE(o.name, 'Ohne Ort') AS ort_name
+        COALESCE(o.name, 'Ohne Ort') AS ort_name,
+        COALESCE(prod.name, 'Gelöschtes Produkt') AS produkt_name
       FROM preisbeobachtungen pb
       LEFT JOIN orte o ON o.id = pb.ort_id
+      LEFT JOIN objekte prod ON prod.id = pb.produkt_id
       LEFT JOIN produkt_kategorien pk ON pk.produkt_id = pb.produkt_id
       WHERE (? IS NULL OR
           (? = 'produkt' AND pb.produkt_id = ?) OR
@@ -153,8 +155,12 @@ class SqliteAuswertungsService
         Zeitwert(
           zeitpunkt: DateTime.parse(row['beobachtet_am']! as String),
           wert: (row['betrag_minor']! as int) / 100,
-          beschreibung: '${row['ort_name']} · ${row['waehrung']}',
-          serie: row['waehrung']! as String,
+          beschreibung: filter.objektArt == StatistikObjektart.ort
+              ? '${row['produkt_name']} · ${row['ort_name']}'
+              : '${row['ort_name']} · ${row['waehrung']}',
+          serie: filter.objektArt == StatistikObjektart.ort
+              ? '${row['produkt_name']} · ${row['waehrung']}'
+              : row['waehrung']! as String,
         ),
     ].where((wert) => filter.enthaeltZeitpunkt(wert.zeitpunkt)).toList();
   }
