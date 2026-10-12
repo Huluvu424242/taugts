@@ -35,7 +35,6 @@ class SqliteAuswertungsService implements AuswertungsService {
         LEFT JOIN ortsbewertungen ob ON ob.id = b.ortsbewertung_id
         LEFT JOIN kriterien k ON k.id = b.kriterium_id
         LEFT JOIN erlebnispositionen ep ON ep.id = b.erlebnis_position_id
-        LEFT JOIN ortsbewertungen ob ON ob.id = b.ortsbewertung_id
         LEFT JOIN produkt_kategorien pk ON pk.produkt_id = ep.produkt_id
         LEFT JOIN ort_kategorien ok ON ok.ort_id = ob.ort_id
         WHERE (? IS NULL OR COALESCE(ep.produkt_id, ob.ort_id) = ?)
