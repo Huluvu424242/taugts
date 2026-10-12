@@ -69,6 +69,7 @@ class _FakeAuswertungsService implements AuswertungsService {
         bewertungsanzahl: 1,
         durchschnitte: [],
         preisverlauf: [],
+        ausgabenverlauf: [],
         qualitaetsverlauf: [],
         ortsverlauf: [],
         erlebnisgruppen: [],

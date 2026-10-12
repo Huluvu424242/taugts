@@ -106,6 +106,13 @@ void main() {
         {5.0, 7.0, 6.5},
       );
 
+      final ausgaben = await SqliteAuswertungsService(db).berechne(
+        const AuswertungsFilter(),
+      );
+      expect(ausgaben.ausgabenverlauf, hasLength(1));
+      expect(ausgaben.ausgabenverlauf.single.wert, 21.5);
+      expect(ausgaben.ausgabenverlauf.single.serie, 'EUR');
+
       final ortspreise = await SqliteAuswertungsService(db).berechne(
         const AuswertungsFilter(
           objektId: 'ort',

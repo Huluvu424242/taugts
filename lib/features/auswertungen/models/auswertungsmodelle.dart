@@ -153,8 +153,9 @@ class StatistikRechnung {
 
   static List<Zeitwert> aggregiere(
     Iterable<Zeitwert> werte,
-    StatistikZeitraum zeitraum,
-  ) {
+    StatistikZeitraum zeitraum, {
+    bool summieren = false,
+  }) {
     final gruppen = <(DateTime, String?, String), List<double>>{};
     for (final wert in werte) {
       final start = StatistikZeitpunkt(
@@ -169,7 +170,9 @@ class StatistikRechnung {
       for (final eintrag in gruppen.entries)
         Zeitwert(
           zeitpunkt: eintrag.key.$1,
-          wert: StatistikKennzahlen.ausWerten(eintrag.value).durchschnitt,
+          wert: summieren
+              ? eintrag.value.fold<double>(0, (summe, wert) => summe + wert)
+              : StatistikKennzahlen.ausWerten(eintrag.value).durchschnitt,
           beschreibung: eintrag.key.$3,
           serie: eintrag.key.$2,
         ),
@@ -198,6 +201,7 @@ class AuswertungsUebersicht {
     required this.bewertungsanzahl,
     required this.durchschnitte,
     required this.preisverlauf,
+    required this.ausgabenverlauf,
     required this.qualitaetsverlauf,
     required this.ortsverlauf,
     required this.erlebnisgruppen,
@@ -207,6 +211,7 @@ class AuswertungsUebersicht {
   final int bewertungsanzahl;
   final List<Durchschnittswert> durchschnitte;
   final List<Zeitwert> preisverlauf;
+  final List<Zeitwert> ausgabenverlauf;
   final List<Zeitwert> qualitaetsverlauf;
   final List<Zeitwert> ortsverlauf;
   final List<ErlebnisGruppe> erlebnisgruppen;
