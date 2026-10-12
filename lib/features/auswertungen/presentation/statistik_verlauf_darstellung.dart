@@ -128,7 +128,8 @@ class _VerlaufMaler extends CustomPainter {
       ..strokeWidth = 1;
     for (var index = 0; index < 4; index++) {
       final y = diagramm.top + diagramm.height * index / 3;
-      canvas.drawLine(Offset(diagramm.left, y), Offset(diagramm.right, y), hilfslinien);
+      canvas.drawLine(
+          Offset(diagramm.left, y), Offset(diagramm.right, y), hilfslinien);
     }
 
     final minimum = werte.reduce((a, b) => a < b ? a : b);
@@ -146,7 +147,8 @@ class _VerlaufMaler extends CustomPainter {
       final x = werte.length == 1
           ? diagramm.center.dx
           : diagramm.left + diagramm.width * index / (werte.length - 1);
-      final anteil = spannweite == 0 ? 0.5 : (werte[index] - minimum) / spannweite;
+      final anteil =
+          spannweite == 0 ? 0.5 : (werte[index] - minimum) / spannweite;
       final y = diagramm.bottom - diagramm.height * anteil;
       final punkt = Offset(x, y);
       if (index == 0) {
