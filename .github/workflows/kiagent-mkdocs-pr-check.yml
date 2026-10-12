@@ -9,11 +9,17 @@ on:
       - "docs/**"
       - "mkdocs.yml"
       - "requirements-docs.txt"
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: "Vollständiger 40-stelliger Commit-SHA des zu prüfenden Arbeitsbranches"
+        required: true
+        type: string
 
 permissions: {}
 
 concurrency:
-  group: mkdocs-pr-${{ github.event.pull_request.number }}
+  group: mkdocs-${{ github.event_name == 'workflow_dispatch' && inputs.commit_sha || github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
@@ -24,10 +30,25 @@ jobs:
     permissions:
       contents: read
     steps:
+      - name: Commit-SHA für manuellen Lauf validieren
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TARGET_SHA: ${{ inputs.commit_sha }}
+        run: |
+          if [[ ! "$TARGET_SHA" =~ ^[[:xdigit:]]{40}$ ]]; then
+            echo "::error::commit_sha muss ein vollständiger 40-stelliger Git-Commit-SHA sein."
+            exit 1
+          fi
+
       - name: Repository auschecken
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.commit_sha || github.sha }}
+
+      - name: Geprüften Commit dokumentieren
+        run: |
+          echo "Geprüfter Commit: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Python einrichten
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
