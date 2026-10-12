@@ -54,7 +54,7 @@ void main() {
 
     expect(ziel.inhalt, isNull);
     expect(
-      find.textContaining('noch keine Qualitätswertungen vorhanden'),
+      find.textContaining('keine passenden Daten vor'),
       findsOneWidget,
     );
   });

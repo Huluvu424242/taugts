@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:excel_community/excel_community.dart';
+import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
 import 'package:taugts/features/auswertungen/models/statistik_export_modelle.dart';
 
 class StatistikExcelDatei {
@@ -19,11 +20,26 @@ class StatistikExcelService {
   StatistikExcelDatei erstelle(
     StatistikExportDaten daten, {
     DateTime? zeitpunkt,
+    List<Zeitwert>? zeitreihe,
+    String? statistikTitel,
+    AuswertungsFilter? filter,
+    StatistikZeitraum? gruppierung,
+    AuswertungsFilterOptionen? filterOptionen,
   }) {
     final excel = Excel.createExcel();
     _produktbewertungen(excel, daten.produktbewertungen);
     _ortsbewertungen(excel, daten.ortsbewertungen);
     _ortsverlauf(excel, daten.ortsverlauf);
+    if (zeitreihe != null) {
+      _auswertung(
+        excel,
+        zeitreihe: zeitreihe,
+        statistikTitel: statistikTitel ?? 'Auswertung',
+        filter: filter ?? const AuswertungsFilter(),
+        gruppierung: gruppierung ?? StatistikZeitraum.monat,
+        filterOptionen: filterOptionen,
+      );
+    }
     excel.delete('Sheet1');
 
     final bytes = excel.save();
@@ -36,6 +52,123 @@ class StatistikExcelService {
       inhalt: Uint8List.fromList(bytes),
     );
   }
+
+  void _auswertung(
+    Excel excel, {
+    required List<Zeitwert> zeitreihe,
+    required String statistikTitel,
+    required AuswertungsFilter filter,
+    required StatistikZeitraum gruppierung,
+    AuswertungsFilterOptionen? filterOptionen,
+  }) {
+    final sheet = excel['Aktuelle Auswertung'];
+    sheet.frozenRows = 8;
+    sheet.setColumnWidth(0, 22);
+    sheet.setColumnWidth(1, 24);
+    sheet.setColumnWidth(2, 44);
+    for (var spalte = 3; spalte <= 7; spalte++) {
+      sheet.setColumnWidth(spalte, 16);
+    }
+
+    final objektOptionen = filter.objektArt == StatistikObjektart.ort
+        ? filterOptionen?.orte
+        : filterOptionen?.produkte;
+    final objekt = _bezeichnung(objektOptionen, filter.objektId);
+    final kategorie =
+        _bezeichnung(filterOptionen?.kategorien, filter.kategorieId);
+    final kriterium =
+        _bezeichnung(filterOptionen?.kriterien, filter.kriteriumId);
+    final start = filter.von?.toLocal();
+    final ende = filter.bis?.toLocal();
+    final zeitraum = start == null && ende == null
+        ? 'Alle Zeitpunkte'
+        : '${start == null ? 'ab Beginn' : _dateiDatum(start)} bis '
+            '${ende == null ? 'heute' : _dateiDatum(ende)}';
+
+    for (final (zeile, titel, wert) in [
+      (0, 'Statistik', statistikTitel),
+      (1, 'Gruppierung', _gruppierungText(gruppierung)),
+      (2, 'Zeitraum', zeitraum),
+      (3, 'Objekt', objekt),
+      (4, 'Kategorie', kategorie),
+      (5, 'Kriterium', kriterium),
+    ]) {
+      _textZelle(sheet, 0, zeile, titel, _zeilenKopfStyle);
+      _textZelle(sheet, 1, zeile, wert, _textStyle);
+    }
+
+    const kopf = [
+      'Zeitpunkt',
+      'Reihe / Einheit',
+      'Beobachtung',
+      'Wert',
+      'Anzahl',
+      'Minimum',
+      'Maximum',
+      'Mittelwert',
+    ];
+    for (var spalte = 0; spalte < kopf.length; spalte++) {
+      _textZelle(sheet, spalte, 7, kopf[spalte], _hauptKopfStyle);
+    }
+
+    final sortiert = [...zeitreihe]..sort((a, b) {
+        final zeit = a.zeitpunkt.compareTo(b.zeitpunkt);
+        return zeit != 0 ? zeit : a.beschreibung.compareTo(b.beschreibung);
+      });
+    if (sortiert.isEmpty) {
+      _textZelle(sheet, 0, 8,
+          'Für die gewählten Filter liegen keine Daten vor.', _textStyle);
+      return;
+    }
+
+    for (var index = 0; index < sortiert.length; index++) {
+      final punkt = sortiert[index];
+      final zeile = index + 8;
+      final beschriftung = punkt.zeitpunktBeschriftung;
+      if (beschriftung != null) {
+        _textZelle(sheet, 0, zeile, beschriftung, _textStyle);
+      } else {
+        final zeit = punkt.zeitpunkt.toLocal();
+        final zelle = sheet.cell(
+          CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: zeile),
+        );
+        zelle.value = DateTimeCellValue(
+          year: zeit.year,
+          month: zeit.month,
+          day: zeit.day,
+          hour: zeit.hour,
+          minute: zeit.minute,
+          second: zeit.second,
+        );
+        zelle.cellStyle = _datumStyle;
+      }
+      _textZelle(sheet, 1, zeile, punkt.serie ?? '', _textStyle);
+      _textZelle(sheet, 2, zeile, punkt.beschreibung, _textStyle);
+      _zahlZelle(sheet, 3, zeile, punkt.wert, _zahlStyle);
+      final kennzahlen = punkt.kennzahlen;
+      if (kennzahlen != null) {
+        _zahlZelle(sheet, 4, zeile, kennzahlen.anzahl.toDouble(), _zahlStyle);
+        _zahlZelle(sheet, 5, zeile, kennzahlen.minimum, _zahlStyle);
+        _zahlZelle(sheet, 6, zeile, kennzahlen.maximum, _zahlStyle);
+        _zahlZelle(sheet, 7, zeile, kennzahlen.durchschnitt, _zahlStyle);
+      }
+    }
+  }
+
+  String _bezeichnung(List<AuswertungsFilterOption>? optionen, String? id) {
+    if (id == null) return 'Alle';
+    for (final option in optionen ?? const <AuswertungsFilterOption>[]) {
+      if (option.id == id) return option.bezeichnung;
+    }
+    return 'Ausgewählter Eintrag';
+  }
+
+  String _gruppierungText(StatistikZeitraum zeitraum) => switch (zeitraum) {
+        StatistikZeitraum.tag => 'Tag',
+        StatistikZeitraum.woche => 'Woche',
+        StatistikZeitraum.monat => 'Monat',
+        StatistikZeitraum.jahr => 'Jahr',
+      };
 
   void _produktbewertungen(
     Excel excel,
@@ -306,6 +439,7 @@ class StatistikExcelService {
     textWrapping: TextWrapping.WrapText,
   );
   static final _zeilenKopfStyle = CellStyle(bold: true);
+  static final _textStyle = CellStyle(textWrapping: TextWrapping.WrapText);
   static final _zahlStyle = CellStyle(
     horizontalAlign: HorizontalAlign.Right,
     numberFormat: CustomNumericNumFormat(formatCode: '0.00'),

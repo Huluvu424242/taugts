@@ -149,6 +149,22 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
     });
   }
 
+  List<Zeitwert> _auswertungsPunkte(AuswertungsUebersicht daten) {
+    final werte = _ansicht.werte(daten);
+    final einzelBeobachtungen =
+        _ansicht == _StatistikAnsicht.auffaelligkeiten ||
+            (_ansicht == _StatistikAnsicht.preise &&
+                _filter.objektArt == StatistikObjektart.ort &&
+                _aggregation == StatistikZeitraum.tag);
+    if (einzelBeobachtungen) return werte;
+    return StatistikRechnung.aggregiere(
+      werte,
+      _aggregation,
+      summieren: _ansicht == _StatistikAnsicht.ausgaben ||
+          _ansicht == _StatistikAnsicht.haeufigkeit,
+    );
+  }
+
   Future<void> _exportieren() async {
     final statistikExportService = widget.statistikExportService;
     final exportZielService = widget.exportZielService;
@@ -160,16 +176,24 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
 
     setState(() => _exportLaeuft = true);
     try {
-      final daten = await statistikExportService.ladeDaten();
+      final exportDaten = await statistikExportService.ladeDaten();
+      final auswertungsDaten = await _daten;
+      final verlauf = _auswertungsPunkte(auswertungsDaten);
+      final optionen = await _filterOptionen;
       if (!mounted) return;
-      if (!daten.hatAuswertbareWertungen) {
-        _meldung(
-          'Für den Excel-Export sind noch keine Qualitätswertungen vorhanden.',
-        );
+      if (!exportDaten.hatAuswertbareWertungen && verlauf.isEmpty) {
+        _meldung('Für den Excel-Export liegen keine passenden Daten vor.');
         return;
       }
 
-      final datei = widget.excelService.erstelle(daten);
+      final datei = widget.excelService.erstelle(
+        exportDaten,
+        zeitreihe: verlauf,
+        statistikTitel: _ansicht.titel,
+        filter: _filter,
+        gruppierung: _aggregation,
+        filterOptionen: optionen,
+      );
       final ziel = await exportZielService.speichern(
         dateiname: datei.dateiname,
         inhalt: datei.inhalt,
@@ -286,21 +310,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                 );
               }
               final daten = snapshot.data!;
-              final werte = _ansicht.werte(daten);
-              final ortspreiseAmEinzeltermin =
-                  _ansicht == _StatistikAnsicht.preise &&
-                      _filter.objektArt == StatistikObjektart.ort &&
-                      _aggregation == StatistikZeitraum.tag;
-              final auffaelligkeitenDirekt =
-                  _ansicht == _StatistikAnsicht.auffaelligkeiten;
-              final punkte = ortspreiseAmEinzeltermin || auffaelligkeitenDirekt
-                  ? werte
-                  : StatistikRechnung.aggregiere(
-                      werte,
-                      _aggregation,
-                      summieren: _ansicht == _StatistikAnsicht.ausgaben ||
-                          _ansicht == _StatistikAnsicht.haeufigkeit,
-                    );
+              final punkte = _auswertungsPunkte(daten);
               return ListView(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                 children: [
@@ -528,7 +538,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Der Excel-Export enthält Produktbewertungen, Ortsbewertungen und einen Ortsverlauf mit Liniendiagramm.',
+                      'Der Excel-Export enthält Produkt- und Ortsbewertungen, den Ortsverlauf sowie die aktuell gefilterte Zeitreihe mit Metadaten.',
                     ),
                   ],
                   const SizedBox(height: 16),
