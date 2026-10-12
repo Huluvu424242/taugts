@@ -22,7 +22,8 @@ class SqliteAuswertungsService implements AuswertungsService {
   }
 
   List<Map<String, Object?>> _bewertungsRows(AuswertungsFilter filter) =>
-      _db.verbindung.select('''
+      _db.verbindung
+          .select('''
         SELECT DISTINCT b.id, b.kriterium_id,
           COALESCE(e.beginn, ob.bewertet_am, b.erstellt_am) AS ereigniszeit,
           COALESCE(b.kriterium_name, k.name, b.kriterium_id) AS kriterium_name,
@@ -42,17 +43,21 @@ class SqliteAuswertungsService implements AuswertungsService {
           AND (? IS NULL OR pk.kategorie_id = ? OR ok.kategorie_id = ?)
         ORDER BY ereigniszeit
       ''', [
-        filter.objektId,
-        filter.objektId,
-        filter.herkunftProfilId,
-        filter.herkunftProfilId,
-        filter.kategorieId,
-        filter.kategorieId,
-        filter.kategorieId,
-      ]).cast<Map<String, Object?>>().where((row) {
-        final zeit = DateTime.tryParse(row['ereigniszeit'] as String? ?? '');
-        return zeit != null && filter.enthaeltZeitpunkt(zeit);
-      }).toList();
+            filter.objektId,
+            filter.objektId,
+            filter.herkunftProfilId,
+            filter.herkunftProfilId,
+            filter.kategorieId,
+            filter.kategorieId,
+            filter.kategorieId,
+          ])
+          .cast<Map<String, Object?>>()
+          .where((row) {
+            final zeit =
+                DateTime.tryParse(row['ereigniszeit'] as String? ?? '');
+            return zeit != null && filter.enthaeltZeitpunkt(zeit);
+          })
+          .toList();
 
   List<Durchschnittswert> _durchschnitte(List<Map<String, Object?>> rows) {
     final gruppen = <String, List<double>>{};
@@ -71,8 +76,7 @@ class SqliteAuswertungsService implements AuswertungsService {
           kriterium: namen[entry.key]!,
           kriteriumVersion: versionen[entry.key]!,
           anzahl: StatistikKennzahlen.ausWerten(entry.value).anzahl,
-          durchschnitt:
-              StatistikKennzahlen.ausWerten(entry.value).durchschnitt,
+          durchschnitt: StatistikKennzahlen.ausWerten(entry.value).durchschnitt,
         ),
     ]..sort((a, b) => a.kriterium.compareTo(b.kriterium));
   }
@@ -122,8 +126,8 @@ class SqliteAuswertungsService implements AuswertungsService {
 
   List<Zeitwert> _ortsverlauf(AuswertungsFilter filter) =>
       _bewertungsRows(filter)
-          .where(
-              (row) => row['eingabetyp'] == 'wertung' &&
+          .where((row) =>
+              row['eingabetyp'] == 'wertung' &&
               row['wert'] != null &&
               row['ort_id'] != null)
           .map(
