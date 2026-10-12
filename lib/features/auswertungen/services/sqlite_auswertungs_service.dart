@@ -99,6 +99,7 @@ class SqliteAuswertungsService implements AuswertungsService {
           zeitpunkt: DateTime.parse(row['beobachtet_am']! as String),
           wert: (row['betrag_minor']! as int) / 100,
           beschreibung: '${row['ort_name']} · ${row['waehrung']}',
+          serie: row['waehrung']! as String,
         ),
     ].where((wert) => filter.enthaeltZeitpunkt(wert.zeitpunkt)).toList();
   }
