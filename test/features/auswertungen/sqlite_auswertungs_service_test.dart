@@ -19,8 +19,13 @@ void main() {
         [profil, null, jetzt, jetzt],
       );
       db.verbindung.execute(
-        "INSERT INTO erlebnisse (id, typ, erstellt_am, geaendert_am, herkunft_profil_id) VALUES ('e', 'einkauf', ?, ?, ?)",
-        [jetzt, jetzt, profil],
+        "INSERT INTO erlebnisse (id, typ, beginn, erstellt_am, geaendert_am, herkunft_profil_id) VALUES ('e', 'einkauf', ?, ?, ?, ?)",
+        [
+          DateTime.utc(2026, 9, 1).toIso8601String(),
+          jetzt,
+          jetzt,
+          profil,
+        ],
       );
       db.verbindung.execute(
         '''
@@ -58,6 +63,11 @@ void main() {
       );
       expect(version1.durchschnitt, 3.0);
       expect(version1.anzahl, 2);
+
+      final zeitlichGefiltert = await SqliteAuswertungsService(db).berechne(
+        AuswertungsFilter(von: DateTime.utc(2026, 9, 2)),
+      );
+      expect(zeitlichGefiltert.bewertungsanzahl, 0);
     },
   );
 }
