@@ -7,7 +7,7 @@ class AuswertungsFilter {
     this.herkunftProfilId,
     this.von,
     this.bis,
-  }) : assert(von == null || bis == null || !bis.isBefore(von));
+  });
 
   final String? kategorieId;
   final String? objektId;
@@ -18,6 +18,9 @@ class AuswertungsFilter {
 
   /// Inklusive Obergrenze der fachlichen Ereigniszeit.
   final DateTime? bis;
+
+  bool get hatGueltigenZeitraum =>
+      von == null || bis == null || !bis.isBefore(von);
 
   bool enthaeltZeitpunkt(DateTime zeitpunkt) {
     final lokal = zeitpunkt.toLocal();
@@ -36,11 +39,6 @@ class StatistikKennzahlen {
     required this.durchschnitt,
   });
 
-  final int anzahl;
-  final double minimum;
-  final double maximum;
-  final double durchschnitt;
-
   factory StatistikKennzahlen.ausWerten(Iterable<num> werte) {
     final sortiert = werte.map((wert) => wert.toDouble()).toList()..sort();
     if (sortiert.isEmpty) {
@@ -54,6 +52,11 @@ class StatistikKennzahlen {
       durchschnitt: summe / sortiert.length,
     );
   }
+
+  final int anzahl;
+  final double minimum;
+  final double maximum;
+  final double durchschnitt;
 }
 
 class StatistikZeitpunkt {
