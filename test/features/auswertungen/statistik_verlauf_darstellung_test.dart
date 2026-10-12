@@ -4,9 +4,9 @@ import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
 import 'package:taugts/features/auswertungen/presentation/statistik_verlauf_darstellung.dart';
 
 void main() {
-  testWidgets('Verlauf zeigt Diagramm und zugängliche Datentabelle', (
-    tester,
-  ) async {
+  testWidgets(
+    'Verlauf zeigt Diagramm und zugängliche Datentabelle',
+    (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -36,6 +36,7 @@ void main() {
     expect(find.text('Wert'), findsOneWidget);
     expect(find.text('Einheit: EUR'), findsOneWidget);
     expect(find.text('2.00'), findsOneWidget);
-    expect(find.text('4.00'), findsOneWidget);
-  });
+      expect(find.text('4.00'), findsOneWidget);
+    },
+  );
 }
