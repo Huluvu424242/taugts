@@ -89,3 +89,21 @@ Diese Freigabe gilt ausschließlich für die oben bezeichnete Version. Jede Änd
 - **Actions/SHAs:** `actions/checkout` v6: `d23441a48e516b6c34aea4fa41551a30e30af803`; `actions/setup-python` v6: `ece7cb06caefa5fff74198d8649806c4678c61a1`.
 - **Supply Chain/Lizenzen:** bestehende dokumentierte MkDocs-/Material-Abhängigkeiten aus `requirements-docs.txt`, keine zusätzlichen Pakete oder externen Workflows; Herkunft und Lizenzprüfung aus `docs/entwicklung/dokumentationswerkzeugkette.md` gelten weiterhin. PR-Code und Build-Abhängigkeiten sind als potenziell nicht vertrauenswürdig zu behandeln; daher lesender Job ohne Secrets.
 - **Audit/Deaktivierung/Rollback:** PR-Check und Logs sind nachvollziehbar. Die Dateiumbenennung auf `kiagent-mkdocs-pr-check.yml` ist im `master`-Commit `89f8212d92a52c13b2590325bba562d43a29acbc` dokumentiert; Story #285 führt die Referenzanpassung nach. Änderungen an Dateipfad, Git-Blob-SHA, Triggern, Berechtigungen, Actions/SHAs, Datenflüssen, Secrets, Outputs, Artefakten, Runner oder Zweck beenden diese spezifische Freigabe; erneute ausdrückliche Genehmigung nötig. Deaktivierung oder Rücknahme ausschließlich nach den AGENTS-Regeln per geprüftem PR.
+
+
+## Noch nicht freigegebene Änderung: MkDocs-PR-Prüfung für Commit-SHAs (Story #288)
+
+**Status: Freigabe ausstehend – keine Ausführungsberechtigung.** Dieser Abschnitt dokumentiert nur den beantragten neuen Workflow und seine Prüfsumme. Die oben dokumentierte Dauerfreigabe für Blob-SHA `db0e38642a6fa5f5b6c6ff928a1bc890d2d6f75b` gilt **nicht** für diese geänderte Version. Ein neuer Hash-Eintrag ist keine Genehmigung.
+
+- **Repository und Story:** `Huluvu424242/taugts`, [#288](https://github.com/Huluvu424242/taugts/issues/288).
+- **Workflow und Version (beantragt):** `MkDocs-PR-Prüfung`, `.github/workflows/kiagent-mkdocs-pr-check.yml`, Git-Blob-SHA `7ef9433251a89f8a22c2b23896cd7d214b7530f1`.
+- **Automatischer Trigger:** unverändert `pull_request` gegen `master` oder `release/**`, gefiltert auf `docs/**`, `mkdocs.yml`, `requirements-docs.txt`.
+- **Zusätzlicher manueller Trigger (beantragt):** `workflow_dispatch` über die Workflow-Version auf `master` mit Pflichtfeld `commit_sha` (vollständiger 40-stelliger Git-SHA). Vor Checkout wird das SHA-Format überprüft; der Checkout liest exakt diesen Commit. Für PR-Läufe wird weiterhin der von GitHub bereitgestellte Prüfreferenz-Commit (`github.sha`) verwendet.
+- **Zweck:** `mkdocs build --strict` auch auf gestapelten PR-Branches, ohne diese PRs umzutargeten; keine Publikation.
+- **Berechtigungen/Datenzugriff:** Default `permissions: {}`, Job ausschließlich `contents: read`; Checkout `persist-credentials: false`; lesender Zugriff auf den benannten Repository-Commit und Installation der dort festgelegten öffentlichen Python-Dokumentationsabhängigkeiten.
+- **Secrets und Ausgabe:** keine projektspezifischen Secrets, keine Commits, Schreibzugriffe, Deployments oder Artefakt-Uploads. Status, GitHub-Logs und Job-Zusammenfassung mit dem tatsächlich ausgecheckten Commit; `site/` nur temporär im Runner, GitHub-Standardaufbewahrung.
+- **Runner/Abhängigkeiten/Actions:** `ubuntu-latest`, maximal 15 Minuten, Python 3.13, vorhandene `requirements-docs.txt`; `actions/checkout` v6 SHA `d23441a48e516b6c34aea4fa41551a30e30af803` und `actions/setup-python` v6 SHA `ece7cb06caefa5fff74198d8649806c4678c61a1`. Keine neuen externen Actions.
+- **Risiken und Begrenzungen:** Zu prüfender Quellstand und seine Abhängigkeiten können fremden Code enthalten; deshalb keine persistierten Checkout-Credentials oder Schreibrechte/Secrets. Eindeutige SHA-Eingabe verhindert unkontrollierten Branchwechsel während des Runs. GitHub-Logs und Job-Zusammenfassung erlauben die Rückverfolgung. Normales GitHub-Actions-Kontingent; Lizenz- und Supply-Chain-Rahmen wie bei der bisherigen dokumentierten MkDocs-Prüfung.
+- **Rollout und Freigabe:** Story → separater Workflow-/Harness-PR → menschliche Prüfung und Merge → **erneute ausdrückliche Ausführungsfreigabe** für genau die geänderte Version und den gewünschten Trigger. Bis dahin insbesondere keine manuellen oder durch Änderung der PR-Basis provozierten Testläufe.
+- **Rollback:** Workflow und Freigabedokumentation per separatem geprüften PR zurücksetzen; keine Änderung an GitHub-Projekteinstellungen erforderlich.
+
