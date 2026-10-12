@@ -160,7 +160,9 @@ class SqliteAuswertungsService
               : '${row['ort_name']} · ${row['waehrung']}',
           serie: filter.objektArt == StatistikObjektart.ort
               ? '${row['produkt_name']} · ${row['waehrung']}'
-              : row['waehrung']! as String,
+              : filter.objektId == null
+                  ? row['waehrung']! as String
+                  : '${row['ort_name']} · ${row['waehrung']}',
         ),
     ].where((wert) => filter.enthaeltZeitpunkt(wert.zeitpunkt)).toList();
   }
