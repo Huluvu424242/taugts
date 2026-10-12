@@ -57,6 +57,29 @@ void main() {
       );
     });
 
+    test('Kostenaggregation summiert statt Mittelwerte zu bilden', () {
+      final ergebnis = StatistikRechnung.aggregiere(
+        [
+          Zeitwert(
+            zeitpunkt: DateTime(2026, 2, 1),
+            wert: 12,
+            beschreibung: 'Tatsächliche Ausgaben',
+            serie: 'EUR',
+          ),
+          Zeitwert(
+            zeitpunkt: DateTime(2026, 2, 12),
+            wert: 8,
+            beschreibung: 'Tatsächliche Ausgaben',
+            serie: 'EUR',
+          ),
+        ],
+        StatistikZeitraum.monat,
+        summieren: true,
+      );
+
+      expect(ergebnis.single.wert, 20);
+    });
+
     test('Aggregation trennt Währungen und mittelt dieselbe Zeitreihe', () {
       final ergebnis = StatistikRechnung.aggregiere(
         [

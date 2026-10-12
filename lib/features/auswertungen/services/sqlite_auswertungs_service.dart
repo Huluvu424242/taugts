@@ -52,6 +52,7 @@ class SqliteAuswertungsService
       bewertungsanzahl: bewertungsRows.length,
       durchschnitte: _durchschnitte(bewertungsRows),
       preisverlauf: _preisverlauf(filter),
+      ausgabenverlauf: _ausgabenverlauf(filter),
       qualitaetsverlauf: _qualitaetsverlauf(filter),
       ortsverlauf: _ortsverlauf(filter),
       erlebnisgruppen: _erlebnisgruppen(filter),
@@ -165,6 +166,49 @@ class SqliteAuswertungsService
                   : '${row['ort_name']} · ${row['waehrung']}',
         ),
     ].where((wert) => filter.enthaeltZeitpunkt(wert.zeitpunkt)).toList();
+  }
+
+  List<Zeitwert> _ausgabenverlauf(AuswertungsFilter filter) {
+    final rows = _db.verbindung.select('''
+      SELECT e.id, e.typ,
+        COALESCE(e.beginn, MIN(pb.beobachtet_am), e.erstellt_am) AS ereigniszeit,
+        pb.waehrung, SUM(pb.betrag_minor * ep.anzahl) AS betrag_minor
+      FROM preisbeobachtungen pb
+      JOIN erlebnispositionen ep ON ep.id = pb.erlebnis_position_id
+      JOIN erlebnisse e ON e.id = pb.erlebnis_id
+      LEFT JOIN produkt_kategorien pk ON pk.produkt_id = pb.produkt_id
+      WHERE (? IS NULL OR
+          (? = 'ort' AND pb.ort_id = ?) OR
+          (? = 'produkt' AND pb.produkt_id = ?))
+        AND (? IS NULL OR e.herkunft_profil_id = ?)
+        AND (? IS NULL OR pk.kategorie_id = ?)
+      GROUP BY e.id, e.typ, pb.waehrung
+      ORDER BY ereigniszeit
+    ''', [
+      filter.objektId,
+      filter.objektArt.name,
+      filter.objektId,
+      filter.objektArt.name,
+      filter.objektId,
+      filter.herkunftProfilId,
+      filter.herkunftProfilId,
+      filter.kategorieId,
+      filter.kategorieId,
+    ]);
+    final ergebnis = <Zeitwert>[];
+    for (final row in rows) {
+      final zeit = DateTime.tryParse(row['ereigniszeit'] as String? ?? '');
+      if (zeit == null || !filter.enthaeltZeitpunkt(zeit)) continue;
+      ergebnis.add(
+        Zeitwert(
+          zeitpunkt: zeit,
+          wert: (row['betrag_minor']! as int) / 100,
+          beschreibung: 'Tatsächliche Ausgaben',
+          serie: row['waehrung']! as String,
+        ),
+      );
+    }
+    return ergebnis;
   }
 
   List<Zeitwert> _qualitaetsverlauf(AuswertungsFilter filter) =>

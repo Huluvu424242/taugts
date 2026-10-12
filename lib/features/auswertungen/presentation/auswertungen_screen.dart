@@ -10,6 +10,7 @@ import 'package:taugts/features/datenaustausch/services/binaer_export_ziel_servi
 
 enum _StatistikAnsicht {
   preise('Preise'),
+  ausgaben('Einkaufskosten'),
   produktqualitaet('Produktqualität'),
   ortsqualitaet('Ortsqualität'),
   andrang('Andrang');
@@ -20,6 +21,7 @@ enum _StatistikAnsicht {
 
   List<Zeitwert> werte(AuswertungsUebersicht daten) => switch (this) {
         _StatistikAnsicht.preise => daten.preisverlauf,
+        _StatistikAnsicht.ausgaben => daten.ausgabenverlauf,
         _StatistikAnsicht.produktqualitaet => daten.qualitaetsverlauf,
         _StatistikAnsicht.ortsqualitaet => daten.ortsverlauf,
         _StatistikAnsicht.andrang => daten.andrangBeobachtungen,
@@ -274,7 +276,11 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                       _aggregation == StatistikZeitraum.tag;
               final punkte = ortspreiseAmEinzeltermin
                   ? werte
-                  : StatistikRechnung.aggregiere(werte, _aggregation);
+                  : StatistikRechnung.aggregiere(
+                      werte,
+                      _aggregation,
+                      summieren: _ansicht == _StatistikAnsicht.ausgaben,
+                    );
               return ListView(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                 children: [
