@@ -8,7 +8,7 @@ void main() {
     'Verlauf zeigt Diagramm und zugängliche Datentabelle',
     (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: StatistikVerlaufDarstellung(
               daten: [
