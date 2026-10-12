@@ -28,8 +28,7 @@ class AuswertungenScreen extends StatefulWidget {
 
 class _AuswertungenScreenState extends State<AuswertungenScreen> {
   var _filter = const AuswertungsFilter();
-  late Future<AuswertungsUebersicht> _daten =
-      widget.service.berechne(_filter);
+  late Future<AuswertungsUebersicht> _daten = widget.service.berechne(_filter);
   var _exportLaeuft = false;
 
   void _neuLaden() => setState(() {
@@ -173,7 +172,9 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                               '${_filter.von!.toLocal().toString().split(' ').first} bis ${_filter.bis!.toLocal().toString().split(' ').first}',
                             ),
                           TextButton(
-                            onPressed: _filter.von == null ? null : _filterZuruecksetzen,
+                            onPressed: _filter.von == null
+                                ? null
+                                : _filterZuruecksetzen,
                             child: const Text('Filter zurücksetzen'),
                           ),
                         ],
