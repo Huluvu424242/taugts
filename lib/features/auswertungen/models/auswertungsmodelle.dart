@@ -19,8 +19,11 @@ class AuswertungsFilter {
   /// Inklusive Obergrenze der fachlichen Ereigniszeit.
   final DateTime? bis;
 
-  bool get hatGueltigenZeitraum =>
-      von == null || bis == null || !bis.isBefore(von);
+  bool get hatGueltigenZeitraum {
+    final start = von;
+    final ende = bis;
+    return start == null || ende == null || !ende.isBefore(start);
+  }
 
   bool enthaeltZeitpunkt(DateTime zeitpunkt) {
     final lokal = zeitpunkt.toLocal();
