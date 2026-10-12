@@ -59,7 +59,7 @@ class SqliteAuswertungsService implements AuswertungsService {
     final namen = <String, String>{};
     final versionen = <String, int>{};
     for (final row in rows) {
-      if (row['eingabetyp'] != 'wertung') continue;
+      if (row['eingabetyp'] != 'wertung' || row['wert'] == null) continue;
       final id = '${row['kriterium_id']}#${row['kriterium_version']}';
       gruppen.putIfAbsent(id, () => []).add((row['wert']! as num).toDouble());
       namen[id] = row['kriterium_name']! as String;
@@ -106,7 +106,9 @@ class SqliteAuswertungsService implements AuswertungsService {
   List<Zeitwert> _qualitaetsverlauf(AuswertungsFilter filter) =>
       _bewertungsRows(filter)
           .where((row) =>
-              row['eingabetyp'] == 'wertung' && row['produkt_id'] != null)
+              row['eingabetyp'] == 'wertung' &&
+              row['wert'] != null &&
+              row['produkt_id'] != null)
           .map(
             (row) => Zeitwert(
               zeitpunkt: DateTime.parse(row['ereigniszeit']! as String),
@@ -120,7 +122,9 @@ class SqliteAuswertungsService implements AuswertungsService {
   List<Zeitwert> _ortsverlauf(AuswertungsFilter filter) =>
       _bewertungsRows(filter)
           .where(
-              (row) => row['eingabetyp'] == 'wertung' && row['ort_id'] != null)
+              (row) => row['eingabetyp'] == 'wertung' &&
+              row['wert'] != null &&
+              row['ort_id'] != null)
           .map(
             (row) => Zeitwert(
               zeitpunkt: DateTime.parse(row['ereigniszeit']! as String),
