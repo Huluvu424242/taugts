@@ -24,12 +24,15 @@ class SqliteAuswertungsService implements AuswertungsService {
   List<Map<String, Object?>> _bewertungsRows(AuswertungsFilter filter) =>
       _db.verbindung.select('''
         SELECT DISTINCT b.id, b.kriterium_id,
+          COALESCE(e.beginn, ob.bewertet_am, b.erstellt_am) AS ereigniszeit,
           COALESCE(b.kriterium_name, k.name, b.kriterium_id) AS kriterium_name,
           COALESCE(b.kriterium_version, k.version, 1) AS kriterium_version,
           COALESCE(b.kriterium_eingabetyp, k.eingabetyp, 'wertung') AS eingabetyp,
           b.wert, b.erstellt_am, b.herkunft_profil_id,
           ep.produkt_id, ob.ort_id
         FROM bewertungen b
+        LEFT JOIN erlebnisse e ON e.id = b.erlebnis_id
+        LEFT JOIN ortsbewertungen ob ON ob.id = b.ortsbewertung_id
         LEFT JOIN kriterien k ON k.id = b.kriterium_id
         LEFT JOIN erlebnispositionen ep ON ep.id = b.erlebnis_position_id
         LEFT JOIN ortsbewertungen ob ON ob.id = b.ortsbewertung_id
@@ -47,7 +50,10 @@ class SqliteAuswertungsService implements AuswertungsService {
         filter.kategorieId,
         filter.kategorieId,
         filter.kategorieId,
-      ]).cast<Map<String, Object?>>();
+      ]).cast<Map<String, Object?>>().where((row) {
+        final zeit = DateTime.tryParse(row['ereigniszeit'] as String? ?? '');
+        return zeit != null && filter.enthaeltZeitpunkt(zeit);
+      }).toList();
 
   List<Durchschnittswert> _durchschnitte(List<Map<String, Object?>> rows) {
     final gruppen = <String, List<double>>{};
@@ -95,7 +101,7 @@ class SqliteAuswertungsService implements AuswertungsService {
           wert: (row['betrag_minor']! as int) / 100,
           beschreibung: '${row['ort_name']} · ${row['waehrung']}',
         ),
-    ];
+    ].where((wert) => filter.enthaeltZeitpunkt(wert.zeitpunkt)).toList();
   }
 
   List<Zeitwert> _qualitaetsverlauf(AuswertungsFilter filter) =>
@@ -144,7 +150,7 @@ class SqliteAuswertungsService implements AuswertungsService {
     for (final row in rows) {
       final beginn = DateTime.tryParse(row['beginn'] as String? ?? '');
       final ende = DateTime.tryParse(row['ende'] as String? ?? '');
-      if (beginn == null) continue;
+      if (beginn == null || !filter.enthaeltZeitpunkt(beginn)) continue;
       final tageszeit = beginn.hour < 11
           ? 'morgens'
           : beginn.hour < 17
@@ -191,6 +197,6 @@ class SqliteAuswertungsService implements AuswertungsService {
           beschreibung:
               '${row['name']} · beobachteter Andrang, keine Kausalaussage',
         ),
-    ];
+    ].where((wert) => filter.enthaeltZeitpunkt(wert.zeitpunkt)).toList();
   }
 }
