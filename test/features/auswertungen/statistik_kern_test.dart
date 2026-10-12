@@ -4,8 +4,7 @@ import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
 void main() {
   group('Statistikgrundlage', () {
     test('Kennzahlen halten Anzahl, Minimum, Maximum und Mittelwert fest', () {
-      final kennzahlen =
-          StatistikKennzahlen.ausWerten([4, 2, 8, 2]);
+      final kennzahlen = StatistikKennzahlen.ausWerten([4, 2, 8, 2]);
 
       expect(kennzahlen.anzahl, 4);
       expect(kennzahlen.minimum, 2);
