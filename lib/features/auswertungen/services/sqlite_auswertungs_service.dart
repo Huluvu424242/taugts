@@ -64,7 +64,7 @@ class SqliteAuswertungsService
   List<Map<String, Object?>> _bewertungsRows(AuswertungsFilter filter) =>
       _db.verbindung
           .select('''
-        SELECT DISTINCT b.id, b.kriterium_id,
+        SELECT DISTINCT b.id, e.id AS erlebnis_id, b.kriterium_id,
           COALESCE(e.beginn, ob.bewertet_am, b.erstellt_am) AS ereigniszeit,
           COALESCE(b.kriterium_name, k.name, b.kriterium_id) AS kriterium_name,
           COALESCE(b.kriterium_version, k.version, 1) AS kriterium_version,
@@ -224,6 +224,7 @@ class SqliteAuswertungsService
               wert: (row['wert']! as num).toDouble(),
               beschreibung:
                   '${row['kriterium_name']} · Version ${row['kriterium_version']}',
+              serie: 'Produkt',
             ),
           )
           .toList(growable: false);
@@ -240,6 +241,7 @@ class SqliteAuswertungsService
               wert: (row['wert']! as num).toDouble(),
               beschreibung:
                   '${row['kriterium_name']} · Version ${row['kriterium_version']}',
+              serie: 'Ort',
             ),
           )
           .toList(growable: false);
@@ -298,6 +300,7 @@ class SqliteAuswertungsService
     const schwelle = 2.0;
     final gruppen = <(int, int, String, int), List<(double, DateTime)>>{};
     final namen = <(int, int, String, int), String>{};
+    final gruppenErlebnisse = <(int, int, String, int), List<String>>{};
     for (final row in _bewertungsRows(filter)) {
       if (row['eingabetyp'] != 'wertung' || row['wert'] == null) continue;
       final zeit = DateTime.tryParse(row['ereigniszeit'] as String? ?? '');
@@ -312,6 +315,9 @@ class SqliteAuswertungsService
       gruppen
           .putIfAbsent(key, () => [])
           .add(((row['wert']! as num).toDouble(), zeit));
+      gruppenErlebnisse
+          .putIfAbsent(key, () => [])
+          .add(row['erlebnis_id']! as String);
       namen[key] = row['kriterium_name']! as String;
     }
 
@@ -340,6 +346,7 @@ class SqliteAuswertungsService
           beschreibung: '${namen[eintrag.key]} · Version ${eintrag.key.$4} · '
               '${niedrigeWertungen.length} von ${stichprobe.length} höchstens 2 '
               'an ${niedrigeWochen.length} Wochen',
+          erlebnisIds: gruppenErlebnisse[eintrag.key]!.toSet().toList(),
           serie: 'Wiederkehrende niedrige Wertungen',
         ),
       );

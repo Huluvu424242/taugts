@@ -7,6 +7,7 @@ import 'package:taugts/features/bewertungen/services/bewertungs_repository.dart'
 import 'package:taugts/features/datenaustausch/services/binaer_export_ziel_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_service.dart';
 import 'package:taugts/features/datenaustausch/services/export_ziel_service.dart';
+import 'package:taugts/features/erlebnisse/presentation/erlebnis_screen.dart';
 import 'package:taugts/features/home/presentation/home_screen.dart';
 import 'package:taugts/features/kategorien/presentation/kriteriensets_screen.dart';
 import 'package:taugts/features/kategorien/services/kategorie_repository.dart';
@@ -64,6 +65,34 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
     });
   }
 
+  Future<void> _erlebnisOeffnen(String erlebnisId) async {
+    final repository = widget.bewertungsRepository;
+    final idGenerator = widget.idGenerator;
+    final profil = widget.profil;
+    if (repository == null || idGenerator == null || profil == null) return;
+    final erlebnisse = await repository.ladeErlebnisse();
+    if (!mounted) return;
+    final passendeErlebnisse =
+        erlebnisse.where((eintrag) => eintrag.id == erlebnisId).toList();
+    if (passendeErlebnisse.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Das Erlebnis ist nicht mehr verfügbar.')),
+      );
+      return;
+    }
+    final erlebnis = passendeErlebnisse.single;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => ErlebnisScreen(
+          repository: repository,
+          idGenerator: idGenerator,
+          profil: profil,
+          erlebnis: erlebnis,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bewertungen = widget.bewertungsRepository;
@@ -95,6 +124,7 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
               service: widget.auswertungsService!,
               statistikExportService: widget.statistikExportService,
               exportZielService: widget.binaerExportZielService,
+              onErlebnisOeffnen: _erlebnisOeffnen,
             ),
       if (kannSets)
         KriteriensetsScreen(

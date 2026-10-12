@@ -140,6 +140,7 @@ class Zeitwert {
     this.serie,
     this.kennzahlen,
     this.zeitpunktBeschriftung,
+    this.erlebnisIds = const [],
   });
 
   final DateTime zeitpunkt;
@@ -150,6 +151,7 @@ class Zeitwert {
   final String? serie;
   final StatistikKennzahlen? kennzahlen;
   final String? zeitpunktBeschriftung;
+  final List<String> erlebnisIds;
 }
 
 class StatistikRechnung {
