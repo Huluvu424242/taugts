@@ -139,6 +139,7 @@ class Zeitwert {
     required this.beschreibung,
     this.serie,
     this.kennzahlen,
+    this.zeitpunktBeschriftung,
   });
 
   final DateTime zeitpunkt;
@@ -148,6 +149,7 @@ class Zeitwert {
   /// Gruppierung, die niemals mit anderen Einheiten vermischt werden darf.
   final String? serie;
   final StatistikKennzahlen? kennzahlen;
+  final String? zeitpunktBeschriftung;
 }
 
 class StatistikRechnung {
@@ -210,6 +212,7 @@ class AuswertungsUebersicht {
     required this.ortsverlauf,
     required this.erlebnisgruppen,
     required this.andrangBeobachtungen,
+    required this.auffaelligkeiten,
   });
 
   final int bewertungsanzahl;
@@ -220,4 +223,5 @@ class AuswertungsUebersicht {
   final List<Zeitwert> ortsverlauf;
   final List<ErlebnisGruppe> erlebnisgruppen;
   final List<Zeitwert> andrangBeobachtungen;
+  final List<Zeitwert> auffaelligkeiten;
 }

@@ -155,16 +155,48 @@ void main() {
           [eintrag.$1, eintrag.$2, jetzt, jetzt, profil, eintrag.$3],
         );
       }
+      for (final besuch in [
+        ('e2', '2026-09-08T18:00:00.000Z', 'b4', 2.0),
+        ('e3', '2026-09-15T18:00:00.000Z', 'b5', 1.0),
+        ('e4', '2026-09-22T18:00:00.000Z', 'b6', 4.0),
+      ]) {
+        db.verbindung.execute(
+          '''
+            INSERT INTO erlebnisse (
+              id, typ, beginn, erstellt_am, geaendert_am, herkunft_profil_id
+            ) VALUES (?, 'besuch', ?, ?, ?, ?)
+          ''',
+          [besuch.$1, besuch.$2, jetzt, jetzt, profil],
+        );
+        db.verbindung.execute(
+          '''
+            INSERT INTO bewertungen (
+              id, erlebnis_id, kriterium_id, wert, erstellt_am, geaendert_am,
+              herkunft_profil_id, kriterium_name, kriterium_eingabetyp,
+              kriterium_reihenfolge, kriterium_version, kriterium_auswahlwerte
+            ) VALUES (?, ?, 'k', ?, ?, ?, ?, 'Geschmack', 'wertung', 0, 1, '')
+          ''',
+          [besuch.$3, besuch.$1, besuch.$4, jetzt, jetzt, profil],
+        );
+      }
+
       final daten = await SqliteAuswertungsService(db).berechne(
         const AuswertungsFilter(),
       );
-      expect(daten.bewertungsanzahl, 3);
+      expect(daten.auffaelligkeiten, hasLength(1));
+      expect(daten.auffaelligkeiten.single.wert, 2);
+      expect(
+        daten.auffaelligkeiten.single.zeitpunktBeschriftung,
+        'Wochentag 2 · 18:00 Uhr',
+      );
+      expect(daten.auffaelligkeiten.single.beschreibung, contains('2 von 3'));
+      expect(daten.bewertungsanzahl, 6);
       expect(daten.durchschnitte, hasLength(2));
       final version1 = daten.durchschnitte.firstWhere(
         (wert) => wert.kriteriumVersion == 1,
       );
-      expect(version1.durchschnitt, 3.0);
-      expect(version1.anzahl, 2);
+      expect(version1.durchschnitt, 2.6);
+      expect(version1.anzahl, 5);
 
       final service = SqliteAuswertungsService(db);
       final optionen = await service.ladeFilterOptionen();
@@ -181,7 +213,7 @@ void main() {
       final zeitlichGefiltert = await SqliteAuswertungsService(db).berechne(
         AuswertungsFilter(von: DateTime.utc(2026, 9, 2)),
       );
-      expect(zeitlichGefiltert.bewertungsanzahl, 0);
+      expect(zeitlichGefiltert.bewertungsanzahl, 3);
     },
   );
 }

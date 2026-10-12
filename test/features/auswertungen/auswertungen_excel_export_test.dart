@@ -74,6 +74,7 @@ class _FakeAuswertungsService implements AuswertungsService {
         ortsverlauf: [],
         erlebnisgruppen: [],
         andrangBeobachtungen: [],
+        auffaelligkeiten: [],
       );
 }
 

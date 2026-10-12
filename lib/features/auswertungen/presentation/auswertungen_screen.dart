@@ -13,7 +13,8 @@ enum _StatistikAnsicht {
   ausgaben('Einkaufskosten'),
   produktqualitaet('Produktqualität'),
   ortsqualitaet('Ortsqualität'),
-  andrang('Andrang');
+  andrang('Andrang'),
+  auffaelligkeiten('Bewertungsauffälligkeiten');
 
   const _StatistikAnsicht(this.titel);
 
@@ -25,6 +26,7 @@ enum _StatistikAnsicht {
         _StatistikAnsicht.produktqualitaet => daten.qualitaetsverlauf,
         _StatistikAnsicht.ortsqualitaet => daten.ortsverlauf,
         _StatistikAnsicht.andrang => daten.andrangBeobachtungen,
+        _StatistikAnsicht.auffaelligkeiten => daten.auffaelligkeiten,
       };
 }
 
