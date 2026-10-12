@@ -78,7 +78,7 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
                 DataRow(
                   cells: [
                     DataCell(Text(_zeitpunkt(punkt.zeitpunkt))),
-                    DataCell(Text(punkt.wert.toStringAsFixed(2))),
+                    DataCell(Text(_zahl(punkt.wert))),
                     DataCell(Text(punkt.beschreibung)),
                   ],
                 ),
@@ -90,10 +90,12 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
   String _diagrammBeschreibung(List<Zeitwert> punkte) {
     final werte = punkte.map((punkt) => punkt.wert).toList();
     return 'Zeitverlauf mit ${punkte.length} Datenpunkten. '
-        'Kleinster Wert ${werte.reduce((a, b) => a < b ? a : b).toStringAsFixed(2)}, '
-        'größter Wert ${werte.reduce((a, b) => a > b ? a : b).toStringAsFixed(2)}. '
+        'Kleinster Wert ${_zahl(werte.reduce((a, b) => a < b ? a : b))}, '
+        'größter Wert ${_zahl(werte.reduce((a, b) => a > b ? a : b))}. '
         'Die genaue Datentabelle folgt.';
   }
+
+  String _zahl(double wert) => wert.toStringAsFixed(2).replaceAll('.', ',');
 
   String _zeitpunkt(DateTime zeitpunkt) {
     final lokal = zeitpunkt.toLocal();

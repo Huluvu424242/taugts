@@ -56,5 +56,41 @@ void main() {
         DateTime(2026),
       );
     });
+
+    test('Aggregation trennt Währungen und mittelt dieselbe Zeitreihe', () {
+      final ergebnis = StatistikRechnung.aggregiere(
+        [
+          Zeitwert(
+            zeitpunkt: DateTime(2024, 1, 1),
+            wert: 2,
+            beschreibung: 'Biergarten',
+            serie: 'EUR',
+          ),
+          Zeitwert(
+            zeitpunkt: DateTime(2024, 6, 1),
+            wert: 4,
+            beschreibung: 'Biergarten',
+            serie: 'EUR',
+          ),
+          Zeitwert(
+            zeitpunkt: DateTime(2024, 6, 1),
+            wert: 120,
+            beschreibung: 'Biergarten',
+            serie: 'CZK',
+          ),
+        ],
+        StatistikZeitraum.jahr,
+      );
+
+      expect(ergebnis, hasLength(2));
+      expect(
+        ergebnis.firstWhere((wert) => wert.serie == 'EUR').wert,
+        3,
+      );
+      expect(
+        ergebnis.firstWhere((wert) => wert.serie == 'CZK').wert,
+        120,
+      );
+    });
   });
 }

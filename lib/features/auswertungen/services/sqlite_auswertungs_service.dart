@@ -2,10 +2,48 @@ import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
 import 'package:taugts/features/auswertungen/services/auswertungs_service.dart';
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 
-class SqliteAuswertungsService implements AuswertungsService {
+class SqliteAuswertungsService
+    implements AuswertungsService, AuswertungsFilterOptionenService {
   const SqliteAuswertungsService(this._db);
 
   final LokaleDatenbank _db;
+
+  @override
+  Future<AuswertungsFilterOptionen> ladeFilterOptionen() async =>
+      AuswertungsFilterOptionen(
+        produkte: _optionen('''
+          SELECT p.objekt_id AS id, o.name AS bezeichnung
+          FROM produkte p
+          JOIN objekte o ON o.id = p.objekt_id
+          WHERE p.geloescht = 0
+          ORDER BY o.name
+        '''),
+        orte: _optionen('''
+          SELECT id, name AS bezeichnung
+          FROM orte
+          WHERE geloescht = 0
+          ORDER BY name
+        '''),
+        kategorien: _optionen('''
+          SELECT id, name AS bezeichnung
+          FROM kategorien
+          ORDER BY name
+        '''),
+        kriterien: _optionen('''
+          SELECT id, name AS bezeichnung
+          FROM kriterien
+          WHERE aktiv = 1
+          ORDER BY reihenfolge, name
+        '''),
+      );
+
+  List<AuswertungsFilterOption> _optionen(String abfrage) => [
+        for (final row in _db.verbindung.select(abfrage))
+          AuswertungsFilterOption(
+            id: row['id']! as String,
+            bezeichnung: row['bezeichnung']! as String,
+          ),
+      ];
 
   @override
   Future<AuswertungsUebersicht> berechne(AuswertungsFilter filter) async {
@@ -38,13 +76,21 @@ class SqliteAuswertungsService implements AuswertungsService {
         LEFT JOIN erlebnispositionen ep ON ep.id = b.erlebnis_position_id
         LEFT JOIN produkt_kategorien pk ON pk.produkt_id = ep.produkt_id
         LEFT JOIN ort_kategorien ok ON ok.ort_id = ob.ort_id
-        WHERE (? IS NULL OR COALESCE(ep.produkt_id, ob.ort_id) = ?)
+        WHERE (? IS NULL OR
+            (? = 'produkt' AND ep.produkt_id = ?) OR
+            (? = 'ort' AND ob.ort_id = ?))
+          AND (? IS NULL OR b.kriterium_id = ?)
           AND (? IS NULL OR b.herkunft_profil_id = ?)
           AND (? IS NULL OR pk.kategorie_id = ? OR ok.kategorie_id = ?)
         ORDER BY ereigniszeit
       ''', [
             filter.objektId,
+            filter.objektArt.name,
             filter.objektId,
+            filter.objektArt.name,
+            filter.objektId,
+            filter.kriteriumId,
+            filter.kriteriumId,
             filter.herkunftProfilId,
             filter.herkunftProfilId,
             filter.kategorieId,
@@ -88,14 +134,19 @@ class SqliteAuswertungsService implements AuswertungsService {
       FROM preisbeobachtungen pb
       LEFT JOIN orte o ON o.id = pb.ort_id
       LEFT JOIN produkt_kategorien pk ON pk.produkt_id = pb.produkt_id
-      WHERE (? IS NULL OR pb.produkt_id = ?)
+      WHERE (? IS NULL OR
+          (? = 'produkt' AND pb.produkt_id = ?) OR
+          (? = 'ort' AND pb.ort_id = ?))
         AND (? IS NULL OR pk.kategorie_id = ?)
       ORDER BY pb.beobachtet_am
     ''', [
       filter.objektId,
+      filter.objektArt.name,
+      filter.objektId,
+      filter.objektArt.name,
       filter.objektId,
       filter.kategorieId,
-      filter.kategorieId
+      filter.kategorieId,
     ]);
     return [
       for (final row in rows)
@@ -145,11 +196,20 @@ class SqliteAuswertungsService implements AuswertungsService {
       SELECT e.id, e.typ, e.beginn, e.ende,
         COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) AS ort_id
       FROM erlebnisse e
-      WHERE (? IS NULL OR COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) = ?)
+      WHERE (? IS NULL OR
+          (? = 'ort' AND
+            COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) = ?) OR
+          (? = 'produkt' AND EXISTS (
+            SELECT 1 FROM erlebnispositionen ep
+            WHERE ep.erlebnis_id = e.id AND ep.produkt_id = ?
+          )))
         AND (? IS NULL OR e.herkunft_profil_id = ?)
         AND e.ende IS NOT NULL
     ''', [
       filter.objektId,
+      filter.objektArt.name,
+      filter.objektId,
+      filter.objektArt.name,
       filter.objektId,
       filter.herkunftProfilId,
       filter.herkunftProfilId,
@@ -188,12 +248,19 @@ class SqliteAuswertungsService implements AuswertungsService {
       JOIN ortsbewertungen ob ON ob.id = b.ortsbewertung_id
       JOIN orte o ON o.id = ob.ort_id
       WHERE COALESCE(b.kriterium_name, '') = 'Andrang / Auslastung'
-        AND (? IS NULL OR ob.ort_id = ?)
+        AND (? IS NULL OR
+          (? = 'ort' AND ob.ort_id = ?) OR
+          (? = 'produkt' AND 0))
+        AND (? IS NULL OR b.kriterium_id = ?)
         AND (? IS NULL OR b.herkunft_profil_id = ?)
       ORDER BY ob.bewertet_am
     ''', [
       filter.objektId,
+      filter.objektArt.name,
       filter.objektId,
+      filter.objektArt.name,
+      filter.kriteriumId,
+      filter.kriteriumId,
       filter.herkunftProfilId,
       filter.herkunftProfilId,
     ]);
