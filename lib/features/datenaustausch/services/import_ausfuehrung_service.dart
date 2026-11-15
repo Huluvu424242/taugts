@@ -30,14 +30,13 @@ class ImportErgebnisZaehler {
     int uebersprungen = 0,
     int zusammengefuehrt = 0,
     int fehlerhaft = 0,
-  }) =>
-      ImportErgebnisZaehler(
-        hinzugefuegt: this.hinzugefuegt + hinzugefuegt,
-        aktualisiert: this.aktualisiert + aktualisiert,
-        uebersprungen: this.uebersprungen + uebersprungen,
-        zusammengefuehrt: this.zusammengefuehrt + zusammengefuehrt,
-        fehlerhaft: this.fehlerhaft + fehlerhaft,
-      );
+  }) => ImportErgebnisZaehler(
+    hinzugefuegt: this.hinzugefuegt + hinzugefuegt,
+    aktualisiert: this.aktualisiert + aktualisiert,
+    uebersprungen: this.uebersprungen + uebersprungen,
+    zusammengefuehrt: this.zusammengefuehrt + zusammengefuehrt,
+    fehlerhaft: this.fehlerhaft + fehlerhaft,
+  );
 }
 
 class ImportAusfuehrungsErgebnis {
@@ -46,15 +45,15 @@ class ImportAusfuehrungsErgebnis {
   final Map<String, ImportErgebnisZaehler> nachSammlung;
 
   ImportErgebnisZaehler get gesamt => nachSammlung.values.fold(
-        const ImportErgebnisZaehler(),
-        (summe, wert) => summe.plus(
-          hinzugefuegt: wert.hinzugefuegt,
-          aktualisiert: wert.aktualisiert,
-          uebersprungen: wert.uebersprungen,
-          zusammengefuehrt: wert.zusammengefuehrt,
-          fehlerhaft: wert.fehlerhaft,
-        ),
-      );
+    const ImportErgebnisZaehler(),
+    (summe, wert) => summe.plus(
+      hinzugefuegt: wert.hinzugefuegt,
+      aktualisiert: wert.aktualisiert,
+      uebersprungen: wert.uebersprungen,
+      zusammengefuehrt: wert.zusammengefuehrt,
+      fehlerhaft: wert.fehlerhaft,
+    ),
+  );
 }
 
 class ImportAusfuehrungService {
@@ -85,8 +84,7 @@ class ImportAusfuehrungService {
   Map<String, Object?> normalisiereBekannteAliase(
     LokaleDatenbank datenbank,
     Map<String, Object?> importDokument,
-  ) =>
-      aliasRepository.normalisiereDokument(datenbank, importDokument);
+  ) => aliasRepository.normalisiereDokument(datenbank, importDokument);
 
   ImportAusfuehrungsErgebnis ausfuehren({
     required LokaleDatenbank datenbank,
@@ -175,12 +173,7 @@ class ImportAusfuehrungService {
             final existiert = _existiert(datenbank, sammlung, zielId);
             if (existiert &&
                 strategie != ImportStrategie.bestandErsetzen &&
-                _identischZumBestand(
-                  sammlung,
-                  zielId,
-                  wert,
-                  lokalerStand,
-                )) {
+                _identischZumBestand(sammlung, zielId, wert, lokalerStand)) {
               ergebnis[ergebnisSammlung] = zaehler.plus(uebersprungen: 1);
               continue;
             }
@@ -190,12 +183,7 @@ class ImportAusfuehrungService {
               ergebnis[ergebnisSammlung] = zaehler.plus(uebersprungen: 1);
               continue;
             }
-            _schreibe(
-              datenbank,
-              sammlung,
-              {...wert, 'id': zielId},
-              existiert,
-            );
+            _schreibe(datenbank, sammlung, {...wert, 'id': zielId}, existiert);
             ergebnis[ergebnisSammlung] = existiert
                 ? zaehler.plus(aktualisiert: 1)
                 : zaehler.plus(hinzugefuegt: 1);
@@ -208,11 +196,7 @@ class ImportAusfuehrungService {
           entscheidungen: entscheidungen,
         );
         for (final alias in aliase) {
-          aliasRepository.speichere(
-            datenbank,
-            alias,
-            erstelltAm: zeitpunkt,
-          );
+          aliasRepository.speichere(datenbank, alias, erstelltAm: zeitpunkt);
         }
       });
     } catch (_) {
@@ -258,17 +242,13 @@ class ImportAusfuehrungService {
   List<ImportProtokollEintrag> ladeProtokoll(
     LokaleDatenbank datenbank, {
     int limit = 20,
-  }) =>
-      protokollRepository.lade(datenbank, limit: limit);
+  }) => protokollRepository.lade(datenbank, limit: limit);
 
   List<String> _ergebnisSammlungen(String sammlung) => sammlung == 'bewertungen'
       ? const ['produktbewertungen', 'ortsbewertungswerte']
       : [sammlung];
 
-  String _ergebnisSammlung(
-    String sammlung,
-    Map<String, Object?> wert,
-  ) {
+  String _ergebnisSammlung(String sammlung, Map<String, Object?> wert) {
     if (sammlung != 'bewertungen') return sammlung;
     return wert['zielart'] == 'ort'
         ? 'ortsbewertungswerte'
@@ -391,22 +371,23 @@ class ImportAusfuehrungService {
   bool _existiert(LokaleDatenbank db, String sammlung, String id) {
     final tabelle = _tabelle(sammlung);
     if (tabelle == null) return false;
-    return db.verbindung
-        .select('SELECT 1 FROM $tabelle WHERE id = ?', [id]).isNotEmpty;
+    return db.verbindung.select('SELECT 1 FROM $tabelle WHERE id = ?', [
+      id,
+    ]).isNotEmpty;
   }
 
   String? _tabelle(String sammlung) => switch (sammlung) {
-        'profile' => 'profile',
-        'objekte' => 'objekte',
-        'orte' => 'orte',
-        'bewertungskriterien' => 'kriterien',
-        'erlebnisse' => 'erlebnisse',
-        'erlebnisPositionen' => 'erlebnispositionen',
-        'preisbeobachtungen' => 'preisbeobachtungen',
-        'ortsbewertungen' => 'ortsbewertungen',
-        'bewertungen' => 'bewertungen',
-        _ => null,
-      };
+    'profile' => 'profile',
+    'objekte' => 'objekte',
+    'orte' => 'orte',
+    'bewertungskriterien' => 'kriterien',
+    'erlebnisse' => 'erlebnisse',
+    'erlebnisPositionen' => 'erlebnispositionen',
+    'preisbeobachtungen' => 'preisbeobachtungen',
+    'ortsbewertungen' => 'ortsbewertungen',
+    'bewertungen' => 'bewertungen',
+    _ => null,
+  };
 
   void _schreibe(
     LokaleDatenbank db,
@@ -428,10 +409,9 @@ class ImportAusfuehrungService {
         existiert,
       );
       if (wert['art'] == 'allgemein') {
-        db.verbindung.execute(
-          'DELETE FROM produkte WHERE objekt_id = ?',
-          [wert['id']],
-        );
+        db.verbindung.execute('DELETE FROM produkte WHERE objekt_id = ?', [
+          wert['id'],
+        ]);
         return;
       }
       final produktExistiert = db.verbindung.select(
@@ -468,93 +448,93 @@ class ImportAusfuehrungService {
   }
 
   Map<String, String>? _mapping(String sammlung) => switch (sammlung) {
-        'profile' => const {
-            'id': 'id',
-            'anzeigename': 'anzeigename',
-            'erstelltAm': 'erstellt_am',
-            'geaendertAm': 'geaendert_am',
-          },
-        'orte' => const {
-            'id': 'id',
-            'name': 'name',
-            'typ': 'typ',
-            'geloescht': 'geloescht',
-            'adresse': 'adresse',
-            'breitengrad': 'breitengrad',
-            'laengengrad': 'laengengrad',
-            'osmReferenz': 'osm_referenz',
-            'notiz': 'notiz',
-            'erstelltAm': 'erstellt_am',
-            'geaendertAm': 'geaendert_am',
-          },
-        'erlebnisse' => const {
-            'id': 'id',
-            'herkunftProfilId': 'herkunft_profil_id',
-            'typ': 'typ',
-            'ortId': 'ort_id',
-            'beginn': 'beginn',
-            'ende': 'ende',
-            'notiz': 'notiz',
-            'erstelltAm': 'erstellt_am',
-            'geaendertAm': 'geaendert_am',
-          },
-        'erlebnisPositionen' => const {
-            'id': 'id',
-            'erlebnisId': 'erlebnis_id',
-            'produktId': 'produkt_id',
-            'anzahl': 'anzahl',
-            'erstelltAm': 'erstellt_am',
-            'geaendertAm': 'geaendert_am',
-          },
-        'preisbeobachtungen' => const {
-            'id': 'id',
-            'erlebnisId': 'erlebnis_id',
-            'erlebnisPositionId': 'erlebnis_position_id',
-            'produktId': 'produkt_id',
-            'ortId': 'ort_id',
-            'betragMinor': 'betrag_minor',
-            'waehrung': 'waehrung',
-            'beobachtetAm': 'beobachtet_am',
-            'erstelltAm': 'erstellt_am',
-            'geaendertAm': 'geaendert_am',
-          },
-        'ortsbewertungen' => const {
-            'id': 'id',
-            'erlebnisId': 'erlebnis_id',
-            'ortId': 'ort_id',
-            'herkunftProfilId': 'herkunft_profil_id',
-            'bewertetAm': 'bewertet_am',
-            'notiz': 'notiz',
-            'erstelltAm': 'erstellt_am',
-            'geaendertAm': 'geaendert_am',
-          },
-        'bewertungskriterien' => const {
-            'id': 'id',
-            'name': 'name',
-            'beschreibung': 'beschreibung',
-            'eingabetyp': 'eingabetyp',
-            'reihenfolge': 'reihenfolge',
-            'aktiv': 'aktiv',
-            'produktart': 'produktart',
-            'objektart': 'objektart',
-            'version': 'version',
-            'erstelltAm': 'erstellt_am',
-            'geaendertAm': 'geaendert_am',
-          },
-        'bewertungen' => const {
-            'id': 'id',
-            'erlebnisId': 'erlebnis_id',
-            'erlebnisPositionId': 'erlebnis_position_id',
-            'ortsbewertungId': 'ortsbewertung_id',
-            'ortId': 'ort_id',
-            'herkunftProfilId': 'herkunft_profil_id',
-            'wert': 'wert',
-            'textWert': 'text_wert',
-            'erstelltAm': 'erstellt_am',
-            'geaendertAm': 'geaendert_am',
-          },
-        _ => null,
-      };
+    'profile' => const {
+      'id': 'id',
+      'anzeigename': 'anzeigename',
+      'erstelltAm': 'erstellt_am',
+      'geaendertAm': 'geaendert_am',
+    },
+    'orte' => const {
+      'id': 'id',
+      'name': 'name',
+      'typ': 'typ',
+      'geloescht': 'geloescht',
+      'adresse': 'adresse',
+      'breitengrad': 'breitengrad',
+      'laengengrad': 'laengengrad',
+      'osmReferenz': 'osm_referenz',
+      'notiz': 'notiz',
+      'erstelltAm': 'erstellt_am',
+      'geaendertAm': 'geaendert_am',
+    },
+    'erlebnisse' => const {
+      'id': 'id',
+      'herkunftProfilId': 'herkunft_profil_id',
+      'typ': 'typ',
+      'ortId': 'ort_id',
+      'beginn': 'beginn',
+      'ende': 'ende',
+      'notiz': 'notiz',
+      'erstelltAm': 'erstellt_am',
+      'geaendertAm': 'geaendert_am',
+    },
+    'erlebnisPositionen' => const {
+      'id': 'id',
+      'erlebnisId': 'erlebnis_id',
+      'produktId': 'produkt_id',
+      'anzahl': 'anzahl',
+      'erstelltAm': 'erstellt_am',
+      'geaendertAm': 'geaendert_am',
+    },
+    'preisbeobachtungen' => const {
+      'id': 'id',
+      'erlebnisId': 'erlebnis_id',
+      'erlebnisPositionId': 'erlebnis_position_id',
+      'produktId': 'produkt_id',
+      'ortId': 'ort_id',
+      'betragMinor': 'betrag_minor',
+      'waehrung': 'waehrung',
+      'beobachtetAm': 'beobachtet_am',
+      'erstelltAm': 'erstellt_am',
+      'geaendertAm': 'geaendert_am',
+    },
+    'ortsbewertungen' => const {
+      'id': 'id',
+      'erlebnisId': 'erlebnis_id',
+      'ortId': 'ort_id',
+      'herkunftProfilId': 'herkunft_profil_id',
+      'bewertetAm': 'bewertet_am',
+      'notiz': 'notiz',
+      'erstelltAm': 'erstellt_am',
+      'geaendertAm': 'geaendert_am',
+    },
+    'bewertungskriterien' => const {
+      'id': 'id',
+      'name': 'name',
+      'beschreibung': 'beschreibung',
+      'eingabetyp': 'eingabetyp',
+      'reihenfolge': 'reihenfolge',
+      'aktiv': 'aktiv',
+      'produktart': 'produktart',
+      'objektart': 'objektart',
+      'version': 'version',
+      'erstelltAm': 'erstellt_am',
+      'geaendertAm': 'geaendert_am',
+    },
+    'bewertungen' => const {
+      'id': 'id',
+      'erlebnisId': 'erlebnis_id',
+      'erlebnisPositionId': 'erlebnis_position_id',
+      'ortsbewertungId': 'ortsbewertung_id',
+      'ortId': 'ort_id',
+      'herkunftProfilId': 'herkunft_profil_id',
+      'wert': 'wert',
+      'textWert': 'text_wert',
+      'erstelltAm': 'erstellt_am',
+      'geaendertAm': 'geaendert_am',
+    },
+    _ => null,
+  };
 
   Map<String, Object?> _werte(
     Map<String, Object?> quelle,

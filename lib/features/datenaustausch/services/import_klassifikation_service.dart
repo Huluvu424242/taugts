@@ -75,10 +75,10 @@ class ImportKlassifikationService {
           vorhandeneKategorieIds.contains(kategorie['id'])) {
         continue;
       }
-      db.execute(
-        'UPDATE kategorien SET eltern_id = ? WHERE id = ?',
-        [kategorie['elternKategorieId'], kategorie['id']],
-      );
+      db.execute('UPDATE kategorien SET eltern_id = ? WHERE id = ?', [
+        kategorie['elternKategorieId'],
+        kategorie['id'],
+      ]);
     }
     for (final wert in _liste(dokument, 'kategorieZuordnungen')) {
       final id = ImportKonfliktentscheidungService.identitaet(

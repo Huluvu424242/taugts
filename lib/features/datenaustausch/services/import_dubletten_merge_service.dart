@@ -63,7 +63,8 @@ class ImportDublettenMergeService {
   }) {
     if (!_unterstuetzteSammlung(sammlung)) {
       throw ArgumentError(
-          'Zusammenführen wird für $sammlung nicht unterstützt.');
+        'Zusammenführen wird für $sammlung nicht unterstützt.',
+      );
     }
     final importWert = _finde(importDokument, sammlung, importId);
     final lokalWert = _finde(lokalesDokument, sammlung, lokaleId);
@@ -154,16 +155,17 @@ class ImportDublettenMergeService {
   }
 
   List<Map<String, Object?>> _liste(
-          Map<String, Object?> dokument, String name) =>
-      ((dokument[name] as List?) ?? const [])
-          .whereType<Map>()
-          .map((e) => Map<String, Object?>.from(e))
-          .toList();
+    Map<String, Object?> dokument,
+    String name,
+  ) => ((dokument[name] as List?) ?? const [])
+      .whereType<Map>()
+      .map((e) => Map<String, Object?>.from(e))
+      .toList();
 
   Map<String, Object?> _tiefeKopie(Map<String, Object?> dokument) => {
-        for (final eintrag in dokument.entries)
-          eintrag.key: _kopiereWert(eintrag.value),
-      };
+    for (final eintrag in dokument.entries)
+      eintrag.key: _kopiereWert(eintrag.value),
+  };
 
   Object? _kopiereWert(Object? wert) {
     if (wert is Map) {
