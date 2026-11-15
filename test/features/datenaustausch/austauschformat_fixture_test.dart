@@ -11,8 +11,7 @@ Map<String, Object?> _jsonDatei(String pfad) {
 List<Map<String, Object?>> _liste(
   Map<String, Object?> dokument,
   String schluessel,
-) =>
-    (dokument[schluessel] as List<Object?>).cast<Map<String, Object?>>();
+) => (dokument[schluessel] as List<Object?>).cast<Map<String, Object?>>();
 
 void main() {
   const schemaPfad = 'schema/taugts-export.schema.json';
@@ -80,7 +79,9 @@ void main() {
       hasLength(2),
     );
     expect(
-        bewertungen.map((bewertung) => bewertung['id']).toSet(), hasLength(2));
+      bewertungen.map((bewertung) => bewertung['id']).toSet(),
+      hasLength(2),
+    );
 
     for (final bewertung in bewertungen) {
       final kriterium = bewertung['kriterium'] as Map<String, Object?>;

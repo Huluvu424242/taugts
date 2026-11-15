@@ -12,58 +12,60 @@ void main() {
 
   setUp(() {
     datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-    datenbank.verbindung.execute(
-      'INSERT INTO profile VALUES (?, NULL, ?, ?)',
-      [profilId, zeit.toIso8601String(), zeit.toIso8601String()],
-    );
+    datenbank.verbindung.execute('INSERT INTO profile VALUES (?, NULL, ?, ?)', [
+      profilId,
+      zeit.toIso8601String(),
+      zeit.toIso8601String(),
+    ]);
     repository = SqliteBewertungsRepository(datenbank);
   });
 
   tearDown(() => datenbank.schliessen());
 
-  test('Teilfehler beim Speichern rollt Erlebnis und Ortsbezug zurück',
-      () async {
-    final alterOrt = Ort(
-      id: '22100000-0000-4000-8000-000000000001',
-      name: 'Alter Ort',
-      typ: Ortstyp.gastronomie,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    );
-    final neuerOrt = Ort(
-      id: '22100000-0000-4000-8000-000000000002',
-      name: 'Neuer Ort',
-      typ: Ortstyp.gastronomie,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    );
-    await repository.speichereOrt(alterOrt);
-    await repository.speichereOrt(neuerOrt);
-    final erlebnis = Erlebnis(
-      id: '22100000-0000-4000-8000-000000000003',
-      ortId: alterOrt.id,
-      herkunftProfilId: profilId,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    );
-    await repository.speichereErlebnis(erlebnis);
-    await repository.speichereOrtsbewertung(
-      erlebnis: erlebnis,
-      ort: alterOrt,
-      ortsbewertung: Ortsbewertung(
-        id: '22100000-0000-4000-8000-000000000004',
-        erlebnisId: erlebnis.id,
-        ortId: alterOrt.id,
-        herkunftProfilId: profilId,
-        bewertetAm: erlebnis.erlebtAm,
-        notiz: 'Historischer Besuch',
+  test(
+    'Teilfehler beim Speichern rollt Erlebnis und Ortsbezug zurück',
+    () async {
+      final alterOrt = Ort(
+        id: '22100000-0000-4000-8000-000000000001',
+        name: 'Alter Ort',
+        typ: Ortstyp.gastronomie,
         erstelltAm: zeit,
         geaendertAm: zeit,
-      ),
-      bewertungen: const [],
-    );
-    // Absichtlich einen Fehler nach dem Update der Erlebniszeile auslösen.
-    datenbank.verbindung.execute('''
+      );
+      final neuerOrt = Ort(
+        id: '22100000-0000-4000-8000-000000000002',
+        name: 'Neuer Ort',
+        typ: Ortstyp.gastronomie,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      );
+      await repository.speichereOrt(alterOrt);
+      await repository.speichereOrt(neuerOrt);
+      final erlebnis = Erlebnis(
+        id: '22100000-0000-4000-8000-000000000003',
+        ortId: alterOrt.id,
+        herkunftProfilId: profilId,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      );
+      await repository.speichereErlebnis(erlebnis);
+      await repository.speichereOrtsbewertung(
+        erlebnis: erlebnis,
+        ort: alterOrt,
+        ortsbewertung: Ortsbewertung(
+          id: '22100000-0000-4000-8000-000000000004',
+          erlebnisId: erlebnis.id,
+          ortId: alterOrt.id,
+          herkunftProfilId: profilId,
+          bewertetAm: erlebnis.erlebtAm,
+          notiz: 'Historischer Besuch',
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        ),
+        bewertungen: const [],
+      );
+      // Absichtlich einen Fehler nach dem Update der Erlebniszeile auslösen.
+      datenbank.verbindung.execute('''
       CREATE TRIGGER abbrechen_ortsbewertung
       BEFORE UPDATE OF ort_id ON ortsbewertungen
       BEGIN
@@ -71,23 +73,24 @@ void main() {
       END
     ''');
 
-    await expectLater(
-      repository.speichereErlebnis(
-        erlebnis.kopiereMit(
-          ortId: neuerOrt.id,
-          geaendertAm: zeit.add(const Duration(minutes: 1)),
+      await expectLater(
+        repository.speichereErlebnis(
+          erlebnis.kopiereMit(
+            ortId: neuerOrt.id,
+            geaendertAm: zeit.add(const Duration(minutes: 1)),
+          ),
         ),
-      ),
-      throwsA(isA<SqliteException>()),
-    );
-    expect((await repository.ladeErlebnis(erlebnis.id))!.ortId, alterOrt.id);
-    expect(
-      (await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id))!
-          .ortsbewertung
-          .ortId,
-      alterOrt.id,
-    );
-  });
+        throwsA(isA<SqliteException>()),
+      );
+      expect((await repository.ladeErlebnis(erlebnis.id))!.ortId, alterOrt.id);
+      expect(
+        (await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id))!
+            .ortsbewertung
+            .ortId,
+        alterOrt.id,
+      );
+    },
+  );
 
   test('Gesamtstand sichert mehrere Produkte und Bewertungen atomar', () async {
     const id = '22110000-0000-4000-8000-000000000001';
@@ -115,10 +118,9 @@ void main() {
         erstelltAm: zeit,
         geaendertAm: zeit,
       );
-      positionen.add(ErlebnispositionMitProdukt(
-        position: position,
-        produkt: produkt,
-      ));
+      positionen.add(
+        ErlebnispositionMitProdukt(position: position, produkt: produkt),
+      );
       bewertungen[position.id] = [
         Bewertung(
           id: '22110000-0000-4000-8000-00000000002$i',
@@ -150,57 +152,59 @@ void main() {
     }
   });
 
-  test('Fehler bei Produktbewertung rollt sämtliche Positionen zurück',
-      () async {
-    const id = '22120000-0000-4000-8000-000000000001';
-    final erlebnis = Erlebnis(
-      id: id,
-      herkunftProfilId: profilId,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    );
-    final produkt = Produkt(
-      id: '22120000-0000-4000-8000-000000000002',
-      name: 'Fehlerfall',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    );
-    await repository.speichereProdukt(produkt);
-    final position = ErlebnisPosition(
-      id: '22120000-0000-4000-8000-000000000003',
-      erlebnisId: id,
-      produktId: produkt.id,
-      anzahl: 1,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    );
-    await expectLater(
-      repository.speichereErlebnisGesamtstand(
-        erlebnis: erlebnis,
-        geaendertePositionen: [
-          ErlebnispositionMitProdukt(position: position, produkt: produkt),
-        ],
-        entferntePositionen: const <String>{},
-        produktbewertungen: {
-          position.id: [
-            Bewertung(
-              id: '22120000-0000-4000-8000-000000000004',
-              erlebnisId: id,
-              erlebnisPositionId: position.id,
-              kriteriumId: '22120000-0000-4000-8000-000000000099',
-              herkunftProfilId: profilId,
-              wert: 4,
-              erstelltAm: zeit,
-              geaendertAm: zeit,
-            ),
+  test(
+    'Fehler bei Produktbewertung rollt sämtliche Positionen zurück',
+    () async {
+      const id = '22120000-0000-4000-8000-000000000001';
+      final erlebnis = Erlebnis(
+        id: id,
+        herkunftProfilId: profilId,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      );
+      final produkt = Produkt(
+        id: '22120000-0000-4000-8000-000000000002',
+        name: 'Fehlerfall',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      );
+      await repository.speichereProdukt(produkt);
+      final position = ErlebnisPosition(
+        id: '22120000-0000-4000-8000-000000000003',
+        erlebnisId: id,
+        produktId: produkt.id,
+        anzahl: 1,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      );
+      await expectLater(
+        repository.speichereErlebnisGesamtstand(
+          erlebnis: erlebnis,
+          geaendertePositionen: [
+            ErlebnispositionMitProdukt(position: position, produkt: produkt),
           ],
-        },
-      ),
-      throwsA(anything),
-    );
-    expect(await repository.ladeErlebnis(id), isNull);
-    expect(await repository.ladeErlebnispositionen(id), isEmpty);
-  });
+          entferntePositionen: const <String>{},
+          produktbewertungen: {
+            position.id: [
+              Bewertung(
+                id: '22120000-0000-4000-8000-000000000004',
+                erlebnisId: id,
+                erlebnisPositionId: position.id,
+                kriteriumId: '22120000-0000-4000-8000-000000000099',
+                herkunftProfilId: profilId,
+                wert: 4,
+                erstelltAm: zeit,
+                geaendertAm: zeit,
+              ),
+            ],
+          },
+        ),
+        throwsA(anything),
+      );
+      expect(await repository.ladeErlebnis(id), isNull);
+      expect(await repository.ladeErlebnispositionen(id), isEmpty);
+    },
+  );
 
   test('speichert und lädt ein Produkt', () async {
     final produkt = Produkt(
@@ -270,15 +274,17 @@ void main() {
       geaendertAm: zeit,
     );
     await repository.speichereProdukt(produkt);
-    await repository.speichereProdukt(Produkt(
-      id: produkt.id,
-      name: produkt.name,
-      marke: 'Ergänzte Marke',
-      brauerei: 'Ergänzte Brauerei',
-      sorte: 'Lager',
-      erstelltAm: produkt.erstelltAm,
-      geaendertAm: zeit.add(const Duration(minutes: 1)),
-    ));
+    await repository.speichereProdukt(
+      Produkt(
+        id: produkt.id,
+        name: produkt.name,
+        marke: 'Ergänzte Marke',
+        brauerei: 'Ergänzte Brauerei',
+        sorte: 'Lager',
+        erstelltAm: produkt.erstelltAm,
+        geaendertAm: zeit.add(const Duration(minutes: 1)),
+      ),
+    );
 
     final produkte = await repository.ladeProdukte();
     expect(produkte, hasLength(1));
@@ -288,22 +294,26 @@ void main() {
   });
 
   test('sucht Produkte über ihre Stammdaten', () async {
-    await repository.speichereProdukt(Produkt(
-      id: '55e34e0e-fb72-450d-9db7-20d42188d235',
-      name: 'Sonnenpils',
-      marke: 'Erzgebirge',
-      brauerei: 'Brauerei am Berg',
-      sorte: 'Pils',
-      barcode: '4012345678901',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
-    await repository.speichereProdukt(Produkt(
-      id: '55e34e0e-fb72-450d-9db7-20d42188d236',
-      name: 'Apfelschorle',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
+    await repository.speichereProdukt(
+      Produkt(
+        id: '55e34e0e-fb72-450d-9db7-20d42188d235',
+        name: 'Sonnenpils',
+        marke: 'Erzgebirge',
+        brauerei: 'Brauerei am Berg',
+        sorte: 'Pils',
+        barcode: '4012345678901',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
+    await repository.speichereProdukt(
+      Produkt(
+        id: '55e34e0e-fb72-450d-9db7-20d42188d236',
+        name: 'Apfelschorle',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
 
     expect(
       (await repository.ladeProdukte(suchtext: 'berg')).single.name,
@@ -325,21 +335,25 @@ void main() {
       geaendertAm: zeit,
     );
     await repository.speichereProdukt(produkt);
-    await repository.speichereErlebnis(Erlebnis(
-      id: '65e34e0e-fb72-450d-9db7-20d42188d229',
-      produktId: produktId,
-      herkunftProfilId: profilId,
-      beginn: zeit,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
+    await repository.speichereErlebnis(
+      Erlebnis(
+        id: '65e34e0e-fb72-450d-9db7-20d42188d229',
+        produktId: produktId,
+        herkunftProfilId: profilId,
+        beginn: zeit,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
 
-    await repository.speichereProdukt(Produkt(
-      id: produkt.id,
-      name: 'Neuer Name',
-      erstelltAm: produkt.erstelltAm,
-      geaendertAm: zeit.add(const Duration(minutes: 1)),
-    ));
+    await repository.speichereProdukt(
+      Produkt(
+        id: produkt.id,
+        name: 'Neuer Name',
+        erstelltAm: produkt.erstelltAm,
+        geaendertAm: zeit.add(const Duration(minutes: 1)),
+      ),
+    );
 
     final erlebnisse = datenbank.verbindung.select(
       'SELECT * FROM erlebnisse WHERE produkt_id = ?',
@@ -352,58 +366,67 @@ void main() {
   test('bewahrt mehrere Bewertungen mit Herkunftsprofil', () async {
     const produktId = '2d30ae97-1a64-4bb5-a8fd-1df46be78d67';
     const kriteriumId = '5ef4ace9-f038-40d4-a042-042eac68ca3f';
-    await repository.speichereProdukt(Produkt(
-      id: produktId,
-      name: 'Testbier',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
-    await repository.speichereKriterium(Bewertungskriterium(
-      id: kriteriumId,
-      name: 'Geschmack',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
+    await repository.speichereProdukt(
+      Produkt(
+        id: produktId,
+        name: 'Testbier',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
+    await repository.speichereKriterium(
+      Bewertungskriterium(
+        id: kriteriumId,
+        name: 'Geschmack',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
 
     for (var index = 0; index < 2; index++) {
       final erlebnisId = '00000000-0000-4000-8000-00000000000$index';
-      await repository.speichereErlebnis(Erlebnis(
-        id: erlebnisId,
-        produktId: produktId,
-        herkunftProfilId: profilId,
-        beginn: zeit.add(Duration(days: index)),
-        erstelltAm: zeit.add(Duration(days: index)),
-        geaendertAm: zeit.add(Duration(days: index)),
-      ));
-      await repository.speichereBewertung(Bewertung(
-        id: '10000000-0000-4000-8000-00000000000$index',
-        erlebnisId: erlebnisId,
-        kriteriumId: kriteriumId,
-        herkunftProfilId: profilId,
-        wert: 3.0 + index,
-        erstelltAm: zeit.add(Duration(days: index)),
-        geaendertAm: zeit.add(Duration(days: index)),
-      ));
+      await repository.speichereErlebnis(
+        Erlebnis(
+          id: erlebnisId,
+          produktId: produktId,
+          herkunftProfilId: profilId,
+          beginn: zeit.add(Duration(days: index)),
+          erstelltAm: zeit.add(Duration(days: index)),
+          geaendertAm: zeit.add(Duration(days: index)),
+        ),
+      );
+      await repository.speichereBewertung(
+        Bewertung(
+          id: '10000000-0000-4000-8000-00000000000$index',
+          erlebnisId: erlebnisId,
+          kriteriumId: kriteriumId,
+          herkunftProfilId: profilId,
+          wert: 3.0 + index,
+          erstelltAm: zeit.add(Duration(days: index)),
+          geaendertAm: zeit.add(Duration(days: index)),
+        ),
+      );
     }
 
     final bewertungen = await repository.ladeBewertungenFuerProdukt(produktId);
     expect(bewertungen.map((bewertung) => bewertung.wert), [3.0, 4.0]);
-    expect(
-      bewertungen.map((bewertung) => bewertung.herkunftProfilId).toSet(),
-      {profilId},
-    );
+    expect(bewertungen.map((bewertung) => bewertung.herkunftProfilId).toSet(), {
+      profilId,
+    });
   });
 
   test('erzwingt Beziehungen zwischen Profil, Produkt und Erlebnis', () async {
     await expectLater(
-      repository.speichereErlebnis(Erlebnis(
-        id: '00000000-0000-4000-8000-000000000000',
-        produktId: 'nicht-vorhanden',
-        herkunftProfilId: profilId,
-        beginn: zeit,
-        erstelltAm: zeit,
-        geaendertAm: zeit,
-      )),
+      repository.speichereErlebnis(
+        Erlebnis(
+          id: '00000000-0000-4000-8000-000000000000',
+          produktId: 'nicht-vorhanden',
+          herkunftProfilId: profilId,
+          beginn: zeit,
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        ),
+      ),
       throwsA(isA<SqliteException>()),
     );
   });
@@ -411,39 +434,45 @@ void main() {
   test('speichert, aktualisiert und verwirft einen Erlebnisentwurf', () async {
     const produktId = '2d30ae97-1a64-4bb5-a8fd-1df46be78d68';
     const erlebnisId = '3d30ae97-1a64-4bb5-a8fd-1df46be78d68';
-    await repository.speichereProdukt(Produkt(
-      id: produktId,
-      name: 'Entwurfsbier',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
-    await repository.speichereErlebnis(Erlebnis(
-      id: erlebnisId,
-      produktId: produktId,
-      herkunftProfilId: profilId,
-      beginn: zeit,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-      preis: 4.9,
-      menge: 0.5,
-      gebinde: 'Glas',
-      notiz: 'Später bewerten',
-    ));
+    await repository.speichereProdukt(
+      Produkt(
+        id: produktId,
+        name: 'Entwurfsbier',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
+    await repository.speichereErlebnis(
+      Erlebnis(
+        id: erlebnisId,
+        produktId: produktId,
+        herkunftProfilId: profilId,
+        beginn: zeit,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+        preis: 4.9,
+        menge: 0.5,
+        gebinde: 'Glas',
+        notiz: 'Später bewerten',
+      ),
+    );
 
     var entwuerfe = await repository.ladeErlebnisse();
     expect(entwuerfe, hasLength(1));
     expect(entwuerfe.single.preis, 4.9);
     expect(entwuerfe.single.notiz, 'Später bewerten');
 
-    await repository.speichereErlebnis(Erlebnis(
-      id: erlebnisId,
-      produktId: produktId,
-      herkunftProfilId: profilId,
-      beginn: zeit,
-      erstelltAm: zeit,
-      geaendertAm: zeit.add(const Duration(minutes: 1)),
-      notiz: 'Fortgesetzt',
-    ));
+    await repository.speichereErlebnis(
+      Erlebnis(
+        id: erlebnisId,
+        produktId: produktId,
+        herkunftProfilId: profilId,
+        beginn: zeit,
+        erstelltAm: zeit,
+        geaendertAm: zeit.add(const Duration(minutes: 1)),
+        notiz: 'Fortgesetzt',
+      ),
+    );
     entwuerfe = await repository.ladeErlebnisse();
     expect(entwuerfe.single.notiz, 'Fortgesetzt');
 
@@ -514,14 +543,16 @@ void main() {
     expect(geladen?.breitengrad, 50.8323);
     expect(geladen?.osmReferenz, 'node/123456');
 
-    await repository.speichereOrt(Ort(
-      id: ort.id,
-      name: 'Gasthaus am Neumarkt',
-      typ: ort.typ,
-      adresse: ort.adresse,
-      erstelltAm: ort.erstelltAm,
-      geaendertAm: zeit.add(const Duration(minutes: 1)),
-    ));
+    await repository.speichereOrt(
+      Ort(
+        id: ort.id,
+        name: 'Gasthaus am Neumarkt',
+        typ: ort.typ,
+        adresse: ort.adresse,
+        erstelltAm: ort.erstelltAm,
+        geaendertAm: zeit.add(const Duration(minutes: 1)),
+      ),
+    );
     expect((await repository.ladeOrt(ort.id))?.name, 'Gasthaus am Neumarkt');
   });
 
@@ -565,13 +596,17 @@ void main() {
     }
 
     expect(
-        (await repository.ladeOrte(suchtext: 'brau')).single.name, 'Brauhaus');
+      (await repository.ladeOrte(suchtext: 'brau')).single.name,
+      'Brauhaus',
+    );
     expect(
       (await repository.ladeOrte(suchtext: 'geschaeft')).single.name,
       'Getränkemarkt',
     );
-    expect((await repository.ladeOrte(suchtext: 'leipzig')).single.name,
-        'Getränkemarkt');
+    expect(
+      (await repository.ladeOrte(suchtext: 'leipzig')).single.name,
+      'Getränkemarkt',
+    );
   });
 
   test('findet mögliche Dubletten, ohne das Speichern zu verbieten', () async {
@@ -584,9 +619,7 @@ void main() {
     );
     await repository.speichereOrt(ersterOrt);
 
-    final dubletten = await repository.findeAehnlicheOrte(
-      name: '  ZUM ANKER ',
-    );
+    final dubletten = await repository.findeAehnlicheOrte(name: '  ZUM ANKER ');
     expect(dubletten.map((ort) => ort.id), contains(ersterOrt.id));
 
     final zweiterOrt = Ort(
@@ -620,126 +653,142 @@ void main() {
   test('liefert aktive Getränkekriterien in definierter Reihenfolge', () async {
     final kriterien = await repository.ladeAktiveGetraenkekriterien();
 
-    expect(
-      kriterien.map((kriterium) => kriterium.name),
-      [
-        'Gesamturteil',
-        'Geschmack',
-        'Aroma',
-        'Frische',
-        'Preis-Leistung',
-        'Bitterkeit',
-        'Farbintensität',
-      ],
-    );
+    expect(kriterien.map((kriterium) => kriterium.name), [
+      'Gesamturteil',
+      'Geschmack',
+      'Aroma',
+      'Frische',
+      'Preis-Leistung',
+      'Bitterkeit',
+      'Farbintensität',
+    ]);
     expect(kriterien.every((kriterium) => kriterium.aktiv), isTrue);
-    expect(
-      kriterien.last.eingabetyp,
-      KriteriumEingabetyp.intensitaet,
-    );
+    expect(kriterien.last.eingabetyp, KriteriumEingabetyp.intensitaet);
   });
 
-  test('konfiguriert Kriterien und erhält die verwendete Version historisch',
-      () async {
-    const kriteriumId = '9ef4ace9-f038-40d4-a042-042eac68ca3f';
-    final kriterium = Bewertungskriterium(
-      id: kriteriumId,
-      name: 'Eigene Wertung',
-      objektart: KriteriumObjektart.gastronomie,
-      eingabetyp: KriteriumEingabetyp.jaNein,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    );
-    await repository.speichereKriterium(kriterium);
+  test(
+    'konfiguriert Kriterien und erhält die verwendete Version historisch',
+    () async {
+      const kriteriumId = '9ef4ace9-f038-40d4-a042-042eac68ca3f';
+      final kriterium = Bewertungskriterium(
+        id: kriteriumId,
+        name: 'Eigene Wertung',
+        objektart: KriteriumObjektart.gastronomie,
+        eingabetyp: KriteriumEingabetyp.jaNein,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      );
+      await repository.speichereKriterium(kriterium);
 
-    final ersteVersion = (await repository.ladeKriterien())
-        .singleWhere((wert) => wert.id == kriteriumId);
-    expect(ersteVersion.version, 1);
-    expect(ersteVersion.wirksameObjektart, KriteriumObjektart.gastronomie);
+      final ersteVersion = (await repository.ladeKriterien()).singleWhere(
+        (wert) => wert.id == kriteriumId,
+      );
+      expect(ersteVersion.version, 1);
+      expect(ersteVersion.wirksameObjektart, KriteriumObjektart.gastronomie);
 
-    await repository.speichereKriterium(Bewertungskriterium(
-      id: kriterium.id,
-      name: 'Umbenannte Wertung',
-      objektart: kriterium.objektart,
-      eingabetyp: kriterium.eingabetyp,
-      aktiv: false,
-      erstelltAm: kriterium.erstelltAm,
-      geaendertAm: zeit.add(const Duration(minutes: 1)),
-    ));
+      await repository.speichereKriterium(
+        Bewertungskriterium(
+          id: kriterium.id,
+          name: 'Umbenannte Wertung',
+          objektart: kriterium.objektart,
+          eingabetyp: kriterium.eingabetyp,
+          aktiv: false,
+          erstelltAm: kriterium.erstelltAm,
+          geaendertAm: zeit.add(const Duration(minutes: 1)),
+        ),
+      );
 
-    final zweiteVersion = (await repository.ladeKriterien())
-        .singleWhere((wert) => wert.id == kriteriumId);
-    expect(zweiteVersion.version, 2);
-    expect(zweiteVersion.aktiv, isFalse);
-    expect(
-      await repository.ladeAktiveKriterienFuerObjektart(
-        KriteriumObjektart.gastronomie,
-      ),
-      isNot(contains(
-          predicate<Bewertungskriterium>((wert) => wert.id == kriteriumId))),
-    );
-  });
+      final zweiteVersion = (await repository.ladeKriterien()).singleWhere(
+        (wert) => wert.id == kriteriumId,
+      );
+      expect(zweiteVersion.version, 2);
+      expect(zweiteVersion.aktiv, isFalse);
+      expect(
+        await repository.ladeAktiveKriterienFuerObjektart(
+          KriteriumObjektart.gastronomie,
+        ),
+        isNot(
+          contains(
+            predicate<Bewertungskriterium>((wert) => wert.id == kriteriumId),
+          ),
+        ),
+      );
+    },
+  );
 
-  test('bewahrt Beschreibung und Auswahlskala historischer Bewertungen',
-      () async {
-    const kriteriumId = '9ef4ace9-f038-40d4-a042-042eac68ca40';
-    const erlebnisId = '9ef4ace9-f038-40d4-a042-042eac68ca41';
-    await repository.speichereKriterium(Bewertungskriterium(
-      id: kriteriumId,
-      name: 'Zapfart',
-      beschreibung: 'Wie wurde das Getränk gezapft?',
-      eingabetyp: KriteriumEingabetyp.auswahl,
-      auswahlwerte: const ['Direkt', 'Langsam'],
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
-    await repository.speichereErlebnis(Erlebnis(
-      id: erlebnisId,
-      herkunftProfilId: profilId,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
-    await repository.speichereBewertung(Bewertung(
-      id: '9ef4ace9-f038-40d4-a042-042eac68ca42',
-      erlebnisId: erlebnisId,
-      kriteriumId: kriteriumId,
-      herkunftProfilId: profilId,
-      textWert: 'Direkt',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
+  test(
+    'bewahrt Beschreibung und Auswahlskala historischer Bewertungen',
+    () async {
+      const kriteriumId = '9ef4ace9-f038-40d4-a042-042eac68ca40';
+      const erlebnisId = '9ef4ace9-f038-40d4-a042-042eac68ca41';
+      await repository.speichereKriterium(
+        Bewertungskriterium(
+          id: kriteriumId,
+          name: 'Zapfart',
+          beschreibung: 'Wie wurde das Getränk gezapft?',
+          eingabetyp: KriteriumEingabetyp.auswahl,
+          auswahlwerte: const ['Direkt', 'Langsam'],
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        ),
+      );
+      await repository.speichereErlebnis(
+        Erlebnis(
+          id: erlebnisId,
+          herkunftProfilId: profilId,
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        ),
+      );
+      await repository.speichereBewertung(
+        Bewertung(
+          id: '9ef4ace9-f038-40d4-a042-042eac68ca42',
+          erlebnisId: erlebnisId,
+          kriteriumId: kriteriumId,
+          herkunftProfilId: profilId,
+          textWert: 'Direkt',
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        ),
+      );
 
-    await repository.speichereKriterium(Bewertungskriterium(
-      id: kriteriumId,
-      name: 'Neue Zapfart',
-      beschreibung: 'Neue Bedeutung',
-      eingabetyp: KriteriumEingabetyp.auswahl,
-      auswahlwerte: const ['Anders'],
-      erstelltAm: zeit,
-      geaendertAm: zeit.add(const Duration(minutes: 1)),
-    ));
+      await repository.speichereKriterium(
+        Bewertungskriterium(
+          id: kriteriumId,
+          name: 'Neue Zapfart',
+          beschreibung: 'Neue Bedeutung',
+          eingabetyp: KriteriumEingabetyp.auswahl,
+          auswahlwerte: const ['Anders'],
+          erstelltAm: zeit,
+          geaendertAm: zeit.add(const Duration(minutes: 1)),
+        ),
+      );
 
-    final historisch =
-        (await repository.ladeBewertungenFuerErlebnis(erlebnisId)).single;
-    expect(historisch.kriteriumName, 'Zapfart');
-    expect(
-      historisch.kriteriumBeschreibung,
-      'Wie wurde das Getränk gezapft?',
-    );
-    expect(historisch.kriteriumAuswahlwerte, ['Direkt', 'Langsam']);
-    expect(historisch.kriteriumVersion, 1);
-  });
+      final historisch = (await repository.ladeBewertungenFuerErlebnis(
+        erlebnisId,
+      )).single;
+      expect(historisch.kriteriumName, 'Zapfart');
+      expect(
+        historisch.kriteriumBeschreibung,
+        'Wie wurde das Getränk gezapft?',
+      );
+      expect(historisch.kriteriumAuswahlwerte, ['Direkt', 'Langsam']);
+      expect(historisch.kriteriumVersion, 1);
+    },
+  );
 
   test('löscht unbenutzte Kriterien und deaktiviert verwendete', () async {
     const unbenutztId = '9ef4ace9-f038-40d4-a042-042eac68ca43';
     const verwendetId = '9ef4ace9-f038-40d4-a042-042eac68ca44';
     for (final id in [unbenutztId, verwendetId]) {
-      await repository.speichereKriterium(Bewertungskriterium(
-        id: id,
-        name: id == unbenutztId ? 'Unbenutzt' : 'Verwendet',
-        erstelltAm: zeit,
-        geaendertAm: zeit,
-      ));
+      await repository.speichereKriterium(
+        Bewertungskriterium(
+          id: id,
+          name: id == unbenutztId ? 'Unbenutzt' : 'Verwendet',
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        ),
+      );
     }
     final erlebnis = Erlebnis(
       id: '9ef4ace9-f038-40d4-a042-042eac68ca45',
@@ -748,25 +797,24 @@ void main() {
       geaendertAm: zeit,
     );
     await repository.speichereErlebnis(erlebnis);
-    await repository.speichereBewertung(Bewertung(
-      id: '9ef4ace9-f038-40d4-a042-042eac68ca46',
-      erlebnisId: erlebnis.id,
-      kriteriumId: verwendetId,
-      herkunftProfilId: profilId,
-      wert: 4,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
+    await repository.speichereBewertung(
+      Bewertung(
+        id: '9ef4ace9-f038-40d4-a042-042eac68ca46',
+        erlebnisId: erlebnis.id,
+        kriteriumId: verwendetId,
+        herkunftProfilId: profilId,
+        wert: 4,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
 
     expect(await repository.entferneKriterium(unbenutztId), isFalse);
     expect(await repository.entferneKriterium(verwendetId), isTrue);
 
     final alle = await repository.ladeKriterien();
     expect(alle.any((wert) => wert.id == unbenutztId), isFalse);
-    expect(
-      alle.singleWhere((wert) => wert.id == verwendetId).aktiv,
-      isFalse,
-    );
+    expect(alle.singleWhere((wert) => wert.id == verwendetId).aktiv, isFalse);
     expect(
       (await repository.ladeBewertungenFuerErlebnis(erlebnis.id))
           .single
@@ -781,23 +829,23 @@ void main() {
       '9ef4ace9-f038-40d4-a042-042eac68ca48',
     ];
     for (var index = 0; index < ids.length; index++) {
-      await repository.speichereKriterium(Bewertungskriterium(
-        id: ids[index],
-        name: 'Sortierung $index',
-        objektart: KriteriumObjektart.gastronomie,
-        reihenfolge: index * 10,
-        erstelltAm: zeit,
-        geaendertAm: zeit,
-      ));
+      await repository.speichereKriterium(
+        Bewertungskriterium(
+          id: ids[index],
+          name: 'Sortierung $index',
+          objektart: KriteriumObjektart.gastronomie,
+          reihenfolge: index * 10,
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        ),
+      );
     }
 
     await repository.sortiereKriterien(ids.reversed.toList());
 
     final sortiert = (await repository.ladeAktiveKriterienFuerObjektart(
       KriteriumObjektart.gastronomie,
-    ))
-        .where((wert) => ids.contains(wert.id))
-        .toList();
+    )).where((wert) => ids.contains(wert.id)).toList();
     expect(sortiert.map((wert) => wert.id), ids.reversed);
     await expectLater(
       repository.sortiereKriterien([ids.first, 'unbekannt']),
@@ -805,9 +853,7 @@ void main() {
     );
     final unveraendert = (await repository.ladeAktiveKriterienFuerObjektart(
       KriteriumObjektart.gastronomie,
-    ))
-        .where((wert) => ids.contains(wert.id))
-        .map((wert) => wert.id);
+    )).where((wert) => ids.contains(wert.id)).map((wert) => wert.id);
     expect(unveraendert, ids.reversed);
   });
 
@@ -866,8 +912,9 @@ void main() {
         ),
       ],
     );
-    final korrigiert =
-        await repository.ladeBewertungenFuerErlebnis(erstesErlebnis.id);
+    final korrigiert = await repository.ladeBewertungenFuerErlebnis(
+      erstesErlebnis.id,
+    );
     expect(korrigiert, hasLength(1));
     expect(korrigiert.single.id, ersteBewertung.id);
     expect(korrigiert.single.wert, 4);
@@ -898,10 +945,10 @@ void main() {
 
     final historie = await repository.ladeBewertungenFuerProdukt(produktId);
     expect(historie.map((bewertung) => bewertung.wert), [4, 2]);
-    expect(
-      historie.map((bewertung) => bewertung.erlebnisId).toSet(),
-      {erstesErlebnis.id, zweitesErlebnis.id},
-    );
+    expect(historie.map((bewertung) => bewertung.erlebnisId).toSet(), {
+      erstesErlebnis.id,
+      zweitesErlebnis.id,
+    });
     final verlauf = await repository.ladeProduktverlauf(produktId);
     expect(verlauf, hasLength(2));
     expect(verlauf.first.erlebnis.id, zweitesErlebnis.id);
@@ -919,19 +966,19 @@ void main() {
       geaendertAm: zeit,
       notiz: 'Entwurf bleibt',
     );
-    await repository.speichereProdukt(Produkt(
-      id: produktId,
-      name: 'Rollback-Pils',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
+    await repository.speichereProdukt(
+      Produkt(
+        id: produktId,
+        name: 'Rollback-Pils',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
     await repository.speichereErlebnis(erlebnis);
 
     await expectLater(
       repository.speichereGetraenkebewertung(
-        erlebnis: erlebnis.kopiereMit(
-          notiz: 'Darf nicht bleiben',
-        ),
+        erlebnis: erlebnis.kopiereMit(notiz: 'Darf nicht bleiben'),
         bewertungen: [
           Bewertung(
             id: '90000000-0000-4000-8000-000000000003',
@@ -953,29 +1000,30 @@ void main() {
     ).single;
     expect(zeile.keys, isNot(contains('ist_entwurf')));
     expect(zeile['notiz'], 'Entwurf bleibt');
-    expect(
-      await repository.ladeBewertungenFuerErlebnis(erlebnis.id),
-      isEmpty,
-    );
+    expect(await repository.ladeBewertungenFuerErlebnis(erlebnis.id), isEmpty);
   });
 
   test('speichert Position und Preis atomar und korrigierbar', () async {
     const produktId = '91000000-0000-4000-8000-000000000001';
     const erlebnisId = '91000000-0000-4000-8000-000000000002';
     const positionId = '91000000-0000-4000-8000-000000000003';
-    await repository.speichereProdukt(Produkt(
-      id: produktId,
-      name: 'Marktprodukt',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
-    await repository.speichereErlebnis(Erlebnis(
-      id: erlebnisId,
-      typ: Erlebnistyp.einkauf,
-      herkunftProfilId: profilId,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
+    await repository.speichereProdukt(
+      Produkt(
+        id: produktId,
+        name: 'Marktprodukt',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
+    await repository.speichereErlebnis(
+      Erlebnis(
+        id: erlebnisId,
+        typ: Erlebnistyp.einkauf,
+        herkunftProfilId: profilId,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
     final position = ErlebnisPosition(
       id: positionId,
       erlebnisId: erlebnisId,
@@ -1018,9 +1066,7 @@ void main() {
       (await repository.ladeLetztenPreis(
         produktId: produktId,
         waehrung: 'EUR',
-      ))
-          ?.betrag
-          .minorEinheiten,
+      ))?.betrag.minorEinheiten,
       349,
     );
     expect(
@@ -1049,10 +1095,7 @@ void main() {
   });
 
   test('parst Geldbeträge ohne Gleitkomma-Rundung', () {
-    expect(
-      Geldbetrag.ausEingabe('12,30', 'EUR')?.minorEinheiten,
-      1230,
-    );
+    expect(Geldbetrag.ausEingabe('12,30', 'EUR')?.minorEinheiten, 1230);
     expect(Geldbetrag.ausEingabe('1.234', 'EUR'), isNull);
     expect(Geldbetrag.ausEingabe('-1', 'EUR'), isNull);
   });
@@ -1072,13 +1115,15 @@ void main() {
 
   test('bewahrt Bewertungen je Erlebnisposition historisch getrennt', () async {
     const produktId = '93000000-0000-4000-8000-000000000001';
-    await repository.speichereProdukt(Produkt(
-      id: produktId,
-      name: 'Pommes',
-      produktart: Produktart.speise,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
+    await repository.speichereProdukt(
+      Produkt(
+        id: produktId,
+        name: 'Pommes',
+        produktart: Produktart.speise,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
     for (var index = 0; index < 2; index++) {
       final erlebnis = Erlebnis(
         id: '93000000-0000-4000-8000-00000000001$index',
@@ -1126,218 +1171,232 @@ void main() {
     expect(verlauf.first.bewertungen.single.wert, 4);
   });
 
-  test('speichert Gaststättenbewertungen je Besuch getrennt und korrigierbar',
-      () async {
-    final ort = Ort(
-      id: '94000000-0000-4000-8000-000000000001',
-      name: 'Zum Test',
-      typ: Ortstyp.gastronomie,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    );
-    await repository.speichereOrt(ort);
-    for (var index = 0; index < 2; index++) {
-      final erlebnis = Erlebnis(
-        id: '94000000-0000-4000-8000-00000000001$index',
-        ortId: ort.id,
-        herkunftProfilId: profilId,
-        beginn: zeit.add(Duration(days: index)),
-        erstelltAm: zeit.add(Duration(days: index)),
-        geaendertAm: zeit.add(Duration(days: index)),
-      );
-      await repository.speichereErlebnis(erlebnis);
-      final ortsbewertung = Ortsbewertung(
-        id: '94000000-0000-4000-8000-00000000002$index',
-        erlebnisId: erlebnis.id,
-        ortId: ort.id,
-        herkunftProfilId: profilId,
-        bewertetAm: erlebnis.erlebtAm,
-        notiz: 'Besuch $index',
-        erstelltAm: erlebnis.erstelltAm,
-        geaendertAm: erlebnis.geaendertAm,
-      );
-      await repository.speichereOrtsbewertung(
-        erlebnis: erlebnis,
-        ort: ort,
-        ortsbewertung: ortsbewertung,
-        bewertungen: [
-          Bewertung(
-            id: '94000000-0000-4000-8000-00000000003$index',
-            erlebnisId: erlebnis.id,
-            ortId: ort.id,
-            ortsbewertungId: ortsbewertung.id,
-            kriteriumId: StandardOrtskriterien.gastronomie(zeit).first.id,
-            herkunftProfilId: profilId,
-            wert: 3 + index.toDouble(),
-            erstelltAm: erlebnis.erstelltAm,
-            geaendertAm: erlebnis.geaendertAm,
-          ),
-        ],
-      );
-    }
-
-    final erste = await repository.ladeOrtsbewertungFuerErlebnis(
-      '94000000-0000-4000-8000-000000000010',
-    );
-    final zweite = await repository.ladeOrtsbewertungFuerErlebnis(
-      '94000000-0000-4000-8000-000000000011',
-    );
-    expect(erste?.werte.single.wert, 3);
-    expect(zweite?.werte.single.wert, 4);
-    expect(erste?.ortsbewertung.bewertetAm, zeit);
-    expect(
-      zweite?.ortsbewertung.bewertetAm,
-      zeit.add(const Duration(days: 1)),
-    );
-
-    final erstesErlebnis = (await repository.ladeErlebnis(
-      '94000000-0000-4000-8000-000000000010',
-    ))!;
-    final ersteBewertung = erste!;
-    await repository.speichereOrtsbewertung(
-      erlebnis: erstesErlebnis,
-      ort: ort,
-      ortsbewertung: Ortsbewertung(
-        id: ersteBewertung.ortsbewertung.id,
-        erlebnisId: erstesErlebnis.id,
-        ortId: ort.id,
-        herkunftProfilId: profilId,
-        bewertetAm: erstesErlebnis.erlebtAm,
-        notiz: 'Korrigierter erster Besuch',
-        erstelltAm: ersteBewertung.ortsbewertung.erstelltAm,
-        geaendertAm: zeit.add(const Duration(days: 2)),
-      ),
-      bewertungen: [
-        Bewertung(
-          id: ersteBewertung.werte.single.id,
-          erlebnisId: erstesErlebnis.id,
-          ortId: ort.id,
-          ortsbewertungId: ersteBewertung.ortsbewertung.id,
-          kriteriumId: ersteBewertung.werte.single.kriteriumId,
-          herkunftProfilId: profilId,
-          wert: 5,
-          erstelltAm: ersteBewertung.werte.single.erstelltAm,
-          geaendertAm: zeit.add(const Duration(days: 2)),
-        ),
-      ],
-    );
-
-    expect(
-      (await repository.ladeOrtsbewertungFuerErlebnis(erstesErlebnis.id))
-          ?.werte
-          .single
-          .wert,
-      5,
-    );
-    expect(
-      (await repository.ladeOrtsbewertungFuerErlebnis(
-        '94000000-0000-4000-8000-000000000011',
-      ))
-          ?.werte
-          .single
-          .wert,
-      4,
-    );
-    final verlauf = await repository.ladeOrtsverlauf(ort.id);
-    expect(verlauf, hasLength(2));
-    expect(verlauf.first.notiz, 'Besuch 1');
-    expect(
-      datenbank.verbindung.select(
-        'SELECT * FROM ortsbewertungen WHERE ort_id = ?',
-        [ort.id],
-      ),
-      hasLength(2),
-    );
-  });
-
-  test('Produktlöschung erhält Erlebnisposition und erlaubt Neuzuordnung',
-      () async {
-    const alt = '21700000-0000-4000-8000-000000000001';
-    const neu = '21700000-0000-4000-8000-000000000002';
-    const erlebnisId = '21700000-0000-4000-8000-000000000003';
-    const positionId = '21700000-0000-4000-8000-000000000004';
-    for (final eintrag in [(alt, 'Alt'), (neu, 'Neu')]) {
-      await repository.speichereProdukt(Produkt(
-        id: eintrag.$1,
-        name: eintrag.$2,
-        erstelltAm: zeit,
-        geaendertAm: zeit,
-      ));
-    }
-    await repository.speichereErlebnis(Erlebnis(
-      id: erlebnisId,
-      herkunftProfilId: profilId,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
-    await repository.speichereErlebnisposition(
-      position: ErlebnisPosition(
-        id: positionId,
-        erlebnisId: erlebnisId,
-        produktId: alt,
-        anzahl: 2,
-        erstelltAm: zeit,
-        geaendertAm: zeit,
-      ),
-    );
-
-    await repository.loescheProdukt(alt);
-
-    expect(await repository.ladeProdukt(alt), isNull);
-    expect((await repository.ladeProdukte()).map((p) => p.id),
-        isNot(contains(alt)));
-    var position = (await repository.ladeErlebnispositionen(erlebnisId)).single;
-    expect(position.produkt.anzeigetitel, 'Nicht zugeordnet');
-    expect(position.position.anzahl, 2);
-
-    await repository.speichereErlebnisposition(
-      position: ErlebnisPosition(
-        id: positionId,
-        erlebnisId: erlebnisId,
-        produktId: neu,
-        anzahl: position.position.anzahl,
-        erstelltAm: position.position.erstelltAm,
-        geaendertAm: zeit.add(const Duration(minutes: 1)),
-      ),
-    );
-    position = (await repository.ladeErlebnispositionen(erlebnisId)).single;
-    expect(position.produkt.id, neu);
-    expect(position.position.anzahl, 2);
-  });
-
-  test('Ortlöschung erhält Historie und Erlebnis kann neu zugeordnet werden',
-      () async {
-    const alt = '21700000-0000-4000-8000-000000000011';
-    const neu = '21700000-0000-4000-8000-000000000012';
-    const erlebnisId = '21700000-0000-4000-8000-000000000013';
-    for (final eintrag in [(alt, 'Alter Ort'), (neu, 'Neuer Ort')]) {
-      await repository.speichereOrt(Ort(
-        id: eintrag.$1,
-        name: eintrag.$2,
+  test(
+    'speichert Gaststättenbewertungen je Besuch getrennt und korrigierbar',
+    () async {
+      final ort = Ort(
+        id: '94000000-0000-4000-8000-000000000001',
+        name: 'Zum Test',
         typ: Ortstyp.gastronomie,
         erstelltAm: zeit,
         geaendertAm: zeit,
-      ));
-    }
-    final erlebnis = Erlebnis(
-      id: erlebnisId,
-      ortId: alt,
-      herkunftProfilId: profilId,
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    );
-    await repository.speichereErlebnis(erlebnis);
-    await repository.loescheOrt(alt);
+      );
+      await repository.speichereOrt(ort);
+      for (var index = 0; index < 2; index++) {
+        final erlebnis = Erlebnis(
+          id: '94000000-0000-4000-8000-00000000001$index',
+          ortId: ort.id,
+          herkunftProfilId: profilId,
+          beginn: zeit.add(Duration(days: index)),
+          erstelltAm: zeit.add(Duration(days: index)),
+          geaendertAm: zeit.add(Duration(days: index)),
+        );
+        await repository.speichereErlebnis(erlebnis);
+        final ortsbewertung = Ortsbewertung(
+          id: '94000000-0000-4000-8000-00000000002$index',
+          erlebnisId: erlebnis.id,
+          ortId: ort.id,
+          herkunftProfilId: profilId,
+          bewertetAm: erlebnis.erlebtAm,
+          notiz: 'Besuch $index',
+          erstelltAm: erlebnis.erstelltAm,
+          geaendertAm: erlebnis.geaendertAm,
+        );
+        await repository.speichereOrtsbewertung(
+          erlebnis: erlebnis,
+          ort: ort,
+          ortsbewertung: ortsbewertung,
+          bewertungen: [
+            Bewertung(
+              id: '94000000-0000-4000-8000-00000000003$index',
+              erlebnisId: erlebnis.id,
+              ortId: ort.id,
+              ortsbewertungId: ortsbewertung.id,
+              kriteriumId: StandardOrtskriterien.gastronomie(zeit).first.id,
+              herkunftProfilId: profilId,
+              wert: 3 + index.toDouble(),
+              erstelltAm: erlebnis.erstelltAm,
+              geaendertAm: erlebnis.geaendertAm,
+            ),
+          ],
+        );
+      }
 
-    expect(await repository.ladeOrt(alt), isNull);
-    expect((await repository.ladeErlebnis(erlebnisId))?.ortId, alt);
+      final erste = await repository.ladeOrtsbewertungFuerErlebnis(
+        '94000000-0000-4000-8000-000000000010',
+      );
+      final zweite = await repository.ladeOrtsbewertungFuerErlebnis(
+        '94000000-0000-4000-8000-000000000011',
+      );
+      expect(erste?.werte.single.wert, 3);
+      expect(zweite?.werte.single.wert, 4);
+      expect(erste?.ortsbewertung.bewertetAm, zeit);
+      expect(
+        zweite?.ortsbewertung.bewertetAm,
+        zeit.add(const Duration(days: 1)),
+      );
 
-    await repository.speichereErlebnis(erlebnis.kopiereMit(
-      ortId: neu,
-      geaendertAm: zeit.add(const Duration(minutes: 1)),
-    ));
-    final neuZugeordnet = await repository.ladeErlebnis(erlebnisId);
-    expect(neuZugeordnet?.ortId, neu);
-    expect(neuZugeordnet?.erstelltAm, zeit);
-  });
+      final erstesErlebnis = (await repository.ladeErlebnis(
+        '94000000-0000-4000-8000-000000000010',
+      ))!;
+      final ersteBewertung = erste!;
+      await repository.speichereOrtsbewertung(
+        erlebnis: erstesErlebnis,
+        ort: ort,
+        ortsbewertung: Ortsbewertung(
+          id: ersteBewertung.ortsbewertung.id,
+          erlebnisId: erstesErlebnis.id,
+          ortId: ort.id,
+          herkunftProfilId: profilId,
+          bewertetAm: erstesErlebnis.erlebtAm,
+          notiz: 'Korrigierter erster Besuch',
+          erstelltAm: ersteBewertung.ortsbewertung.erstelltAm,
+          geaendertAm: zeit.add(const Duration(days: 2)),
+        ),
+        bewertungen: [
+          Bewertung(
+            id: ersteBewertung.werte.single.id,
+            erlebnisId: erstesErlebnis.id,
+            ortId: ort.id,
+            ortsbewertungId: ersteBewertung.ortsbewertung.id,
+            kriteriumId: ersteBewertung.werte.single.kriteriumId,
+            herkunftProfilId: profilId,
+            wert: 5,
+            erstelltAm: ersteBewertung.werte.single.erstelltAm,
+            geaendertAm: zeit.add(const Duration(days: 2)),
+          ),
+        ],
+      );
+
+      expect(
+        (await repository.ladeOrtsbewertungFuerErlebnis(erstesErlebnis.id))
+            ?.werte
+            .single
+            .wert,
+        5,
+      );
+      expect(
+        (await repository.ladeOrtsbewertungFuerErlebnis(
+          '94000000-0000-4000-8000-000000000011',
+        ))?.werte.single.wert,
+        4,
+      );
+      final verlauf = await repository.ladeOrtsverlauf(ort.id);
+      expect(verlauf, hasLength(2));
+      expect(verlauf.first.notiz, 'Besuch 1');
+      expect(
+        datenbank.verbindung.select(
+          'SELECT * FROM ortsbewertungen WHERE ort_id = ?',
+          [ort.id],
+        ),
+        hasLength(2),
+      );
+    },
+  );
+
+  test(
+    'Produktlöschung erhält Erlebnisposition und erlaubt Neuzuordnung',
+    () async {
+      const alt = '21700000-0000-4000-8000-000000000001';
+      const neu = '21700000-0000-4000-8000-000000000002';
+      const erlebnisId = '21700000-0000-4000-8000-000000000003';
+      const positionId = '21700000-0000-4000-8000-000000000004';
+      for (final eintrag in [(alt, 'Alt'), (neu, 'Neu')]) {
+        await repository.speichereProdukt(
+          Produkt(
+            id: eintrag.$1,
+            name: eintrag.$2,
+            erstelltAm: zeit,
+            geaendertAm: zeit,
+          ),
+        );
+      }
+      await repository.speichereErlebnis(
+        Erlebnis(
+          id: erlebnisId,
+          herkunftProfilId: profilId,
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        ),
+      );
+      await repository.speichereErlebnisposition(
+        position: ErlebnisPosition(
+          id: positionId,
+          erlebnisId: erlebnisId,
+          produktId: alt,
+          anzahl: 2,
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        ),
+      );
+
+      await repository.loescheProdukt(alt);
+
+      expect(await repository.ladeProdukt(alt), isNull);
+      expect(
+        (await repository.ladeProdukte()).map((p) => p.id),
+        isNot(contains(alt)),
+      );
+      var position = (await repository.ladeErlebnispositionen(erlebnisId))
+          .single;
+      expect(position.produkt.anzeigetitel, 'Nicht zugeordnet');
+      expect(position.position.anzahl, 2);
+
+      await repository.speichereErlebnisposition(
+        position: ErlebnisPosition(
+          id: positionId,
+          erlebnisId: erlebnisId,
+          produktId: neu,
+          anzahl: position.position.anzahl,
+          erstelltAm: position.position.erstelltAm,
+          geaendertAm: zeit.add(const Duration(minutes: 1)),
+        ),
+      );
+      position = (await repository.ladeErlebnispositionen(erlebnisId)).single;
+      expect(position.produkt.id, neu);
+      expect(position.position.anzahl, 2);
+    },
+  );
+
+  test(
+    'Ortlöschung erhält Historie und Erlebnis kann neu zugeordnet werden',
+    () async {
+      const alt = '21700000-0000-4000-8000-000000000011';
+      const neu = '21700000-0000-4000-8000-000000000012';
+      const erlebnisId = '21700000-0000-4000-8000-000000000013';
+      for (final eintrag in [(alt, 'Alter Ort'), (neu, 'Neuer Ort')]) {
+        await repository.speichereOrt(
+          Ort(
+            id: eintrag.$1,
+            name: eintrag.$2,
+            typ: Ortstyp.gastronomie,
+            erstelltAm: zeit,
+            geaendertAm: zeit,
+          ),
+        );
+      }
+      final erlebnis = Erlebnis(
+        id: erlebnisId,
+        ortId: alt,
+        herkunftProfilId: profilId,
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      );
+      await repository.speichereErlebnis(erlebnis);
+      await repository.loescheOrt(alt);
+
+      expect(await repository.ladeOrt(alt), isNull);
+      expect((await repository.ladeErlebnis(erlebnisId))?.ortId, alt);
+
+      await repository.speichereErlebnis(
+        erlebnis.kopiereMit(
+          ortId: neu,
+          geaendertAm: zeit.add(const Duration(minutes: 1)),
+        ),
+      );
+      final neuZugeordnet = await repository.ladeErlebnis(erlebnisId);
+      expect(neuZugeordnet?.ortId, neu);
+      expect(neuZugeordnet?.erstelltAm, zeit);
+    },
+  );
 }

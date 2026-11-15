@@ -38,49 +38,55 @@ void main() {
     }
   });
 
-  test('bekannter Produktalias normalisiert Stammdaten und Historienbezüge',
-      () {
-    final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-    addTearDown(datenbank.schliessen);
-    repository.speichere(
-      datenbank,
-      const ImportAliasReferenz(
-        sammlung: 'objekte',
-        aliasId: 'produkt-alt',
-        kanonischeId: 'produkt-neu',
-      ),
-    );
+  test(
+    'bekannter Produktalias normalisiert Stammdaten und Historienbezüge',
+    () {
+      final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+      addTearDown(datenbank.schliessen);
+      repository.speichere(
+        datenbank,
+        const ImportAliasReferenz(
+          sammlung: 'objekte',
+          aliasId: 'produkt-alt',
+          kanonischeId: 'produkt-neu',
+        ),
+      );
 
-    final normalisiert = repository.normalisiereDokument(datenbank, {
-      'objekte': [
-        {'id': 'produkt-alt', 'name': 'Pils'},
-      ],
-      'erlebnisPositionen': [
-        {'id': 'pos-1', 'produktId': 'produkt-alt'},
-      ],
-      'preisbeobachtungen': [
-        {'id': 'preis-1', 'produktId': 'produkt-alt'},
-      ],
-      'bewertungen': [
-        {'id': 'bew-1', 'objektId': 'produkt-alt'},
-      ],
-    });
+      final normalisiert = repository.normalisiereDokument(datenbank, {
+        'objekte': [
+          {'id': 'produkt-alt', 'name': 'Pils'},
+        ],
+        'erlebnisPositionen': [
+          {'id': 'pos-1', 'produktId': 'produkt-alt'},
+        ],
+        'preisbeobachtungen': [
+          {'id': 'preis-1', 'produktId': 'produkt-alt'},
+        ],
+        'bewertungen': [
+          {'id': 'bew-1', 'objektId': 'produkt-alt'},
+        ],
+      });
 
-    expect(
-        ((normalisiert['objekte'] as List).single as Map)['id'], 'produkt-neu');
-    expect(
-      ((normalisiert['erlebnisPositionen'] as List).single as Map)['produktId'],
-      'produkt-neu',
-    );
-    expect(
-      ((normalisiert['preisbeobachtungen'] as List).single as Map)['produktId'],
-      'produkt-neu',
-    );
-    expect(
-      ((normalisiert['bewertungen'] as List).single as Map)['objektId'],
-      'produkt-neu',
-    );
-  });
+      expect(
+        ((normalisiert['objekte'] as List).single as Map)['id'],
+        'produkt-neu',
+      );
+      expect(
+        ((normalisiert['erlebnisPositionen'] as List).single
+            as Map)['produktId'],
+        'produkt-neu',
+      );
+      expect(
+        ((normalisiert['preisbeobachtungen'] as List).single
+            as Map)['produktId'],
+        'produkt-neu',
+      );
+      expect(
+        ((normalisiert['bewertungen'] as List).single as Map)['objektId'],
+        'produkt-neu',
+      );
+    },
+  );
 
   test('widersprüchliche Aliaszuordnung und Aliaszyklus werden verhindert', () {
     final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
@@ -159,10 +165,9 @@ void main() {
     );
 
     expect(
-      datenbank.verbindung.select(
-        'SELECT id FROM objekte WHERE id = ?',
-        ['produkt-rollback'],
-      ),
+      datenbank.verbindung.select('SELECT id FROM objekte WHERE id = ?', [
+        'produkt-rollback',
+      ]),
       isEmpty,
     );
   });
