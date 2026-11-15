@@ -19,14 +19,13 @@ class Kategorie {
     String? name,
     String? elternId,
     bool elternEntfernen = false,
-  }) =>
-      Kategorie(
-        id: id,
-        name: name ?? this.name,
-        bereich: bereich,
-        elternId: elternEntfernen ? null : elternId ?? this.elternId,
-        istStandard: istStandard,
-      );
+  }) => Kategorie(
+    id: id,
+    name: name ?? this.name,
+    bereich: bereich,
+    elternId: elternEntfernen ? null : elternId ?? this.elternId,
+    istStandard: istStandard,
+  );
 }
 
 abstract final class StandardKategorien {

@@ -48,21 +48,21 @@ class SqliteKriteriensetRepository implements KriteriensetRepository {
   }
 
   @override
-  List<KategorieKriteriumZuordnung> zuordnungenFuer(String kategorieId) =>
-      _db.verbindung
-          .select(
-            'SELECT * FROM kategorie_kriterien WHERE kategorie_id = ? '
-            'ORDER BY reihenfolge, kriterium_id',
-            [kategorieId],
-          )
-          .map(
-            (row) => KategorieKriteriumZuordnung(
-              kategorieId: kategorieId,
-              kriteriumId: row['kriterium_id']! as String,
-              reihenfolge: row['reihenfolge']! as int,
-            ),
-          )
-          .toList(growable: false);
+  List<KategorieKriteriumZuordnung> zuordnungenFuer(String kategorieId) => _db
+      .verbindung
+      .select(
+        'SELECT * FROM kategorie_kriterien WHERE kategorie_id = ? '
+        'ORDER BY reihenfolge, kriterium_id',
+        [kategorieId],
+      )
+      .map(
+        (row) => KategorieKriteriumZuordnung(
+          kategorieId: kategorieId,
+          kriteriumId: row['kriterium_id']! as String,
+          reihenfolge: row['reihenfolge']! as int,
+        ),
+      )
+      .toList(growable: false);
 
   @override
   void speichereRegel(KategorieKriteriensetRegel regel) {
@@ -70,10 +70,11 @@ class SqliteKriteriensetRepository implements KriteriensetRepository {
     final version = bisher == null
         ? 1
         : bisher.modus == regel.modus &&
-                bisher.fallbackObjektart == regel.fallbackObjektart
-            ? bisher.version
-            : bisher.version + 1;
-    _db.verbindung.execute('''
+              bisher.fallbackObjektart == regel.fallbackObjektart
+        ? bisher.version
+        : bisher.version + 1;
+    _db.verbindung.execute(
+      '''
       INSERT INTO kategorie_kriterienset_regeln
         (kategorie_id, fallback_objektart, modus, version)
       VALUES (?, ?, ?, ?)
@@ -81,19 +82,18 @@ class SqliteKriteriensetRepository implements KriteriensetRepository {
         fallback_objektart = excluded.fallback_objektart,
         modus = excluded.modus,
         version = excluded.version
-      ''', [
-      regel.kategorieId,
-      regel.fallbackObjektart.name,
-      regel.modus.name,
-      version,
-    ]);
+      ''',
+      [
+        regel.kategorieId,
+        regel.fallbackObjektart.name,
+        regel.modus.name,
+        version,
+      ],
+    );
   }
 
   @override
-  void setzeZuordnungen(
-    String kategorieId,
-    Iterable<String> kriteriumIds,
-  ) {
+  void setzeZuordnungen(String kategorieId, Iterable<String> kriteriumIds) {
     final ids = kriteriumIds.toList(growable: false);
     if (ids.toSet().length != ids.length) {
       throw ArgumentError.value(ids, 'kriteriumIds', 'Doppelte Kriterien.');

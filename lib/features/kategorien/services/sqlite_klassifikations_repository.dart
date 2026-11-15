@@ -82,10 +82,9 @@ class SqliteKlassifikationsRepository implements KlassifikationsRepository {
       }
     }
     _db.transaktion(() {
-      _db.verbindung.execute(
-        'DELETE FROM objekt_tags WHERE objekt_id = ?',
-        [objektId],
-      );
+      _db.verbindung.execute('DELETE FROM objekt_tags WHERE objekt_id = ?', [
+        objektId,
+      ]);
       for (final eintrag in eindeutig.entries) {
         _db.verbindung.execute(
           'INSERT INTO objekt_tags (objekt_id, normalisiert, text) VALUES (?, ?, ?)',
@@ -106,46 +105,29 @@ class SqliteKlassifikationsRepository implements KlassifikationsRepository {
   }
 
   @override
-  void setzeHerkunft(String objektId, String? wert) => _setzeMerkmal(
-        objektId,
-        KlassifikationsDimension.herkunft,
-        '',
-        wert,
-      );
+  void setzeHerkunft(String objektId, String? wert) =>
+      _setzeMerkmal(objektId, KlassifikationsDimension.herkunft, '', wert);
 
   @override
-  void setzeHersteller(String objektId, String? wert) => _setzeMerkmal(
-        objektId,
-        KlassifikationsDimension.hersteller,
-        '',
-        wert,
-      );
+  void setzeHersteller(String objektId, String? wert) =>
+      _setzeMerkmal(objektId, KlassifikationsDimension.hersteller, '', wert);
 
   @override
-  void setzeEigenschaft(
-    String objektId,
-    String schluessel,
-    String? wert,
-  ) {
+  void setzeEigenschaft(String objektId, String schluessel, String? wert) {
     final key = schluessel.trim();
     if (key.isEmpty) {
       throw ArgumentError.value(schluessel, 'schluessel');
     }
-    _setzeMerkmal(
-      objektId,
-      KlassifikationsDimension.eigenschaft,
-      key,
-      wert,
-    );
+    _setzeMerkmal(objektId, KlassifikationsDimension.eigenschaft, key, wert);
   }
 
   @override
   void entferneEigenschaft(String objektId, String schluessel) => _setzeMerkmal(
-        objektId,
-        KlassifikationsDimension.eigenschaft,
-        schluessel.trim(),
-        null,
-      );
+    objektId,
+    KlassifikationsDimension.eigenschaft,
+    schluessel.trim(),
+    null,
+  );
 
   void _setzeMerkmal(
     String objektId,
@@ -162,12 +144,15 @@ class SqliteKlassifikationsRepository implements KlassifikationsRepository {
       );
       return;
     }
-    _db.verbindung.execute('''
+    _db.verbindung.execute(
+      '''
       INSERT INTO objekt_klassifikationsmerkmale
         (objekt_id, dimension, schluessel, wert)
       VALUES (?, ?, ?, ?)
       ON CONFLICT(objekt_id, dimension, schluessel) DO UPDATE SET
         wert = excluded.wert
-      ''', [objektId, dimension.name, schluessel, bereinigt]);
+      ''',
+      [objektId, dimension.name, schluessel, bereinigt],
+    );
   }
 }

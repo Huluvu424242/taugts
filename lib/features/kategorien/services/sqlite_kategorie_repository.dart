@@ -63,12 +63,12 @@ class SqliteKategorieRepository implements KategorieRepository {
   }
 
   Kategorie _ausZeile(Map<String, Object?> zeile) => Kategorie(
-        id: zeile['id']! as String,
-        name: zeile['name']! as String,
-        bereich: KategorieBereich.values.byName(zeile['bereich']! as String),
-        elternId: zeile['eltern_id'] as String?,
-        istStandard: (zeile['ist_standard']! as int) == 1,
-      );
+    id: zeile['id']! as String,
+    name: zeile['name']! as String,
+    bereich: KategorieBereich.values.byName(zeile['bereich']! as String),
+    elternId: zeile['eltern_id'] as String?,
+    istStandard: (zeile['ist_standard']! as int) == 1,
+  );
 
   @override
   void speichern(Kategorie kategorie) {
@@ -91,10 +91,10 @@ class SqliteKategorieRepository implements KategorieRepository {
     if (name.trim().isEmpty) {
       throw ArgumentError.value(name, 'name');
     }
-    _db.verbindung.execute(
-      'UPDATE kategorien SET name = ? WHERE id = ?',
-      [name.trim(), id],
-    );
+    _db.verbindung.execute('UPDATE kategorien SET name = ? WHERE id = ?', [
+      name.trim(),
+      id,
+    ]);
   }
 
   @override
@@ -104,17 +104,13 @@ class SqliteKategorieRepository implements KategorieRepository {
       throw ArgumentError.value(id, 'id');
     }
     _pruefeEltern(id, kategorie.bereich, elternId);
-    _db.verbindung.execute(
-      'UPDATE kategorien SET eltern_id = ? WHERE id = ?',
-      [elternId, id],
-    );
+    _db.verbindung.execute('UPDATE kategorien SET eltern_id = ? WHERE id = ?', [
+      elternId,
+      id,
+    ]);
   }
 
-  void _pruefeEltern(
-    String id,
-    KategorieBereich bereich,
-    String? elternId,
-  ) {
+  void _pruefeEltern(String id, KategorieBereich bereich, String? elternId) {
     if (elternId == null) return;
     if (elternId == id) {
       throw const UngueltigeKategorieHierarchieException(
@@ -158,27 +154,27 @@ class SqliteKategorieRepository implements KategorieRepository {
 
   @override
   void ordneProduktZu(String produktId, String kategorieId) => _ordneZu(
-        'produkt_kategorien',
-        'produkt_id',
-        produktId,
-        kategorieId,
-        KategorieBereich.produkt,
-      );
+    'produkt_kategorien',
+    'produkt_id',
+    produktId,
+    kategorieId,
+    KategorieBereich.produkt,
+  );
 
   @override
   void ordneOrtZu(String ortId, String kategorieId) => _ordneZu(
-        'ort_kategorien',
-        'ort_id',
-        ortId,
-        kategorieId,
-        KategorieBereich.ort,
-      );
+    'ort_kategorien',
+    'ort_id',
+    ortId,
+    kategorieId,
+    KategorieBereich.ort,
+  );
 
-  Set<String> _zuordnungen(String tabelle, String spalte, String id) =>
-      _db.verbindung
-          .select('SELECT kategorie_id FROM $tabelle WHERE $spalte = ?', [id])
-          .map((zeile) => zeile['kategorie_id']! as String)
-          .toSet();
+  Set<String> _zuordnungen(String tabelle, String spalte, String id) => _db
+      .verbindung
+      .select('SELECT kategorie_id FROM $tabelle WHERE $spalte = ?', [id])
+      .map((zeile) => zeile['kategorie_id']! as String)
+      .toSet();
 
   @override
   Set<String> kategorienFuerProdukt(String produktId) =>
