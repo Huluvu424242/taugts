@@ -60,8 +60,9 @@ class KriteriensetService {
 
     final eintraege = wirksam.values.toList()
       ..sort((a, b) {
-        final reihenfolge =
-            a.kriterium.reihenfolge.compareTo(b.kriterium.reihenfolge);
+        final reihenfolge = a.kriterium.reihenfolge.compareTo(
+          b.kriterium.reihenfolge,
+        );
         return reihenfolge != 0
             ? reihenfolge
             : a.kriterium.name.compareTo(b.kriterium.name);
@@ -87,10 +88,10 @@ class KriteriensetService {
   }
 
   String _objektartLabel(KriteriumObjektart art) => switch (art) {
-        KriteriumObjektart.getraenk => 'Getränk',
-        KriteriumObjektart.speise => 'Speise',
-        KriteriumObjektart.sonstigesProdukt => 'Produkt',
-        KriteriumObjektart.gastronomie => 'Gastronomie',
-        KriteriumObjektart.geschaeft => 'Geschäft',
-      };
+    KriteriumObjektart.getraenk => 'Getränk',
+    KriteriumObjektart.speise => 'Speise',
+    KriteriumObjektart.sonstigesProdukt => 'Produkt',
+    KriteriumObjektart.gastronomie => 'Gastronomie',
+    KriteriumObjektart.geschaeft => 'Geschäft',
+  };
 }
