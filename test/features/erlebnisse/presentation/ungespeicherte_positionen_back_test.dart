@@ -88,6 +88,22 @@ void main() {
           reason: 'Ungespeicherte Erlebnispositionen erfordern eine Rückfrage.');
       expect(find.byType(ErlebnisScreen), findsOneWidget);
       expect(await repository.ladeErlebnispositionen(erlebnis.id), isEmpty);
+
+      // Die Rückfrage abbrechen: Entwurf und aktuelle Ansicht erhalten.
+      await tester.tap(find.text('Weiter bearbeiten'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(ErlebnisScreen), findsOneWidget);
+      expect(find.text('Regressionstest-Produkt'), findsWidgets);
+
+      // Erst das ausdrücklich bestätigte Verwerfen darf schließen.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Änderungen verwerfen'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ErlebnisScreen), findsNothing);
+      expect(find.text('Erlebnis öffnen'), findsOneWidget);
+      expect(await repository.ladeErlebnispositionen(erlebnis.id), isEmpty);
     },
   );
 }
