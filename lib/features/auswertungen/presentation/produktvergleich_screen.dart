@@ -222,6 +222,7 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
                 }
                 var rang = 0;
                 double? vorher;
+                String? vorherEinheit;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -229,10 +230,28 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
                       Builder(
                         builder: (context) {
                           final wert = eintrag.einheitspreis;
+                          final neueEinheit = wert != null &&
+                              eintrag.einheitspreisEinheit != vorherEinheit;
+                          if (neueEinheit) {
+                            rang = 0;
+                            vorher = null;
+                            vorherEinheit = eintrag.einheitspreisEinheit;
+                          }
                           if (wert != null && wert != vorher) rang++;
                           if (wert != null) vorher = wert;
-                          return Card(
-                            child: ListTile(
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (neueEinheit)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 12),
+                                  child: Text(
+                                    'Eigenständige Rangliste: ${eintrag.einheitspreisEinheit}',
+                                    style: Theme.of(context).textTheme.titleSmall,
+                                  ),
+                                ),
+                              Card(
+                                child: ListTile(
                               title: Text(
                                 wert == null
                                     ? eintrag.ortName
@@ -260,7 +279,9 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
                                           ),
                                         )
                                   : null,
-                            ),
+                                ),
+                              ),
+                            ],
                           );
                         },
                       ),
