@@ -39,6 +39,11 @@ class GaststaettenbewertungController {
 
   bool get hatWertfehler => _hatWertfehlerAktion?.call() ?? false;
 
+  bool Function()? _hatAenderungenAktion;
+
+  bool get hatUngespeicherteAenderungen =>
+      _hatAenderungenAktion?.call() ?? _entwurfGeaendert;
+
   Future<bool> speichereFallsGeaendert(Erlebnis erlebnis) async {
     final aktion = _speicherAktion;
     return aktion == null ? false : aktion(erlebnis);
@@ -49,11 +54,13 @@ class GaststaettenbewertungController {
     Future<bool> Function(Erlebnis erlebnis) speicherAktion,
     bool Function() hatEingabeAktion,
     bool Function() hatWertfehlerAktion,
+    bool Function() hatAenderungenAktion,
   ) {
     _owner = owner;
     _speicherAktion = speicherAktion;
     _hatEingabeAktion = hatEingabeAktion;
     _hatWertfehlerAktion = hatWertfehlerAktion;
+    _hatAenderungenAktion = hatAenderungenAktion;
   }
 
   void _trenne(Object owner) {
@@ -62,6 +69,7 @@ class GaststaettenbewertungController {
     _speicherAktion = null;
     _hatEingabeAktion = null;
     _hatWertfehlerAktion = null;
+    _hatAenderungenAktion = null;
   }
 }
 
@@ -333,6 +341,7 @@ class _FormularState extends State<_Formular> {
       _speichereFallsGeaendert,
       () => _hatEingabe,
       () => _hatWertfehler,
+      () => _geaendert,
     );
   }
 
@@ -346,6 +355,7 @@ class _FormularState extends State<_Formular> {
       _speichereFallsGeaendert,
       () => _hatEingabe,
       () => _hatWertfehler,
+      () => _geaendert,
     );
   }
 
