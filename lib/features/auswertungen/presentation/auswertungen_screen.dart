@@ -327,8 +327,9 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                                   as AuswertungsFilterOptionenService,
                           preisService:
                               widget.service as ProduktPreisvergleichService,
-                          bewertungsService: widget.service
-                              as ProduktBewertungsvergleichService,
+                          bewertungsService:
+                              widget.service
+                                  as ProduktBewertungsvergleichService,
                         ),
                       ),
                     ),

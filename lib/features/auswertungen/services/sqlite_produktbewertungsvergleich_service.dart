@@ -11,7 +11,8 @@ class SqliteProduktbewertungsvergleichService
   Future<List<ProduktBewertungsRang>> ladeBewertungen(
     ProduktvergleichFilter filter,
   ) async {
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT b.id, b.erlebnis_id, b.kriterium_id,
         COALESCE(b.kriterium_version, k.version, 1) AS version,
         COALESCE(b.kriterium_name, k.name, '') AS kriterium_name,
@@ -32,7 +33,9 @@ class SqliteProduktbewertungsvergleichService
         AND COALESCE(b.kriterium_eingabetyp, k.eingabetyp, 'wertung') = 'wertung'
         AND b.wert IS NOT NULL
       ORDER BY zeitpunkt, b.id
-    ''', [filter.produktId]);
+    ''',
+      [filter.produktId],
+    );
     final relevante = <Map<String, Object?>>[];
     final neuesteVersionen = <String, int>{};
     for (final row in rows) {
@@ -93,10 +96,8 @@ class SqliteProduktbewertungsvergleichService
           letzteBewertung: letzte[gruppe.key]!,
         ),
     ]..sort((a, b) {
-        final vergleich = b.durchschnitt.compareTo(a.durchschnitt);
-        return vergleich == 0
-            ? a.ortName.compareTo(b.ortName)
-            : vergleich;
-      });
+      final vergleich = b.durchschnitt.compareTo(a.durchschnitt);
+      return vergleich == 0 ? a.ortName.compareTo(b.ortName) : vergleich;
+    });
   }
 }
