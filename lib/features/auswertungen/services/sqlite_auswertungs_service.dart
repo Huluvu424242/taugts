@@ -164,6 +164,7 @@ class SqliteAuswertungsService
           (? = 'produkt' AND pb.produkt_id = ?) OR
           (? = 'ort' AND pb.ort_id = ?))
         AND (? IS NULL OR pk.kategorie_id = ?)
+        AND (? IS NULL OR pb.produkt_id = ?)
       ORDER BY pb.beobachtet_am
     ''',
       [
@@ -174,6 +175,8 @@ class SqliteAuswertungsService
         filter.objektId,
         filter.kategorieId,
         filter.kategorieId,
+        filter.preisProduktId,
+        filter.preisProduktId,
       ],
     );
     return [

@@ -141,6 +141,16 @@ void main() {
         ''',
         [jetzt, jetzt],
       );
+      final produktAmOrt = await SqliteAuswertungsService(db).berechne(
+        const AuswertungsFilter(
+          objektId: 'ort',
+          objektArt: StatistikObjektart.ort,
+          preisProduktId: 'p2',
+        ),
+      );
+      expect(produktAmOrt.preisverlauf, hasLength(1));
+      expect(produktAmOrt.preisverlauf.single.wert, 3);
+
       for (final eintrag in [('b1', 4.0, 1), ('b2', 2.0, 1), ('b3', 5.0, 2)]) {
         db.verbindung.execute(
           '''

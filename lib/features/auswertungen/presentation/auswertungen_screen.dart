@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
+import 'package:taugts/features/auswertungen/models/orts_preismatrix.dart';
 import 'package:taugts/features/auswertungen/models/preisvergleich_kennzahlen.dart';
 import 'package:taugts/features/auswertungen/models/produktvergleich_modelle.dart';
 import 'package:taugts/features/auswertungen/presentation/produktvergleich_screen.dart';
@@ -96,6 +97,8 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
     bool objektAendern = false,
     String? kriteriumId,
     bool kriteriumAendern = false,
+    String? preisProduktId,
+    bool preisProduktAendern = false,
   }) {
     setState(() {
       _filter = AuswertungsFilter(
@@ -103,6 +106,11 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
         bis: _filter.bis,
         herkunftProfilId: _filter.herkunftProfilId,
         kategorieId: kategorieAendern ? kategorieId : _filter.kategorieId,
+        preisProduktId: preisProduktAendern
+            ? preisProduktId
+            : objektAendern
+            ? null
+            : _filter.preisProduktId,
         objektId: objektAendern ? objektId : _filter.objektId,
         objektArt: objektAendern ? objektArt! : _filter.objektArt,
         kriteriumId: kriteriumAendern ? kriteriumId : _filter.kriteriumId,
@@ -138,6 +146,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
     setState(() {
       _filter = AuswertungsFilter(
         kategorieId: _filter.kategorieId,
+        preisProduktId: _filter.preisProduktId,
         objektId: _filter.objektId,
         objektArt: _filter.objektArt,
         kriteriumId: _filter.kriteriumId,
@@ -261,6 +270,62 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
             ],
             if (serien.isEmpty)
               const Text('Keine beobachteten Preise im gewählten Zeitraum.'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _preismatrixAmOrt(List<Zeitwert> werte) {
+    final matrix = OrtsPreisMatrix.ausBeobachtungen(werte);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Preismatrix – Produkte und Erlebniszeitpunkte',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const Text(
+              'Produkte und Währungen als Zeilen, Zeitpunkte als Spalten. '
+              'Mehrfachpreise bleiben erhalten, fehlende Käufe sind leer.',
+            ),
+            if (matrix.zeitpunkte.isEmpty)
+              const Text('Keine Produktpreise am gewählten Ort im Zeitraum.')
+            else
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columns: [
+                    const DataColumn(label: Text('Produkt · Währung')),
+                    for (final zeit in matrix.zeitpunkte)
+                      DataColumn(
+                        label: Text(
+                          zeit.toLocal().toString().substring(0, 16),
+                        ),
+                      ),
+                  ],
+                  rows: [
+                    for (final zeile in matrix.zeilen)
+                      DataRow(
+                        cells: [
+                          DataCell(Text(zeile.produktUndWaehrung)),
+                          for (final zeit in matrix.zeitpunkte)
+                            DataCell(
+                              Text(
+                                zeile
+                                    .preiseAm(zeit)
+                                    .map((preis) => preis.toStringAsFixed(2))
+                                    .join(' / '),
+                              ),
+                            ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
@@ -510,6 +575,30 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                                   objektAendern: true,
                                 ),
                               ),
+                              if (_ansicht == _StatistikAnsicht.preise &&
+                                  _filter.objektArt == StatistikObjektart.ort &&
+                                  _filter.objektId != null)
+                                DropdownButtonFormField<String>(
+                                  initialValue: _filter.preisProduktId,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Produkt an diesem Ort',
+                                  ),
+                                  items: [
+                                    const DropdownMenuItem(
+                                      value: null,
+                                      child: Text('Alle Produkte am Ort'),
+                                    ),
+                                    for (final option in optionen.produkte)
+                                      DropdownMenuItem(
+                                        value: option.id,
+                                        child: Text(option.bezeichnung),
+                                      ),
+                                  ],
+                                  onChanged: (id) => _filterAnwenden(
+                                    preisProduktId: id,
+                                    preisProduktAendern: true,
+                                  ),
+                                ),
                               DropdownButtonFormField<String>(
                                 initialValue: _filter.kategorieId,
                                 decoration: const InputDecoration(
@@ -626,6 +715,10 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                   _filter.objektArt == StatistikObjektart.produkt &&
                   _filter.objektId != null)
                 _ortspreiseImVergleich(daten.preisverlauf),
+              if (_ansicht == _StatistikAnsicht.preise &&
+                  _filter.objektArt == StatistikObjektart.ort &&
+                  _filter.objektId != null)
+                _preismatrixAmOrt(daten.preisverlauf),
               if (_ansicht == _StatistikAnsicht.preisQualitaet)
                 const Text(
                   'Preise und Wertungen werden in getrennten Diagrammreihen und eigenen Skalen dargestellt. Der Verlauf zeigt keine Ursache-Wirkung-Beziehung.',
