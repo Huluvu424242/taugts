@@ -44,7 +44,10 @@ void main() {
       containsAll(<String>{'typ', 'beginn', 'ende'}),
     );
     expect(_spalten(verbindung, 'produkte'), contains('geloescht'));
-    expect(_spalten(verbindung, 'preisbeobachtungen'), containsAll(<String>{'bezugsmenge', 'bezugseinheit'}));
+    expect(
+      _spalten(verbindung, 'preisbeobachtungen'),
+      containsAll(<String>{'bezugsmenge', 'bezugseinheit'}),
+    );
     expect(_spalten(verbindung, 'orte'), contains('geloescht'));
     expect(
       _spalten(verbindung, 'kriterien'),

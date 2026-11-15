@@ -85,7 +85,7 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
           const Text(
             'Historische Beobachtungen, keine aktuellen Marktpreise. '
             'Einheitspreise verwenden die beim Kauf erfasste Bezugsmenge. '
-            'Bei historischen Käufen ohne Menge wird kein Einheitspreis berechnet.'
+            'Bei historischen Käufen ohne Menge wird kein Einheitspreis berechnet.',
           ),
           const SizedBox(height: 12),
           FutureBuilder<AuswertungsFilterOptionen>(

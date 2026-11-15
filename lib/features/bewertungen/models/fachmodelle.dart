@@ -268,9 +268,11 @@ class Preisbeobachtung {
   final String erlebnisPositionId;
   final String produktId;
   final String? ortId;
+
   /// Menge je einzelner verkaufter Positionseinheit, nicht die aktuelle
   /// Produktstammdaten-Menge; NULL bedeutet historisch unbekannt.
   final int? bezugsmenge;
+
   /// 'ml', 'g' oder 'stueck' – historische, beim Kauf erfasste Einheit.
   final String? bezugseinheit;
   final Geldbetrag betrag;

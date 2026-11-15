@@ -56,7 +56,8 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
     _waehrung = vorhanden?.preis?.betrag.waehrung ?? 'EUR';
     _preis.text = vorhanden?.preis?.betrag.dezimalText ?? '';
     _einheit = vorhanden?.preis?.bezugseinheit ?? 'ml';
-    _menge.text = vorhanden?.preis?.bezugsmenge?.toString() ??
+    _menge.text =
+        vorhanden?.preis?.bezugsmenge?.toString() ??
         (vorhanden == null ? _produkt?.fuellmengeMl?.toString() ?? '' : '');
     if (_produkt != null) _ladeLetztenPreis();
   }
@@ -323,12 +324,15 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: const InputDecoration(
               labelText: 'Menge pro Stück für diesen Kauf (optional)',
-              helperText: 'Historische Packungsgröße, z. B. 500 ml, 250 g oder 1 Stück',
+              helperText:
+                  'Historische Packungsgröße, z. B. 500 ml, 250 g oder 1 Stück',
             ),
           ),
           DropdownButtonFormField<String>(
             initialValue: _einheit,
-            decoration: const InputDecoration(labelText: 'Einheit der Bezugsmenge'),
+            decoration: const InputDecoration(
+              labelText: 'Einheit der Bezugsmenge',
+            ),
             items: const [
               DropdownMenuItem(value: 'ml', child: Text('Milliliter (ml)')),
               DropdownMenuItem(value: 'g', child: Text('Gramm (g)')),
