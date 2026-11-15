@@ -65,9 +65,7 @@ void main() {
       expect(find.text('Neues Pils'), findsOneWidget);
       expect(
         tester
-            .widget<TextField>(
-              find.byKey(const ValueKey('positions-anzahl')),
-            )
+            .widget<TextField>(find.byKey(const ValueKey('positions-anzahl')))
             .controller
             ?.text,
         '3',
@@ -84,8 +82,9 @@ void main() {
     },
   );
 
-  testWidgets('Abbruch der Produktbearbeitung lässt Auswahl unverändert',
-      (tester) async {
+  testWidgets('Abbruch der Produktbearbeitung lässt Auswahl unverändert', (
+    tester,
+  ) async {
     final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     addTearDown(datenbank.schliessen);
     final repository = SqliteBewertungsRepository(datenbank);
