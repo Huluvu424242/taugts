@@ -46,22 +46,22 @@ class TaugtsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: HauptnavigationScreen(
-          profil: profil,
-          profilRepository: profilRepository,
-          bewertungsRepository: bewertungsRepository,
-          exportService: exportService,
-          exportZielService: exportZielService,
-          binaerExportZielService: binaerExportZielService,
-          statistikExportService: statistikExportService,
-          idGenerator: idGenerator,
-          kategorieRepository: kategorieRepository,
-          kriteriensetRepository: kriteriensetRepository,
-          sucheService: sucheService,
-          auswertungsService: auswertungsService,
-        ),
-        theme: AppTheme.light,
-        title: 'Taugt’s?',
-      );
+    debugShowCheckedModeBanner: false,
+    home: HauptnavigationScreen(
+      profil: profil,
+      profilRepository: profilRepository,
+      bewertungsRepository: bewertungsRepository,
+      exportService: exportService,
+      exportZielService: exportZielService,
+      binaerExportZielService: binaerExportZielService,
+      statistikExportService: statistikExportService,
+      idGenerator: idGenerator,
+      kategorieRepository: kategorieRepository,
+      kriteriensetRepository: kriteriensetRepository,
+      sucheService: sucheService,
+      auswertungsService: auswertungsService,
+    ),
+    theme: AppTheme.light,
+    title: 'Taugt’s?',
+  );
 }

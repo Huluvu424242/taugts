@@ -55,36 +55,30 @@ class AppSupportMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PopupMenuButton<_SupportAktion>(
-        tooltip: 'App-Menü öffnen',
-        onSelected: (aktion) async {
-          switch (aktion) {
-            case _SupportAktion.bugMelden:
-              await zeigeBugMeldung(
-                context,
-                contextName: contextName,
-                appInfoGateway: appInfoGateway,
-                externalUrlGateway: externalUrlGateway,
-              );
-            case _SupportAktion.ueber:
-              await zeigeUeberDialog(
-                context,
-                appInfoGateway: appInfoGateway,
-                externalUrlGateway: externalUrlGateway,
-                changelogGateway: changelogGateway,
-              );
-          }
-        },
-        itemBuilder: (_) => const [
-          PopupMenuItem(
-            value: _SupportAktion.bugMelden,
-            child: Text('Bug melden'),
-          ),
-          PopupMenuItem(
-            value: _SupportAktion.ueber,
-            child: Text('Über'),
-          ),
-        ],
-      );
+    tooltip: 'App-Menü öffnen',
+    onSelected: (aktion) async {
+      switch (aktion) {
+        case _SupportAktion.bugMelden:
+          await zeigeBugMeldung(
+            context,
+            contextName: contextName,
+            appInfoGateway: appInfoGateway,
+            externalUrlGateway: externalUrlGateway,
+          );
+        case _SupportAktion.ueber:
+          await zeigeUeberDialog(
+            context,
+            appInfoGateway: appInfoGateway,
+            externalUrlGateway: externalUrlGateway,
+            changelogGateway: changelogGateway,
+          );
+      }
+    },
+    itemBuilder: (_) => const [
+      PopupMenuItem(value: _SupportAktion.bugMelden, child: Text('Bug melden')),
+      PopupMenuItem(value: _SupportAktion.ueber, child: Text('Über')),
+    ],
+  );
 }
 
 enum _SupportAktion { bugMelden, ueber }
@@ -103,15 +97,15 @@ class BugMeldenButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextButton.icon(
-        onPressed: () => zeigeBugMeldung(
-          context,
-          contextName: contextName,
-          appInfoGateway: appInfoGateway,
-          externalUrlGateway: externalUrlGateway,
-        ),
-        icon: const Icon(Icons.bug_report_outlined),
-        label: const Text('Bug melden'),
-      );
+    onPressed: () => zeigeBugMeldung(
+      context,
+      contextName: contextName,
+      appInfoGateway: appInfoGateway,
+      externalUrlGateway: externalUrlGateway,
+    ),
+    icon: const Icon(Icons.bug_report_outlined),
+    label: const Text('Bug melden'),
+  );
 }
 
 Future<void> zeigeUeberDialog(
@@ -189,9 +183,9 @@ Future<void> zeigeUeberDialog(
                         onPressed: oeffnetLink
                             ? null
                             : () => oeffneExternesZiel(
-                                  url: _benutzerdokumentationUrl,
-                                  zielName: 'Hilfe',
-                                ),
+                                url: _benutzerdokumentationUrl,
+                                zielName: 'Hilfe',
+                              ),
                         icon: const Icon(Icons.help_outline),
                         label: const Text('Hilfe'),
                       ),
@@ -216,9 +210,9 @@ Future<void> zeigeUeberDialog(
                         onPressed: oeffnetLink
                             ? null
                             : () => oeffneExternesZiel(
-                                  url: _projektseiteUrl,
-                                  zielName: 'Projektseite',
-                                ),
+                                url: _projektseiteUrl,
+                                zielName: 'Projektseite',
+                              ),
                         icon: const Icon(Icons.open_in_new),
                         label: const Text('Projektseite'),
                       ),
@@ -230,9 +224,9 @@ Future<void> zeigeUeberDialog(
                         onPressed: oeffnetLink
                             ? null
                             : () => oeffneExternesZiel(
-                                  url: _projektdokumentationUrl,
-                                  zielName: 'Projektdokumentation',
-                                ),
+                                url: _projektdokumentationUrl,
+                                zielName: 'Projektdokumentation',
+                              ),
                         icon: const Icon(Icons.open_in_new),
                         label: const Text('Projektdokumentation'),
                       ),
@@ -292,126 +286,123 @@ Future<void> zeigeUeberDialog(
 Future<void> zeigeAenderungshistorie(
   BuildContext context, {
   ChangelogGateway? changelogGateway,
-}) =>
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Änderungshistorie'),
-        content: SizedBox(
-          width: 560,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.65,
-            ),
-            child: FutureBuilder<String>(
-              future:
-                  (changelogGateway ?? const AssetChangelogService()).laden(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Semantics(
-                    liveRegion: true,
-                    child: Text(
-                      'Änderungshistorie konnte nicht geladen werden: ${snapshot.error}',
-                    ),
-                  );
-                }
-                if (!snapshot.hasData) {
-                  return Center(
-                    child: Semantics(
-                      label: 'Änderungshistorie wird geladen',
-                      child: const CircularProgressIndicator(),
-                    ),
-                  );
-                }
-                return ChangelogDarstellung(markdown: snapshot.data!);
-              },
-            ),
-          ),
+}) => showDialog<void>(
+  context: context,
+  builder: (dialogContext) => AlertDialog(
+    title: const Text('Änderungshistorie'),
+    content: SizedBox(
+      width: 560,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.65,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Schließen'),
-          ),
-        ],
+        child: FutureBuilder<String>(
+          future: (changelogGateway ?? const AssetChangelogService()).laden(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Semantics(
+                liveRegion: true,
+                child: Text(
+                  'Änderungshistorie konnte nicht geladen werden: ${snapshot.error}',
+                ),
+              );
+            }
+            if (!snapshot.hasData) {
+              return Center(
+                child: Semantics(
+                  label: 'Änderungshistorie wird geladen',
+                  child: const CircularProgressIndicator(),
+                ),
+              );
+            }
+            return ChangelogDarstellung(markdown: snapshot.data!);
+          },
+        ),
       ),
-    );
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.of(dialogContext).pop(),
+        child: const Text('Schließen'),
+      ),
+    ],
+  ),
+);
 
 Future<void> zeigeBarrierefreiheitserklaerung(
   BuildContext context, {
   AppInfoGateway? appInfoGateway,
   ExternalUrlGateway? externalUrlGateway,
-}) =>
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Barrierefreiheitserklärung'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Semantics(
-                header: true,
-                child: const Text(
-                  'Stand: 29. August 2026',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Taugt’s? wird nach den im Projekt festgelegten UX- und '
-                'Barrierefreiheitsregeln entwickelt. Die App unterstützt '
-                'verständliche Beschriftungen, ausreichend große Touch-Ziele, '
-                'große Systemschrift sowie wahrnehmbare Lade-, Fehler- und '
-                'Erfolgszustände.',
-              ),
-              const SizedBox(height: 12),
-              Semantics(
-                header: true,
-                child: const Text(
-                  'Bekannte Barrieren',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Die vollständige praktische Prüfung aller Abläufe mit '
-                'TalkBack, Schaltersteuerungen und unterschiedlichen '
-                'Android-Geräten ist noch nicht abgeschlossen. Die '
-                'Plattformintegration für Windows und Linux ist vorbereitet, '
-                'aber noch nicht vollständig umgesetzt. Externe GitHub-Seiten '
-                'liegen außerhalb des Einflussbereichs dieser App.',
-              ),
-              const SizedBox(height: 12),
-              Semantics(
-                header: true,
-                child: const Text(
-                  'Barrieren melden',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Über „Bug melden“ kann eine Barriere mit installierter '
-                'App-Version und dem Kontext dieser Erklärung gemeldet werden.',
-              ),
-            ],
+}) => showDialog<void>(
+  context: context,
+  builder: (dialogContext) => AlertDialog(
+    title: const Text('Barrierefreiheitserklärung'),
+    content: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            header: true,
+            child: const Text(
+              'Stand: 29. August 2026',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
-        ),
-        actions: [
-          BugMeldenButton(
-            contextName: SupportKontexte.barrierefreiheitserklaerung,
-            appInfoGateway: appInfoGateway,
-            externalUrlGateway: externalUrlGateway,
+          const SizedBox(height: 12),
+          const Text(
+            'Taugt’s? wird nach den im Projekt festgelegten UX- und '
+            'Barrierefreiheitsregeln entwickelt. Die App unterstützt '
+            'verständliche Beschriftungen, ausreichend große Touch-Ziele, '
+            'große Systemschrift sowie wahrnehmbare Lade-, Fehler- und '
+            'Erfolgszustände.',
           ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Schließen'),
+          const SizedBox(height: 12),
+          Semantics(
+            header: true,
+            child: const Text(
+              'Bekannte Barrieren',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Die vollständige praktische Prüfung aller Abläufe mit '
+            'TalkBack, Schaltersteuerungen und unterschiedlichen '
+            'Android-Geräten ist noch nicht abgeschlossen. Die '
+            'Plattformintegration für Windows und Linux ist vorbereitet, '
+            'aber noch nicht vollständig umgesetzt. Externe GitHub-Seiten '
+            'liegen außerhalb des Einflussbereichs dieser App.',
+          ),
+          const SizedBox(height: 12),
+          Semantics(
+            header: true,
+            child: const Text(
+              'Barrieren melden',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Über „Bug melden“ kann eine Barriere mit installierter '
+            'App-Version und dem Kontext dieser Erklärung gemeldet werden.',
           ),
         ],
       ),
-    );
+    ),
+    actions: [
+      BugMeldenButton(
+        contextName: SupportKontexte.barrierefreiheitserklaerung,
+        appInfoGateway: appInfoGateway,
+        externalUrlGateway: externalUrlGateway,
+      ),
+      TextButton(
+        onPressed: () => Navigator.of(dialogContext).pop(),
+        child: const Text('Schließen'),
+      ),
+    ],
+  ),
+);
 
 Future<void> zeigeBugMeldung(
   BuildContext context, {
@@ -516,16 +507,12 @@ class _BugMeldungDialogState extends State<_BugMeldungDialog> {
           ? 'Keine zusätzliche Beschreibung angegeben.'
           : beschreibung,
     ].join('\n');
-    final uri = Uri.https(
-      'github.com',
-      '/$_appRepository/issues/new',
-      {
-        'template': 'app_bug_report.md',
-        'labels': 'bug',
-        'title': titel,
-        'body': inhalt,
-      },
-    );
+    final uri = Uri.https('github.com', '/$_appRepository/issues/new', {
+      'template': 'app_bug_report.md',
+      'labels': 'bug',
+      'title': titel,
+      'body': inhalt,
+    });
     try {
       await widget.externalUrlGateway.oeffnen(uri.toString());
       if (!mounted) return;
@@ -542,111 +529,111 @@ class _BugMeldungDialogState extends State<_BugMeldungDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-        title: const Text('Bug melden'),
-        content: SizedBox(
-          width: 520,
-          child: Form(
-            key: _formularKey,
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Builder(
-                    builder: (_) => _zeigtFehler && _fehlerart == null
-                        ? FormularFehlersammler(
-                            focusNode: _fehlerFokus,
-                            fehler: [('Fehlerart: Bitte auswählen', _typFokus)],
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                  Text('Kontext: ${widget.contextName}'),
-                  Text('Releaseversion: ${widget.appInfo.displayVersion}'),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    focusNode: _typFokus,
-                    initialValue: _fehlerart,
-                    hint: const Text('Bitte auswählen'),
-                    decoration: const InputDecoration(
-                      labelText: 'Fehlerart *',
-                      helperText: 'Bitte eine Fehlerart auswählen.',
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Barrierefreiheitsfehler',
-                        child: Text('Barrierefreiheitsfehler'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Darstellungsfehler',
-                        child: Text('Darstellungsfehler'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Funktionsfehler',
-                        child: Text('Funktionsfehler'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Sonstiges',
-                        child: Text('Sonstiges'),
-                      ),
-                    ],
-                    onChanged: _oeffnet
-                        ? null
-                        : (wert) => setState(() => _fehlerart = wert),
-                    validator: (wert) =>
-                        wert == null ? 'Bitte eine Fehlerart auswählen.' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _beschreibung,
-                    enabled: !_oeffnet,
-                    minLines: 4,
-                    maxLines: 8,
-                    maxLength: _beschreibungMaxLength,
-                    decoration: const InputDecoration(
-                      labelText: 'Beschreibung',
-                      helperText:
-                          'Keine Zugangsdaten oder persönlichen Daten eintragen.',
-                      alignLabelWithHint: true,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Semantics(
-                    container: true,
-                    child: const Text(
-                      'Zum Absenden ist eine Anmeldung bei GitHub erforderlich. '
-                      'Der vorbereitete Bericht kann auf GitHub geprüft und '
-                      'erst dort endgültig abgesendet werden.',
-                    ),
-                  ),
-                  if (_fehlermeldung != null) ...[
-                    const SizedBox(height: 12),
-                    Semantics(
-                      liveRegion: true,
-                      child: Text(
-                        _fehlermeldung!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 64),
-                ],
+    title: const Text('Bug melden'),
+    content: SizedBox(
+      width: 520,
+      child: Form(
+        key: _formularKey,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Builder(
+                builder: (_) => _zeigtFehler && _fehlerart == null
+                    ? FormularFehlersammler(
+                        focusNode: _fehlerFokus,
+                        fehler: [('Fehlerart: Bitte auswählen', _typFokus)],
+                      )
+                    : const SizedBox.shrink(),
               ),
-            ),
+              Text('Kontext: ${widget.contextName}'),
+              Text('Releaseversion: ${widget.appInfo.displayVersion}'),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                focusNode: _typFokus,
+                initialValue: _fehlerart,
+                hint: const Text('Bitte auswählen'),
+                decoration: const InputDecoration(
+                  labelText: 'Fehlerart *',
+                  helperText: 'Bitte eine Fehlerart auswählen.',
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'Barrierefreiheitsfehler',
+                    child: Text('Barrierefreiheitsfehler'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Darstellungsfehler',
+                    child: Text('Darstellungsfehler'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Funktionsfehler',
+                    child: Text('Funktionsfehler'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Sonstiges',
+                    child: Text('Sonstiges'),
+                  ),
+                ],
+                onChanged: _oeffnet
+                    ? null
+                    : (wert) => setState(() => _fehlerart = wert),
+                validator: (wert) =>
+                    wert == null ? 'Bitte eine Fehlerart auswählen.' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _beschreibung,
+                enabled: !_oeffnet,
+                minLines: 4,
+                maxLines: 8,
+                maxLength: _beschreibungMaxLength,
+                decoration: const InputDecoration(
+                  labelText: 'Beschreibung',
+                  helperText:
+                      'Keine Zugangsdaten oder persönlichen Daten eintragen.',
+                  alignLabelWithHint: true,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Semantics(
+                container: true,
+                child: const Text(
+                  'Zum Absenden ist eine Anmeldung bei GitHub erforderlich. '
+                  'Der vorbereitete Bericht kann auf GitHub geprüft und '
+                  'erst dort endgültig abgesendet werden.',
+                ),
+              ),
+              if (_fehlermeldung != null) ...[
+                const SizedBox(height: 12),
+                Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    _fehlermeldung!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 64),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: _oeffnet ? null : () => Navigator.of(context).pop(),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton.icon(
-            onPressed: _oeffnet ? null : _absenden,
-            icon: const Icon(Icons.open_in_new),
-            label: Text(_oeffnet ? 'Wird geöffnet …' : 'Auf GitHub prüfen'),
-          ),
-        ],
-      );
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: _oeffnet ? null : () => Navigator.of(context).pop(),
+        child: const Text('Abbrechen'),
+      ),
+      FilledButton.icon(
+        onPressed: _oeffnet ? null : _absenden,
+        icon: const Icon(Icons.open_in_new),
+        label: Text(_oeffnet ? 'Wird geöffnet …' : 'Auf GitHub prüfen'),
+      ),
+    ],
+  );
 }

@@ -71,76 +71,76 @@ class _BootstrapAppState extends State<BootstrapApp> {
 
   @override
   Widget build(BuildContext context) => FutureBuilder<_StartDaten>(
-        future: _start,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final daten = snapshot.data!;
-            return TaugtsApp(
-              profil: daten.profil,
-              profilRepository: daten.profilRepository,
-              bewertungsRepository: daten.bewertungsRepository,
-              kategorieRepository: daten.kategorieRepository,
-              kriteriensetRepository: daten.kriteriensetRepository,
-              sucheService: daten.sucheService,
-              auswertungsService: daten.auswertungsService,
-              statistikExportService: daten.statistikExportService,
-              exportService: daten.exportService,
-              exportZielService: daten.exportZielService,
-              binaerExportZielService: daten.binaerExportZielService,
-              idGenerator: daten.idGenerator,
-            );
-          }
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light,
-            title: 'Taugt’s?',
-            home: Scaffold(
-              appBar: AppBar(
-                actions: const [
-                  AppSupportMenu(contextName: SupportKontexte.appStart),
-                ],
-              ),
-              body: SafeArea(
-                child: ListView(
-                  padding: const EdgeInsets.all(24),
-                  children: [
-                    Semantics(
-                      image: true,
-                      label: 'Logo von Taugt’s?',
-                      child: Image.asset(
-                        'assets/icons/app_icon_source.png',
-                        width: 128,
-                        height: 128,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    if (snapshot.hasError) ...[
-                      const Text(
-                        'Die lokalen Daten konnten nicht geladen werden.',
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      Center(
-                        child: FilledButton.icon(
-                          onPressed: _erneutVersuchen,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Erneut versuchen'),
-                        ),
-                      ),
-                    ] else
-                      Center(
-                        child: Semantics(
-                          label: 'Taugt’s? wird vorbereitet',
-                          child: const CircularProgressIndicator(),
-                        ),
-                      ),
-                  ],
+    future: _start,
+    builder: (context, snapshot) {
+      if (snapshot.hasData) {
+        final daten = snapshot.data!;
+        return TaugtsApp(
+          profil: daten.profil,
+          profilRepository: daten.profilRepository,
+          bewertungsRepository: daten.bewertungsRepository,
+          kategorieRepository: daten.kategorieRepository,
+          kriteriensetRepository: daten.kriteriensetRepository,
+          sucheService: daten.sucheService,
+          auswertungsService: daten.auswertungsService,
+          statistikExportService: daten.statistikExportService,
+          exportService: daten.exportService,
+          exportZielService: daten.exportZielService,
+          binaerExportZielService: daten.binaerExportZielService,
+          idGenerator: daten.idGenerator,
+        );
+      }
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        title: 'Taugt’s?',
+        home: Scaffold(
+          appBar: AppBar(
+            actions: const [
+              AppSupportMenu(contextName: SupportKontexte.appStart),
+            ],
+          ),
+          body: SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.all(24),
+              children: [
+                Semantics(
+                  image: true,
+                  label: 'Logo von Taugt’s?',
+                  child: Image.asset(
+                    'assets/icons/app_icon_source.png',
+                    width: 128,
+                    height: 128,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 24),
+                if (snapshot.hasError) ...[
+                  const Text(
+                    'Die lokalen Daten konnten nicht geladen werden.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: FilledButton.icon(
+                      onPressed: _erneutVersuchen,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Erneut versuchen'),
+                    ),
+                  ),
+                ] else
+                  Center(
+                    child: Semantics(
+                      label: 'Taugt’s? wird vorbereitet',
+                      child: const CircularProgressIndicator(),
+                    ),
+                  ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       );
+    },
+  );
 }
 
 class _StartDaten {

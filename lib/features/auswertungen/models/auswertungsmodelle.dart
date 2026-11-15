@@ -69,10 +69,7 @@ class StatistikKennzahlen {
 }
 
 class StatistikZeitpunkt {
-  const StatistikZeitpunkt({
-    required this.zeitpunkt,
-    required this.schluessel,
-  });
+  const StatistikZeitpunkt({required this.zeitpunkt, required this.schluessel});
 
   final DateTime zeitpunkt;
   final String schluessel;
@@ -83,8 +80,11 @@ class StatistikZeitpunkt {
       case StatistikZeitraum.tag:
         return DateTime(zeit.year, zeit.month, zeit.day);
       case StatistikZeitraum.woche:
-        final wochenbeginn = DateTime(zeit.year, zeit.month, zeit.day)
-            .subtract(Duration(days: zeit.weekday - DateTime.monday));
+        final wochenbeginn = DateTime(
+          zeit.year,
+          zeit.month,
+          zeit.day,
+        ).subtract(Duration(days: zeit.weekday - DateTime.monday));
         return wochenbeginn;
       case StatistikZeitraum.monat:
         return DateTime(zeit.year, zeit.month);
@@ -95,10 +95,7 @@ class StatistikZeitpunkt {
 }
 
 class AuswertungsFilterOption {
-  const AuswertungsFilterOption({
-    required this.id,
-    required this.bezeichnung,
-  });
+  const AuswertungsFilterOption({required this.id, required this.bezeichnung});
 
   final String id;
   final String bezeichnung;
@@ -168,26 +165,29 @@ class StatistikRechnung {
         zeitpunkt: wert.zeitpunkt,
         schluessel: wert.beschreibung,
       ).runde(zeitraum);
-      gruppen.putIfAbsent(
-          (start, wert.serie, wert.beschreibung), () => []).add(wert.wert);
+      gruppen
+          .putIfAbsent((start, wert.serie, wert.beschreibung), () => [])
+          .add(wert.wert);
     }
 
-    final ergebnis = [
-      for (final eintrag in gruppen.entries)
-        Zeitwert(
-          zeitpunkt: eintrag.key.$1,
-          wert: summieren
-              ? eintrag.value.fold<double>(0, (summe, wert) => summe + wert)
-              : StatistikKennzahlen.ausWerten(eintrag.value).durchschnitt,
-          beschreibung: eintrag.key.$3,
-          serie: eintrag.key.$2,
-          kennzahlen:
-              summieren ? null : StatistikKennzahlen.ausWerten(eintrag.value),
-        ),
-    ]..sort((a, b) {
-        final zeit = a.zeitpunkt.compareTo(b.zeitpunkt);
-        return zeit != 0 ? zeit : a.beschreibung.compareTo(b.beschreibung);
-      });
+    final ergebnis =
+        [
+          for (final eintrag in gruppen.entries)
+            Zeitwert(
+              zeitpunkt: eintrag.key.$1,
+              wert: summieren
+                  ? eintrag.value.fold<double>(0, (summe, wert) => summe + wert)
+                  : StatistikKennzahlen.ausWerten(eintrag.value).durchschnitt,
+              beschreibung: eintrag.key.$3,
+              serie: eintrag.key.$2,
+              kennzahlen: summieren
+                  ? null
+                  : StatistikKennzahlen.ausWerten(eintrag.value),
+            ),
+        ]..sort((a, b) {
+          final zeit = a.zeitpunkt.compareTo(b.zeitpunkt);
+          return zeit != 0 ? zeit : a.beschreibung.compareTo(b.beschreibung);
+        });
     return ergebnis;
   }
 }
