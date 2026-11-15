@@ -12,9 +12,9 @@ class Profil {
   final DateTime geaendertAm;
 
   Profil mitAnzeigename(String? wert, DateTime geaendertAm) => Profil(
-        id: id,
-        anzeigename: wert,
-        erstelltAm: erstelltAm,
-        geaendertAm: geaendertAm,
-      );
+    id: id,
+    anzeigename: wert,
+    erstelltAm: erstelltAm,
+    geaendertAm: geaendertAm,
+  );
 }

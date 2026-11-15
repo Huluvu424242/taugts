@@ -46,7 +46,8 @@ class SqliteSucheService implements SucheService {
 
   List<Suchtreffer> _produkte(Suchfilter filter) {
     final text = '%${filter.text.trim().toLowerCase()}%';
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT DISTINCT o.id, o.name, p.marke, p.barcode, p.produktart
       FROM objekte o
       JOIN produkte p ON p.objekt_id = o.id
@@ -62,16 +63,18 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR pk.kategorie_id = ?)
       ORDER BY o.name COLLATE NOCASE
       LIMIT 500
-    ''', [
-      text,
-      text,
-      text,
-      text,
-      text,
-      text,
-      filter.kategorieId,
-      filter.kategorieId,
-    ]);
+    ''',
+      [
+        text,
+        text,
+        text,
+        text,
+        text,
+        text,
+        filter.kategorieId,
+        filter.kategorieId,
+      ],
+    );
     return [
       for (final row in rows)
         Suchtreffer(
@@ -87,7 +90,8 @@ class SqliteSucheService implements SucheService {
 
   List<Suchtreffer> _orte(Suchfilter filter) {
     final text = '%${filter.text.trim().toLowerCase()}%';
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT DISTINCT o.id, o.name, o.typ, o.adresse
       FROM orte o
       LEFT JOIN ort_kategorien ok ON ok.ort_id = o.id
@@ -102,16 +106,18 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR ok.kategorie_id = ?)
       ORDER BY o.name COLLATE NOCASE
       LIMIT 500
-    ''', [
-      text,
-      text,
-      text,
-      text,
-      text,
-      text,
-      filter.kategorieId,
-      filter.kategorieId,
-    ]);
+    ''',
+      [
+        text,
+        text,
+        text,
+        text,
+        text,
+        text,
+        filter.kategorieId,
+        filter.kategorieId,
+      ],
+    );
     return [
       for (final row in rows)
         Suchtreffer(
@@ -129,7 +135,8 @@ class SqliteSucheService implements SucheService {
     final text = '%${filter.text.trim().toLowerCase()}%';
     final von = filter.von?.toUtc().toIso8601String();
     final bis = filter.bis?.toUtc().toIso8601String();
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT DISTINCT e.id, e.typ,
         COALESCE(e.beginn, e.erstellt_am) AS zeit,
         o.name AS ort_name, COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) AS ort_id
@@ -145,21 +152,23 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR COALESCE(e.beginn, e.erstellt_am) <= ?)
       ORDER BY zeit DESC
       LIMIT 500
-    ''', [
-      text,
-      text,
-      text,
-      filter.erlebnistyp?.name,
-      filter.erlebnistyp?.name,
-      filter.ortId,
-      filter.ortId,
-      filter.produktId,
-      filter.produktId,
-      von,
-      von,
-      bis,
-      bis,
-    ]);
+    ''',
+      [
+        text,
+        text,
+        text,
+        filter.erlebnistyp?.name,
+        filter.erlebnistyp?.name,
+        filter.ortId,
+        filter.ortId,
+        filter.produktId,
+        filter.produktId,
+        von,
+        von,
+        bis,
+        bis,
+      ],
+    );
     return [
       for (final row in rows)
         Suchtreffer(
@@ -200,7 +209,8 @@ class SqliteSucheService implements SucheService {
     final text = '%${filter.text.trim().toLowerCase()}%';
     final von = filter.von?.toUtc().toIso8601String();
     final bis = filter.bis?.toUtc().toIso8601String();
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT DISTINCT b.id, b.erlebnis_id, ep.produkt_id,
         CASE WHEN pr.geloescht = 0 THEN p.name END AS produkt_name,
         COALESCE(b.kriterium_name, k.name, b.kriterium_id) AS kriterium_name,
@@ -228,24 +238,26 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR b.erstellt_am >= ?)
         AND (? IS NULL OR b.erstellt_am <= ?)
       ORDER BY b.erstellt_am DESC
-    ''', [
-      text,
-      text,
-      text,
-      text,
-      filter.produktId,
-      filter.produktId,
-      filter.ortId,
-      filter.ortId,
-      filter.herkunftProfilId,
-      filter.herkunftProfilId,
-      filter.kategorieId,
-      filter.kategorieId,
-      von,
-      von,
-      bis,
-      bis,
-    ]);
+    ''',
+      [
+        text,
+        text,
+        text,
+        text,
+        filter.produktId,
+        filter.produktId,
+        filter.ortId,
+        filter.ortId,
+        filter.herkunftProfilId,
+        filter.herkunftProfilId,
+        filter.kategorieId,
+        filter.kategorieId,
+        von,
+        von,
+        bis,
+        bis,
+      ],
+    );
     return [
       for (final row in rows)
         Suchtreffer(
@@ -272,7 +284,8 @@ class SqliteSucheService implements SucheService {
     final text = '%${filter.text.trim().toLowerCase()}%';
     final von = filter.von?.toUtc().toIso8601String();
     final bis = filter.bis?.toUtc().toIso8601String();
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT DISTINCT b.id, b.erlebnis_id, ob.ort_id,
         CASE WHEN o.geloescht = 0 THEN o.name END AS ort_name, o.typ,
         e.typ AS erlebnis_typ,
@@ -293,21 +306,23 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR ob.bewertet_am >= ?)
         AND (? IS NULL OR ob.bewertet_am <= ?)
       ORDER BY ob.bewertet_am DESC
-    ''', [
-      text,
-      text,
-      text,
-      filter.ortId,
-      filter.ortId,
-      filter.herkunftProfilId,
-      filter.herkunftProfilId,
-      filter.kategorieId,
-      filter.kategorieId,
-      von,
-      von,
-      bis,
-      bis,
-    ]);
+    ''',
+      [
+        text,
+        text,
+        text,
+        filter.ortId,
+        filter.ortId,
+        filter.herkunftProfilId,
+        filter.herkunftProfilId,
+        filter.kategorieId,
+        filter.kategorieId,
+        von,
+        von,
+        bis,
+        bis,
+      ],
+    );
     return [
       for (final row in rows)
         if (_passtOrtshistorienart(row['typ']! as String, filter.historienart))
@@ -339,7 +354,8 @@ class SqliteSucheService implements SucheService {
     final text = '%${filter.text.trim().toLowerCase()}%';
     final von = filter.von?.toUtc().toIso8601String();
     final bis = filter.bis?.toUtc().toIso8601String();
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT DISTINCT pb.id, pb.erlebnis_id, pb.produkt_id, pb.ort_id,
         pb.beobachtet_am, pb.betrag_minor, pb.waehrung,
         CASE WHEN pr.geloescht = 0 THEN p.name END AS produkt_name,
@@ -360,21 +376,23 @@ class SqliteSucheService implements SucheService {
         AND (? IS NULL OR pb.beobachtet_am >= ?)
         AND (? IS NULL OR pb.beobachtet_am <= ?)
       ORDER BY pb.beobachtet_am DESC
-    ''', [
-      text,
-      text,
-      text,
-      filter.produktId,
-      filter.produktId,
-      filter.ortId,
-      filter.ortId,
-      filter.kategorieId,
-      filter.kategorieId,
-      von,
-      von,
-      bis,
-      bis,
-    ]);
+    ''',
+      [
+        text,
+        text,
+        text,
+        filter.produktId,
+        filter.produktId,
+        filter.ortId,
+        filter.ortId,
+        filter.kategorieId,
+        filter.kategorieId,
+        von,
+        von,
+        bis,
+        bis,
+      ],
+    );
     return [
       for (final row in rows)
         Suchtreffer(

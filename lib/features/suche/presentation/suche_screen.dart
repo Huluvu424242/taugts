@@ -53,181 +53,176 @@ class _SucheScreenState extends State<SucheScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Suche'),
-          actions: const [
-            AppSupportMenu(contextName: SupportKontexte.suche),
-          ],
-        ),
-        body: SafeArea(
-          child: ListView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-            children: [
-              TextField(
-                controller: _text,
-                textInputAction: TextInputAction.search,
-                decoration: InputDecoration(
-                  labelText: 'Suchbegriff',
-                  hintText: 'Name, Marke, Kategorie, Barcode oder Schlagwort',
-                  suffixIcon: IconButton(
-                    tooltip: 'Suchbegriff löschen',
-                    onPressed: () {
-                      _text.clear();
-                      _suchen();
-                    },
-                    icon: const Icon(Icons.clear),
-                  ),
-                ),
-                onSubmitted: (_) => _suchen(),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<Suchziel>(
-                initialValue: _ziel,
-                decoration: const InputDecoration(labelText: 'Suchbereich'),
-                items: [
-                  for (final ziel in Suchziel.values)
-                    DropdownMenuItem(
-                      value: ziel,
-                      child: Text(_zielLabel(ziel)),
-                    ),
-                ],
-                onChanged: (wert) {
-                  if (wert != null) _ziel = wert;
+    appBar: AppBar(
+      title: const Text('Suche'),
+      actions: const [AppSupportMenu(contextName: SupportKontexte.suche)],
+    ),
+    body: SafeArea(
+      child: ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+        children: [
+          TextField(
+            controller: _text,
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              labelText: 'Suchbegriff',
+              hintText: 'Name, Marke, Kategorie, Barcode oder Schlagwort',
+              suffixIcon: IconButton(
+                tooltip: 'Suchbegriff löschen',
+                onPressed: () {
+                  _text.clear();
                   _suchen();
                 },
+                icon: const Icon(Icons.clear),
               ),
-              if (_ziel == Suchziel.erlebnisse) ...[
-                const SizedBox(height: 12),
-                DropdownButtonFormField<Erlebnistyp?>(
-                  initialValue: _erlebnistyp,
-                  decoration: const InputDecoration(labelText: 'Erlebnistyp'),
-                  items: const [
-                    DropdownMenuItem(value: null, child: Text('Alle Typen')),
-                    DropdownMenuItem(
-                      value: Erlebnistyp.restaurantbesuch,
-                      child: Text('Restaurantbesuch'),
-                    ),
-                    DropdownMenuItem(
-                      value: Erlebnistyp.einkauf,
-                      child: Text('Einkauf'),
-                    ),
-                  ],
-                  onChanged: (wert) {
-                    _erlebnistyp = wert;
-                    _suchen();
-                  },
+            ),
+            onSubmitted: (_) => _suchen(),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<Suchziel>(
+            initialValue: _ziel,
+            decoration: const InputDecoration(labelText: 'Suchbereich'),
+            items: [
+              for (final ziel in Suchziel.values)
+                DropdownMenuItem(value: ziel, child: Text(_zielLabel(ziel))),
+            ],
+            onChanged: (wert) {
+              if (wert != null) _ziel = wert;
+              _suchen();
+            },
+          ),
+          if (_ziel == Suchziel.erlebnisse) ...[
+            const SizedBox(height: 12),
+            DropdownButtonFormField<Erlebnistyp?>(
+              initialValue: _erlebnistyp,
+              decoration: const InputDecoration(labelText: 'Erlebnistyp'),
+              items: const [
+                DropdownMenuItem(value: null, child: Text('Alle Typen')),
+                DropdownMenuItem(
+                  value: Erlebnistyp.restaurantbesuch,
+                  child: Text('Restaurantbesuch'),
+                ),
+                DropdownMenuItem(
+                  value: Erlebnistyp.einkauf,
+                  child: Text('Einkauf'),
                 ),
               ],
-              if (_ziel == Suchziel.historie) ...[
-                const SizedBox(height: 12),
-                DropdownButtonFormField<Historienart?>(
-                  initialValue: _historienart,
-                  decoration: const InputDecoration(labelText: 'Historienart'),
-                  items: [
-                    const DropdownMenuItem(
-                      value: null,
-                      child: Text('Alle historischen Daten'),
-                    ),
-                    for (final art in Historienart.values)
-                      DropdownMenuItem(
-                        value: art,
-                        child: Text(_historieLabel(art)),
-                      ),
-                  ],
-                  onChanged: (wert) {
-                    _historienart = wert;
-                    _suchen();
-                  },
+              onChanged: (wert) {
+                _erlebnistyp = wert;
+                _suchen();
+              },
+            ),
+          ],
+          if (_ziel == Suchziel.historie) ...[
+            const SizedBox(height: 12),
+            DropdownButtonFormField<Historienart?>(
+              initialValue: _historienart,
+              decoration: const InputDecoration(labelText: 'Historienart'),
+              items: [
+                const DropdownMenuItem(
+                  value: null,
+                  child: Text('Alle historischen Daten'),
                 ),
+                for (final art in Historienart.values)
+                  DropdownMenuItem(
+                    value: art,
+                    child: Text(_historieLabel(art)),
+                  ),
               ],
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  Chip(label: Text('Bereich: ${_zielLabel(_ziel)}')),
-                  if (_erlebnistyp != null && _ziel == Suchziel.erlebnisse)
-                    Chip(label: Text('Typ: ${_erlebnistyp!.name}')),
-                  if (_historienart != null && _ziel == Suchziel.historie)
-                    Chip(label: Text('Art: ${_historieLabel(_historienart!)}')),
-                ],
-              ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: _suchen,
-                icon: const Icon(Icons.search),
-                label: const Text('Suchen'),
-              ),
-              const SizedBox(height: 20),
-              Semantics(
-                header: true,
-                child: Text(
-                  'Ergebnisse',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              if (_treffer != null)
-                FutureBuilder<List<Suchtreffer>>(
-                  future: _treffer,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Semantics(
-                        liveRegion: true,
-                        child: const Text(
-                          'Die Suche konnte nicht ausgeführt werden.',
-                        ),
-                      );
-                    }
-                    if (!snapshot.hasData) {
-                      return Semantics(
-                        label: 'Suche läuft',
-                        child: const LinearProgressIndicator(),
-                      );
-                    }
-                    if (snapshot.data!.isEmpty) {
-                      return const Padding(
-                        padding: EdgeInsets.only(top: 16),
-                        child: Text('Keine Treffer für die aktiven Filter.'),
-                      );
-                    }
-                    return Column(
-                      children: [
-                        for (final treffer in snapshot.data!)
-                          ListTile(
-                            title: Text(treffer.titel),
-                            subtitle: Text(treffer.untertitel),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () => Navigator.of(context).push<void>(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    SuchtrefferDetailScreen(treffer: treffer),
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
+              onChanged: (wert) {
+                _historienart = wert;
+                _suchen();
+              },
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              Chip(label: Text('Bereich: ${_zielLabel(_ziel)}')),
+              if (_erlebnistyp != null && _ziel == Suchziel.erlebnisse)
+                Chip(label: Text('Typ: ${_erlebnistyp!.name}')),
+              if (_historienart != null && _ziel == Suchziel.historie)
+                Chip(label: Text('Art: ${_historieLabel(_historienart!)}')),
             ],
           ),
-        ),
-      );
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _suchen,
+            icon: const Icon(Icons.search),
+            label: const Text('Suchen'),
+          ),
+          const SizedBox(height: 20),
+          Semantics(
+            header: true,
+            child: Text(
+              'Ergebnisse',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+          if (_treffer != null)
+            FutureBuilder<List<Suchtreffer>>(
+              future: _treffer,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Semantics(
+                    liveRegion: true,
+                    child: const Text(
+                      'Die Suche konnte nicht ausgeführt werden.',
+                    ),
+                  );
+                }
+                if (!snapshot.hasData) {
+                  return Semantics(
+                    label: 'Suche läuft',
+                    child: const LinearProgressIndicator(),
+                  );
+                }
+                if (snapshot.data!.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 16),
+                    child: Text('Keine Treffer für die aktiven Filter.'),
+                  );
+                }
+                return Column(
+                  children: [
+                    for (final treffer in snapshot.data!)
+                      ListTile(
+                        title: Text(treffer.titel),
+                        subtitle: Text(treffer.untertitel),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => Navigator.of(context).push<void>(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                SuchtrefferDetailScreen(treffer: treffer),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+        ],
+      ),
+    ),
+  );
 
   String _zielLabel(Suchziel ziel) => switch (ziel) {
-        Suchziel.alle => 'Alle',
-        Suchziel.produkte => 'Produkte',
-        Suchziel.orte => 'Orte',
-        Suchziel.erlebnisse => 'Erlebnisse',
-        Suchziel.historie => 'Bewertungen und Preise',
-      };
+    Suchziel.alle => 'Alle',
+    Suchziel.produkte => 'Produkte',
+    Suchziel.orte => 'Orte',
+    Suchziel.erlebnisse => 'Erlebnisse',
+    Suchziel.historie => 'Bewertungen und Preise',
+  };
 
   String _historieLabel(Historienart art) => switch (art) {
-        Historienart.produktbewertung => 'Produktbewertungen',
-        Historienart.gaststaettenbewertung => 'Gaststättenbewertungen',
-        Historienart.geschaeftsbewertung => 'Geschäftsbewertungen',
-        Historienart.preisbeobachtung => 'Preisbeobachtungen',
-      };
+    Historienart.produktbewertung => 'Produktbewertungen',
+    Historienart.gaststaettenbewertung => 'Gaststättenbewertungen',
+    Historienart.geschaeftsbewertung => 'Geschäftsbewertungen',
+    Historienart.preisbeobachtung => 'Preisbeobachtungen',
+  };
 }
 
 class SuchtrefferDetailScreen extends StatelessWidget {
@@ -263,9 +258,7 @@ class SuchtrefferDetailScreen extends StatelessWidget {
             if (treffer.produktId != null || treffer.produktName != null)
               Text('Produkt: ${treffer.produktName ?? 'Nicht zugeordnet'}'),
             Text('Ort: $ortName'),
-            Text(
-              'Erlebnis: ${_erlebnisText(context, ortName, zeitpunkt)}',
-            ),
+            Text('Erlebnis: ${_erlebnisText(context, ortName, zeitpunkt)}'),
             if (zeitpunkt != null)
               Text('Zeitpunkt: ${_datumZeit(context, zeitpunkt)}'),
             const SizedBox(height: 16),
