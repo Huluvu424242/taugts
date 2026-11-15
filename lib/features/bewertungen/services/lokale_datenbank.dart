@@ -166,15 +166,23 @@ class LokaleDatenbank {
   /// Bestehende Preise haben keine verlässliche historische Gebindegröße:
   /// die neuen Spalten bleiben ausdrücklich NULL, statt alte Werte zu raten.
   void _migriereVon4Auf5() {
-    verbindung.execute(
-      'ALTER TABLE preisbeobachtungen ADD COLUMN bezugsmenge INTEGER '
-      'CHECK (bezugsmenge IS NULL OR bezugsmenge > 0)',
-    );
-    verbindung.execute(
-      "ALTER TABLE preisbeobachtungen ADD COLUMN bezugseinheit TEXT "
-      "CHECK (bezugseinheit IS NULL OR "
-      "bezugseinheit IN ('ml', 'g', 'stueck'))",
-    );
+    final spalten = verbindung
+        .select('PRAGMA table_info(preisbeobachtungen)')
+        .map((row) => row['name'] as String)
+        .toSet();
+    if (!spalten.contains('bezugsmenge')) {
+      verbindung.execute(
+        'ALTER TABLE preisbeobachtungen ADD COLUMN bezugsmenge INTEGER '
+        'CHECK (bezugsmenge IS NULL OR bezugsmenge > 0)',
+      );
+    }
+    if (!spalten.contains('bezugseinheit')) {
+      verbindung.execute(
+        "ALTER TABLE preisbeobachtungen ADD COLUMN bezugseinheit TEXT "
+        "CHECK (bezugseinheit IS NULL OR "
+        "bezugseinheit IN ('ml', 'g', 'stueck'))",
+      );
+    }
   }
 
   void _stelleStandardkriterienBereit() {
