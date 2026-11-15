@@ -84,9 +84,8 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
         children: [
           const Text(
             'Historische Beobachtungen, keine aktuellen Marktpreise. '
-            'Einheitspreise verwenden die gespeicherte Produktfüllmenge; '
-            'bei nachträglich veränderten Stammdaten kann sie vom '
-            'früheren Gebinde abweichen.',
+            'Einheitspreise verwenden die beim Kauf erfasste Bezugsmenge. '
+            'Bei historischen Käufen ohne Menge wird kein Einheitspreis berechnet.'
           ),
           const SizedBox(height: 12),
           FutureBuilder<AuswertungsFilterOptionen>(
@@ -229,7 +228,7 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
                     for (final eintrag in snapshot.data!)
                       Builder(
                         builder: (context) {
-                          final wert = eintrag.euroProLiter;
+                          final wert = eintrag.einheitspreis;
                           if (wert != null && wert != vorher) rang++;
                           if (wert != null) vorher = wert;
                           return Card(
@@ -242,12 +241,12 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
                               subtitle: Text(
                                 '${eintrag.zeitpunkt.toLocal().toString().substring(0, 16)} · '
                                 '${eintrag.preis.toStringAsFixed(2)} ${eintrag.waehrung}'
-                                '${eintrag.mengeMl == null ? '' : ' / ${eintrag.mengeMl} ml'}',
+                                '${eintrag.mengeMl == null ? '' : ' / ${eintrag.mengeMl} ${eintrag.bezugseinheit ?? ''}'}',
                               ),
                               trailing: Text(
                                 wert == null
                                     ? 'Nicht vergleichbar'
-                                    : '${wert.toStringAsFixed(2)} €/l',
+                                    : '${wert.toStringAsFixed(2)} ${eintrag.einheitspreisEinheit}',
                               ),
                               isThreeLine: wert == null,
                               onTap: wert == null

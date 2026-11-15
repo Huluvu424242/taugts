@@ -206,6 +206,8 @@ class ExportService {
               'ortId': z['ort_id'],
               'betragMinor': z['betrag_minor'],
               'waehrung': z['waehrung'],
+              'bezugsMenge': z['bezugsmenge'],
+              'bezugsEinheit': z['bezugseinheit'],
               'beobachtetAm': z['beobachtet_am'],
               'erstelltAm': z['erstellt_am'],
               'geaendertAm': z['geaendert_am'],

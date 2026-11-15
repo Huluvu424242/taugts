@@ -4,7 +4,7 @@
 
 Öffnen Sie unter **Auswertungen** den **Produktvergleich**. Suchen und wählen Sie genau ein bestehendes Produkt. Standardmäßig werden **alle Zeitpunkte** und **nur Gaststätten** berücksichtigt; alternativ können Sie Geschäfte oder beide Ortstypen und einen eigenen Zeitraum auswählen. Die Preisrangliste verwendet für jeden Ort **ausschließlich den letzten dokumentierten Kauf innerhalb des Zeitraums**, nicht den niedrigsten historischen Preis. Die Sortierung erfolgt aufsteigend nach **Euro pro Liter**, nicht nach dem Einzelpreis. Nicht vergleichbare Währungen und fehlende oder ungültige Füllmengen erhalten keinen Rang.
 
-**Wichtig:** Der historische Preis wird je Kauf gespeichert, die zur Umrechnung verwendete Füllmenge stammt derzeit aus den **aktuellen Produktstammdaten**. Wenn sich Füllmengen historisch geändert haben, ist der berechnete Vergleichspreis deshalb nicht notwendigerweise historisch korrekt. Prüfen Sie vor einer Entscheidung, ob die Produktvariante zum früheren Kauf passt. Die Liste zeigt nur eigene Preisbeobachtungen und keine aktuellen Ladenpreise oder Verfügbarkeiten.
+**Wichtig:** Die Bezugsmenge und Einheit werden bei der Erfassung des Kaufs historisch gespeichert (ml, g oder Stück). Spätere Produktänderungen verändern bereits gespeicherte Einheitspreise nicht. Für Altdaten ohne historische Mengendaten gibt es keinen Preisrang. Mengen unterschiedlicher Dimensionen sind nicht miteinander vergleichbar. Die Liste zeigt nur eigene Preisbeobachtungen und keine aktuellen Ladenpreise oder Verfügbarkeiten.
 
 Die Auswertungen arbeiten vollständig offline auf den lokal gespeicherten historischen Datensätzen.
 

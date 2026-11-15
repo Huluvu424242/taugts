@@ -519,6 +519,14 @@
           "type": "integer",
           "minimum": 0
         },
+        "bezugsMenge": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "bezugsEinheit": {
+          "type": ["string", "null"],
+          "enum": ["ml", "g", "stueck", null]
+        },
         "waehrung": {
           "type": "string",
           "pattern": "^[A-Z]{3}$"
