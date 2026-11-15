@@ -79,6 +79,37 @@ void main() {
       const ProduktvergleichFilter(produktId: 'bier'),
     );
     expect(nachStammdatenAenderung.single.euroProLiter, 8);
+    // Die Preise bleiben je Mengendimension vergleichbar; Anzahl der
+    // Gebinde ist nicht Teil der gespeicherten Menge je Gebinde.
+    db.verbindung.execute(
+      "UPDATE preisbeobachtungen SET bezugsmenge = 250, bezugseinheit = 'g' "
+      "WHERE id = 'preis-zwei'",
+    );
+    db.verbindung.execute(
+      "UPDATE erlebnispositionen SET anzahl = 2 WHERE id = 'pos-zwei'",
+    );
+    final gramm = await service.ladeLetztePreise(
+      const ProduktvergleichFilter(produktId: 'bier'),
+    );
+    expect(gramm.single.euroProLiter, isNull);
+    expect(gramm.single.einheitspreis, 8);
+    expect(gramm.single.einheitspreisEinheit, '€/kg');
+    db.verbindung.execute(
+      "UPDATE preisbeobachtungen SET bezugsmenge = 1, "
+      "bezugseinheit = 'stueck' WHERE id = 'preis-zwei'",
+    );
+    final stueck = await service.ladeLetztePreise(
+      const ProduktvergleichFilter(produktId: 'bier'),
+    );
+    expect(stueck.single.einheitspreis, 2);
+    expect(stueck.single.einheitspreisEinheit, '€/Stück');
+    db.verbindung.execute(
+      "UPDATE preisbeobachtungen SET bezugsmenge = 500, "
+      "bezugseinheit = 'ml' WHERE id = 'preis-zwei'",
+    );
+    db.verbindung.execute(
+      "UPDATE erlebnispositionen SET anzahl = 1 WHERE id = 'pos-zwei'",
+    );
 
     final beide = await service.ladeLetztePreise(
       const ProduktvergleichFilter(
