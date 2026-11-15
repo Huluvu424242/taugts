@@ -68,9 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (geaendert != null && mounted) {
       setState(() => _profil = geaendert);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profil gespeichert.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Profil gespeichert.')));
     }
   }
 
@@ -110,10 +109,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (repository == null || idGenerator == null) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => KriterienScreen(
-          repository: repository,
-          idGenerator: idGenerator,
-        ),
+        builder: (_) =>
+            KriterienScreen(repository: repository, idGenerator: idGenerator),
       ),
     );
   }
@@ -184,23 +181,23 @@ class _HomeScreenState extends State<HomeScreen> {
     required IconData icon,
     required String label,
     required VoidCallback? onPressed,
-  }) =>
-      SizedBox(
-        width: width,
-        child: OutlinedButton.icon(
-          onPressed: onPressed,
-          icon: Icon(icon),
-          label: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Text(label, textAlign: TextAlign.center),
-          ),
-        ),
-      );
+  }) => SizedBox(
+    width: width,
+    child: OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon),
+      label: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Text(label, textAlign: TextAlign.center),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     final profil = _profil;
-    final repositoryVerfuegbar = widget.bewertungsRepository != null &&
+    final repositoryVerfuegbar =
+        widget.bewertungsRepository != null &&
         widget.idGenerator != null &&
         profil != null;
     return Scaffold(
@@ -290,10 +287,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   }
                   final aktive = snapshot.data!
-                      .where((e) =>
-                          e.beginn != null &&
-                          !e.beginn!.isAfter(DateTime.now()) &&
-                          (e.ende == null || !e.ende!.isBefore(DateTime.now())))
+                      .where(
+                        (e) =>
+                            e.beginn != null &&
+                            !e.beginn!.isAfter(DateTime.now()) &&
+                            (e.ende == null ||
+                                !e.ende!.isBefore(DateTime.now())),
+                      )
                       .toList(growable: false);
                   if (aktive.isEmpty) return const SizedBox.shrink();
                   final genauEins = aktive.length == 1;
@@ -301,8 +301,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   final label = erlebnis?.typ == Erlebnistyp.restaurantbesuch
                       ? 'Bestellung öffnen'
                       : erlebnis?.typ == Erlebnistyp.einkauf
-                          ? 'Einkauf öffnen'
-                          : 'Aktive Erlebnisse auswählen';
+                      ? 'Einkauf öffnen'
+                      : 'Aktive Erlebnisse auswählen';
                   return Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -322,8 +322,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           Text(
                             genauEins
                                 ? erlebnis!.typ == Erlebnistyp.restaurantbesuch
-                                    ? 'Restaurantbesuch'
-                                    : 'Einkauf'
+                                      ? 'Restaurantbesuch'
+                                      : 'Einkauf'
                                 : 'Wähle aus, welches Erlebnis du fortsetzen möchtest.',
                           ),
                           const SizedBox(height: 12),
@@ -363,7 +363,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.inventory_2_outlined,
                       label: 'Produkte',
-                      onPressed: widget.bewertungsRepository != null &&
+                      onPressed:
+                          widget.bewertungsRepository != null &&
                               widget.idGenerator != null
                           ? _produkteOeffnen
                           : null,
@@ -372,7 +373,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.place_outlined,
                       label: 'Orte',
-                      onPressed: widget.bewertungsRepository != null &&
+                      onPressed:
+                          widget.bewertungsRepository != null &&
                               widget.idGenerator != null
                           ? _orteOeffnen
                           : null,
@@ -393,7 +395,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.import_export,
                       label: 'Import/Export',
-                      onPressed: widget.exportService != null &&
+                      onPressed:
+                          widget.exportService != null &&
                               widget.exportZielService != null
                           ? _datenaustauschOeffnen
                           : null,
@@ -402,13 +405,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: breite,
                       icon: Icons.settings_outlined,
                       label: 'Einstellungen',
-                      onPressed: widget.bewertungsRepository != null &&
+                      onPressed:
+                          widget.bewertungsRepository != null &&
                               widget.idGenerator != null
                           ? _kriterienOeffnen
                           : () => _infoOeffnen(
-                                'Einstellungen',
-                                'Einstellungen stehen nach vollständigem App-Start zur Verfügung.',
-                              ),
+                              'Einstellungen',
+                              'Einstellungen stehen nach vollständigem App-Start zur Verfügung.',
+                            ),
                     ),
                   ],
                 );
@@ -444,38 +448,38 @@ class _NochNichtVerfuegbarScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(titel)),
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 560),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.info_outline, size: 48),
-                    const SizedBox(height: 16),
-                    Semantics(
-                      header: true,
-                      child: Text(
-                        '$titel noch nicht verfügbar',
-                        style: Theme.of(context).textTheme.titleLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(beschreibung, textAlign: TextAlign.center),
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Zurück'),
-                    ),
-                  ],
+    appBar: AppBar(title: Text(titel)),
+    body: SafeArea(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.info_outline, size: 48),
+                const SizedBox(height: 16),
+                Semantics(
+                  header: true,
+                  child: Text(
+                    '$titel noch nicht verfügbar',
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                Text(beschreibung, textAlign: TextAlign.center),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Zurück'),
+                ),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }

@@ -188,8 +188,7 @@ class ImportStrategieService {
     return ImportIdentitaetsKonflikt(
       sammlung: sammlung,
       id: importWert['id'] as String,
-      nachricht:
-          'Dieselbe stabile ID verweist auf einen anderen historischen Kontext.',
+      nachricht: 'Dieselbe stabile ID verweist auf einen anderen historischen Kontext.',
     );
   }
 
@@ -226,12 +225,11 @@ class ImportStrategieService {
   Map<String, Map<String, Object?>> _nachId(
     String sammlung,
     List<Map<String, Object?>> werte,
-  ) =>
-      {
-        for (final wert in werte)
-          if (_identitaet(sammlung, wert).isNotEmpty)
-            _identitaet(sammlung, wert): wert,
-      };
+  ) => {
+    for (final wert in werte)
+      if (_identitaet(sammlung, wert).isNotEmpty)
+        _identitaet(sammlung, wert): wert,
+  };
 
   String _identitaet(String sammlung, Map<String, Object?> wert) =>
       switch (sammlung) {
@@ -247,11 +245,10 @@ class ImportStrategieService {
   List<Map<String, Object?>> _liste(
     Map<String, Object?> dokument,
     String name,
-  ) =>
-      ((dokument[name] as List?) ?? const [])
-          .whereType<Map>()
-          .map((e) => Map<String, Object?>.from(e))
-          .toList();
+  ) => ((dokument[name] as List?) ?? const [])
+      .whereType<Map>()
+      .map((e) => Map<String, Object?>.from(e))
+      .toList();
 
   bool _gleich(Object? a, Object? b) {
     if (a is Map && b is Map) {

@@ -106,9 +106,9 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   }
 
   String get _typLabel => switch (_typ) {
-        Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
-        Erlebnistyp.einkauf => 'Einkauf',
-      };
+    Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
+    Erlebnistyp.einkauf => 'Einkauf',
+  };
 
   Future<void> _ortWaehlen() async {
     final ort = await Navigator.of(context).push<Ort>(
@@ -215,12 +215,13 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       SnackBar(
         content: Text(
           fehler.any(
-            (eintrag) => eintrag.startsWith('Bitte einen Ort mit Besuchszeit'),
-          )
+                (eintrag) =>
+                    eintrag.startsWith('Bitte einen Ort mit Besuchszeit'),
+              )
               ? 'Bitte einen Inhalt für das Erlebnis erfassen.'
               : fehler.any((eintrag) => eintrag.contains('Ortsbewertung'))
-                  ? 'Bitte die Ortsbewertung prüfen.'
-                  : 'Bitte Zeitangaben prüfen.',
+              ? 'Bitte die Ortsbewertung prüfen.'
+              : 'Bitte Zeitangaben prüfen.',
         ),
       ),
     );
@@ -294,9 +295,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     }
   }
 
-  Future<void> _persistieren({
-    required bool schliessen,
-  }) async {
+  Future<void> _persistieren({required bool schliessen}) async {
     if (_speichert) return;
     final erlebnis = _erlebnisAusEingaben();
     if (!await _validiere(erlebnis) || !mounted) return;
@@ -313,11 +312,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         _gespeichertesErlebnis = erlebnis;
         _speichert = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Erlebnis gespeichert.'),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: const Text('Erlebnis gespeichert.')));
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -351,9 +347,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     });
   }
 
-  Future<void> _positionOeffnen([
-    ErlebnispositionMitProdukt? vorhanden,
-  ]) async {
+  Future<void> _positionOeffnen([ErlebnispositionMitProdukt? vorhanden]) async {
     final erlebnis = _erlebnisAusEingaben();
     if (!await _validiere(erlebnis, pruefeInhalt: false) || !mounted) return;
     final gespeichert = await Navigator.of(context).push<bool>(
@@ -518,8 +512,9 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
                   builder: (context, snapshot) {
                     final bewertet =
                         snapshot.hasData && snapshot.data!.isNotEmpty;
-                    final status =
-                        bewertet ? 'Bewertet' : 'Noch nicht bewertet';
+                    final status = bewertet
+                        ? 'Bewertet'
+                        : 'Noch nicht bewertet';
                     return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -554,10 +549,9 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
 
   String _positionsZusammenfassung(
     List<ErlebnispositionMitProdukt> eintraege,
-  ) =>
-      eintraege
-          .map((e) => '${e.position.anzahl} × ${e.produkt.anzeigetitel}')
-          .join(' · ');
+  ) => eintraege
+      .map((e) => '${e.position.anzahl} × ${e.produkt.anzeigetitel}')
+      .join(' · ');
 
   Widget _einkaufssumme(List<ErlebnispositionMitProdukt> eintraege) {
     final mitPreis = eintraege.where((e) => e.preis != null).toList();
@@ -610,208 +604,208 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
 
   @override
   Widget build(BuildContext context) => PopScope(
-        canPop: _darfSchliessen,
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) _zurueckNavigieren();
-        },
-        child: _baueScaffold(context),
-      );
+    canPop: _darfSchliessen,
+    onPopInvokedWithResult: (didPop, _) {
+      if (!didPop) _zurueckNavigieren();
+    },
+    child: _baueScaffold(context),
+  );
 
   Widget _baueScaffold(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(_typLabel),
-          actions: [
-            AppSupportMenu(
-              contextName: SupportKontexte.erlebnisGrunddaten(
-                typ: _typLabel,
-                bearbeiten: widget.erlebnis != null,
+    appBar: AppBar(
+      title: Text(_typLabel),
+      actions: [
+        AppSupportMenu(
+          contextName: SupportKontexte.erlebnisGrunddaten(
+            typ: _typLabel,
+            bearbeiten: widget.erlebnis != null,
+          ),
+        ),
+      ],
+    ),
+    body: SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
+        children: [
+          if (_zeitfehler.isNotEmpty)
+            FormularFehlersammler(
+              key: _fehlerKey,
+              focusNode: _fehlerFokus,
+              fehler: [
+                for (final fehler in _zeitfehler)
+                  (fehler, _fokusFuerFehler(fehler)),
+              ],
+            ),
+          TextButton.icon(
+            onPressed: _ortWaehlen,
+            icon: Icon(
+              _istRestaurant
+                  ? Icons.restaurant_outlined
+                  : Icons.shopping_bag_outlined,
+            ),
+            label: Text(_ortLabel),
+          ),
+          const SizedBox(height: 16),
+          Semantics(
+            header: true,
+            child: Text(
+              'Zeitraum',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          TextButton.icon(
+            onPressed: _ort == null
+                ? null
+                : () => setState(() {
+                    _beginn = DateTime.now();
+                    _ende = null;
+                  }),
+            icon: const Icon(Icons.today_outlined),
+            label: const Text('Spontanen Besuch jetzt erfassen'),
+          ),
+          if (_ort == null)
+            const Text(
+              'Für einen spontanen Besuch zuerst einen Ort auswählen.',
+            ),
+          ListTile(
+            key: const ValueKey('erlebnis-beginn'),
+            contentPadding: EdgeInsets.zero,
+            focusNode: _beginnFokus,
+            title: const Text('Beginn (optional)'),
+            subtitle: Text(_datumZeitText(context, _beginn)),
+            trailing: const Icon(Icons.login),
+            onTap: () => _tatsaechlicheZeitWaehlen(beginn: true),
+          ),
+          ListTile(
+            key: const ValueKey('erlebnis-ende'),
+            contentPadding: EdgeInsets.zero,
+            focusNode: _endeFokus,
+            title: const Text('Ende (optional)'),
+            subtitle: Text(_datumZeitText(context, _ende)),
+            trailing: const Icon(Icons.logout),
+            onTap: () => _tatsaechlicheZeitWaehlen(beginn: false),
+          ),
+          TextField(
+            controller: _notiz,
+            maxLength: 1000,
+            maxLines: 4,
+            decoration: const InputDecoration(labelText: 'Notiz (optional)'),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    _istEinkauf ? 'Einkaufsliste' : 'Bestellung',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: _speichert ? null : _positionOeffnen,
+                icon: const Icon(Icons.add),
+                label: const Text('Produkt hinzufügen'),
+              ),
+            ],
+          ),
+          FutureBuilder<List<ErlebnispositionMitProdukt>>(
+            future: _positionen,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Semantics(
+                  liveRegion: true,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _istEinkauf
+                              ? 'Die Einkaufsliste konnte nicht geladen werden.'
+                              : 'Die Bestellung konnte nicht geladen werden.',
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _positionenLaden,
+                        child: const Text('Erneut versuchen'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              if (!snapshot.hasData) {
+                return Semantics(
+                  label: _istEinkauf
+                      ? 'Einkaufsliste wird geladen'
+                      : 'Bestellung wird geladen',
+                  child: const LinearProgressIndicator(),
+                );
+              }
+              final eintraege = snapshot.data!;
+              if (eintraege.isEmpty) {
+                return Text(
+                  _istEinkauf
+                      ? 'Die Einkaufsliste ist leer. Produkte können auch ohne Termin vorab hinzugefügt werden.'
+                      : 'Noch keine Produkte bestellt. Produkt hinzufügen, um die Bestellung zu beginnen.',
+                );
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final eintrag in eintraege) _produktposition(eintrag),
+                  const SizedBox(height: 8),
+                  Text(
+                    _positionsZusammenfassung(eintraege),
+                    key: ValueKey(
+                      _istEinkauf
+                          ? 'einkaufslisten-zusammenfassung'
+                          : 'bestellungs-zusammenfassung',
+                    ),
+                  ),
+                  if (_istEinkauf) ...[
+                    const SizedBox(height: 16),
+                    _einkaufssumme(eintraege),
+                  ],
+                ],
+              );
+            },
+          ),
+          if (_istRestaurant || _istEinkauf) ...[
+            const SizedBox(height: 24),
+            Focus(
+              focusNode: _ortsBewertungFokus,
+              child: GaststaettenbewertungAbschnitt(
+                key: ValueKey('ortsbewertung-$_id-${_ort?.id}'),
+                repository: _entwurf,
+                idGenerator: widget.idGenerator,
+                erlebnis: _erlebnisAusEingaben(),
+                ort: _ort,
+                controller: _ortsbewertungController,
               ),
             ),
           ],
-        ),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
-            children: [
-              if (_zeitfehler.isNotEmpty)
-                FormularFehlersammler(
-                  key: _fehlerKey,
-                  focusNode: _fehlerFokus,
-                  fehler: [
-                    for (final fehler in _zeitfehler)
-                      (fehler, _fokusFuerFehler(fehler)),
-                  ],
-                ),
-              TextButton.icon(
-                onPressed: _ortWaehlen,
-                icon: Icon(
-                  _istRestaurant
-                      ? Icons.restaurant_outlined
-                      : Icons.shopping_bag_outlined,
-                ),
-                label: Text(_ortLabel),
-              ),
-              const SizedBox(height: 16),
-              Semantics(
-                header: true,
-                child: Text(
-                  'Zeitraum',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              TextButton.icon(
-                onPressed: _ort == null
-                    ? null
-                    : () => setState(() {
-                          _beginn = DateTime.now();
-                          _ende = null;
-                        }),
-                icon: const Icon(Icons.today_outlined),
-                label: const Text('Spontanen Besuch jetzt erfassen'),
-              ),
-              if (_ort == null)
-                const Text(
-                    'Für einen spontanen Besuch zuerst einen Ort auswählen.'),
-              ListTile(
-                key: const ValueKey('erlebnis-beginn'),
-                contentPadding: EdgeInsets.zero,
-                focusNode: _beginnFokus,
-                title: const Text('Beginn (optional)'),
-                subtitle: Text(_datumZeitText(context, _beginn)),
-                trailing: const Icon(Icons.login),
-                onTap: () => _tatsaechlicheZeitWaehlen(beginn: true),
-              ),
-              ListTile(
-                key: const ValueKey('erlebnis-ende'),
-                contentPadding: EdgeInsets.zero,
-                focusNode: _endeFokus,
-                title: const Text('Ende (optional)'),
-                subtitle: Text(_datumZeitText(context, _ende)),
-                trailing: const Icon(Icons.logout),
-                onTap: () => _tatsaechlicheZeitWaehlen(beginn: false),
-              ),
-              TextField(
-                controller: _notiz,
-                maxLength: 1000,
-                maxLines: 4,
-                decoration:
-                    const InputDecoration(labelText: 'Notiz (optional)'),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: Semantics(
-                      header: true,
-                      child: Text(
-                        _istEinkauf ? 'Einkaufsliste' : 'Bestellung',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                  ),
-                  TextButton.icon(
-                    onPressed: _speichert ? null : _positionOeffnen,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Produkt hinzufügen'),
-                  ),
-                ],
-              ),
-              FutureBuilder<List<ErlebnispositionMitProdukt>>(
-                future: _positionen,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Semantics(
-                      liveRegion: true,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _istEinkauf
-                                  ? 'Die Einkaufsliste konnte nicht geladen werden.'
-                                  : 'Die Bestellung konnte nicht geladen werden.',
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: _positionenLaden,
-                            child: const Text('Erneut versuchen'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  if (!snapshot.hasData) {
-                    return Semantics(
-                      label: _istEinkauf
-                          ? 'Einkaufsliste wird geladen'
-                          : 'Bestellung wird geladen',
-                      child: const LinearProgressIndicator(),
-                    );
-                  }
-                  final eintraege = snapshot.data!;
-                  if (eintraege.isEmpty) {
-                    return Text(
-                      _istEinkauf
-                          ? 'Die Einkaufsliste ist leer. Produkte können auch ohne Termin vorab hinzugefügt werden.'
-                          : 'Noch keine Produkte bestellt. Produkt hinzufügen, um die Bestellung zu beginnen.',
-                    );
-                  }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (final eintrag in eintraege)
-                        _produktposition(eintrag),
-                      const SizedBox(height: 8),
-                      Text(
-                        _positionsZusammenfassung(eintraege),
-                        key: ValueKey(
-                          _istEinkauf
-                              ? 'einkaufslisten-zusammenfassung'
-                              : 'bestellungs-zusammenfassung',
-                        ),
-                      ),
-                      if (_istEinkauf) ...[
-                        const SizedBox(height: 16),
-                        _einkaufssumme(eintraege),
-                      ],
-                    ],
-                  );
-                },
-              ),
-              if (_istRestaurant || _istEinkauf) ...[
-                const SizedBox(height: 24),
-                Focus(
-                  focusNode: _ortsBewertungFokus,
-                  child: GaststaettenbewertungAbschnitt(
-                    key: ValueKey('ortsbewertung-$_id-${_ort?.id}'),
-                    repository: _entwurf,
-                    idGenerator: widget.idGenerator,
-                    erlebnis: _erlebnisAusEingaben(),
-                    ort: _ort,
-                    controller: _ortsbewertungController,
-                  ),
-                ),
-              ],
-            ],
+        ],
+      ),
+    ),
+    bottomNavigationBar: SafeArea(
+      top: false,
+      minimum: const EdgeInsets.all(16),
+      child: Wrap(
+        alignment: WrapAlignment.end,
+        spacing: 12,
+        runSpacing: 8,
+        children: [
+          FilledButton.icon(
+            onPressed: _speichert
+                ? null
+                : () => _persistieren(schliessen: true),
+            icon: const Icon(Icons.save_outlined),
+            label: const Text('Speichern'),
           ),
-        ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          minimum: const EdgeInsets.all(16),
-          child: Wrap(
-            alignment: WrapAlignment.end,
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              FilledButton.icon(
-                onPressed:
-                    _speichert ? null : () => _persistieren(schliessen: true),
-                icon: const Icon(Icons.save_outlined),
-                label: const Text('Speichern'),
-              ),
-            ],
-          ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
 
 class _ProduktBewertungsButton extends StatelessWidget {
