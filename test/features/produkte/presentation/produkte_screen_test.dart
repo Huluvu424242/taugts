@@ -20,12 +20,14 @@ void main() {
     addTearDown(datenbank.schliessen);
     final repository = SqliteBewertungsRepository(datenbank);
     final zeit = DateTime.utc(2026, 8, 29);
-    await repository.speichereProdukt(Produkt(
-      id: '55e34e0e-fb72-450d-9db7-20d42188d239',
-      name: 'Sonnenpils',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
+    await repository.speichereProdukt(
+      Produkt(
+        id: '55e34e0e-fb72-450d-9db7-20d42188d239',
+        name: 'Sonnenpils',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -45,8 +47,9 @@ void main() {
     expect(find.text('Produkt anlegen'), findsWidgets);
   });
 
-  testWidgets('schlägt ein vorhandenes Scan-Produkt zur Auswahl vor',
-      (tester) async {
+  testWidgets('schlägt ein vorhandenes Scan-Produkt zur Auswahl vor', (
+    tester,
+  ) async {
     final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     addTearDown(datenbank.schliessen);
     final repository = SqliteBewertungsRepository(datenbank);
@@ -60,12 +63,14 @@ void main() {
     );
     await repository.speichereProdukt(produkt);
 
-    await tester.pumpWidget(MaterialApp(
-      home: _ProduktauswahlTestStart(
-        repository: repository,
-        scanCode: '4012345678901',
+    await tester.pumpWidget(
+      MaterialApp(
+        home: _ProduktauswahlTestStart(
+          repository: repository,
+          scanCode: '4012345678901',
+        ),
       ),
-    ));
+    );
     await tester.tap(find.text('Produktauswahl öffnen'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Barcode scannen'));
@@ -84,18 +89,21 @@ void main() {
     expect(find.text('Ausgewählt: Scan-Pils'), findsOneWidget);
   });
 
-  testWidgets('legt einen unbekannten Barcode als unvollständiges Produkt an',
-      (tester) async {
+  testWidgets('legt einen unbekannten Barcode als unvollständiges Produkt an', (
+    tester,
+  ) async {
     final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     addTearDown(datenbank.schliessen);
     final repository = SqliteBewertungsRepository(datenbank);
 
-    await tester.pumpWidget(MaterialApp(
-      home: _ProduktauswahlTestStart(
-        repository: repository,
-        scanCode: '9876543210128',
+    await tester.pumpWidget(
+      MaterialApp(
+        home: _ProduktauswahlTestStart(
+          repository: repository,
+          scanCode: '9876543210128',
+        ),
       ),
-    ));
+    );
     await tester.tap(find.text('Produktauswahl öffnen'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Barcode scannen'));
@@ -121,18 +129,21 @@ void main() {
     expect(gespeichert!.istUnvollstaendig, isTrue);
   });
 
-  testWidgets('gibt manuell neu angelegtes Produkt aus Auswahl zurück',
-      (tester) async {
+  testWidgets('gibt manuell neu angelegtes Produkt aus Auswahl zurück', (
+    tester,
+  ) async {
     final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     addTearDown(datenbank.schliessen);
     final repository = SqliteBewertungsRepository(datenbank);
 
-    await tester.pumpWidget(MaterialApp(
-      home: _ProduktauswahlTestStart(
-        repository: repository,
-        scanCode: '0000000000000',
+    await tester.pumpWidget(
+      MaterialApp(
+        home: _ProduktauswahlTestStart(
+          repository: repository,
+          scanCode: '0000000000000',
+        ),
       ),
-    ));
+    );
     await tester.tap(find.text('Produktauswahl öffnen'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Produkt anlegen').first);
@@ -152,19 +163,22 @@ void main() {
     expect(find.text('Ausgewählt: Erlebnis-Pils'), findsOneWidget);
   });
 
-  testWidgets('Suchfehler blockiert die manuelle Produkterfassung nicht',
-      (tester) async {
+  testWidgets('Suchfehler blockiert die manuelle Produkterfassung nicht', (
+    tester,
+  ) async {
     final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     addTearDown(datenbank.schliessen);
     final repository = _BarcodeFehlerRepository(datenbank);
 
-    await tester.pumpWidget(MaterialApp(
-      home: ProdukteScreen(
-        repository: repository,
-        idGenerator: _FesterIdGenerator(),
-        barcodeScanStart: (_) async => '4012345678901',
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProdukteScreen(
+          repository: repository,
+          idGenerator: _FesterIdGenerator(),
+          barcodeScanStart: (_) async => '4012345678901',
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Barcode scannen'));
     await tester.pumpAndSettle();
@@ -178,25 +192,25 @@ void main() {
     expect(find.text('Produkt anlegen'), findsWidgets);
   });
 
-  testWidgets('Löschen erklärt Historienerhalt und kann abgebrochen werden',
-      (tester) async {
+  testWidgets('Löschen erklärt Historienerhalt und kann abgebrochen werden', (
+    tester,
+  ) async {
     final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     addTearDown(datenbank.schliessen);
     final repository = SqliteBewertungsRepository(datenbank);
     final zeit = DateTime.utc(2026, 9, 13);
     const id = '21700000-0000-4000-8000-000000000101';
-    await repository.speichereProdukt(Produkt(
-      id: id,
-      name: 'Löschtest',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
-    await tester.pumpWidget(MaterialApp(
-      home: ProdukteScreen(
-        repository: repository,
-        idGenerator: _FesterIdGenerator(),
+    await repository.speichereProdukt(
+      Produkt(id: id, name: 'Löschtest', erstelltAm: zeit, geaendertAm: zeit),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProdukteScreen(
+          repository: repository,
+          idGenerator: _FesterIdGenerator(),
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Löschtest löschen'));
@@ -257,13 +271,13 @@ class _ProduktauswahlTestStartState extends State<_ProduktauswahlTestStart> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: Center(
-          child: _produkt == null
-              ? FilledButton(
-                  onPressed: _oeffnen,
-                  child: const Text('Produktauswahl öffnen'),
-                )
-              : Text('Ausgewählt: ${_produkt!.anzeigetitel}'),
-        ),
-      );
+    body: Center(
+      child: _produkt == null
+          ? FilledButton(
+              onPressed: _oeffnen,
+              child: const Text('Produktauswahl öffnen'),
+            )
+          : Text('Ausgewählt: ${_produkt!.anzeigetitel}'),
+    ),
+  );
 }

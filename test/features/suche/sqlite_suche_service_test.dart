@@ -17,14 +17,16 @@ void main() {
     final kategorien = SqliteKategorieRepository(db);
     final klassifikation = SqliteKlassifikationsRepository(db);
     final jetzt = DateTime.utc(2026, 9, 3);
-    await bewertungen.speichereProdukt(Produkt(
-      id: 'p1',
-      name: 'Hopfenstern',
-      marke: 'Beispiel',
-      barcode: '4012345678901',
-      erstelltAm: jetzt,
-      geaendertAm: jetzt,
-    ));
+    await bewertungen.speichereProdukt(
+      Produkt(
+        id: 'p1',
+        name: 'Hopfenstern',
+        marke: 'Beispiel',
+        barcode: '4012345678901',
+        erstelltAm: jetzt,
+        geaendertAm: jetzt,
+      ),
+    );
     const ipa = Kategorie(
       id: 'ipa',
       name: 'IPA',
@@ -63,14 +65,16 @@ void main() {
     SqliteKlassifikationsRepository(db);
     final bewertungen = SqliteBewertungsRepository(db);
     final jetzt = DateTime.utc(2026, 9, 3);
-    await bewertungen.speichereOrt(Ort(
-      id: 'o1',
-      name: 'Zum Goldenen Hopfen',
-      typ: Ortstyp.gastronomie,
-      adresse: 'Markt 1',
-      erstelltAm: jetzt,
-      geaendertAm: jetzt,
-    ));
+    await bewertungen.speichereOrt(
+      Ort(
+        id: 'o1',
+        name: 'Zum Goldenen Hopfen',
+        typ: Ortstyp.gastronomie,
+        adresse: 'Markt 1',
+        erstelltAm: jetzt,
+        geaendertAm: jetzt,
+      ),
+    );
     final service = SqliteSucheService(db);
 
     final treffer = await service.suche(
@@ -78,10 +82,7 @@ void main() {
     );
 
     expect(treffer.map((wert) => wert.id), contains('o1'));
-    expect(
-      treffer.firstWhere((wert) => wert.id == 'o1').art,
-      Suchziel.orte,
-    );
+    expect(treffer.firstWhere((wert) => wert.id == 'o1').art, Suchziel.orte);
   });
 
   test('Historische Suche berücksichtigt den Suchbegriff', () async {
@@ -92,32 +93,40 @@ void main() {
     final bewertungen = SqliteBewertungsRepository(db);
     final jetzt = DateTime.utc(2026, 9, 3, 18);
     const profilId = 'profil-historie';
-    db.verbindung.execute(
-      'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [profilId, null, jetzt.toIso8601String(), jetzt.toIso8601String()],
+    db.verbindung.execute('INSERT INTO profile VALUES (?, ?, ?, ?)', [
+      profilId,
+      null,
+      jetzt.toIso8601String(),
+      jetzt.toIso8601String(),
+    ]);
+    await bewertungen.speichereProdukt(
+      Produkt(
+        id: 'p-historie',
+        name: 'Abendstern',
+        erstelltAm: jetzt,
+        geaendertAm: jetzt,
+      ),
     );
-    await bewertungen.speichereProdukt(Produkt(
-      id: 'p-historie',
-      name: 'Abendstern',
-      erstelltAm: jetzt,
-      geaendertAm: jetzt,
-    ));
-    await bewertungen.speichereOrt(Ort(
-      id: 'o-historie',
-      name: 'Zum Goldenen Hopfen',
-      typ: Ortstyp.gastronomie,
-      erstelltAm: jetzt,
-      geaendertAm: jetzt,
-    ));
-    await bewertungen.speichereErlebnis(Erlebnis(
-      id: 'e-historie',
-      herkunftProfilId: profilId,
-      typ: Erlebnistyp.restaurantbesuch,
-      ortId: 'o-historie',
-      beginn: jetzt,
-      erstelltAm: jetzt,
-      geaendertAm: jetzt,
-    ));
+    await bewertungen.speichereOrt(
+      Ort(
+        id: 'o-historie',
+        name: 'Zum Goldenen Hopfen',
+        typ: Ortstyp.gastronomie,
+        erstelltAm: jetzt,
+        geaendertAm: jetzt,
+      ),
+    );
+    await bewertungen.speichereErlebnis(
+      Erlebnis(
+        id: 'e-historie',
+        herkunftProfilId: profilId,
+        typ: Erlebnistyp.restaurantbesuch,
+        ortId: 'o-historie',
+        beginn: jetzt,
+        erstelltAm: jetzt,
+        geaendertAm: jetzt,
+      ),
+    );
     db.verbindung.execute(
       '''
       INSERT INTO erlebnispositionen (
@@ -174,24 +183,30 @@ void main() {
     final bewertungen = SqliteBewertungsRepository(db);
     final jetzt = DateTime.utc(2026, 9, 3, 12);
     const profilId = 'profil-1';
-    db.verbindung.execute(
-      'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [profilId, null, jetzt.toIso8601String(), jetzt.toIso8601String()],
+    db.verbindung.execute('INSERT INTO profile VALUES (?, ?, ?, ?)', [
+      profilId,
+      null,
+      jetzt.toIso8601String(),
+      jetzt.toIso8601String(),
+    ]);
+    await bewertungen.speichereErlebnis(
+      Erlebnis(
+        id: 'e1',
+        herkunftProfilId: profilId,
+        typ: Erlebnistyp.einkauf,
+        beginn: jetzt,
+        erstelltAm: jetzt,
+        geaendertAm: jetzt,
+      ),
     );
-    await bewertungen.speichereErlebnis(Erlebnis(
-      id: 'e1',
-      herkunftProfilId: profilId,
-      typ: Erlebnistyp.einkauf,
-      beginn: jetzt,
-      erstelltAm: jetzt,
-      geaendertAm: jetzt,
-    ));
     final service = SqliteSucheService(db);
 
-    final treffer = await service.suche(const Suchfilter(
-      ziel: Suchziel.erlebnisse,
-      erlebnistyp: Erlebnistyp.einkauf,
-    ));
+    final treffer = await service.suche(
+      const Suchfilter(
+        ziel: Suchziel.erlebnisse,
+        erlebnistyp: Erlebnistyp.einkauf,
+      ),
+    );
     expect(treffer.map((wert) => wert.id), contains('e1'));
   });
 }
