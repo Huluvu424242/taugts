@@ -46,8 +46,9 @@ void main() {
       db.verbindung.execute(
         '''INSERT INTO preisbeobachtungen (
           id, erlebnis_id, erlebnis_position_id, produkt_id, ort_id,
-          beobachtet_am, betrag_minor, waehrung, erstellt_am, geaendert_am
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'EUR', ?, ?)''',
+          beobachtet_am, betrag_minor, waehrung, bezugsmenge,
+          bezugseinheit, erstellt_am, geaendert_am
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'EUR', 500, 'ml', ?, ?)''',
         [
           'preis-${kauf.$1}',
           kauf.$1,
@@ -69,6 +70,15 @@ void main() {
     expect(nurGast, hasLength(1));
     expect(nurGast.single.preis, 4);
     expect(nurGast.single.euroProLiter, 8);
+    // Eine Stammdatenänderung darf keinen beobachteten Kauf verändern.
+    db.verbindung.execute(
+      'UPDATE produkte SET fuellmenge_ml = 330 WHERE objekt_id = ?',
+      ['bier'],
+    );
+    final nachStammdatenAenderung = await service.ladeLetztePreise(
+      const ProduktvergleichFilter(produktId: 'bier'),
+    );
+    expect(nachStammdatenAenderung.single.euroProLiter, 8);
 
     final beide = await service.ladeLetztePreise(
       const ProduktvergleichFilter(
