@@ -25,10 +25,12 @@ void main() {
       },
     );
 
-    final positionen = plan.sammlungen
-        .singleWhere((sammlung) => sammlung.name == 'erlebnisPositionen');
-    final ortsbewertungen = plan.sammlungen
-        .singleWhere((sammlung) => sammlung.name == 'ortsbewertungen');
+    final positionen = plan.sammlungen.singleWhere(
+      (sammlung) => sammlung.name == 'erlebnisPositionen',
+    );
+    final ortsbewertungen = plan.sammlungen.singleWhere(
+      (sammlung) => sammlung.name == 'ortsbewertungen',
+    );
 
     expect(positionen.hinzufuegen, 1);
     expect(positionen.behalten, 1);
