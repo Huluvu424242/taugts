@@ -17,9 +17,8 @@ typedef BinaerExportSpeichernDialog = Future<String?> Function(
 );
 
 class SystemBinaerExportZielService implements BinaerExportZielService {
-  SystemBinaerExportZielService({
-    BinaerExportSpeichernDialog? speichernDialog,
-  }) : _speichernDialog = speichernDialog ?? _systemSpeichernDialog;
+  SystemBinaerExportZielService({BinaerExportSpeichernDialog? speichernDialog})
+    : _speichernDialog = speichernDialog ?? _systemSpeichernDialog;
 
   final BinaerExportSpeichernDialog _speichernDialog;
 
@@ -27,20 +26,18 @@ class SystemBinaerExportZielService implements BinaerExportZielService {
     String dateiname,
     Uint8List inhalt,
     String dateiendung,
-  ) =>
-      FilePicker.platform.saveFile(
-        dialogTitle: 'Taugt’s?-Export speichern',
-        fileName: dateiname,
-        type: FileType.custom,
-        allowedExtensions: [dateiendung],
-        bytes: inhalt,
-      );
+  ) => FilePicker.platform.saveFile(
+    dialogTitle: 'Taugt’s?-Export speichern',
+    fileName: dateiname,
+    type: FileType.custom,
+    allowedExtensions: [dateiendung],
+    bytes: inhalt,
+  );
 
   @override
   Future<String?> speichern({
     required String dateiname,
     required Uint8List inhalt,
     required String dateiendung,
-  }) =>
-      _speichernDialog(dateiname, inhalt, dateiendung);
+  }) => _speichernDialog(dateiname, inhalt, dateiendung);
 }

@@ -34,7 +34,8 @@ class _GetraenkebewertungScreenState extends State<GetraenkebewertungScreen> {
   late Future<_BewertungsDaten> _laden = _datenLaden();
 
   Future<_BewertungsDaten> _datenLaden() async {
-    final produktId = widget.erlebnisposition?.position.produktId ??
+    final produktId =
+        widget.erlebnisposition?.position.produktId ??
         widget.erlebnis.produktId;
     if (produktId == null) {
       throw StateError('Das Erlebnis enthält noch kein Produkt.');
@@ -72,63 +73,61 @@ class _GetraenkebewertungScreenState extends State<GetraenkebewertungScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(
-            '${widget.erlebnisposition?.produkt.anzeigetitel ?? 'Getränk'} bewerten',
-          ),
-          actions: const [
-            AppSupportMenu(
-              contextName: SupportKontexte.getraenkBewertung,
-            ),
-          ],
-        ),
-        body: SafeArea(
-          child: FutureBuilder<_BewertungsDaten>(
-            future: _laden,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'Die Bewertung konnte nicht geladen werden.',
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        FilledButton.icon(
-                          onPressed: _erneutLaden,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Erneut versuchen'),
-                        ),
-                      ],
+    appBar: AppBar(
+      title: Text(
+        '${widget.erlebnisposition?.produkt.anzeigetitel ?? 'Getränk'} bewerten',
+      ),
+      actions: const [
+        AppSupportMenu(contextName: SupportKontexte.getraenkBewertung),
+      ],
+    ),
+    body: SafeArea(
+      child: FutureBuilder<_BewertungsDaten>(
+        future: _laden,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Die Bewertung konnte nicht geladen werden.',
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                );
-              }
-              if (!snapshot.hasData) {
-                return Center(
-                  child: Semantics(
-                    label: 'Bewertung wird geladen',
-                    child: const CircularProgressIndicator(),
-                  ),
-                );
-              }
-              return _BewertungsFormular(
-                key: ValueKey(widget.erlebnis.id),
-                repository: widget.repository,
-                idGenerator: widget.idGenerator,
-                profil: widget.profil,
-                erlebnis: widget.erlebnis,
-                erlebnisposition: widget.erlebnisposition,
-                daten: snapshot.data!,
-              );
-            },
-          ),
-        ),
-      );
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: _erneutLaden,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Erneut versuchen'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          if (!snapshot.hasData) {
+            return Center(
+              child: Semantics(
+                label: 'Bewertung wird geladen',
+                child: const CircularProgressIndicator(),
+              ),
+            );
+          }
+          return _BewertungsFormular(
+            key: ValueKey(widget.erlebnis.id),
+            repository: widget.repository,
+            idGenerator: widget.idGenerator,
+            profil: widget.profil,
+            erlebnis: widget.erlebnis,
+            erlebnisposition: widget.erlebnisposition,
+            daten: snapshot.data!,
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class _BewertungsFormular extends StatefulWidget {
@@ -175,8 +174,9 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
     };
     _werte = {
       for (final kriterium in widget.daten.kriterien)
-        kriterium.id:
-            KriteriumEingabewert.ausBewertung(vorhandene[kriterium.id]),
+        kriterium.id: KriteriumEingabewert.ausBewertung(
+          vorhandene[kriterium.id],
+        ),
     };
     _kriteriumFokusse = {
       for (final kriterium in widget.daten.kriterien) kriterium.id: FocusNode(),
@@ -221,9 +221,8 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
   }
 
   Future<void> _zuFehlernNavigieren() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bitte Eingaben prüfen.')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Bitte Eingaben prüfen.')));
     if (_scrollController.hasClients) {
       await _scrollController.animateTo(
         0,
@@ -253,8 +252,9 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
       for (final bewertung in widget.daten.bewertungen)
         bewertung.kriteriumId: bewertung,
     };
-    final aktiveIds =
-        widget.daten.kriterien.map((kriterium) => kriterium.id).toSet();
+    final aktiveIds = widget.daten.kriterien
+        .map((kriterium) => kriterium.id)
+        .toSet();
     final bewertungen = <Bewertung>[
       for (final bewertung in widget.daten.bewertungen)
         if (!aktiveIds.contains(bewertung.kriteriumId)) bewertung,
@@ -306,9 +306,8 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
 
   @override
   Widget build(BuildContext context) {
-    final datum = MaterialLocalizations.of(context).formatFullDate(
-      widget.erlebnis.erlebtAm.toLocal(),
-    );
+    final datum = MaterialLocalizations.of(context)
+        .formatFullDate(widget.erlebnis.erlebtAm.toLocal());
     final formularFehler = _formularFehler;
     return Column(
       children: [
@@ -345,9 +344,11 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
                 'aus den Einzelwerten berechnet.',
               ),
               const SizedBox(height: 24),
-              for (var index = 0;
-                  index < widget.daten.kriterien.length;
-                  index++) ...[
+              for (
+                var index = 0;
+                index < widget.daten.kriterien.length;
+                index++
+              ) ...[
                 KriteriumEingabefeld(
                   kriterium: widget.daten.kriterien[index],
                   wert: _werte[widget.daten.kriterien[index].id]!,
@@ -400,8 +401,8 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
                 _speichert
                     ? 'Bewertung wird gespeichert'
                     : widget.repository is ErlebnisEntwurfRepository
-                        ? 'Bewertung übernehmen'
-                        : 'Bewertung speichern',
+                    ? 'Bewertung übernehmen'
+                    : 'Bewertung speichern',
               ),
             ),
           ),
@@ -411,11 +412,11 @@ class _BewertungsFormularState extends State<_BewertungsFormular> {
   }
 
   String _produktartLabel(Produktart art) => switch (art) {
-        Produktart.bier => 'Bier',
-        Produktart.getraenk => 'Getränk',
-        Produktart.speise => 'Speise',
-        Produktart.sonstiges => 'Sonstiges Produkt',
-      };
+    Produktart.bier => 'Bier',
+    Produktart.getraenk => 'Getränk',
+    Produktart.speise => 'Speise',
+    Produktart.sonstiges => 'Sonstiges Produkt',
+  };
 }
 
 class _BewertungsDaten {

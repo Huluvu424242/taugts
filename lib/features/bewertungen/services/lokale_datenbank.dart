@@ -198,9 +198,9 @@ class LokaleDatenbank {
   }
 
   bool _tabelleExistiert(String name) => verbindung.select(
-        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
-        [name],
-      ).isNotEmpty;
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+    [name],
+  ).isNotEmpty;
 
   void _erstelleSchemaVersion1() {
     verbindung.execute('''

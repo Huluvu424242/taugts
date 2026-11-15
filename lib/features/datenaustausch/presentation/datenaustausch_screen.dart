@@ -171,7 +171,8 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       if (!mounted) return;
       setState(() {
         _istFehler = true;
-        _status = 'Die lokalen Daten konnten nicht gelöscht werden. '
+        _status =
+            'Die lokalen Daten konnten nicht gelöscht werden. '
             'Es wurden keine Änderungen übernommen.';
       });
     } finally {
@@ -213,17 +214,16 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       if (!validierung.istGueltig) {
         setState(() {
           _istFehler = true;
-          _status =
-              'Die Importdatei ist nicht gültig. Es wurden keine Daten verändert.';
+          _status = 'Die Importdatei ist nicht gültig. Es wurden keine Daten verändert.';
           _importFehler = validierung.fehler;
         });
         return;
       }
-      final importDokument =
-          widget.importAusfuehrungService.normalisiereBekannteAliase(
-        widget.exportService.datenbank,
-        validierung.dokument!,
-      );
+      final importDokument = widget.importAusfuehrungService
+          .normalisiereBekannteAliase(
+            widget.exportService.datenbank,
+            validierung.dokument!,
+          );
       final lokal = Map<String, Object?>.from(
         jsonDecode(widget.exportService.erzeugeJson()) as Map,
       );
@@ -251,8 +251,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       if (!mounted) return;
       setState(() {
         _istFehler = true;
-        _status =
-            'Die Importdatei konnte nicht geprüft werden. Die lokalen Daten wurden nicht verändert.';
+        _status = 'Die Importdatei konnte nicht geprüft werden. Die lokalen Daten wurden nicht verändert.';
       });
     } finally {
       if (mounted) setState(() => _laeuft = false);
@@ -288,8 +287,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         werte[konflikt.schluessel] = ImportKonfliktAktion.importVersion;
       } else if (konflikt.art == ImportKonfliktArt.unveraendert) {
         werte[konflikt.schluessel] = ImportKonfliktAktion.lokaleVersion;
-      } else if (konflikt.erlaubteAktionen
-          .contains(ImportKonfliktAktion.importVersion)) {
+      } else if (konflikt.erlaubteAktionen.contains(
+        ImportKonfliktAktion.importVersion,
+      )) {
         // Der allgemeine Importmodus bleibt lokal bevorzugend.
         // Für tatsächliche Konflikte gilt unabhängig davon Import bevorzugen.
         werte[konflikt.schluessel] = ImportKonfliktAktion.importVersion;
@@ -323,15 +323,15 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         _lokalesDokument == null) {
       return;
     }
-    _mergePlaene[konflikt.schluessel] =
-        widget.importDublettenMergeService.plane(
-      sammlung: konflikt.sammlung,
-      importId: konflikt.importId,
-      lokaleId: konflikt.lokaleId,
-      importDokument: _importDokument!,
-      lokalesDokument: _lokalesDokument!,
-      feldauswahl: _mergeFeldauswahl[konflikt.schluessel] ?? const {},
-    );
+    _mergePlaene[konflikt.schluessel] = widget.importDublettenMergeService
+        .plane(
+          sammlung: konflikt.sammlung,
+          importId: konflikt.importId,
+          lokaleId: konflikt.lokaleId,
+          importDokument: _importDokument!,
+          lokalesDokument: _lokalesDokument!,
+          feldauswahl: _mergeFeldauswahl[konflikt.schluessel] ?? const {},
+        );
   }
 
   void _entscheidungAendern(
@@ -393,8 +393,8 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   int get _offeneKonflikte => _strategie == ImportStrategie.bestandErsetzen
       ? 0
       : _konflikte
-          .where((konflikt) => _entscheidungsStand.fuer(konflikt) == null)
-          .length;
+            .where((konflikt) => _entscheidungsStand.fuer(konflikt) == null)
+            .length;
 
   int get _zuLoeschendeDatensaetze => _lokalesDokument == null
       ? 0
@@ -415,16 +415,16 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         );
 
   bool get _ersatzdateiHatFachdaten => const [
-        'profile',
-        'objekte',
-        'orte',
-        'bewertungskriterien',
-        'erlebnisse',
-        'erlebnisPositionen',
-        'preisbeobachtungen',
-        'ortsbewertungen',
-        'bewertungen',
-      ].any((name) => (_importDokument?[name] as List? ?? const []).isNotEmpty);
+    'profile',
+    'objekte',
+    'orte',
+    'bewertungskriterien',
+    'erlebnisse',
+    'erlebnisPositionen',
+    'preisbeobachtungen',
+    'ortsbewertungen',
+    'bewertungen',
+  ].any((name) => (_importDokument?[name] as List? ?? const []).isNotEmpty);
 
   Future<bool> _ersatzBestaetigen() async {
     final ergebnis = await showDialog<bool>(
@@ -497,8 +497,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
     if (!_bestandSeitVorschauUnveraendert()) {
       setState(() {
         _istFehler = true;
-        _status =
-            'Der lokale Bestand wurde seit der Vorschau verändert. Bitte die Importdatei erneut prüfen.';
+        _status = 'Der lokale Bestand wurde seit der Vorschau verändert. Bitte die Importdatei erneut prüfen.';
         _analyse = null;
         _strategiePlan = null;
         _importDokument = null;
@@ -509,16 +508,14 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         !_ersatzdateiHatFachdaten) {
       setState(() {
         _istFehler = true;
-        _status =
-            'Ein vollständiger Ersatz durch eine leere Datei ist nicht zulässig.';
+        _status = 'Ein vollständiger Ersatz durch eine leere Datei ist nicht zulässig.';
       });
       return;
     }
     if (!_alleKonflikteEntschieden) {
       setState(() {
         _istFehler = true;
-        _status =
-            'Vor dem Import müssen alle entscheidungspflichtigen Konflikte entschieden werden.';
+        _status = 'Vor dem Import müssen alle entscheidungspflichtigen Konflikte entschieden werden.';
       });
       return;
     }
@@ -537,9 +534,11 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
     });
 
     try {
-      var dokument = _tiefeKopie(_strategie == ImportStrategie.bestandErsetzen
-          ? _originalImportDokument!
-          : _importDokument!);
+      var dokument = _tiefeKopie(
+        _strategie == ImportStrategie.bestandErsetzen
+            ? _originalImportDokument!
+            : _importDokument!,
+      );
       final mergesNachSammlung = <String, int>{};
       final neueAliase = <ImportAliasReferenz>[];
       for (final konflikt in _konflikte) {
@@ -603,10 +602,11 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       setState(() {
         _istFehler = true;
         _importProtokoll = protokoll;
-        _status = fehler is StateError &&
-                fehler.message
-                    .toString()
-                    .startsWith('Bestandsersatz nicht möglich:')
+        _status =
+            fehler is StateError &&
+                fehler.message.toString().startsWith(
+                  'Bestandsersatz nicht möglich:',
+                )
             ? '${fehler.message} Die lokalen Daten wurden nicht verändert.'
             : 'Import fehlgeschlagen. Alle fachlichen Änderungen wurden zurückgerollt.';
       });
@@ -616,9 +616,9 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   }
 
   Map<String, Object?> _tiefeKopie(Map<String, Object?> dokument) => {
-        for (final eintrag in dokument.entries)
-          eintrag.key: _kopiereWert(eintrag.value),
-      };
+    for (final eintrag in dokument.entries)
+      eintrag.key: _kopiereWert(eintrag.value),
+  };
 
   Object? _kopiereWert(Object? wert) {
     if (wert is Map) {
@@ -646,8 +646,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
       if (!mounted) return;
       setState(() {
         _istFehler = true;
-        _status =
-            'Der Export konnte nicht abgeschlossen werden. Die lokalen Daten wurden nicht verändert.';
+        _status = 'Der Export konnte nicht abgeschlossen werden. Die lokalen Daten wurden nicht verändert.';
       });
     } finally {
       if (mounted) setState(() => _laeuft = false);
@@ -655,28 +654,27 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   }
 
   String _strategieName(ImportStrategie strategie) => switch (strategie) {
-        ImportStrategie.bestandErsetzen =>
-          'Gesamten lokalen Datenbestand ersetzen',
-        ImportStrategie.importBevorzugen => 'Import bevorzugen',
-        ImportStrategie.lokalBevorzugen =>
-          'Bestehende Daten behalten und ergänzen (empfohlen)',
-      };
+    ImportStrategie.bestandErsetzen => 'Gesamten lokalen Datenbestand ersetzen',
+    ImportStrategie.importBevorzugen => 'Import bevorzugen',
+    ImportStrategie.lokalBevorzugen =>
+      'Bestehende Daten behalten und ergänzen (empfohlen)',
+  };
 
   String _aktionsName(ImportKonfliktAktion aktion) => switch (aktion) {
-        ImportKonfliktAktion.lokaleVersion => 'Lokale Version',
-        ImportKonfliktAktion.importVersion => 'Importversion',
-        ImportKonfliktAktion.ueberspringen => 'Überspringen',
-        ImportKonfliktAktion.beideBehalten => 'Beide behalten',
-        ImportKonfliktAktion.zusammenfuehren => 'Zusammenführen',
-      };
+    ImportKonfliktAktion.lokaleVersion => 'Lokale Version',
+    ImportKonfliktAktion.importVersion => 'Importversion',
+    ImportKonfliktAktion.ueberspringen => 'Überspringen',
+    ImportKonfliktAktion.beideBehalten => 'Beide behalten',
+    ImportKonfliktAktion.zusammenfuehren => 'Zusammenführen',
+  };
 
   String _konfliktArtName(ImportKonfliktArt art) => switch (art) {
-        ImportKonfliktArt.neuerDatensatz => 'Neuer Datensatz',
-        ImportKonfliktArt.unveraendert => 'Bereits vorhanden / unverändert',
-        ImportKonfliktArt.versionskonflikt => 'Versionskonflikt',
-        ImportKonfliktArt.identitaetskonflikt => 'Identitätskonflikt',
-        ImportKonfliktArt.fachlicheDublette => 'Mögliche fachliche Dublette',
-      };
+    ImportKonfliktArt.neuerDatensatz => 'Neuer Datensatz',
+    ImportKonfliktArt.unveraendert => 'Bereits vorhanden / unverändert',
+    ImportKonfliktArt.versionskonflikt => 'Versionskonflikt',
+    ImportKonfliktArt.identitaetskonflikt => 'Identitätskonflikt',
+    ImportKonfliktArt.fachlicheDublette => 'Mögliche fachliche Dublette',
+  };
 
   String _wertText(Object? wert) {
     if (wert == null) return '—';
@@ -742,12 +740,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
             child: ListTile(
               title: Text(sammlung.name),
               subtitle: Text(
-                'Neu: ${sammlung.hinzufuegen} · Unverändert: ${sammlung.unveraendert} · Aktualisiert: ${sammlung.aktualisieren} · Übersprungen: ${sammlung.uebersprungen} · Lokal erhalten: ${sammlung.behalten} · Konflikte: ${_konflikte.where(
-                      (k) =>
-                          k.sammlung == sammlung.name &&
-                          k.art != ImportKonfliktArt.neuerDatensatz &&
-                          k.art != ImportKonfliktArt.unveraendert,
-                    ).length} · Zu löschen: ${sammlung.entfernen}',
+                'Neu: ${sammlung.hinzufuegen} · Unverändert: ${sammlung.unveraendert} · Aktualisiert: ${sammlung.aktualisieren} · Übersprungen: ${sammlung.uebersprungen} · Lokal erhalten: ${sammlung.behalten} · Konflikte: ${_konflikte.where((k) => k.sammlung == sammlung.name && k.art != ImportKonfliktArt.neuerDatensatz && k.art != ImportKonfliktArt.unveraendert).length} · Zu löschen: ${sammlung.entfernen}',
               ),
             ),
           ),
@@ -775,16 +768,19 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
         ],
         const SizedBox(height: 20),
         FilledButton.icon(
-          onPressed: _laeuft ||
+          onPressed:
+              _laeuft ||
                   !_alleKonflikteEntschieden ||
                   (_strategie == ImportStrategie.bestandErsetzen &&
                       !_ersatzdateiHatFachdaten)
               ? null
               : _importBestaetigen,
           icon: const Icon(Icons.download_done_outlined),
-          label: Text(_strategie == ImportStrategie.bestandErsetzen
-              ? 'Bestand ersetzen und importieren'
-              : 'Import verbindlich ausführen'),
+          label: Text(
+            _strategie == ImportStrategie.bestandErsetzen
+                ? 'Bestand ersetzen und importieren'
+                : 'Import verbindlich ausführen',
+          ),
         ),
         if (_strategie == ImportStrategie.bestandErsetzen &&
             !_ersatzdateiHatFachdaten)
@@ -802,54 +798,54 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   }
 
   Widget _buildKonfliktBearbeitung(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 24),
-          Semantics(
-            header: true,
-            child: Text(
-              'Importkonflikte entscheiden',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Diese Entscheidungen sind Teil der Vorschau. Erst die ausdrückliche Importbestätigung verändert lokale Daten.',
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: _laeuft
-                ? null
-                : () => setState(() => _konflikteBearbeiten = false),
-            icon: const Icon(Icons.arrow_back),
-            label: const Text('Zurück zur Importvorschau'),
-          ),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            title: const Text('Nur Konflikte anzeigen'),
-            subtitle: const Text(
-              'Ausschalten, um auch automatisch übernommene oder bereits vorhandene Datensätze einzusehen.',
-            ),
-            value: _nurEchteKonflikte,
-            onChanged: _laeuft
-                ? null
-                : (wert) => setState(() => _nurEchteKonflikte = wert),
-          ),
-          for (final konflikt in _konflikte.where(
-            (k) =>
-                !_nurEchteKonflikte ||
-                (k.art != ImportKonfliktArt.neuerDatensatz &&
-                    k.art != ImportKonfliktArt.unveraendert),
-          ))
-            _buildKonfliktKarte(context, konflikt),
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              '${_entscheidungsStand.entscheidungen.length} von ${_konflikte.length} Konflikten entschieden.',
-            ),
-          ),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      const SizedBox(height: 24),
+      Semantics(
+        header: true,
+        child: Text(
+          'Importkonflikte entscheiden',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+      ),
+      const SizedBox(height: 8),
+      const Text(
+        'Diese Entscheidungen sind Teil der Vorschau. Erst die ausdrückliche Importbestätigung verändert lokale Daten.',
+      ),
+      const SizedBox(height: 12),
+      OutlinedButton.icon(
+        onPressed: _laeuft
+            ? null
+            : () => setState(() => _konflikteBearbeiten = false),
+        icon: const Icon(Icons.arrow_back),
+        label: const Text('Zurück zur Importvorschau'),
+      ),
+      const SizedBox(height: 16),
+      SwitchListTile(
+        title: const Text('Nur Konflikte anzeigen'),
+        subtitle: const Text(
+          'Ausschalten, um auch automatisch übernommene oder bereits vorhandene Datensätze einzusehen.',
+        ),
+        value: _nurEchteKonflikte,
+        onChanged: _laeuft
+            ? null
+            : (wert) => setState(() => _nurEchteKonflikte = wert),
+      ),
+      for (final konflikt in _konflikte.where(
+        (k) =>
+            !_nurEchteKonflikte ||
+            (k.art != ImportKonfliktArt.neuerDatensatz &&
+                k.art != ImportKonfliktArt.unveraendert),
+      ))
+        _buildKonfliktKarte(context, konflikt),
+      Semantics(
+        liveRegion: true,
+        child: Text(
+          '${_entscheidungsStand.entscheidungen.length} von ${_konflikte.length} Konflikten entschieden.',
+        ),
+      ),
+    ],
+  );
 
   Widget _buildKonfliktKarte(
     BuildContext context,
@@ -888,20 +884,13 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
               ],
               if (konflikt.art == ImportKonfliktArt.identitaetskonflikt) ...[
                 const SizedBox(height: 8),
-                Text(
-                  switch (konflikt.art) {
-                    ImportKonfliktArt.neuerDatensatz =>
-                      'Stabile ID ist lokal unbekannt. Automatisch übernehmen; überspringen ist nur bei unabhängigen Einträgen möglich.',
-                    ImportKonfliktArt.unveraendert =>
-                      'Gleiche stabile ID und identische Inhalte. Bereits vorhanden, unverändert lassen.',
-                    ImportKonfliktArt.versionskonflikt =>
-                      'Gleiche stabile ID, aber geänderter Inhalt. Die Strategie gibt die Vorbelegung vor.',
-                    ImportKonfliktArt.identitaetskonflikt =>
-                      'Gleiche stabile ID mit anderem fachlichem Bezug. Entscheidung erforderlich.',
-                    ImportKonfliktArt.fachlicheDublette =>
-                      'Ähnlicher Inhalt mit anderer ID. Keine automatische Zusammenführung.',
-                  },
-                ),
+                Text(switch (konflikt.art) {
+                  ImportKonfliktArt.neuerDatensatz => 'Stabile ID ist lokal unbekannt. Automatisch übernehmen; überspringen ist nur bei unabhängigen Einträgen möglich.',
+                  ImportKonfliktArt.unveraendert => 'Gleiche stabile ID und identische Inhalte. Bereits vorhanden, unverändert lassen.',
+                  ImportKonfliktArt.versionskonflikt => 'Gleiche stabile ID, aber geänderter Inhalt. Die Strategie gibt die Vorbelegung vor.',
+                  ImportKonfliktArt.identitaetskonflikt => 'Gleiche stabile ID mit anderem fachlichem Bezug. Entscheidung erforderlich.',
+                  ImportKonfliktArt.fachlicheDublette => 'Ähnlicher Inhalt mit anderer ID. Keine automatische Zusammenführung.',
+                }),
                 const SizedBox(height: 8),
                 Text(
                   'Die stabile ID verweist auf unterschiedliche historische Kontexte. „Beide behalten“ wird deshalb nicht angeboten.',
@@ -969,16 +958,15 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                       key: ValueKey(
                         'merge-${konflikt.schluessel}-${unterschied.feld}',
                       ),
-                      initialValue: _mergeFeldauswahl[konflikt.schluessel]
-                              ?[unterschied.feld] ??
+                      initialValue:
+                          _mergeFeldauswahl[konflikt.schluessel]?[unterschied
+                              .feld] ??
                           DublettenFeldQuelle.lokal,
                       decoration: InputDecoration(labelText: unterschied.feld),
                       items: [
                         DropdownMenuItem(
                           value: DublettenFeldQuelle.lokal,
-                          child: Text(
-                            'Lokal: ${_wertText(unterschied.lokal)}',
-                          ),
+                          child: Text('Lokal: ${_wertText(unterschied.lokal)}'),
                         ),
                         DropdownMenuItem(
                           value: DublettenFeldQuelle.import,
@@ -990,10 +978,10 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
                       onChanged: _laeuft
                           ? null
                           : (quelle) => _mergeFeldAendern(
-                                konflikt,
-                                unterschied.feld,
-                                quelle,
-                              ),
+                              konflikt,
+                              unterschied.feld,
+                              quelle,
+                            ),
                     ),
                   ),
                 if (_mergePlaene.containsKey(konflikt.schluessel))
@@ -1007,9 +995,7 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
               const SizedBox(height: 4),
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'Auf weitere Konflikte dieses Typs anwenden',
-                ),
+                title: const Text('Auf weitere Konflikte dieses Typs anwenden'),
                 value: _aufTypAnwenden.contains(konflikt.schluessel),
                 onChanged: _laeuft
                     ? null
@@ -1068,161 +1054,158 @@ class _DatenaustauschScreenState extends State<DatenaustauschScreen> {
   }
 
   Widget _ergebnisKarte(String titel, ImportErgebnisZaehler zaehler) => Card(
-        child: ListTile(
-          title: Text(titel),
-          subtitle: Text(_zaehlerText(zaehler)),
-        ),
-      );
+    child: ListTile(title: Text(titel), subtitle: Text(_zaehlerText(zaehler))),
+  );
 
   String _zaehlerText(ImportErgebnisZaehler zaehler) =>
       '${zaehler.hinzugefuegt} hinzugefügt · ${zaehler.aktualisiert} aktualisiert · ${zaehler.uebersprungen} übersprungen · ${zaehler.zusammengefuehrt} zusammengeführt · ${zaehler.fehlerhaft} fehlerhaft';
 
   Widget _buildImportProtokoll(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      const SizedBox(height: 28),
+      Semantics(
+        header: true,
+        child: Text(
+          'Importprotokoll',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+      ),
+      const SizedBox(height: 8),
+      const Text(
+        'Das Protokoll bleibt ausschließlich lokal und enthält nur Zeitpunkt, Status, Strategie und Zähler – keine importierten Fachinhalte.',
+      ),
+      const SizedBox(height: 8),
+      if (_importProtokoll.isEmpty)
+        const Text('Noch keine Importausführung protokolliert.')
+      else
+        for (final eintrag in _importProtokoll.take(10))
+          Card(
+            child: ListTile(
+              leading: Icon(
+                eintrag.erfolgreich
+                    ? Icons.check_circle_outline
+                    : Icons.error_outline,
+              ),
+              title: Text(
+                eintrag.erfolgreich
+                    ? 'Import erfolgreich'
+                    : 'Import zurückgerollt',
+              ),
+              subtitle: Text(
+                '${eintrag.ausgefuehrtAm.toLocal()} · ${_strategieName(eintrag.strategie)}\n${eintrag.hinzugefuegt} hinzugefügt · ${eintrag.aktualisiert} aktualisiert · ${eintrag.uebersprungen} übersprungen · ${eintrag.zusammengefuehrt} zusammengeführt · ${eintrag.fehlerhaft} fehlerhaft',
+              ),
+            ),
+          ),
+    ],
+  );
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: const Text('Import/Export'),
+      actions: const [AppSupportMenu(contextName: 'Datenaustausch')],
+    ),
+    body: SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.all(24),
         children: [
+          Semantics(
+            header: true,
+            child: Text(
+              'Gesamtdaten exportieren',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Erstellt eine vollständige JSON-Datei mit deinen lokal gespeicherten Daten. Der Export funktioniert ohne Server und verändert deine Daten nicht.',
+          ),
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            onPressed: _laeuft ? null : _speichern,
+            icon: const Icon(Icons.save_alt),
+            label: const Text('Export speichern'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _laeuft ? null : _teilen,
+            icon: const Icon(Icons.share_outlined),
+            label: const Text('Export teilen'),
+          ),
           const SizedBox(height: 28),
           Semantics(
             header: true,
             child: Text(
-              'Importprotokoll',
+              'Import prüfen',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
           const SizedBox(height: 8),
           const Text(
-            'Das Protokoll bleibt ausschließlich lokal und enthält nur Zeitpunkt, Status, Strategie und Zähler – keine importierten Fachinhalte.',
+            'Wähle eine Taugt’s?-Exportdatei aus. Sie wird validiert und mit deinen lokalen Daten verglichen. Erst die ausdrückliche Importbestätigung speichert Daten.',
+          ),
+          const SizedBox(height: 16),
+          FilledButton.tonalIcon(
+            onPressed: _laeuft ? null : _importPruefen,
+            icon: const Icon(Icons.fact_check_outlined),
+            label: const Text('Importdatei auswählen und prüfen'),
+          ),
+          const SizedBox(height: 28),
+          Semantics(
+            header: true,
+            child: Text(
+              'Lokale Daten löschen',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
           ),
           const SizedBox(height: 8),
-          if (_importProtokoll.isEmpty)
-            const Text('Noch keine Importausführung protokolliert.')
-          else
-            for (final eintrag in _importProtokoll.take(10))
-              Card(
-                child: ListTile(
-                  leading: Icon(
-                    eintrag.erfolgreich
-                        ? Icons.check_circle_outline
-                        : Icons.error_outline,
-                  ),
-                  title: Text(
-                    eintrag.erfolgreich
-                        ? 'Import erfolgreich'
-                        : 'Import zurückgerollt',
-                  ),
-                  subtitle: Text(
-                    '${eintrag.ausgefuehrtAm.toLocal()} · ${_strategieName(eintrag.strategie)}\n${eintrag.hinzugefuegt} hinzugefügt · ${eintrag.aktualisiert} aktualisiert · ${eintrag.uebersprungen} übersprungen · ${eintrag.zusammengefuehrt} zusammengeführt · ${eintrag.fehlerhaft} fehlerhaft',
-                  ),
-                ),
-              ),
-        ],
-      );
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Import/Export'),
-          actions: const [AppSupportMenu(contextName: 'Datenaustausch')],
-        ),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              Semantics(
-                header: true,
-                child: Text(
-                  'Gesamtdaten exportieren',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Erstellt eine vollständige JSON-Datei mit deinen lokal gespeicherten Daten. Der Export funktioniert ohne Server und verändert deine Daten nicht.',
-              ),
-              const SizedBox(height: 20),
-              FilledButton.icon(
-                onPressed: _laeuft ? null : _speichern,
-                icon: const Icon(Icons.save_alt),
-                label: const Text('Export speichern'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: _laeuft ? null : _teilen,
-                icon: const Icon(Icons.share_outlined),
-                label: const Text('Export teilen'),
-              ),
-              const SizedBox(height: 28),
-              Semantics(
-                header: true,
-                child: Text(
-                  'Import prüfen',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Wähle eine Taugt’s?-Exportdatei aus. Sie wird validiert und mit deinen lokalen Daten verglichen. Erst die ausdrückliche Importbestätigung speichert Daten.',
-              ),
-              const SizedBox(height: 16),
-              FilledButton.tonalIcon(
-                onPressed: _laeuft ? null : _importPruefen,
-                icon: const Icon(Icons.fact_check_outlined),
-                label: const Text('Importdatei auswählen und prüfen'),
-              ),
-              const SizedBox(height: 28),
-              Semantics(
-                header: true,
-                child: Text(
-                  'Lokale Daten löschen',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Löscht den gesamten lokalen Datenbestand unwiderruflich. '
-                'Exportiere wichtige Daten vorher als Sicherung.',
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: _laeuft ? null : _alleDatenLoeschen,
-                icon: const Icon(Icons.delete_forever_outlined),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.error,
-                ),
-                label: const Text('Alle Daten löschen'),
-              ),
-              if (_laeuft) ...[
-                const SizedBox(height: 20),
-                Semantics(
-                  label: 'Datenaustausch wird ausgeführt',
-                  child: const LinearProgressIndicator(),
-                ),
-              ],
-              if (_status != null) ...[
-                const SizedBox(height: 20),
-                Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    _status!,
-                    style: _istFehler
-                        ? TextStyle(color: Theme.of(context).colorScheme.error)
-                        : null,
-                  ),
-                ),
-              ],
-              if (_importFehler.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                for (final fehler in _importFehler.take(10))
-                  Text('• ${fehler.pfad}: ${fehler.nachricht}'),
-              ],
-              if (_analyse != null && _strategiePlan != null)
-                if (_konflikteBearbeiten)
-                  _buildKonfliktBearbeitung(context)
-                else
-                  _buildImportVorschau(context),
-              _buildImportErgebnis(context),
-              _buildImportProtokoll(context),
-            ],
+          const Text(
+            'Löscht den gesamten lokalen Datenbestand unwiderruflich. '
+            'Exportiere wichtige Daten vorher als Sicherung.',
           ),
-        ),
-      );
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _laeuft ? null : _alleDatenLoeschen,
+            icon: const Icon(Icons.delete_forever_outlined),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            label: const Text('Alle Daten löschen'),
+          ),
+          if (_laeuft) ...[
+            const SizedBox(height: 20),
+            Semantics(
+              label: 'Datenaustausch wird ausgeführt',
+              child: const LinearProgressIndicator(),
+            ),
+          ],
+          if (_status != null) ...[
+            const SizedBox(height: 20),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                _status!,
+                style: _istFehler
+                    ? TextStyle(color: Theme.of(context).colorScheme.error)
+                    : null,
+              ),
+            ),
+          ],
+          if (_importFehler.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            for (final fehler in _importFehler.take(10))
+              Text('• ${fehler.pfad}: ${fehler.nachricht}'),
+          ],
+          if (_analyse != null && _strategiePlan != null)
+            if (_konflikteBearbeiten)
+              _buildKonfliktBearbeitung(context)
+            else
+              _buildImportVorschau(context),
+          _buildImportErgebnis(context),
+          _buildImportProtokoll(context),
+        ],
+      ),
+    ),
+  );
 }
