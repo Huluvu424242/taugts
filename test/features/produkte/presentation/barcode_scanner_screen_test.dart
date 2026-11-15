@@ -3,8 +3,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:taugts/features/produkte/presentation/barcode_scanner_screen.dart';
 
 void main() {
-  testWidgets('zeigt einen erkannten Code vor der bewussten Übernahme',
-      (tester) async {
+  testWidgets('zeigt einen erkannten Code vor der bewussten Übernahme', (
+    tester,
+  ) async {
     await tester.pumpWidget(const MaterialApp(home: _ScannerTestStart()));
 
     await tester.tap(find.text('Scan starten'));
@@ -29,8 +30,9 @@ void main() {
     expect(find.text('Übernommen: 4012345678901'), findsOneWidget);
   });
 
-  testWidgets('Kameraausfall lässt die manuelle Erfassung erreichbar',
-      (tester) async {
+  testWidgets('Kameraausfall lässt die manuelle Erfassung erreichbar', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
@@ -98,13 +100,10 @@ class _ScannerTestStartState extends State<_ScannerTestStart> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: Center(
-          child: _code == null
-              ? FilledButton(
-                  onPressed: _starten,
-                  child: const Text('Scan starten'),
-                )
-              : Text('Übernommen: $_code'),
-        ),
-      );
+    body: Center(
+      child: _code == null
+          ? FilledButton(onPressed: _starten, child: const Text('Scan starten'))
+          : Text('Übernommen: $_code'),
+    ),
+  );
 }

@@ -41,46 +41,47 @@ void main() {
     );
   });
 
-  testWidgets(
-    'Bewertungen-Kachel öffnet Suche mit historischen Daten',
-    (tester) async {
-      final suche = _FakeSucheService();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: HauptnavigationScreen(
-            profil: null,
-            profilRepository: null,
-            bewertungsRepository: null,
-            exportService: null,
-            exportZielService: null,
-            idGenerator: null,
-            kategorieRepository: null,
-            kriteriensetRepository: null,
-            sucheService: suche,
-            auswertungsService: null,
-          ),
+  testWidgets('Bewertungen-Kachel öffnet Suche mit historischen Daten', (
+    tester,
+  ) async {
+    final suche = _FakeSucheService();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HauptnavigationScreen(
+          profil: null,
+          profilRepository: null,
+          bewertungsRepository: null,
+          exportService: null,
+          exportZielService: null,
+          idGenerator: null,
+          kategorieRepository: null,
+          kriteriensetRepository: null,
+          sucheService: suche,
+          auswertungsService: null,
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      final bewertungenKachel =
-          find.widgetWithText(OutlinedButton, 'Bewertungen');
-      expect(bewertungenKachel, findsOneWidget);
+    final bewertungenKachel = find.widgetWithText(
+      OutlinedButton,
+      'Bewertungen',
+    );
+    expect(bewertungenKachel, findsOneWidget);
 
-      await tester.ensureVisible(bewertungenKachel);
-      await tester.tap(bewertungenKachel);
-      await tester.pumpAndSettle();
+    await tester.ensureVisible(bewertungenKachel);
+    await tester.tap(bewertungenKachel);
+    await tester.pumpAndSettle();
 
-      expect(find.text('Suchbegriff'), findsOneWidget);
-      expect(find.text('Bewertungen noch nicht verfügbar'), findsNothing);
-      expect(suche.letzterFilter?.ziel, Suchziel.historie);
-      expect(find.text('Historienart'), findsOneWidget);
-      expect(
-        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-        1,
-      );
-    },
-  );
+    expect(find.text('Suchbegriff'), findsOneWidget);
+    expect(find.text('Bewertungen noch nicht verfügbar'), findsNothing);
+    expect(suche.letzterFilter?.ziel, Suchziel.historie);
+    expect(find.text('Historienart'), findsOneWidget);
+    expect(
+      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      1,
+    );
+  });
 }
 
 class _FakeSucheService implements SucheService {

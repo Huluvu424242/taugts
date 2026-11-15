@@ -26,14 +26,15 @@ void main() {
     final alle = await bewertungen.ladeAktiveKriterienFuerObjektart(
       KriteriumObjektart.getraenk,
     );
-    sets.speichereRegel(const KategorieKriteriensetRegel(
-      kategorieId: '10000000-0000-4000-8000-000000000003',
-      fallbackObjektart: KriteriumObjektart.getraenk,
-    ));
-    sets.setzeZuordnungen(
-      '10000000-0000-4000-8000-000000000003',
-      [alle.first.id],
+    sets.speichereRegel(
+      const KategorieKriteriensetRegel(
+        kategorieId: '10000000-0000-4000-8000-000000000003',
+        fallbackObjektart: KriteriumObjektart.getraenk,
+      ),
     );
+    sets.setzeZuordnungen('10000000-0000-4000-8000-000000000003', [
+      alle.first.id,
+    ]);
     final service = KriteriensetService(
       kategorien: kategorien,
       kriteriensets: sets,
@@ -47,11 +48,13 @@ void main() {
     expect(geerbt.eintraege, isNotEmpty);
     expect(geerbt.eintraege.any((wert) => wert.geerbt), isTrue);
 
-    sets.speichereRegel(const KategorieKriteriensetRegel(
-      kategorieId: 'kind',
-      fallbackObjektart: KriteriumObjektart.getraenk,
-      modus: KriteriensetModus.ersetzen,
-    ));
+    sets.speichereRegel(
+      const KategorieKriteriensetRegel(
+        kategorieId: 'kind',
+        fallbackObjektart: KriteriumObjektart.getraenk,
+        modus: KriteriensetModus.ersetzen,
+      ),
+    );
     sets.setzeZuordnungen('kind', [alle.last.id]);
     final ersetzt = await service.ermittle(
       kategorieId: kind.id,

@@ -22,8 +22,9 @@ void main() {
 
   tearDown(() => datenbank.schliessen());
 
-  testWidgets('zeigt Pflichtfehler am Feld und im Fehlersammler',
-      (tester) async {
+  testWidgets('zeigt Pflichtfehler am Feld und im Fehlersammler', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ProduktFormular(
@@ -48,18 +49,16 @@ void main() {
     expect(await repository.ladeProdukte(), isEmpty);
 
     await tester.tap(
-      find.widgetWithText(
-        TextButton,
-        'Name oder Barcode ist erforderlich.',
-      ),
+      find.widgetWithText(TextButton, 'Name oder Barcode ist erforderlich.'),
     );
     await tester.pumpAndSettle();
 
     expect(FocusManager.instance.primaryFocus?.context, isNotNull);
   });
 
-  testWidgets('übernimmt gescannte EAN und erhält vorhandene Formulardaten',
-      (tester) async {
+  testWidgets('übernimmt gescannte EAN und erhält vorhandene Formulardaten', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ProduktFormular(
@@ -100,8 +99,9 @@ void main() {
     await tester.tap(find.byTooltip('EAN scannen'));
     await tester.pumpAndSettle();
 
-    final barcode =
-        tester.widget<TextFormField>(find.byType(TextFormField).at(1));
+    final barcode = tester.widget<TextFormField>(
+      find.byType(TextFormField).at(1),
+    );
     expect(barcode.controller?.text, '9780201379624');
   });
 }
