@@ -49,6 +49,20 @@ void main() {
         ['pos-${e.$1}', e.$1, basis, basis],
       );
     }
+    for (final kriterium in [
+      ('gesamt', 'Gesamturteil', 'wertung'),
+      ('geschmack', 'Geschmack', 'wertung'),
+      ('intensitaet', 'Bitterkeit', 'intensitaet'),
+    ]) {
+      db.verbindung.execute(
+        '''INSERT INTO kriterien (
+          id, name, eingabetyp, reihenfolge, aktiv,
+          erstellt_am, geaendert_am, produktart, objektart, version,
+          auswahlwerte
+        ) VALUES (?, ?, ?, 0, 1, ?, ?, 'bier', 'getraenk', 1, '')''',
+        [kriterium.$1, kriterium.$2, kriterium.$3, basis, basis],
+      );
+    }
     var index = 0;
     void bewerten(String erlebnis, String kriterium, String name,
         String typ, double wert) {
