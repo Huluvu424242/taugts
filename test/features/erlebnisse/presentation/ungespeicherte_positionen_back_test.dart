@@ -65,6 +65,11 @@ void main() {
       await tester.tap(find.text('Erlebnis öffnen'));
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.text('Produkt hinzufügen'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.text('Produkt hinzufügen'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Produkt auswählen'));
