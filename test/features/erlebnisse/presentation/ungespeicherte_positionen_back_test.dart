@@ -106,6 +106,84 @@ void main() {
       expect(await repository.ladeErlebnispositionen(erlebnis.id), isEmpty);
     },
   );
+
+  for (final notizAendern in [false, true]) {
+    testWidgets(
+      notizAendern
+          ? 'Geänderte Erlebnisnotiz löst Rückfrage aus'
+          : 'Unverändertes Erlebnis kann ohne Rückfrage verlassen werden',
+      (tester) async {
+        final zeit = DateTime.utc(2026, 11, 15, 18);
+        final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+        addTearDown(datenbank.schliessen);
+        final repository = SqliteBewertungsRepository(datenbank);
+        final profil = Profil(
+          id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        );
+        datenbank.verbindung.execute(
+          'INSERT INTO profile VALUES (?, NULL, ?, ?)',
+          [profil.id, zeit.toIso8601String(), zeit.toIso8601String()],
+        );
+        final erlebnis = Erlebnis(
+          id: '71000000-0000-4000-8000-000000000002',
+          typ: Erlebnistyp.einkauf,
+          herkunftProfilId: profil.id,
+          notiz: 'Gespeicherte Notiz',
+          erstelltAm: zeit,
+          geaendertAm: zeit,
+        );
+        await repository.speichereErlebnis(erlebnis);
+
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => ErlebnisScreen(
+                      repository: repository,
+                      idGenerator: _TestIdGenerator(),
+                      profil: profil,
+                      erlebnis: erlebnis,
+                    ),
+                  ),
+                ),
+                child: const Text('Erlebnis öffnen'),
+              ),
+            ),
+          ),
+        ));
+        await tester.tap(find.text('Erlebnis öffnen'));
+        await tester.pumpAndSettle();
+        if (notizAendern) {
+          await tester.enterText(
+            find.widgetWithText(TextField, 'Notiz (optional)').first,
+            'Geänderte Notiz',
+          );
+          await tester.pumpAndSettle();
+        }
+
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        if (notizAendern) {
+          expect(find.text('Ungespeicherte Änderungen'), findsOneWidget);
+          expect(find.byType(ErlebnisScreen), findsOneWidget);
+          await tester.tap(find.text('Weiter bearbeiten'));
+          await tester.pumpAndSettle();
+          expect(find.byType(ErlebnisScreen), findsOneWidget);
+          expect((await repository.ladeErlebnis(erlebnis.id))?.notiz,
+              'Gespeicherte Notiz');
+        } else {
+          expect(find.byType(AlertDialog), findsNothing);
+          expect(find.byType(ErlebnisScreen), findsNothing);
+          expect(find.text('Erlebnis öffnen'), findsOneWidget);
+        }
+      },
+    );
+  }
+
 }
 
 class _TestIdGenerator implements IdGenerator {
