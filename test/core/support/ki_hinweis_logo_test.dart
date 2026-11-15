@@ -8,8 +8,9 @@ import 'package:taugts/core/support/app_info_service.dart';
 import 'package:taugts/core/support/app_support.dart';
 
 void main() {
-  testWidgets('KI-Hinweislogo lädt auf kleinem Bildschirm ohne Exception',
-      (tester) async {
+  testWidgets('KI-Hinweislogo lädt auf kleinem Bildschirm ohne Exception', (
+    tester,
+  ) async {
     await tester.binding.setSurfaceSize(const Size(320, 568));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -46,19 +47,21 @@ void main() {
     expect(tester.getSize(imageFinder), const Size.square(32));
   });
 
-  test('KI-Hinweislogo ist ein vollständig dekodierbares quadratisches PNG',
-      () async {
-    final data = await rootBundle.load(appLogoAsset);
-    final codec = await ui.instantiateImageCodec(
-      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
-    );
-    addTearDown(codec.dispose);
-    final frame = await codec.getNextFrame();
-    addTearDown(frame.image.dispose);
+  test(
+    'KI-Hinweislogo ist ein vollständig dekodierbares quadratisches PNG',
+    () async {
+      final data = await rootBundle.load(appLogoAsset);
+      final codec = await ui.instantiateImageCodec(
+        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+      );
+      addTearDown(codec.dispose);
+      final frame = await codec.getNextFrame();
+      addTearDown(frame.image.dispose);
 
-    expect(frame.image.width, 64);
-    expect(frame.image.height, 64);
-  });
+      expect(frame.image.width, 64);
+      expect(frame.image.height, 64);
+    },
+  );
 }
 
 class _FakeAppInfoGateway implements AppInfoGateway {

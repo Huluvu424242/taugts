@@ -42,7 +42,9 @@ void main() {
     expect(urheber, findsOneWidget);
 
     expect(
-        tester.getTopLeft(version).dy, lessThan(tester.getTopLeft(hilfe).dy));
+      tester.getTopLeft(version).dy,
+      lessThan(tester.getTopLeft(hilfe).dy),
+    );
     expect(
       tester.getTopLeft(hilfe).dy,
       lessThan(tester.getTopLeft(projektseite).dy),
@@ -88,10 +90,8 @@ void main() {
 }
 
 Widget _testApp(Widget menu) => MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(actions: [menu]),
-      ),
-    );
+  home: Scaffold(appBar: AppBar(actions: [menu])),
+);
 
 class _FakeAppInfoGateway implements AppInfoGateway {
   const _FakeAppInfoGateway();

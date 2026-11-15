@@ -14,31 +14,24 @@ void main() {
       SqliteKategorieRepository(db);
       final jetzt = DateTime.utc(2026, 9, 3).toIso8601String();
       const profil = 'profil-1';
-      db.verbindung.execute(
-        'INSERT INTO profile VALUES (?, ?, ?, ?)',
-        [profil, null, jetzt, jetzt],
-      );
+      db.verbindung.execute('INSERT INTO profile VALUES (?, ?, ?, ?)', [
+        profil,
+        null,
+        jetzt,
+        jetzt,
+      ]);
       db.verbindung.execute(
         "INSERT INTO erlebnisse (id, typ, beginn, erstellt_am, geaendert_am, herkunft_profil_id) VALUES ('e', 'einkauf', ?, ?, ?, ?)",
-        [
-          DateTime.utc(2026, 9, 1).toIso8601String(),
-          jetzt,
-          jetzt,
-          profil,
-        ],
+        [DateTime.utc(2026, 9, 1).toIso8601String(), jetzt, jetzt, profil],
       );
-      for (final produkt in [
-        ('p1', 'Pils 0,5 l'),
-        ('p2', 'Helles 0,5 l'),
-      ]) {
+      for (final produkt in [('p1', 'Pils 0,5 l'), ('p2', 'Helles 0,5 l')]) {
         db.verbindung.execute(
           'INSERT INTO objekte (id, name, art, erstellt_am, geaendert_am) VALUES (?, ?, ?, ?, ?)',
           [produkt.$1, produkt.$2, 'produkt', jetzt, jetzt],
         );
-        db.verbindung.execute(
-          'INSERT INTO produkte (objekt_id) VALUES (?)',
-          [produkt.$1],
-        );
+        db.verbindung.execute('INSERT INTO produkte (objekt_id) VALUES (?)', [
+          produkt.$1,
+        ]);
       }
       db.verbindung.execute(
         'INSERT INTO orte (id, name, typ, erstellt_am, geaendert_am) VALUES (?, ?, ?, ?, ?)',
@@ -97,14 +90,15 @@ void main() {
         ),
       );
       expect(produktspreise.preisverlauf, hasLength(3));
-      expect(
-        produktspreise.preisverlauf.map((wert) => wert.serie).toSet(),
-        {'Brauhaus · EUR', 'Markt · EUR'},
-      );
-      expect(
-        produktspreise.preisverlauf.map((wert) => wert.wert).toSet(),
-        {5.0, 7.0, 6.5},
-      );
+      expect(produktspreise.preisverlauf.map((wert) => wert.serie).toSet(), {
+        'Brauhaus · EUR',
+        'Markt · EUR',
+      });
+      expect(produktspreise.preisverlauf.map((wert) => wert.wert).toSet(), {
+        5.0,
+        7.0,
+        6.5,
+      });
 
       final besuche = await SqliteAuswertungsService(db).berechne(
         const AuswertungsFilter(
@@ -115,9 +109,8 @@ void main() {
       expect(besuche.besuchverlauf, hasLength(1));
       expect(besuche.besuchverlauf.single.wert, 1);
 
-      final ausgaben = await SqliteAuswertungsService(db).berechne(
-        const AuswertungsFilter(),
-      );
+      final ausgaben = await SqliteAuswertungsService(db)
+          .berechne(const AuswertungsFilter());
       expect(ausgaben.ausgabenverlauf, hasLength(1));
       expect(ausgaben.ausgabenverlauf.single.wert, 21.5);
       expect(ausgaben.ausgabenverlauf.single.serie, 'EUR');
@@ -129,14 +122,14 @@ void main() {
         ),
       );
       expect(ortspreise.preisverlauf, hasLength(3));
-      expect(
-        ortspreise.preisverlauf.map((wert) => wert.serie).toSet(),
-        {'Pils 0,5 l · EUR', 'Helles 0,5 l · EUR'},
-      );
-      expect(
-        ortspreise.preisverlauf.map((wert) => wert.beschreibung).toSet(),
-        {'Pils 0,5 l · Brauhaus', 'Helles 0,5 l · Brauhaus'},
-      );
+      expect(ortspreise.preisverlauf.map((wert) => wert.serie).toSet(), {
+        'Pils 0,5 l · EUR',
+        'Helles 0,5 l · EUR',
+      });
+      expect(ortspreise.preisverlauf.map((wert) => wert.beschreibung).toSet(), {
+        'Pils 0,5 l · Brauhaus',
+        'Helles 0,5 l · Brauhaus',
+      });
 
       db.verbindung.execute(
         '''
@@ -148,11 +141,7 @@ void main() {
         ''',
         [jetzt, jetzt],
       );
-      for (final eintrag in [
-        ('b1', 4.0, 1),
-        ('b2', 2.0, 1),
-        ('b3', 5.0, 2),
-      ]) {
+      for (final eintrag in [('b1', 4.0, 1), ('b2', 2.0, 1), ('b3', 5.0, 2)]) {
         db.verbindung.execute(
           '''
             INSERT INTO bewertungen (
@@ -189,9 +178,8 @@ void main() {
         );
       }
 
-      final daten = await SqliteAuswertungsService(db).berechne(
-        const AuswertungsFilter(),
-      );
+      final daten = await SqliteAuswertungsService(db)
+          .berechne(const AuswertungsFilter());
       expect(daten.auffaelligkeiten, hasLength(1));
       expect(daten.auffaelligkeiten.single.wert, 2);
       expect(
@@ -219,9 +207,8 @@ void main() {
       );
       expect(kriteriumsGefiltert.bewertungsanzahl, 0);
 
-      final zeitlichGefiltert = await SqliteAuswertungsService(db).berechne(
-        AuswertungsFilter(von: DateTime.utc(2026, 9, 2)),
-      );
+      final zeitlichGefiltert = await SqliteAuswertungsService(db)
+          .berechne(AuswertungsFilter(von: DateTime.utc(2026, 9, 2)));
       expect(zeitlichGefiltert.bewertungsanzahl, 3);
     },
   );

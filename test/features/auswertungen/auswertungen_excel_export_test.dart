@@ -10,8 +10,9 @@ import 'package:taugts/features/auswertungen/services/statistik_export_service.d
 import 'package:taugts/features/datenaustausch/services/binaer_export_ziel_service.dart';
 
 void main() {
-  testWidgets('Exportieren speichert eine xlsx-Datei und meldet Erfolg',
-      (tester) async {
+  testWidgets('Exportieren speichert eine xlsx-Datei und meldet Erfolg', (
+    tester,
+  ) async {
     final ziel = _FakeBinaerExportZielService();
     await tester.pumpWidget(
       MaterialApp(
@@ -35,8 +36,9 @@ void main() {
     expect(find.textContaining('Excel-Export gespeichert:'), findsOneWidget);
   });
 
-  testWidgets('ohne Qualitätswertungen wird keine leere Datei gespeichert',
-      (tester) async {
+  testWidgets('ohne Qualitätswertungen wird keine leere Datei gespeichert', (
+    tester,
+  ) async {
     final ziel = _FakeBinaerExportZielService();
     await tester.pumpWidget(
       MaterialApp(
@@ -53,10 +55,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(ziel.inhalt, isNull);
-    expect(
-      find.textContaining('keine passenden Daten vor'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('keine passenden Daten vor'), findsOneWidget);
   });
 }
 
@@ -84,23 +83,23 @@ class _FakeStatistikExportService implements StatistikExportService {
 
   @override
   Future<StatistikExportDaten> ladeDaten() async => const StatistikExportDaten(
-        produktbewertungen: [
-          ProduktOrtKennzahlen(
-            produktId: 'p1',
-            produktName: 'Produkt 1',
-            ortId: 'o1',
-            ortName: 'Ort A',
-            kennzahlen: BewertungsKennzahlen(
-              beste: 5,
-              schlechteste: 3,
-              durchschnitt: 4,
-              anzahl: 2,
-            ),
-          ),
-        ],
-        ortsbewertungen: [],
-        ortsverlauf: [],
-      );
+    produktbewertungen: [
+      ProduktOrtKennzahlen(
+        produktId: 'p1',
+        produktName: 'Produkt 1',
+        ortId: 'o1',
+        ortName: 'Ort A',
+        kennzahlen: BewertungsKennzahlen(
+          beste: 5,
+          schlechteste: 3,
+          durchschnitt: 4,
+          anzahl: 2,
+        ),
+      ),
+    ],
+    ortsbewertungen: [],
+    ortsverlauf: [],
+  );
 }
 
 class _LeererStatistikExportService implements StatistikExportService {
@@ -108,10 +107,10 @@ class _LeererStatistikExportService implements StatistikExportService {
 
   @override
   Future<StatistikExportDaten> ladeDaten() async => const StatistikExportDaten(
-        produktbewertungen: [],
-        ortsbewertungen: [],
-        ortsverlauf: [],
-      );
+    produktbewertungen: [],
+    ortsbewertungen: [],
+    ortsverlauf: [],
+  );
 }
 
 class _FakeBinaerExportZielService implements BinaerExportZielService {

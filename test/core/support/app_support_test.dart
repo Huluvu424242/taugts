@@ -127,7 +127,9 @@ void main() {
     expect(uri.queryParameters['body'], contains('Produkt erfassen'));
     expect(uri.queryParameters['body'], contains('1.2.3+45'));
     expect(
-        uri.queryParameters['body'], contains('Der Fokus ist nicht sichtbar.'));
+      uri.queryParameters['body'],
+      contains('Der Fokus ist nicht sichtbar.'),
+    );
     expect(uri.queryParameters['body'], isNot(contains('token')));
   });
 
@@ -169,8 +171,9 @@ void main() {
     expect(find.text('Bug melden'), findsWidgets);
   });
 
-  testWidgets('Fehlende App-Version wird verständlich gemeldet',
-      (tester) async {
+  testWidgets('Fehlende App-Version wird verständlich gemeldet', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _testApp(
         AppSupportMenu(
@@ -226,10 +229,8 @@ void main() {
 }
 
 Widget _testApp(Widget menu) => MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(actions: [menu]),
-      ),
-    );
+  home: Scaffold(appBar: AppBar(actions: [menu])),
+);
 
 class _FakeAppInfoGateway implements AppInfoGateway {
   const _FakeAppInfoGateway();
