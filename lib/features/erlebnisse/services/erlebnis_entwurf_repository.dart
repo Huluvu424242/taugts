@@ -28,6 +28,14 @@ class ErlebnisEntwurfRepository
   }
 
   final String erlebnisId;
+
+  bool get hatUngespeicherteAenderungen =>
+      _positionen.isNotEmpty ||
+      _entferntePositionen.isNotEmpty ||
+      _produktbewertungen.isNotEmpty ||
+      _ortsbewertungGeaendert ||
+      _legacyBewertungen != null;
+
   Erlebnis? _erlebnis;
   final _positionen = <String, ErlebnispositionMitProdukt>{};
   final _entferntePositionen = <String>{};
