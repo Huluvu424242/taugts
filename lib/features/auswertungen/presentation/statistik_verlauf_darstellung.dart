@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
 
 /// Zeigt dieselben Beobachtungen als Diagramm und zugängliche Tabelle.
