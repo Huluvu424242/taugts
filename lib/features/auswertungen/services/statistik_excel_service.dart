@@ -5,10 +5,7 @@ import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
 import 'package:taugts/features/auswertungen/models/statistik_export_modelle.dart';
 
 class StatistikExcelDatei {
-  const StatistikExcelDatei({
-    required this.dateiname,
-    required this.inhalt,
-  });
+  const StatistikExcelDatei({required this.dateiname, required this.inhalt});
 
   final String dateiname;
   final Uint8List inhalt;
@@ -74,16 +71,20 @@ class StatistikExcelService {
         ? filterOptionen?.orte
         : filterOptionen?.produkte;
     final objekt = _bezeichnung(objektOptionen, filter.objektId);
-    final kategorie =
-        _bezeichnung(filterOptionen?.kategorien, filter.kategorieId);
-    final kriterium =
-        _bezeichnung(filterOptionen?.kriterien, filter.kriteriumId);
+    final kategorie = _bezeichnung(
+      filterOptionen?.kategorien,
+      filter.kategorieId,
+    );
+    final kriterium = _bezeichnung(
+      filterOptionen?.kriterien,
+      filter.kriteriumId,
+    );
     final start = filter.von?.toLocal();
     final ende = filter.bis?.toLocal();
     final zeitraum = start == null && ende == null
         ? 'Alle Zeitpunkte'
         : '${start == null ? 'ab Beginn' : _dateiDatum(start)} bis '
-            '${ende == null ? 'heute' : _dateiDatum(ende)}';
+              '${ende == null ? 'heute' : _dateiDatum(ende)}';
 
     for (final (zeile, titel, wert) in [
       (0, 'Statistik', statistikTitel),
@@ -111,13 +112,19 @@ class StatistikExcelService {
       _textZelle(sheet, spalte, 7, kopf[spalte], _hauptKopfStyle);
     }
 
-    final sortiert = [...zeitreihe]..sort((a, b) {
+    final sortiert = [...zeitreihe]
+      ..sort((a, b) {
         final zeit = a.zeitpunkt.compareTo(b.zeitpunkt);
         return zeit != 0 ? zeit : a.beschreibung.compareTo(b.beschreibung);
       });
     if (sortiert.isEmpty) {
-      _textZelle(sheet, 0, 8,
-          'Für die gewählten Filter liegen keine Daten vor.', _textStyle);
+      _textZelle(
+        sheet,
+        0,
+        8,
+        'Für die gewählten Filter liegen keine Daten vor.',
+        _textStyle,
+      );
       return;
     }
 
@@ -164,16 +171,13 @@ class StatistikExcelService {
   }
 
   String _gruppierungText(StatistikZeitraum zeitraum) => switch (zeitraum) {
-        StatistikZeitraum.tag => 'Tag',
-        StatistikZeitraum.woche => 'Woche',
-        StatistikZeitraum.monat => 'Monat',
-        StatistikZeitraum.jahr => 'Jahr',
-      };
+    StatistikZeitraum.tag => 'Tag',
+    StatistikZeitraum.woche => 'Woche',
+    StatistikZeitraum.monat => 'Monat',
+    StatistikZeitraum.jahr => 'Jahr',
+  };
 
-  void _produktbewertungen(
-    Excel excel,
-    List<ProduktOrtKennzahlen> daten,
-  ) {
+  void _produktbewertungen(Excel excel, List<ProduktOrtKennzahlen> daten) {
     final sheet = excel['Produktbewertungen'];
     sheet.frozenRows = 2;
     sheet.frozenColumns = 1;
@@ -200,8 +204,9 @@ class StatistikExcelService {
       customValue: TextCellValue('Produkt'),
     );
     sheet
-        .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0))
-        .cellStyle = _hauptKopfStyle;
+            .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0))
+            .cellStyle =
+        _hauptKopfStyle;
 
     for (var ortIndex = 0; ortIndex < ortIds.length; ortIndex++) {
       final start = 1 + ortIndex * 3;
@@ -212,8 +217,9 @@ class StatistikExcelService {
         customValue: TextCellValue(orte[ortIds[ortIndex]]!),
       );
       sheet
-          .cell(CellIndex.indexByColumnRow(columnIndex: start, rowIndex: 0))
-          .cellStyle = _hauptKopfStyle;
+              .cell(CellIndex.indexByColumnRow(columnIndex: start, rowIndex: 0))
+              .cellStyle =
+          _hauptKopfStyle;
       for (var offset = 0; offset < 3; offset++) {
         sheet.setColumnWidth(start + offset, 16);
       }
@@ -222,9 +228,11 @@ class StatistikExcelService {
       _textZelle(sheet, start + 2, 1, 'Durchschnitt', _kopfStyle);
     }
 
-    for (var produktIndex = 0;
-        produktIndex < produktIds.length;
-        produktIndex++) {
+    for (
+      var produktIndex = 0;
+      produktIndex < produktIds.length;
+      produktIndex++
+    ) {
       final zeile = produktIndex + 2;
       final produktId = produktIds[produktIndex];
       _textZelle(sheet, 0, zeile, produkte[produktId]!, _zeilenKopfStyle);
@@ -275,13 +283,7 @@ class StatistikExcelService {
         eintrag.kennzahlen.schlechteste,
         _schlechtesteStyle,
       );
-      _zahlZelle(
-        sheet,
-        3,
-        zeile,
-        eintrag.kennzahlen.durchschnitt,
-        _zahlStyle,
-      );
+      _zahlZelle(sheet, 3, zeile, eintrag.kennzahlen.durchschnitt, _zahlStyle);
     }
   }
 

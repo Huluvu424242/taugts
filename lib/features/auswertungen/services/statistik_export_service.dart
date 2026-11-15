@@ -12,10 +12,10 @@ class SqliteStatistikExportService implements StatistikExportService {
 
   @override
   Future<StatistikExportDaten> ladeDaten() async => StatistikExportDaten(
-        produktbewertungen: _produktbewertungen(),
-        ortsbewertungen: _ortsbewertungen(),
-        ortsverlauf: _ortsverlauf(),
-      );
+    produktbewertungen: _produktbewertungen(),
+    ortsbewertungen: _ortsbewertungen(),
+    ortsverlauf: _ortsverlauf(),
+  );
 
   List<ProduktOrtKennzahlen> _produktbewertungen() {
     final rows = _db.verbindung.select('''
