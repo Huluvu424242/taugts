@@ -72,8 +72,9 @@ class _HauptnavigationScreenState extends State<HauptnavigationScreen> {
     if (repository == null || idGenerator == null || profil == null) return;
     final erlebnisse = await repository.ladeErlebnisse();
     if (!mounted) return;
-    final passendeErlebnisse =
-        erlebnisse.where((eintrag) => eintrag.id == erlebnisId).toList();
+    final passendeErlebnisse = erlebnisse
+        .where((eintrag) => eintrag.id == erlebnisId)
+        .toList();
     if (passendeErlebnisse.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Das Erlebnis ist nicht mehr verfügbar.')),
@@ -172,11 +173,8 @@ class _NichtVerfuegbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(text),
-          ),
-        ),
-      );
+    child: Center(
+      child: Padding(padding: const EdgeInsets.all(24), child: Text(text)),
+    ),
+  );
 }

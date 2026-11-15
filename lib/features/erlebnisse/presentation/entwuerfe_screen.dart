@@ -35,9 +35,8 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
           title: const Text('Was möchtest du registrieren?'),
           children: [
             SimpleDialogOption(
-              onPressed: () => Navigator.of(dialogContext).pop(
-                Erlebnistyp.restaurantbesuch,
-              ),
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(Erlebnistyp.restaurantbesuch),
               child: const ListTile(
                 leading: Icon(Icons.restaurant_outlined),
                 title: Text('Restaurantbesuch'),
@@ -45,9 +44,8 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
               ),
             ),
             SimpleDialogOption(
-              onPressed: () => Navigator.of(dialogContext).pop(
-                Erlebnistyp.einkauf,
-              ),
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(Erlebnistyp.einkauf),
               child: const ListTile(
                 leading: Icon(Icons.shopping_bag_outlined),
                 title: Text('Einkauf'),
@@ -74,120 +72,119 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
       setState(() {
         _erlebnisse = widget.repository.ladeErlebnisse();
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erlebnis gespeichert.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Erlebnis gespeichert.')));
     }
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Erlebnisse'),
-          actions: const [
-            AppSupportMenu(contextName: SupportKontexte.bewertungsentwuerfe),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: _oeffnen,
-          icon: const Icon(Icons.add),
-          label: const Text('Erlebnis registrieren'),
-        ),
-        body: SafeArea(
-          child: FutureBuilder<List<Erlebnis>>(
-            future: _erlebnisse,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Semantics(
-                  liveRegion: true,
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            'Die Erlebnisse konnten nicht geladen werden.',
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          FilledButton.icon(
-                            onPressed: () => setState(
-                              () => _erlebnisse =
-                                  widget.repository.ladeErlebnisse(),
-                            ),
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('Erlebnisse erneut laden'),
-                          ),
-                        ],
+    appBar: AppBar(
+      title: const Text('Erlebnisse'),
+      actions: const [
+        AppSupportMenu(contextName: SupportKontexte.bewertungsentwuerfe),
+      ],
+    ),
+    floatingActionButton: FloatingActionButton.extended(
+      onPressed: _oeffnen,
+      icon: const Icon(Icons.add),
+      label: const Text('Erlebnis registrieren'),
+    ),
+    body: SafeArea(
+      child: FutureBuilder<List<Erlebnis>>(
+        future: _erlebnisse,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Semantics(
+              liveRegion: true,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Die Erlebnisse konnten nicht geladen werden.',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: () => setState(
+                          () =>
+                              _erlebnisse = widget.repository.ladeErlebnisse(),
+                        ),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Erlebnisse erneut laden'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+          if (!snapshot.hasData) {
+            return Center(
+              child: Semantics(
+                label: 'Erlebnisse werden geladen',
+                child: const CircularProgressIndicator(),
+              ),
+            );
+          }
+          final erlebnisse = snapshot.data!;
+          if (erlebnisse.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        'Noch keine Erlebnisse',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
-                  ),
-                );
-              }
-              if (!snapshot.hasData) {
-                return Center(
-                  child: Semantics(
-                    label: 'Erlebnisse werden geladen',
-                    child: const CircularProgressIndicator(),
-                  ),
-                );
-              }
-              final erlebnisse = snapshot.data!;
-              if (erlebnisse.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Semantics(
-                          header: true,
-                          child: Text(
-                            'Noch keine Erlebnisse',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Registriere einen Restaurantbesuch oder Einkauf. Du kannst jedes Erlebnis jederzeit bearbeiten.',
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        FilledButton(
-                          onPressed: _oeffnen,
-                          child: const Text('Erlebnis registrieren'),
-                        ),
-                      ],
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Registriere einen Restaurantbesuch oder Einkauf. Du kannst jedes Erlebnis jederzeit bearbeiten.',
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                );
-              }
-
-              final sortierte = _sortiere(erlebnisse, aufsteigend: false);
-
-              return ListView(
-                padding: const EdgeInsets.only(bottom: 104),
-                children: [
-                  _Gruppe(
-                    titel: 'Alle Erlebnisse',
-                    erlebnisse: sortierte,
-                    eintragBuilder: _eintrag,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: FilledButton.icon(
+                    const SizedBox(height: 16),
+                    FilledButton(
                       onPressed: _oeffnen,
-                      icon: const Icon(Icons.add),
-                      label: const Text('Erlebnis registrieren'),
+                      child: const Text('Erlebnis registrieren'),
                     ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      );
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final sortierte = _sortiere(erlebnisse, aufsteigend: false);
+
+          return ListView(
+            padding: const EdgeInsets.only(bottom: 104),
+            children: [
+              _Gruppe(
+                titel: 'Alle Erlebnisse',
+                erlebnisse: sortierte,
+                eintragBuilder: _eintrag,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: FilledButton.icon(
+                  onPressed: _oeffnen,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Erlebnis registrieren'),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
 
   List<Erlebnis> _sortiere(
     Iterable<Erlebnis> quelle, {
@@ -211,30 +208,30 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
   DateTime? _sortierZeit(Erlebnis erlebnis) => erlebnis.beginn;
 
   Widget _eintrag(Erlebnis erlebnis) => FutureBuilder<_EintragDetails>(
-        future: _detailsLaden(erlebnis),
-        builder: (context, snapshot) {
-          final details = snapshot.data;
-          final titel = details?.ort?.name ?? _typLabel(erlebnis.typ);
-          final positionen = details?.positionen;
-          final untertitelTeile = <String>[
-            _typLabel(erlebnis.typ),
-            _zeitLabel(context, erlebnis),
-            if (positionen != null)
-              '$positionen ${positionen == 1 ? 'Position' : 'Positionen'}',
-          ];
-          return ListTile(
-            title: Text(titel),
-            subtitle: Text(untertitelTeile.join(' · ')),
-            onTap: () => _oeffnen(erlebnis),
-            leading: Icon(
-              erlebnis.typ == Erlebnistyp.restaurantbesuch
-                  ? Icons.restaurant_outlined
-                  : Icons.shopping_bag_outlined,
-            ),
-            trailing: const Icon(Icons.chevron_right),
-          );
-        },
+    future: _detailsLaden(erlebnis),
+    builder: (context, snapshot) {
+      final details = snapshot.data;
+      final titel = details?.ort?.name ?? _typLabel(erlebnis.typ);
+      final positionen = details?.positionen;
+      final untertitelTeile = <String>[
+        _typLabel(erlebnis.typ),
+        _zeitLabel(context, erlebnis),
+        if (positionen != null)
+          '$positionen ${positionen == 1 ? 'Position' : 'Positionen'}',
+      ];
+      return ListTile(
+        title: Text(titel),
+        subtitle: Text(untertitelTeile.join(' · ')),
+        onTap: () => _oeffnen(erlebnis),
+        leading: Icon(
+          erlebnis.typ == Erlebnistyp.restaurantbesuch
+              ? Icons.restaurant_outlined
+              : Icons.shopping_bag_outlined,
+        ),
+        trailing: const Icon(Icons.chevron_right),
       );
+    },
+  );
 
   Future<_EintragDetails> _detailsLaden(Erlebnis erlebnis) async {
     final ortId = erlebnis.wirksamerOrtId;
@@ -250,9 +247,9 @@ class _EntwuerfeScreenState extends State<EntwuerfeScreen> {
   }
 
   String _typLabel(Erlebnistyp typ) => switch (typ) {
-        Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
-        Erlebnistyp.einkauf => 'Einkauf',
-      };
+    Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
+    Erlebnistyp.einkauf => 'Einkauf',
+  };
 
   String _zeitLabel(BuildContext context, Erlebnis erlebnis) {
     final beginn = erlebnis.beginn;
@@ -291,19 +288,16 @@ class _Gruppe extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
-            child: Semantics(
-              header: true,
-              child: Text(
-                titel,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-          ),
-          for (final erlebnis in erlebnisse) eintragBuilder(erlebnis),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
+        child: Semantics(
+          header: true,
+          child: Text(titel, style: Theme.of(context).textTheme.titleMedium),
+        ),
+      ),
+      for (final erlebnis in erlebnisse) eintragBuilder(erlebnis),
+    ],
+  );
 }

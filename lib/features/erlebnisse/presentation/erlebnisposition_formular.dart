@@ -134,8 +134,9 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
     final produkt = _produkt;
     final anzahl = int.tryParse(_anzahl.text.trim());
     final preisText = _preis.text.trim();
-    final betrag =
-        preisText.isEmpty ? null : Geldbetrag.ausEingabe(preisText, _waehrung);
+    final betrag = preisText.isEmpty
+        ? null
+        : Geldbetrag.ausEingabe(preisText, _waehrung);
     final fehler = <(String, FocusNode)>[
       if (produkt == null) ('Ein Produkt ist erforderlich.', _produktFokus),
       if (anzahl == null || anzahl < 1)
@@ -188,131 +189,133 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
       setState(() => _speichert = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Die Position konnte nicht gespeichert werden.')),
+          content: Text('Die Position konnte nicht gespeichert werden.'),
+        ),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(widget.vorhanden == null
-              ? 'Erlebnisposition hinzufügen'
-              : 'Erlebnisposition bearbeiten'),
-        ),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(24),
+    appBar: AppBar(
+      title: Text(
+        widget.vorhanden == null
+            ? 'Erlebnisposition hinzufügen'
+            : 'Erlebnisposition bearbeiten',
+      ),
+    ),
+    body: SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          if (_fehler.isNotEmpty)
+            FormularFehlersammler(focusNode: _fehlerFokus, fehler: _fehler),
+          Focus(
+            focusNode: _produktFokus,
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Produkt'),
+              subtitle: Text(_produkt?.anzeigetitel ?? 'Produkt auswählen'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _produktWaehlen,
+            ),
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
-              if (_fehler.isNotEmpty)
-                FormularFehlersammler(
-                  focusNode: _fehlerFokus,
-                  fehler: _fehler,
+              if (_produkt != null)
+                OutlinedButton.icon(
+                  onPressed: _produktBearbeiten,
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Produkt bearbeiten'),
                 ),
-              Focus(
-                focusNode: _produktFokus,
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Produkt'),
-                  subtitle: Text(_produkt?.anzeigetitel ?? 'Produkt auswählen'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: _produktWaehlen,
-                ),
-              ),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  if (_produkt != null)
-                    OutlinedButton.icon(
-                      onPressed: _produktBearbeiten,
-                      icon: const Icon(Icons.edit_outlined),
-                      label: const Text('Produkt bearbeiten'),
-                    ),
-                  OutlinedButton.icon(
-                    onPressed: _produktAnlegen,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Neues Produkt'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  IconButton(
-                    tooltip: 'Anzahl verringern',
-                    onPressed: () => _anzahlAendern(-1),
-                    icon: const Icon(Icons.remove),
-                  ),
-                  Expanded(
-                    child: TextField(
-                      key: const ValueKey('positions-anzahl'),
-                      controller: _anzahl,
-                      focusNode: _anzahlFokus,
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: const InputDecoration(labelText: 'Anzahl'),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Anzahl erhöhen',
-                    onPressed: () => _anzahlAendern(1),
-                    icon: const Icon(Icons.add),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _preis,
-                      focusNode: _preisFokus,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'Preis (optional)',
-                        hintText: '0,00',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  DropdownButton<String>(
-                    value: _waehrung,
-                    items: const [
-                      DropdownMenuItem(value: 'EUR', child: Text('EUR')),
-                      DropdownMenuItem(value: 'USD', child: Text('USD')),
-                      DropdownMenuItem(value: 'GBP', child: Text('GBP')),
-                    ],
-                    onChanged: (wert) {
-                      if (wert == null) return;
-                      setState(() => _waehrung = wert);
-                      _ladeLetztenPreis();
-                    },
-                  ),
-                ],
-              ),
-              if (_letzterPreis != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    'Zuletzt erfasst: ${_letzterPreis!.betrag.dezimalText} '
-                    '${_letzterPreis!.betrag.waehrung} – nur zur Orientierung',
-                  ),
-                ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: _speichert ? null : _speichern,
-                icon: const Icon(Icons.save_outlined),
-                label: Text(widget.repository is ErlebnisEntwurfRepository
-                    ? 'Position übernehmen'
-                    : 'Position speichern'),
+              OutlinedButton.icon(
+                onPressed: _produktAnlegen,
+                icon: const Icon(Icons.add),
+                label: const Text('Neues Produkt'),
               ),
             ],
           ),
-        ),
-      );
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              IconButton(
+                tooltip: 'Anzahl verringern',
+                onPressed: () => _anzahlAendern(-1),
+                icon: const Icon(Icons.remove),
+              ),
+              Expanded(
+                child: TextField(
+                  key: const ValueKey('positions-anzahl'),
+                  controller: _anzahl,
+                  focusNode: _anzahlFokus,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: const InputDecoration(labelText: 'Anzahl'),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Anzahl erhöhen',
+                onPressed: () => _anzahlAendern(1),
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _preis,
+                  focusNode: _preisFokus,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Preis (optional)',
+                    hintText: '0,00',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              DropdownButton<String>(
+                value: _waehrung,
+                items: const [
+                  DropdownMenuItem(value: 'EUR', child: Text('EUR')),
+                  DropdownMenuItem(value: 'USD', child: Text('USD')),
+                  DropdownMenuItem(value: 'GBP', child: Text('GBP')),
+                ],
+                onChanged: (wert) {
+                  if (wert == null) return;
+                  setState(() => _waehrung = wert);
+                  _ladeLetztenPreis();
+                },
+              ),
+            ],
+          ),
+          if (_letzterPreis != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                'Zuletzt erfasst: ${_letzterPreis!.betrag.dezimalText} '
+                '${_letzterPreis!.betrag.waehrung} – nur zur Orientierung',
+              ),
+            ),
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: _speichert ? null : _speichern,
+            icon: const Icon(Icons.save_outlined),
+            label: Text(
+              widget.repository is ErlebnisEntwurfRepository
+                  ? 'Position übernehmen'
+                  : 'Position speichern',
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
