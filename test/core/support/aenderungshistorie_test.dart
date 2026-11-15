@@ -45,7 +45,9 @@ void main() {
       expect(find.text('Neu'), findsOneWidget);
       expect(find.text('Teständerung'), findsOneWidget);
       expect(
-          find.byKey(const Key('aenderungshistorie-inhalt')), findsOneWidget);
+        find.byKey(const Key('aenderungshistorie-inhalt')),
+        findsOneWidget,
+      );
       expect(find.textContaining('## '), findsNothing);
     },
   );
@@ -54,9 +56,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(body: _HistorieOeffnenButton()),
-      ),
+      const MaterialApp(home: Scaffold(body: _HistorieOeffnenButton())),
     );
 
     await tester.tap(find.text('Öffnen'));
@@ -73,12 +73,12 @@ class _HistorieOeffnenButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextButton(
-        onPressed: () => zeigeAenderungshistorie(
-          context,
-          changelogGateway: const _FehlerChangelogGateway(),
-        ),
-        child: const Text('Öffnen'),
-      );
+    onPressed: () => zeigeAenderungshistorie(
+      context,
+      changelogGateway: const _FehlerChangelogGateway(),
+    ),
+    child: const Text('Öffnen'),
+  );
 }
 
 class _FakeAppInfoGateway implements AppInfoGateway {

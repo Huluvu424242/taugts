@@ -64,39 +64,36 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Mein Profil'),
-          actions: const [
-            AppSupportMenu(contextName: SupportKontexte.profil),
-          ],
-        ),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              TextField(
-                controller: _anzeigenameController,
-                decoration: const InputDecoration(
-                  labelText: 'Anzeigename (optional)',
-                  helperText:
-                      'Bleibt leer, wenn du keinen Namen angeben möchtest.',
-                ),
-                maxLength: 80,
-                textInputAction: TextInputAction.done,
-                onSubmitted: _speichert ? null : (_) => _speichern(),
-              ),
-              const SizedBox(height: 16),
-              SelectableText(
-                'Profil-ID: ${widget.profil.id}',
-                semanticsLabel: 'Stabile Profil-ID: ${widget.profil.id}',
-              ),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _speichert ? null : _speichern,
-                child: Text(_speichert ? 'Speichert …' : 'Profil speichern'),
-              ),
-            ],
+    appBar: AppBar(
+      title: const Text('Mein Profil'),
+      actions: const [AppSupportMenu(contextName: SupportKontexte.profil)],
+    ),
+    body: SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          TextField(
+            controller: _anzeigenameController,
+            decoration: const InputDecoration(
+              labelText: 'Anzeigename (optional)',
+              helperText: 'Bleibt leer, wenn du keinen Namen angeben möchtest.',
+            ),
+            maxLength: 80,
+            textInputAction: TextInputAction.done,
+            onSubmitted: _speichert ? null : (_) => _speichern(),
           ),
-        ),
-      );
+          const SizedBox(height: 16),
+          SelectableText(
+            'Profil-ID: ${widget.profil.id}',
+            semanticsLabel: 'Stabile Profil-ID: ${widget.profil.id}',
+          ),
+          const SizedBox(height: 24),
+          FilledButton(
+            onPressed: _speichert ? null : _speichern,
+            child: Text(_speichert ? 'Speichert …' : 'Profil speichern'),
+          ),
+        ],
+      ),
+    ),
+  );
 }

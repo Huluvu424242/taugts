@@ -53,11 +53,11 @@ class SqliteProfilRepository implements ProfilRepository {
   }
 
   Profil _ausZeile(Map<String, Object?> zeile) => Profil(
-        id: zeile['id']! as String,
-        anzeigename: zeile['anzeigename'] as String?,
-        erstelltAm: DateTime.parse(zeile['erstellt_am']! as String),
-        geaendertAm: DateTime.parse(zeile['geaendert_am']! as String),
-      );
+    id: zeile['id']! as String,
+    anzeigename: zeile['anzeigename'] as String?,
+    erstelltAm: DateTime.parse(zeile['erstellt_am']! as String),
+    geaendertAm: DateTime.parse(zeile['geaendert_am']! as String),
+  );
 
   String _zeit(DateTime wert) => wert.toUtc().toIso8601String();
 }
