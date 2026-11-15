@@ -43,25 +43,27 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => ErlebnisScreen(
-                    repository: repository,
-                    idGenerator: _TestIdGenerator(),
-                    profil: profil,
-                    erlebnis: erlebnis,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => ErlebnisScreen(
+                      repository: repository,
+                      idGenerator: _TestIdGenerator(),
+                      profil: profil,
+                      erlebnis: erlebnis,
+                    ),
                   ),
                 ),
+                child: const Text('Erlebnis öffnen'),
               ),
-              child: const Text('Erlebnis öffnen'),
             ),
           ),
         ),
-      ));
+      );
       await tester.tap(find.text('Erlebnis öffnen'));
       await tester.pumpAndSettle();
 
@@ -80,8 +82,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Regressionstest-Produkt'), findsWidgets);
-      expect(await repository.ladeErlebnispositionen(erlebnis.id), isEmpty,
-          reason: 'Die Position darf vor dem allgemeinen Speichern nur im Entwurf liegen.');
+      expect(
+        await repository.ladeErlebnispositionen(erlebnis.id),
+        isEmpty,
+        reason: 'Die Position darf vor dem allgemeinen Speichern nur im Entwurf liegen.',
+      );
 
       // Android-System-Zurück statt des allgemeinen Speichern-Buttons.
       await tester.binding.handlePopRoute();
@@ -89,8 +94,11 @@ void main() {
 
       // Sollverhalten: Der Entwurf bleibt geöffnet, bis das Verwerfen
       // ausdrücklich bestätigt wurde. Dieser Test ist vor dem Bugfix rot.
-      expect(find.byType(AlertDialog), findsOneWidget,
-          reason: 'Ungespeicherte Erlebnispositionen erfordern eine Rückfrage.');
+      expect(
+        find.byType(AlertDialog),
+        findsOneWidget,
+        reason: 'Ungespeicherte Erlebnispositionen erfordern eine Rückfrage.',
+      );
       expect(find.byType(ErlebnisScreen), findsOneWidget);
       expect(await repository.ladeErlebnispositionen(erlebnis.id), isEmpty);
 
@@ -141,25 +149,27 @@ void main() {
         );
         await repository.speichereErlebnis(erlebnis);
 
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => TextButton(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => ErlebnisScreen(
-                      repository: repository,
-                      idGenerator: _TestIdGenerator(),
-                      profil: profil,
-                      erlebnis: erlebnis,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ErlebnisScreen(
+                        repository: repository,
+                        idGenerator: _TestIdGenerator(),
+                        profil: profil,
+                        erlebnis: erlebnis,
+                      ),
                     ),
                   ),
+                  child: const Text('Erlebnis öffnen'),
                 ),
-                child: const Text('Erlebnis öffnen'),
               ),
             ),
           ),
-        ));
+        );
         await tester.tap(find.text('Erlebnis öffnen'));
         await tester.pumpAndSettle();
         if (notizAendern) {
@@ -178,8 +188,10 @@ void main() {
           await tester.tap(find.text('Weiter bearbeiten'));
           await tester.pumpAndSettle();
           expect(find.byType(ErlebnisScreen), findsOneWidget);
-          expect((await repository.ladeErlebnis(erlebnis.id))?.notiz,
-              'Gespeicherte Notiz');
+          expect(
+            (await repository.ladeErlebnis(erlebnis.id))?.notiz,
+            'Gespeicherte Notiz',
+          );
         } else {
           expect(find.byType(AlertDialog), findsNothing);
           expect(find.byType(ErlebnisScreen), findsNothing);
@@ -188,7 +200,6 @@ void main() {
       },
     );
   }
-
 }
 
 class _TestIdGenerator implements IdGenerator {

@@ -6,8 +6,9 @@ import 'package:taugts/features/profil/models/profil.dart';
 import 'package:taugts/features/profil/services/profil_repository.dart';
 
 void main() {
-  testWidgets('Hauptmenü zeigt gut erkennbares KI-Logo ohne höhere App-Bar',
-      (tester) async {
+  testWidgets('Hauptmenü zeigt gut erkennbares KI-Logo ohne höhere App-Bar', (
+    tester,
+  ) async {
     await tester.binding.setSurfaceSize(const Size(320, 568));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 

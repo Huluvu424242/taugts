@@ -22,10 +22,11 @@ void main() {
       geaendertAm: zeit,
     );
     datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-    datenbank.verbindung.execute(
-      'INSERT INTO profile VALUES (?, NULL, ?, ?)',
-      [profil.id, zeit.toIso8601String(), zeit.toIso8601String()],
-    );
+    datenbank.verbindung.execute('INSERT INTO profile VALUES (?, NULL, ?, ?)', [
+      profil.id,
+      zeit.toIso8601String(),
+      zeit.toIso8601String(),
+    ]);
     repository = SqliteBewertungsRepository(datenbank);
   });
 
@@ -82,8 +83,9 @@ void main() {
         await tester.tap(find.text('Speichern'));
         await tester.pumpAndSettle();
 
-        final gespeichert =
-            await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id);
+        final gespeichert = await repository.ladeOrtsbewertungFuerErlebnis(
+          erlebnis.id,
+        );
         expect(gespeichert, isNotNull);
         expect(gespeichert!.ortsbewertung.notiz, fall.notiz);
         expect(gespeichert.ortsbewertung.erlebnisId, erlebnis.id);
@@ -115,8 +117,9 @@ void main() {
     );
   }
 
-  testWidgets('Produktposition bleibt bei gemeinsamer Ortsbewertung erhalten',
-      (tester) async {
+  testWidgets('Produktposition bleibt bei gemeinsamer Ortsbewertung erhalten', (
+    tester,
+  ) async {
     final erlebnis = await _vorbereiten(
       repository: repository,
       profil: profil,
@@ -179,38 +182,40 @@ void main() {
   });
 
   testWidgets(
-      'Gelöschter Ort bleibt beim erneuten Speichern historisch erhalten',
-      (tester) async {
-    final erlebnis = await _vorbereiten(
-      repository: repository,
-      profil: profil,
-      zeit: zeit,
-      typ: Erlebnistyp.restaurantbesuch,
-      ortstyp: Ortstyp.gastronomie,
-    );
-    await (repository as StammdatenLoeschRepository).loescheOrt(
-      erlebnis.ortId!,
-    );
+    'Gelöschter Ort bleibt beim erneuten Speichern historisch erhalten',
+    (tester) async {
+      final erlebnis = await _vorbereiten(
+        repository: repository,
+        profil: profil,
+        zeit: zeit,
+        typ: Erlebnistyp.restaurantbesuch,
+        ortstyp: Ortstyp.gastronomie,
+      );
+      await (repository as StammdatenLoeschRepository).loescheOrt(
+        erlebnis.ortId!,
+      );
 
-    await _screenOeffnen(
-      tester: tester,
-      repository: repository,
-      profil: profil,
-      erlebnis: erlebnis,
-    );
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Nicht zugeordnet'), findsWidgets);
-    await tester.tap(find.text('Speichern'));
-    await tester.pumpAndSettle();
+      await _screenOeffnen(
+        tester: tester,
+        repository: repository,
+        profil: profil,
+        erlebnis: erlebnis,
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Nicht zugeordnet'), findsWidgets);
+      await tester.tap(find.text('Speichern'));
+      await tester.pumpAndSettle();
 
-    final gespeichert = await repository.ladeErlebnis(erlebnis.id);
-    expect(gespeichert, isNotNull);
-    expect(gespeichert!.ortId, erlebnis.ortId);
-    expect(await repository.ladeOrt(erlebnis.ortId!), isNull);
-  });
+      final gespeichert = await repository.ladeErlebnis(erlebnis.id);
+      expect(gespeichert, isNotNull);
+      expect(gespeichert!.ortId, erlebnis.ortId);
+      expect(await repository.ladeOrt(erlebnis.ortId!), isNull);
+    },
+  );
 
-  testWidgets('Erlebnis bietet einen einzigen Speichern-Button',
-      (tester) async {
+  testWidgets('Erlebnis bietet einen einzigen Speichern-Button', (
+    tester,
+  ) async {
     final erlebnis = await _vorbereiten(
       repository: repository,
       profil: profil,
@@ -244,8 +249,9 @@ void main() {
     );
   });
 
-  testWidgets('Ungültiger Zahlenwert verhindert Gesamt-Speicherung',
-      (tester) async {
+  testWidgets('Ungültiger Zahlenwert verhindert Gesamt-Speicherung', (
+    tester,
+  ) async {
     const kriteriumId = '22100000-0000-4000-8000-000000000099';
     await repository.speichereKriterium(
       Bewertungskriterium(
@@ -300,7 +306,9 @@ void main() {
     );
     expect(eingabefeld, findsOneWidget);
     expect(
-        tester.widget<TextField>(eingabefeld).controller!.text, 'keine Zahl');
+      tester.widget<TextField>(eingabefeld).controller!.text,
+      'keine Zahl',
+    );
     expect(
       tester.widget<TextField>(eingabefeld).decoration?.errorText,
       'Bitte eine gültige Zahl eingeben.',
@@ -325,10 +333,7 @@ void main() {
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
 
-    expect(
-      await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id),
-      isNull,
-    );
+    expect(await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id), isNull);
     expect(find.text('Zur Bewertung'), findsOneWidget);
   });
 }

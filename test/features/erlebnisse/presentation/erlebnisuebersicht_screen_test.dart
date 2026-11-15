@@ -21,23 +21,27 @@ void main() {
       geaendertAm: zeit,
     );
     datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-    datenbank.verbindung.execute(
-      'INSERT INTO profile VALUES (?, NULL, ?, ?)',
-      [profil.id, zeit.toIso8601String(), zeit.toIso8601String()],
-    );
+    datenbank.verbindung.execute('INSERT INTO profile VALUES (?, NULL, ?, ?)', [
+      profil.id,
+      zeit.toIso8601String(),
+      zeit.toIso8601String(),
+    ]);
     repository = SqliteBewertungsRepository(datenbank);
   });
 
   tearDown(() => datenbank.schliessen());
 
-  testWidgets('Leerzustand erklärt Restaurantbesuch und Einkauf',
-      (tester) async {
+  testWidgets('Leerzustand erklärt Restaurantbesuch und Einkauf', (
+    tester,
+  ) async {
     await tester.pumpWidget(_app(repository, profil));
     await tester.pumpAndSettle();
 
     expect(find.text('Noch keine Erlebnisse'), findsOneWidget);
     expect(
-        find.textContaining('Restaurantbesuch oder Einkauf'), findsOneWidget);
+      find.textContaining('Restaurantbesuch oder Einkauf'),
+      findsOneWidget,
+    );
     expect(find.text('Erlebnis registrieren'), findsWidgets);
   });
 

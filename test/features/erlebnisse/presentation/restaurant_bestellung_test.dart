@@ -21,10 +21,11 @@ void main() {
       geaendertAm: zeit,
     );
     datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-    datenbank.verbindung.execute(
-      'INSERT INTO profile VALUES (?, NULL, ?, ?)',
-      [profil.id, zeit.toIso8601String(), zeit.toIso8601String()],
-    );
+    datenbank.verbindung.execute('INSERT INTO profile VALUES (?, NULL, ?, ?)', [
+      profil.id,
+      zeit.toIso8601String(),
+      zeit.toIso8601String(),
+    ]);
     repository = SqliteBewertungsRepository(datenbank);
 
     final produkt = Produkt(
@@ -56,8 +57,9 @@ void main() {
 
   tearDown(() => datenbank.schliessen());
 
-  testWidgets('Restaurantbesuch führt Bestellung mit direkter Mengenänderung',
-      (tester) async {
+  testWidgets('Restaurantbesuch führt Bestellung mit direkter Mengenänderung', (
+    tester,
+  ) async {
     final erlebnis = (await repository.ladeErlebnisse()).single;
     await tester.pumpWidget(
       MaterialApp(
@@ -94,34 +96,39 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-        (await repository.ladeErlebnispositionen(erlebnis.id))
-            .single
-            .position
-            .anzahl,
-        1);
+      (await repository.ladeErlebnispositionen(erlebnis.id))
+          .single
+          .position
+          .anzahl,
+      1,
+    );
     expect(find.text('2 × Pils'), findsOneWidget);
     expect(find.byTooltip('Pils Anzahl verringern, aktuell 2'), findsOneWidget);
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
     expect(
-        (await repository.ladeErlebnispositionen(erlebnis.id))
-            .single
-            .position
-            .anzahl,
-        2);
+      (await repository.ladeErlebnispositionen(erlebnis.id))
+          .single
+          .position
+          .anzahl,
+      2,
+    );
   });
 
-  testWidgets('Restaurantbesuch nutzt einen kompakten Zeitraum',
-      (tester) async {
+  testWidgets('Restaurantbesuch nutzt einen kompakten Zeitraum', (
+    tester,
+  ) async {
     final erlebnis = (await repository.ladeErlebnisse()).single;
-    await tester.pumpWidget(MaterialApp(
-      home: ErlebnisScreen(
-        repository: repository,
-        idGenerator: _TestIdGenerator(),
-        profil: profil,
-        erlebnis: erlebnis,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ErlebnisScreen(
+          repository: repository,
+          idGenerator: _TestIdGenerator(),
+          profil: profil,
+          erlebnis: erlebnis,
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
     expect(find.text('Zeitraum'), findsOneWidget);
     expect(find.text('Beginn (optional)'), findsOneWidget);
