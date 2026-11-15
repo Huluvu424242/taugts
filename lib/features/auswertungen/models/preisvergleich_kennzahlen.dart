@@ -32,8 +32,7 @@ abstract final class OrtsPreisAnalyse {
       gruppen.putIfAbsent(wert.serie ?? '', () => []).add(wert);
     }
     return [
-      for (final gruppe in gruppen.entries)
-        _kennzahl(gruppe.key, gruppe.value),
+      for (final gruppe in gruppen.entries) _kennzahl(gruppe.key, gruppe.value),
     ]..sort((a, b) => a.serie.compareTo(b.serie));
   }
 

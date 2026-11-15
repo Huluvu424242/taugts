@@ -241,10 +241,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
             ),
             for (final serie in serien) ...[
               const SizedBox(height: 12),
-              Text(
-                serie.serie,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
+              Text(serie.serie, style: Theme.of(context).textTheme.titleSmall),
               Text(
                 '${serie.anzahl} Käufe · Durchschnitt '
                 '${serie.durchschnitt.toStringAsFixed(2)}',
