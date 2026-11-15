@@ -22,15 +22,12 @@ void main() {
       geaendertAm: zeit,
     );
     datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-    datenbank.verbindung.execute(
-      'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [
-        profil.id,
-        profil.anzeigename,
-        zeit.toIso8601String(),
-        zeit.toIso8601String(),
-      ],
-    );
+    datenbank.verbindung.execute('INSERT INTO profile VALUES (?, ?, ?, ?)', [
+      profil.id,
+      profil.anzeigename,
+      zeit.toIso8601String(),
+      zeit.toIso8601String(),
+    ]);
     repository = SqliteBewertungsRepository(datenbank);
   });
 
@@ -55,9 +52,7 @@ void main() {
 
     await tester.tap(
       find.byKey(
-        const ValueKey(
-          'kriterium-c0000000-0000-4000-8000-000000000001',
-        ),
+        const ValueKey('kriterium-c0000000-0000-4000-8000-000000000001'),
       ),
     );
     await tester.pumpAndSettle();
@@ -66,8 +61,9 @@ void main() {
     await tester.tap(find.text('Bewertung speichern'));
     await tester.pumpAndSettle();
 
-    final bewertungen =
-        await repository.ladeBewertungenFuerErlebnis(erlebnis.id);
+    final bewertungen = await repository.ladeBewertungenFuerErlebnis(
+      erlebnis.id,
+    );
     expect(bewertungen, hasLength(1));
     expect(
       bewertungen.single.kriteriumId,
@@ -92,10 +88,7 @@ void main() {
     expect(find.text('Bitterkeit'), findsWidgets);
     expect(find.text('Farbintensität'), findsWidgets);
 
-    final notiz = find.widgetWithText(
-      TextField,
-      'Bewertungsnotiz (optional)',
-    );
+    final notiz = find.widgetWithText(TextField, 'Bewertungsnotiz (optional)');
     await _scrolleBisSichtbar(tester, notiz);
     await tester.enterText(notiz, 'Heute deutlich herber als früher.');
     await tester.tap(find.text('Bewertung speichern'));
@@ -106,10 +99,7 @@ void main() {
       [erlebnis.id],
     ).single;
     expect(zeile['notiz'], 'Heute deutlich herber als früher.');
-    expect(
-      await repository.ladeBewertungenFuerErlebnis(erlebnis.id),
-      isEmpty,
-    );
+    expect(await repository.ladeBewertungenFuerErlebnis(erlebnis.id), isEmpty);
   });
 
   testWidgets('validiert leere Bewertung am Feld und im Fehlersammler', (
@@ -187,10 +177,7 @@ void main() {
   });
 }
 
-Future<void> _scrolleBisSichtbar(
-  WidgetTester tester,
-  Finder ziel,
-) async {
+Future<void> _scrolleBisSichtbar(WidgetTester tester, Finder ziel) async {
   final liste = find.byType(Scrollable).first;
   for (var versuch = 0; versuch < 10 && ziel.evaluate().isEmpty; versuch++) {
     await tester.drag(liste, const Offset(0, -300));
@@ -206,12 +193,14 @@ Future<Erlebnis> _speichereAusgangsdaten(
   DateTime zeit,
 ) async {
   const produktId = '10000000-0000-4000-8000-000000000001';
-  await repository.speichereProdukt(Produkt(
-    id: produktId,
-    name: 'Testpils',
-    erstelltAm: zeit,
-    geaendertAm: zeit,
-  ));
+  await repository.speichereProdukt(
+    Produkt(
+      id: produktId,
+      name: 'Testpils',
+      erstelltAm: zeit,
+      geaendertAm: zeit,
+    ),
+  );
   final erlebnis = Erlebnis(
     id: '10000000-0000-4000-8000-000000000002',
     produktId: produktId,

@@ -18,10 +18,12 @@ void main() {
     repository = SqliteBewertungsRepository(datenbank);
     final zeit = DateTime.utc(2026, 9, 1, 10);
     const profilId = '82000000-0000-4000-8000-000000000000';
-    datenbank.verbindung.execute(
-      'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [profilId, 'Testprofil', zeit.toIso8601String(), zeit.toIso8601String()],
-    );
+    datenbank.verbindung.execute('INSERT INTO profile VALUES (?, ?, ?, ?)', [
+      profilId,
+      'Testprofil',
+      zeit.toIso8601String(),
+      zeit.toIso8601String(),
+    ]);
     ort = Ort(
       id: '82000000-0000-4000-8000-000000000001',
       name: 'Testmarkt',
@@ -49,7 +51,9 @@ void main() {
 
     expect(find.text('Geschäft bewerten'), findsOneWidget);
     expect(
-        find.text('Noch keine Bewertung für diesen Einkauf.'), findsOneWidget);
+      find.text('Noch keine Bewertung für diesen Einkauf.'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Geschäft bewerten'));
     await tester.pumpAndSettle();
@@ -59,8 +63,9 @@ void main() {
     expect(find.text('Wartezeit'), findsOneWidget);
   });
 
-  testWidgets('Geschäftsbewertung bleibt vom Einkauf getrennt gespeichert',
-      (tester) async {
+  testWidgets('Geschäftsbewertung bleibt vom Einkauf getrennt gespeichert', (
+    tester,
+  ) async {
     await _pumpAbschnitt(tester, repository, ort, erlebnis);
     await tester.tap(find.text('Geschäft bewerten'));
     await tester.pumpAndSettle();
@@ -70,14 +75,13 @@ void main() {
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -650));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Bewertung speichern'),
-    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Bewertung speichern'));
     await tester.pumpAndSettle();
 
     expect(find.text('Geschäftsbewertung gespeichert.'), findsOneWidget);
-    final gespeichert =
-        await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id);
+    final gespeichert = await repository.ladeOrtsbewertungFuerErlebnis(
+      erlebnis.id,
+    );
     expect(gespeichert, isNotNull);
     expect(gespeichert!.ortsbewertung.erlebnisId, erlebnis.id);
     expect(gespeichert.ortsbewertung.ortId, ort.id);

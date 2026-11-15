@@ -18,10 +18,12 @@ void main() {
     repository = SqliteBewertungsRepository(datenbank);
     final zeit = DateTime.utc(2026, 8, 31, 18);
     const profilId = '81000000-0000-4000-8000-000000000000';
-    datenbank.verbindung.execute(
-      'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [profilId, 'Testprofil', zeit.toIso8601String(), zeit.toIso8601String()],
-    );
+    datenbank.verbindung.execute('INSERT INTO profile VALUES (?, ?, ?, ?)', [
+      profilId,
+      'Testprofil',
+      zeit.toIso8601String(),
+      zeit.toIso8601String(),
+    ]);
     ort = Ort(
       id: '81000000-0000-4000-8000-000000000001',
       name: 'Testgaststätte',
@@ -43,8 +45,9 @@ void main() {
 
   tearDown(() => datenbank.schliessen());
 
-  testWidgets('zeigt eingeklappt den leeren Status und große Schrift',
-      (tester) async {
+  testWidgets('zeigt eingeklappt den leeren Status und große Schrift', (
+    tester,
+  ) async {
     final leer = _LeereKriterienRepository(datenbank);
     await _pumpAbschnitt(
       tester,
@@ -87,8 +90,9 @@ void main() {
     expect(find.text('Bewertung erneut laden'), findsOneWidget);
   });
 
-  testWidgets('speichert eine Bewertung und zeigt den bewerteten Status',
-      (tester) async {
+  testWidgets('speichert eine Bewertung und zeigt den bewerteten Status', (
+    tester,
+  ) async {
     await _pumpAbschnitt(tester, repository, ort, erlebnis);
     await tester.tap(find.text('Gaststätte bewerten'));
     await tester.pumpAndSettle();
@@ -98,9 +102,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -500));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Bewertung speichern'),
-    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Bewertung speichern'));
     await tester.pumpAndSettle();
 
     expect(find.text('Gaststättenbewertung gespeichert.'), findsOneWidget);
@@ -108,8 +110,9 @@ void main() {
       find.text('Für diesen Besuch liegt eine Bewertung vor.'),
       findsOneWidget,
     );
-    final gespeichert =
-        await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id);
+    final gespeichert = await repository.ladeOrtsbewertungFuerErlebnis(
+      erlebnis.id,
+    );
     expect(gespeichert?.werte.single.wert, 5);
     expect(gespeichert?.ortsbewertung.bewertetAm, erlebnis.erlebtAm);
 
@@ -120,17 +123,16 @@ void main() {
     );
   });
 
-  testWidgets('validiert und behält Eingaben bei einem Persistenzfehler',
-      (tester) async {
+  testWidgets('validiert und behält Eingaben bei einem Persistenzfehler', (
+    tester,
+  ) async {
     final fehlerhaft = _SpeicherfehlerRepository(datenbank);
     await _pumpAbschnitt(tester, fehlerhaft, ort, erlebnis);
     await tester.tap(find.text('Gaststätte bewerten'));
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -500));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Bewertung speichern'),
-    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Bewertung speichern'));
     await tester.pumpAndSettle();
 
     expect(
@@ -149,15 +151,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -500));
     await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Bewertung speichern'),
-    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Bewertung speichern'));
     await tester.pumpAndSettle();
 
     expect(
-      find.text(
-        'Die Gaststättenbewertung konnte nicht gespeichert werden.',
-      ),
+      find.text('Die Gaststättenbewertung konnte nicht gespeichert werden.'),
       findsOneWidget,
     );
     expect(find.text('4 – taugt eher'), findsOneWidget);
@@ -171,23 +169,25 @@ Future<void> _pumpAbschnitt(
   Erlebnis erlebnis, {
   TextScaler textScaler = const TextScaler.linear(1),
 }) async {
-  await tester.pumpWidget(MaterialApp(
-    home: MediaQuery(
-      data: MediaQueryData(textScaler: textScaler),
-      child: Scaffold(
-        body: ListView(
-          children: [
-            GaststaettenbewertungAbschnitt(
-              repository: repository,
-              idGenerator: _TestIdGenerator(),
-              erlebnis: erlebnis,
-              ort: ort,
-            ),
-          ],
+  await tester.pumpWidget(
+    MaterialApp(
+      home: MediaQuery(
+        data: MediaQueryData(textScaler: textScaler),
+        child: Scaffold(
+          body: ListView(
+            children: [
+              GaststaettenbewertungAbschnitt(
+                repository: repository,
+                idGenerator: _TestIdGenerator(),
+                erlebnis: erlebnis,
+                ort: ort,
+              ),
+            ],
+          ),
         ),
       ),
     ),
-  ));
+  );
   await tester.pumpAndSettle();
 }
 
@@ -207,8 +207,7 @@ class _LeereKriterienRepository extends SqliteBewertungsRepository {
   @override
   Future<List<Bewertungskriterium>> ladeAktiveKriterienFuerObjektart(
     KriteriumObjektart objektart,
-  ) async =>
-      [];
+  ) async => [];
 }
 
 class _LadefehlerRepository extends SqliteBewertungsRepository {
@@ -217,8 +216,7 @@ class _LadefehlerRepository extends SqliteBewertungsRepository {
   @override
   Future<List<Bewertungskriterium>> ladeAktiveKriterienFuerObjektart(
     KriteriumObjektart objektart,
-  ) =>
-      Future.error(StateError('Testfehler'));
+  ) => Future.error(StateError('Testfehler'));
 }
 
 class _SpeicherfehlerRepository extends SqliteBewertungsRepository {
@@ -230,6 +228,5 @@ class _SpeicherfehlerRepository extends SqliteBewertungsRepository {
     required Ort ort,
     required Ortsbewertung ortsbewertung,
     required List<Bewertung> bewertungen,
-  }) =>
-      Future.error(StateError('Testfehler'));
+  }) => Future.error(StateError('Testfehler'));
 }

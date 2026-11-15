@@ -9,15 +9,14 @@ void main() {
   Bewertungskriterium kriterium(
     KriteriumEingabetyp typ, {
     List<String> auswahlwerte = const [],
-  }) =>
-      Bewertungskriterium(
-        id: '10000000-0000-4000-8000-000000000001',
-        name: 'Testkriterium',
-        eingabetyp: typ,
-        auswahlwerte: auswahlwerte,
-        erstelltAm: zeit,
-        geaendertAm: zeit,
-      );
+  }) => Bewertungskriterium(
+    id: '10000000-0000-4000-8000-000000000001',
+    name: 'Testkriterium',
+    eingabetyp: typ,
+    auswahlwerte: auswahlwerte,
+    erstelltAm: zeit,
+    geaendertAm: zeit,
+  );
 
   Future<KriteriumEingabewert?> anzeigen(
     WidgetTester tester,
@@ -48,8 +47,9 @@ void main() {
     expect(find.text('5 – taugt sehr'), findsOneWidget);
   });
 
-  testWidgets('Intensität bietet die Intensitätsskala 1 bis 5 an',
-      (tester) async {
+  testWidgets('Intensität bietet die Intensitätsskala 1 bis 5 an', (
+    tester,
+  ) async {
     await anzeigen(tester, kriterium(KriteriumEingabetyp.intensitaet));
 
     await tester.tap(find.byType(DropdownButtonFormField<double?>));
@@ -106,8 +106,9 @@ void main() {
     expect(wert?.fehler, 'Bitte eine gültige Zahl eingeben.');
   });
 
-  testWidgets('Auswahl bietet ausschließlich konfigurierte Werte an',
-      (tester) async {
+  testWidgets('Auswahl bietet ausschließlich konfigurierte Werte an', (
+    tester,
+  ) async {
     KriteriumEingabewert? wert;
     await tester.pumpWidget(
       MaterialApp(
@@ -134,26 +135,28 @@ void main() {
     expect(wert?.text, 'Dunkel');
   });
 
-  testWidgets('Freitext übernimmt freien Text und begrenzt ihn auf 500 Zeichen',
-      (tester) async {
-    KriteriumEingabewert? wert;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: KriteriumEingabefeld(
-            kriterium: kriterium(KriteriumEingabetyp.freitext),
-            wert: const KriteriumEingabewert(),
-            onChanged: (neu) => wert = neu,
+  testWidgets(
+    'Freitext übernimmt freien Text und begrenzt ihn auf 500 Zeichen',
+    (tester) async {
+      KriteriumEingabewert? wert;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: KriteriumEingabefeld(
+              kriterium: kriterium(KriteriumEingabetyp.freitext),
+              wert: const KriteriumEingabewert(),
+              onChanged: (neu) => wert = neu,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    final feld = tester.widget<TextField>(find.byType(TextField));
-    expect(feld.maxLength, 500);
+      final feld = tester.widget<TextField>(find.byType(TextField));
+      expect(feld.maxLength, 500);
 
-    await tester.enterText(find.byType(TextField), 'Röstmalzig und rauchig');
-    await tester.pump();
-    expect(wert?.text, 'Röstmalzig und rauchig');
-  });
+      await tester.enterText(find.byType(TextField), 'Röstmalzig und rauchig');
+      await tester.pump();
+      expect(wert?.text, 'Röstmalzig und rauchig');
+    },
+  );
 }

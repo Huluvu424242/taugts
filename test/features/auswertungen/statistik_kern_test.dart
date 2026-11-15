@@ -43,18 +43,9 @@ void main() {
         schluessel: 'Produkt',
       );
 
-      expect(
-        zeitpunkt.runde(StatistikZeitraum.woche),
-        DateTime(2026, 10, 5),
-      );
-      expect(
-        zeitpunkt.runde(StatistikZeitraum.monat),
-        DateTime(2026, 10),
-      );
-      expect(
-        zeitpunkt.runde(StatistikZeitraum.jahr),
-        DateTime(2026),
-      );
+      expect(zeitpunkt.runde(StatistikZeitraum.woche), DateTime(2026, 10, 5));
+      expect(zeitpunkt.runde(StatistikZeitraum.monat), DateTime(2026, 10));
+      expect(zeitpunkt.runde(StatistikZeitraum.jahr), DateTime(2026));
     });
 
     test('Kostenaggregation summiert statt Mittelwerte zu bilden', () {
@@ -81,29 +72,26 @@ void main() {
     });
 
     test('Aggregation trennt Währungen und mittelt dieselbe Zeitreihe', () {
-      final ergebnis = StatistikRechnung.aggregiere(
-        [
-          Zeitwert(
-            zeitpunkt: DateTime(2024, 1, 1),
-            wert: 2,
-            beschreibung: 'Biergarten',
-            serie: 'EUR',
-          ),
-          Zeitwert(
-            zeitpunkt: DateTime(2024, 6, 1),
-            wert: 4,
-            beschreibung: 'Biergarten',
-            serie: 'EUR',
-          ),
-          Zeitwert(
-            zeitpunkt: DateTime(2024, 6, 1),
-            wert: 120,
-            beschreibung: 'Biergarten',
-            serie: 'CZK',
-          ),
-        ],
-        StatistikZeitraum.jahr,
-      );
+      final ergebnis = StatistikRechnung.aggregiere([
+        Zeitwert(
+          zeitpunkt: DateTime(2024, 1, 1),
+          wert: 2,
+          beschreibung: 'Biergarten',
+          serie: 'EUR',
+        ),
+        Zeitwert(
+          zeitpunkt: DateTime(2024, 6, 1),
+          wert: 4,
+          beschreibung: 'Biergarten',
+          serie: 'EUR',
+        ),
+        Zeitwert(
+          zeitpunkt: DateTime(2024, 6, 1),
+          wert: 120,
+          beschreibung: 'Biergarten',
+          serie: 'CZK',
+        ),
+      ], StatistikZeitraum.jahr);
 
       expect(ergebnis, hasLength(2));
       final euroWert = ergebnis.firstWhere((wert) => wert.serie == 'EUR');
@@ -111,10 +99,7 @@ void main() {
       expect(euroWert.kennzahlen?.anzahl, 2);
       expect(euroWert.kennzahlen?.minimum, 2);
       expect(euroWert.kennzahlen?.maximum, 4);
-      expect(
-        ergebnis.firstWhere((wert) => wert.serie == 'CZK').wert,
-        120,
-      );
+      expect(ergebnis.firstWhere((wert) => wert.serie == 'CZK').wert, 120);
     });
   });
 }
