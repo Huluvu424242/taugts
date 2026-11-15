@@ -312,7 +312,8 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             children: [
               if (widget.service is AuswertungsFilterOptionenService &&
-                  widget.service is ProduktPreisvergleichService)
+                  widget.service is ProduktPreisvergleichService &&
+                  widget.service is ProduktBewertungsvergleichService)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: FilledButton.icon(
@@ -326,6 +327,8 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                                   as AuswertungsFilterOptionenService,
                           preisService:
                               widget.service as ProduktPreisvergleichService,
+                          bewertungsService: widget.service
+                              as ProduktBewertungsvergleichService,
                         ),
                       ),
                     ),
