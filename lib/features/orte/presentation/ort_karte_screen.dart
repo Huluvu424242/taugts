@@ -89,54 +89,54 @@ class _OrtKarteScreenState extends State<OrtKarteScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Ort auf Karte auswählen'),
-          actions: const [
-            AppSupportMenu(contextName: 'Ort auf OpenStreetMap auswählen'),
-          ],
-        ),
-        body: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    'Ausgewählte Position: '
-                    '${_position.latitude.toStringAsFixed(6)}, '
-                    '${_position.longitude.toStringAsFixed(6)}. '
-                    'Karte antippen, um den Marker zu verschieben.',
+    appBar: AppBar(
+      title: const Text('Ort auf Karte auswählen'),
+      actions: const [
+        AppSupportMenu(contextName: 'Ort auf OpenStreetMap auswählen'),
+      ],
+    ),
+    body: SafeArea(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Semantics(
+              liveRegion: true,
+              child: Text(
+                'Ausgewählte Position: '
+                '${_position.latitude.toStringAsFixed(6)}, '
+                '${_position.longitude.toStringAsFixed(6)}. '
+                'Karte antippen, um den Marker zu verschieben.',
+              ),
+            ),
+          ),
+          Expanded(child: _kartenFlaeche(context)),
+          TextButton(
+            onPressed: _attributionOeffnen,
+            child: Text(widget.provider.attribution),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Abbrechen'),
                   ),
                 ),
-              ),
-              Expanded(child: _kartenFlaeche(context)),
-              TextButton(
-                onPressed: _attributionOeffnen,
-                child: Text(widget.provider.attribution),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Abbrechen'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () => Navigator.of(context).pop(_position),
-                        child: const Text('Position übernehmen'),
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () => Navigator.of(context).pop(_position),
+                    child: const Text('Position übernehmen'),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }

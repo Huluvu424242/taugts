@@ -31,7 +31,8 @@ class GeolocatorStandortService implements StandortService {
     if (berechtigung == LocationPermission.denied ||
         berechtigung == LocationPermission.deniedForever) {
       throw const StandortAusnahme(
-          'Die Standortberechtigung wurde nicht erteilt.');
+        'Die Standortberechtigung wurde nicht erteilt.',
+      );
     }
     final position = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(

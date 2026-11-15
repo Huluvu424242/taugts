@@ -51,9 +51,8 @@ class _OrteScreenState extends State<OrteScreen> {
     );
     if (gespeichert != null && mounted) {
       _suchen(_suche.text);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ort gespeichert.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Ort gespeichert.')));
     }
   }
 
@@ -110,136 +109,134 @@ class _OrteScreenState extends State<OrteScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(widget.zurAuswahl ? 'Ort auswählen' : 'Orte'),
-          actions: [
-            AppSupportMenu(
-              contextName: SupportKontexte.orte(
-                zurAuswahl: widget.zurAuswahl,
+    appBar: AppBar(
+      title: Text(widget.zurAuswahl ? 'Ort auswählen' : 'Orte'),
+      actions: [
+        AppSupportMenu(
+          contextName: SupportKontexte.orte(zurAuswahl: widget.zurAuswahl),
+        ),
+      ],
+    ),
+    floatingActionButton: FloatingActionButton.extended(
+      onPressed: _formularOeffnen,
+      icon: const Icon(Icons.add_location_alt_outlined),
+      label: const Text('Ort anlegen'),
+    ),
+    body: SafeArea(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: _suche,
+              decoration: const InputDecoration(
+                labelText: 'Orte suchen',
+                prefixIcon: Icon(Icons.search),
               ),
+              onChanged: _suchen,
+              maxLength: 160,
             ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: _formularOeffnen,
-          icon: const Icon(Icons.add_location_alt_outlined),
-          label: const Text('Ort anlegen'),
-        ),
-        body: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: TextField(
-                  controller: _suche,
-                  decoration: const InputDecoration(
-                    labelText: 'Orte suchen',
-                    prefixIcon: Icon(Icons.search),
-                  ),
-                  onChanged: _suchen,
-                  maxLength: 160,
-                ),
-              ),
-              Expanded(
-                child: FutureBuilder<List<Ort>>(
-                  future: _orte,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: FilledButton.icon(
-                          onPressed: () => _suchen(_suche.text),
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Orte erneut laden'),
-                        ),
-                      );
-                    }
-                    if (!snapshot.hasData) {
-                      return Center(
-                        child: Semantics(
-                          label: 'Orte werden geladen',
-                          child: const CircularProgressIndicator(),
-                        ),
-                      );
-                    }
-                    final orte = snapshot.data!;
-                    if (orte.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _suche.text.trim().isEmpty
-                                    ? 'Noch keine Orte angelegt.'
-                                    : 'Keine passenden Orte gefunden.',
-                              ),
-                              const SizedBox(height: 16),
-                              FilledButton(
-                                onPressed: _formularOeffnen,
-                                child: const Text('Ort anlegen'),
-                              ),
-                            ],
+          ),
+          Expanded(
+            child: FutureBuilder<List<Ort>>(
+              future: _orte,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(
+                    child: FilledButton.icon(
+                      onPressed: () => _suchen(_suche.text),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Orte erneut laden'),
+                    ),
+                  );
+                }
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: Semantics(
+                      label: 'Orte werden geladen',
+                      child: const CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                final orte = snapshot.data!;
+                if (orte.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _suche.text.trim().isEmpty
+                                ? 'Noch keine Orte angelegt.'
+                                : 'Keine passenden Orte gefunden.',
                           ),
-                        ),
-                      );
-                    }
-                    return ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 96),
-                      itemCount: orte.length,
-                      itemBuilder: (context, index) {
-                        final ort = orte[index];
-                        return ListTile(
-                          title: Text(ort.name),
-                          subtitle: Text(
-                            ort.adresse == null
-                                ? _ortstyp(ort.typ)
-                                : '${_ortstyp(ort.typ)} · ${ort.adresse}',
+                          const SizedBox(height: 16),
+                          FilledButton(
+                            onPressed: _formularOeffnen,
+                            child: const Text('Ort anlegen'),
                           ),
-                          trailing: widget.zurAuswahl
-                              ? const Icon(Icons.chevron_right)
-                              : Wrap(
-                                  spacing: 4,
-                                  children: [
-                                    IconButton(
-                                      tooltip: '${ort.name} löschen',
-                                      onPressed: () => _ortLoeschen(ort),
-                                      icon: const Icon(Icons.delete_outline),
-                                    ),
-                                    IconButton(
-                                      tooltip: 'Verlauf von ${ort.name}',
-                                      icon: const Icon(Icons.history),
-                                      onPressed: () =>
-                                          Navigator.of(context).push<void>(
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 96),
+                  itemCount: orte.length,
+                  itemBuilder: (context, index) {
+                    final ort = orte[index];
+                    return ListTile(
+                      title: Text(ort.name),
+                      subtitle: Text(
+                        ort.adresse == null
+                            ? _ortstyp(ort.typ)
+                            : '${_ortstyp(ort.typ)} · ${ort.adresse}',
+                      ),
+                      trailing: widget.zurAuswahl
+                          ? const Icon(Icons.chevron_right)
+                          : Wrap(
+                              spacing: 4,
+                              children: [
+                                IconButton(
+                                  tooltip: '${ort.name} löschen',
+                                  onPressed: () => _ortLoeschen(ort),
+                                  icon: const Icon(Icons.delete_outline),
+                                ),
+                                IconButton(
+                                  tooltip: 'Verlauf von ${ort.name}',
+                                  icon: const Icon(Icons.history),
+                                  onPressed: () =>
+                                      Navigator.of(context).push<void>(
                                         MaterialPageRoute(
                                           builder: (_) =>
                                               BewertungsverlaufScreen.fuerOrt(
-                                            repository: widget.repository,
-                                            ort: ort,
-                                            eigenesProfilId:
-                                                widget.eigenesProfilId,
-                                          ),
+                                                repository: widget.repository,
+                                                ort: ort,
+                                                eigenesProfilId:
+                                                    widget.eigenesProfilId,
+                                              ),
                                         ),
                                       ),
-                                    ),
-                                  ],
                                 ),
-                          onTap: () => _ortAntippen(ort),
-                        );
-                      },
+                              ],
+                            ),
+                      onTap: () => _ortAntippen(ort),
                     );
                   },
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 
   String _ortstyp(Ortstyp typ) => switch (typ) {
-        Ortstyp.gastronomie => 'Gastronomie',
-        Ortstyp.geschaeft => 'Geschäft',
-        Ortstyp.privat => 'Privater Ort',
-        Ortstyp.sonstiger => 'Sonstiger Ort',
-      };
+    Ortstyp.gastronomie => 'Gastronomie',
+    Ortstyp.geschaeft => 'Geschäft',
+    Ortstyp.privat => 'Privater Ort',
+    Ortstyp.sonstiger => 'Sonstiger Ort',
+  };
 }

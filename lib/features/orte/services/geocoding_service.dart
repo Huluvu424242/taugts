@@ -77,7 +77,7 @@ class NominatimGeocodingService implements GeocodingService {
           'shop',
           'tourism',
           'leisure',
-          'building'
+          'building',
         ]) {
           final value = details[key];
           if (value is String && value.trim().isNotEmpty) {
