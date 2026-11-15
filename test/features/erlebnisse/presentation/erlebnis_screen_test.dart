@@ -22,10 +22,11 @@ void main() {
       geaendertAm: zeit,
     );
     datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-    datenbank.verbindung.execute(
-      'INSERT INTO profile VALUES (?, NULL, ?, ?)',
-      [profil.id, zeit.toIso8601String(), zeit.toIso8601String()],
-    );
+    datenbank.verbindung.execute('INSERT INTO profile VALUES (?, NULL, ?, ?)', [
+      profil.id,
+      zeit.toIso8601String(),
+      zeit.toIso8601String(),
+    ]);
     repository = SqliteBewertungsRepository(datenbank);
   });
 
@@ -173,8 +174,9 @@ void main() {
         );
         await tester.tap(find.text('Speichern'));
         await tester.pumpAndSettle();
-        final bewertung =
-            await repository.ladeOrtsbewertungFuerErlebnis(erlebnis.id);
+        final bewertung = await repository.ladeOrtsbewertungFuerErlebnis(
+          erlebnis.id,
+        );
         expect(bewertung?.ortsbewertung.notiz, 'Interessanter Ort für später');
         expect(bewertung?.ortsbewertung.ortId, ort.id);
         expect(await repository.ladeErlebnispositionen(erlebnis.id), isEmpty);
@@ -182,8 +184,9 @@ void main() {
     );
   }
 
-  testWidgets('Ein Ort allein ist noch kein dokumentierter Besuch',
-      (tester) async {
+  testWidgets('Ein Ort allein ist noch kein dokumentierter Besuch', (
+    tester,
+  ) async {
     final ort = Ort(
       id: '79000000-0000-4000-8000-000000000002',
       name: 'Nur Ort',
@@ -212,8 +215,9 @@ void main() {
     expect(await repository.ladeErlebnisse(), isEmpty);
   });
 
-  testWidgets('Ein gemeinsamer Zeitraum ersetzt Plan- und Ist-Zeiten',
-      (tester) async {
+  testWidgets('Ein gemeinsamer Zeitraum ersetzt Plan- und Ist-Zeiten', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ErlebnisScreen(
@@ -235,8 +239,9 @@ void main() {
     expect(find.text('Speichern'), findsOneWidget);
   });
 
-  testWidgets('Ein Ende ohne Beginn wird zuverlässig abgefangen',
-      (tester) async {
+  testWidgets('Ein Ende ohne Beginn wird zuverlässig abgefangen', (
+    tester,
+  ) async {
     final fehler = Erlebnis(
       id: '22222222-2222-4222-8222-222222222222',
       herkunftProfilId: profil.id,
@@ -247,8 +252,9 @@ void main() {
     expect(fehler.zeitfehler, contains('Ein Ende benötigt einen Beginn.'));
   });
 
-  testWidgets('Gaststättenbewertung bleibt beim Ein- und Ausklappen erhalten',
-      (tester) async {
+  testWidgets('Gaststättenbewertung bleibt beim Ein- und Ausklappen erhalten', (
+    tester,
+  ) async {
     final ort = Ort(
       id: '75000000-0000-4000-8000-000000000001',
       name: 'Testgaststätte',
@@ -265,14 +271,16 @@ void main() {
     );
     await repository.speichereOrt(ort);
     await repository.speichereErlebnis(erlebnis);
-    await tester.pumpWidget(MaterialApp(
-      home: ErlebnisScreen(
-        repository: repository,
-        idGenerator: _TestIdGenerator(),
-        profil: profil,
-        erlebnis: erlebnis,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ErlebnisScreen(
+          repository: repository,
+          idGenerator: _TestIdGenerator(),
+          profil: profil,
+          erlebnis: erlebnis,
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
       find.text('Gaststätte bewerten'),

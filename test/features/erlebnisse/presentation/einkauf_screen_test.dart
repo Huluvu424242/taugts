@@ -21,17 +21,19 @@ void main() {
       geaendertAm: zeit,
     );
     datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-    datenbank.verbindung.execute(
-      'INSERT INTO profile VALUES (?, NULL, ?, ?)',
-      [profil.id, zeit.toIso8601String(), zeit.toIso8601String()],
-    );
+    datenbank.verbindung.execute('INSERT INTO profile VALUES (?, NULL, ?, ?)', [
+      profil.id,
+      zeit.toIso8601String(),
+      zeit.toIso8601String(),
+    ]);
     repository = SqliteBewertungsRepository(datenbank);
   });
 
   tearDown(() => datenbank.schliessen());
 
-  testWidgets('Einkauf lässt sich ohne Planungsabschnitt erfassen',
-      (tester) async {
+  testWidgets('Einkauf lässt sich ohne Planungsabschnitt erfassen', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ErlebnisScreen(
@@ -51,8 +53,9 @@ void main() {
     expect(find.text('Speichern'), findsOneWidget);
   });
 
-  testWidgets('Einkauf summiert nur erfasste Preise und ändert Mengen',
-      (tester) async {
+  testWidgets('Einkauf summiert nur erfasste Preise und ändert Mengen', (
+    tester,
+  ) async {
     final erlebnis = Erlebnis(
       id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
       typ: Erlebnistyp.einkauf,
@@ -163,8 +166,9 @@ void main() {
     );
   });
 
-  testWidgets('Gespeicherter Einkaufszeitraum bleibt bearbeitbar',
-      (tester) async {
+  testWidgets('Gespeicherter Einkaufszeitraum bleibt bearbeitbar', (
+    tester,
+  ) async {
     final erlebnis = Erlebnis(
       id: '22222222-2222-4222-8222-222222222222',
       typ: Erlebnistyp.einkauf,
@@ -175,14 +179,16 @@ void main() {
       geaendertAm: zeit,
     );
     await repository.speichereErlebnis(erlebnis);
-    await tester.pumpWidget(MaterialApp(
-      home: ErlebnisScreen(
-        repository: repository,
-        idGenerator: _TestIdGenerator(),
-        profil: profil,
-        erlebnis: erlebnis,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ErlebnisScreen(
+          repository: repository,
+          idGenerator: _TestIdGenerator(),
+          profil: profil,
+          erlebnis: erlebnis,
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
     expect(find.text('Zeitraum'), findsOneWidget);
     expect(find.text('Beginn (optional)'), findsOneWidget);

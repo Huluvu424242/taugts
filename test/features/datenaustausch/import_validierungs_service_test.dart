@@ -13,30 +13,33 @@ Map<String, Object?> _dokument(String name) =>
 void main() {
   const service = ImportValidierungsService();
 
-  test('gültiges V1-Fixture wird auf V3 migriert und vollständig akzeptiert',
-      () {
-    final ergebnis = service.validiere(
-      _fixture('taugts-export-v1-gueltig.json'),
-    );
+  test(
+    'gültiges V1-Fixture wird auf V3 migriert und vollständig akzeptiert',
+    () {
+      final ergebnis = service.validiere(
+        _fixture('taugts-export-v1-gueltig.json'),
+      );
 
-    expect(ergebnis.istGueltig, isTrue);
-    expect(ergebnis.wurdeMigriert, isTrue);
-    expect(ergebnis.urspruenglicheSchemaVersion, 1);
-    expect(ergebnis.schemaVersion, 3);
-    expect(ergebnis.fehler, isEmpty);
-  });
+      expect(ergebnis.istGueltig, isTrue);
+      expect(ergebnis.wurdeMigriert, isTrue);
+      expect(ergebnis.urspruenglicheSchemaVersion, 1);
+      expect(ergebnis.schemaVersion, 3);
+      expect(ergebnis.fehler, isEmpty);
+    },
+  );
 
   test(
-      'eigenständige historische Datensätze werden nicht als Duplikat abgewiesen',
-      () {
-    final dokument = _dokument('taugts-export-v1-gueltig.json');
-    final preise = dokument['preisbeobachtungen'] as List<Object?>;
-    final bewertungen = dokument['bewertungen'] as List<Object?>;
+    'eigenständige historische Datensätze werden nicht als Duplikat abgewiesen',
+    () {
+      final dokument = _dokument('taugts-export-v1-gueltig.json');
+      final preise = dokument['preisbeobachtungen'] as List<Object?>;
+      final bewertungen = dokument['bewertungen'] as List<Object?>;
 
-    expect(preise, hasLength(2));
-    expect(bewertungen, hasLength(2));
-    expect(service.validiere(jsonEncode(dokument)).istGueltig, isTrue);
-  });
+      expect(preise, hasLength(2));
+      expect(bewertungen, hasLength(2));
+      expect(service.validiere(jsonEncode(dokument)).istGueltig, isTrue);
+    },
+  );
 
   test('Vorabversion 0 wird vorwärts auf V3 migriert', () {
     final ergebnis = service.validiere(
