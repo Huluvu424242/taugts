@@ -18,9 +18,8 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
       return const Text('Für diesen Zeitraum liegen keine Daten vor.');
     }
 
-    final punkte = [...daten]..sort(
-        (a, b) => a.zeitpunkt.compareTo(b.zeitpunkt),
-      );
+    final punkte = [...daten]
+      ..sort((a, b) => a.zeitpunkt.compareTo(b.zeitpunkt));
     final serien = punkte.map((punkt) => punkt.serie ?? '').toSet().toList()
       ..sort();
     return Column(
@@ -75,9 +74,7 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
         child: DataTable(
           columns: [
             const DataColumn(label: Text('Zeitpunkt')),
-            DataColumn(
-              label: Text(mitKennzahlen ? 'Mittelwert' : 'Wert'),
-            ),
+            DataColumn(label: Text(mitKennzahlen ? 'Mittelwert' : 'Wert')),
             if (mitKennzahlen) ...const [
               DataColumn(label: Text('Anzahl')),
               DataColumn(label: Text('Minimum')),
@@ -92,8 +89,10 @@ class StatistikVerlaufDarstellung extends StatelessWidget {
               DataRow(
                 cells: [
                   DataCell(
-                    Text(punkt.zeitpunktBeschriftung ??
-                        _zeitpunkt(punkt.zeitpunkt)),
+                    Text(
+                      punkt.zeitpunktBeschriftung ??
+                          _zeitpunkt(punkt.zeitpunkt),
+                    ),
                   ),
                   DataCell(Text(_zahl(punkt.wert))),
                   if (mitKennzahlen) ...[
@@ -173,7 +172,10 @@ class _VerlaufMaler extends CustomPainter {
     for (var index = 0; index < 4; index++) {
       final y = diagramm.top + diagramm.height * index / 3;
       canvas.drawLine(
-          Offset(diagramm.left, y), Offset(diagramm.right, y), hilfslinien);
+        Offset(diagramm.left, y),
+        Offset(diagramm.right, y),
+        hilfslinien,
+      );
     }
 
     final minimum = werte.reduce((a, b) => a < b ? a : b);
@@ -191,8 +193,9 @@ class _VerlaufMaler extends CustomPainter {
       final x = werte.length == 1
           ? diagramm.center.dx
           : diagramm.left + diagramm.width * index / (werte.length - 1);
-      final anteil =
-          spannweite == 0 ? 0.5 : (werte[index] - minimum) / spannweite;
+      final anteil = spannweite == 0
+          ? 0.5
+          : (werte[index] - minimum) / spannweite;
       final y = diagramm.bottom - diagramm.height * anteil;
       final punkt = Offset(x, y);
       if (index == 0) {

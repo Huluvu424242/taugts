@@ -38,12 +38,12 @@ class SqliteAuswertungsService
       );
 
   List<AuswertungsFilterOption> _optionen(String abfrage) => [
-        for (final row in _db.verbindung.select(abfrage))
-          AuswertungsFilterOption(
-            id: row['id']! as String,
-            bezeichnung: row['bezeichnung']! as String,
-          ),
-      ];
+    for (final row in _db.verbindung.select(abfrage))
+      AuswertungsFilterOption(
+        id: row['id']! as String,
+        bezeichnung: row['bezeichnung']! as String,
+      ),
+  ];
 
   @override
   Future<AuswertungsUebersicht> berechne(AuswertungsFilter filter) async {
@@ -62,9 +62,10 @@ class SqliteAuswertungsService
     );
   }
 
-  List<Map<String, Object?>> _bewertungsRows(AuswertungsFilter filter) =>
-      _db.verbindung
-          .select('''
+  List<Map<String, Object?>> _bewertungsRows(AuswertungsFilter filter) => _db
+      .verbindung
+      .select(
+        '''
         SELECT DISTINCT b.id, e.id AS erlebnis_id, b.kriterium_id,
           COALESCE(e.beginn, ob.bewertet_am, b.erstellt_am) AS ereigniszeit,
           COALESCE(b.kriterium_name, k.name, b.kriterium_id) AS kriterium_name,
@@ -86,27 +87,28 @@ class SqliteAuswertungsService
           AND (? IS NULL OR b.herkunft_profil_id = ?)
           AND (? IS NULL OR pk.kategorie_id = ? OR ok.kategorie_id = ?)
         ORDER BY ereigniszeit
-      ''', [
-            filter.objektId,
-            filter.objektArt.name,
-            filter.objektId,
-            filter.objektArt.name,
-            filter.objektId,
-            filter.kriteriumId,
-            filter.kriteriumId,
-            filter.herkunftProfilId,
-            filter.herkunftProfilId,
-            filter.kategorieId,
-            filter.kategorieId,
-            filter.kategorieId,
-          ])
-          .cast<Map<String, Object?>>()
-          .where((row) {
-            final zeit =
-                DateTime.tryParse(row['ereigniszeit'] as String? ?? '');
-            return zeit != null && filter.enthaeltZeitpunkt(zeit);
-          })
-          .toList();
+      ''',
+        [
+          filter.objektId,
+          filter.objektArt.name,
+          filter.objektId,
+          filter.objektArt.name,
+          filter.objektId,
+          filter.kriteriumId,
+          filter.kriteriumId,
+          filter.herkunftProfilId,
+          filter.herkunftProfilId,
+          filter.kategorieId,
+          filter.kategorieId,
+          filter.kategorieId,
+        ],
+      )
+      .cast<Map<String, Object?>>()
+      .where((row) {
+        final zeit = DateTime.tryParse(row['ereigniszeit'] as String? ?? '');
+        return zeit != null && filter.enthaeltZeitpunkt(zeit);
+      })
+      .toList();
 
   List<Durchschnittswert> _durchschnitte(List<Map<String, Object?>> rows) {
     final gruppen = <String, List<double>>{};
@@ -131,7 +133,8 @@ class SqliteAuswertungsService
   }
 
   List<Zeitwert> _preisverlauf(AuswertungsFilter filter) {
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT pb.beobachtet_am, pb.betrag_minor, pb.waehrung,
         COALESCE(o.name, 'Ohne Ort') AS ort_name,
         COALESCE(prod.name, 'Gelöschtes Produkt') AS produkt_name
@@ -144,15 +147,17 @@ class SqliteAuswertungsService
           (? = 'ort' AND pb.ort_id = ?))
         AND (? IS NULL OR pk.kategorie_id = ?)
       ORDER BY pb.beobachtet_am
-    ''', [
-      filter.objektId,
-      filter.objektArt.name,
-      filter.objektId,
-      filter.objektArt.name,
-      filter.objektId,
-      filter.kategorieId,
-      filter.kategorieId,
-    ]);
+    ''',
+      [
+        filter.objektId,
+        filter.objektArt.name,
+        filter.objektId,
+        filter.objektArt.name,
+        filter.objektId,
+        filter.kategorieId,
+        filter.kategorieId,
+      ],
+    );
     return [
       for (final row in rows)
         Zeitwert(
@@ -164,14 +169,15 @@ class SqliteAuswertungsService
           serie: filter.objektArt == StatistikObjektart.ort
               ? '${row['produkt_name']} · ${row['waehrung']}'
               : filter.objektId == null
-                  ? row['waehrung']! as String
-                  : '${row['ort_name']} · ${row['waehrung']}',
+              ? row['waehrung']! as String
+              : '${row['ort_name']} · ${row['waehrung']}',
         ),
     ].where((wert) => filter.enthaeltZeitpunkt(wert.zeitpunkt)).toList();
   }
 
   List<Zeitwert> _ausgabenverlauf(AuswertungsFilter filter) {
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT e.id, e.typ,
         COALESCE(e.beginn, MIN(pb.beobachtet_am), e.erstellt_am) AS ereigniszeit,
         pb.waehrung, SUM(pb.betrag_minor * ep.anzahl) AS betrag_minor
@@ -186,17 +192,19 @@ class SqliteAuswertungsService
         AND (? IS NULL OR pk.kategorie_id = ?)
       GROUP BY e.id, e.typ, pb.waehrung
       ORDER BY ereigniszeit
-    ''', [
-      filter.objektId,
-      filter.objektArt.name,
-      filter.objektId,
-      filter.objektArt.name,
-      filter.objektId,
-      filter.herkunftProfilId,
-      filter.herkunftProfilId,
-      filter.kategorieId,
-      filter.kategorieId,
-    ]);
+    ''',
+      [
+        filter.objektId,
+        filter.objektArt.name,
+        filter.objektId,
+        filter.objektArt.name,
+        filter.objektId,
+        filter.herkunftProfilId,
+        filter.herkunftProfilId,
+        filter.kategorieId,
+        filter.kategorieId,
+      ],
+    );
     final ergebnis = <Zeitwert>[];
     for (final row in rows) {
       final zeit = DateTime.tryParse(row['ereigniszeit'] as String? ?? '');
@@ -213,42 +221,49 @@ class SqliteAuswertungsService
     return ergebnis;
   }
 
-  List<Zeitwert> _qualitaetsverlauf(AuswertungsFilter filter) =>
-      _bewertungsRows(filter)
-          .where((row) =>
-              row['eingabetyp'] == 'wertung' &&
-              row['wert'] != null &&
-              row['produkt_id'] != null)
-          .map(
-            (row) => Zeitwert(
-              zeitpunkt: DateTime.parse(row['ereigniszeit']! as String),
-              wert: (row['wert']! as num).toDouble(),
-              beschreibung:
-                  '${row['kriterium_name']} · Version ${row['kriterium_version']}',
-              serie: 'Produkt',
-            ),
-          )
-          .toList(growable: false);
+  List<Zeitwert> _qualitaetsverlauf(
+    AuswertungsFilter filter,
+  ) => _bewertungsRows(filter)
+      .where(
+        (row) =>
+            row['eingabetyp'] == 'wertung' &&
+            row['wert'] != null &&
+            row['produkt_id'] != null,
+      )
+      .map(
+        (row) => Zeitwert(
+          zeitpunkt: DateTime.parse(row['ereigniszeit']! as String),
+          wert: (row['wert']! as num).toDouble(),
+          beschreibung:
+              '${row['kriterium_name']} · Version ${row['kriterium_version']}',
+          serie: 'Produkt',
+        ),
+      )
+      .toList(growable: false);
 
-  List<Zeitwert> _ortsverlauf(AuswertungsFilter filter) =>
-      _bewertungsRows(filter)
-          .where((row) =>
-              row['eingabetyp'] == 'wertung' &&
-              row['wert'] != null &&
-              row['ort_id'] != null)
-          .map(
-            (row) => Zeitwert(
-              zeitpunkt: DateTime.parse(row['ereigniszeit']! as String),
-              wert: (row['wert']! as num).toDouble(),
-              beschreibung:
-                  '${row['kriterium_name']} · Version ${row['kriterium_version']}',
-              serie: 'Ort',
-            ),
-          )
-          .toList(growable: false);
+  List<Zeitwert> _ortsverlauf(
+    AuswertungsFilter filter,
+  ) => _bewertungsRows(filter)
+      .where(
+        (row) =>
+            row['eingabetyp'] == 'wertung' &&
+            row['wert'] != null &&
+            row['ort_id'] != null,
+      )
+      .map(
+        (row) => Zeitwert(
+          zeitpunkt: DateTime.parse(row['ereigniszeit']! as String),
+          wert: (row['wert']! as num).toDouble(),
+          beschreibung:
+              '${row['kriterium_name']} · Version ${row['kriterium_version']}',
+          serie: 'Ort',
+        ),
+      )
+      .toList(growable: false);
 
   List<Zeitwert> _besuchverlauf(AuswertungsFilter filter) {
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT DISTINCT e.id,
         COALESCE(e.beginn, e.erstellt_am) AS ereigniszeit,
         e.typ
@@ -275,19 +290,21 @@ class SqliteAuswertungsService
             AND ok.kategorie_id = ?
         ))
       ORDER BY ereigniszeit
-    ''', [
-      filter.objektId,
-      filter.objektArt.name,
-      filter.objektId,
-      filter.objektId,
-      filter.objektArt.name,
-      filter.objektId,
-      filter.herkunftProfilId,
-      filter.herkunftProfilId,
-      filter.kategorieId,
-      filter.kategorieId,
-      filter.kategorieId,
-    ]);
+    ''',
+      [
+        filter.objektId,
+        filter.objektArt.name,
+        filter.objektId,
+        filter.objektId,
+        filter.objektArt.name,
+        filter.objektId,
+        filter.herkunftProfilId,
+        filter.herkunftProfilId,
+        filter.kategorieId,
+        filter.kategorieId,
+        filter.kategorieId,
+      ],
+    );
     final ergebnis = <Zeitwert>[];
     for (final row in rows) {
       final zeit = DateTime.tryParse(row['ereigniszeit'] as String? ?? '');
@@ -305,7 +322,8 @@ class SqliteAuswertungsService
   }
 
   List<ErlebnisGruppe> _erlebnisgruppen(AuswertungsFilter filter) {
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT e.id, e.typ, e.beginn, e.ende,
         COALESCE(e.ort_id, e.konsumort_id, e.kaufort_id) AS ort_id
       FROM erlebnisse e
@@ -318,15 +336,17 @@ class SqliteAuswertungsService
           )))
         AND (? IS NULL OR e.herkunft_profil_id = ?)
         AND e.ende IS NOT NULL
-    ''', [
-      filter.objektId,
-      filter.objektArt.name,
-      filter.objektId,
-      filter.objektArt.name,
-      filter.objektId,
-      filter.herkunftProfilId,
-      filter.herkunftProfilId,
-    ]);
+    ''',
+      [
+        filter.objektId,
+        filter.objektArt.name,
+        filter.objektId,
+        filter.objektArt.name,
+        filter.objektId,
+        filter.herkunftProfilId,
+        filter.herkunftProfilId,
+      ],
+    );
     final gruppen = <String, (int, int)>{};
     for (final row in rows) {
       final beginn = DateTime.tryParse(row['beginn'] as String? ?? '');
@@ -335,8 +355,8 @@ class SqliteAuswertungsService
       final tageszeit = beginn.hour < 11
           ? 'morgens'
           : beginn.hour < 17
-              ? 'tagsüber'
-              : 'abends';
+          ? 'tagsüber'
+          : 'abends';
       final key = '${row['typ']} · Wochentag ${beginn.weekday} · $tageszeit';
       final bisher = gruppen[key] ?? (0, 0);
       final dauer = ende == null
@@ -370,9 +390,10 @@ class SqliteAuswertungsService
         row['kriterium_id']! as String,
         version,
       );
-      gruppen
-          .putIfAbsent(key, () => [])
-          .add(((row['wert']! as num).toDouble(), zeit));
+      gruppen.putIfAbsent(key, () => []).add((
+        (row['wert']! as num).toDouble(),
+        zeit,
+      ));
       gruppenErlebnisse
           .putIfAbsent(key, () => [])
           .add(row['erlebnis_id']! as String);
@@ -382,12 +403,16 @@ class SqliteAuswertungsService
     final ergebnis = <Zeitwert>[];
     for (final eintrag in gruppen.entries) {
       final stichprobe = eintrag.value;
-      final niedrigeWertungen =
-          stichprobe.where((wert) => wert.$1 <= schwelle).toList();
+      final niedrigeWertungen = stichprobe
+          .where((wert) => wert.$1 <= schwelle)
+          .toList();
       final niedrigeWochen = niedrigeWertungen.map((wert) {
         final zeit = wert.$2.toLocal();
-        return DateTime(zeit.year, zeit.month, zeit.day)
-            .subtract(Duration(days: zeit.weekday - DateTime.monday));
+        return DateTime(
+          zeit.year,
+          zeit.month,
+          zeit.day,
+        ).subtract(Duration(days: zeit.weekday - DateTime.monday));
       }).toSet();
       if (stichprobe.length < 3 ||
           niedrigeWertungen.length < 2 ||
@@ -401,7 +426,8 @@ class SqliteAuswertungsService
           zeitpunkt: DateTime(2000, 1, 3 + wochentag - 1, eintrag.key.$2),
           zeitpunktBeschriftung: 'Wochentag $wochentag · $stunde:00 Uhr',
           wert: niedrigeWertungen.length.toDouble(),
-          beschreibung: '${namen[eintrag.key]} · Version ${eintrag.key.$4} · '
+          beschreibung:
+              '${namen[eintrag.key]} · Version ${eintrag.key.$4} · '
               '${niedrigeWertungen.length} von ${stichprobe.length} höchstens 2 '
               'an ${niedrigeWochen.length} Wochen',
           erlebnisIds: gruppenErlebnisse[eintrag.key]!.toSet().toList(),
@@ -413,7 +439,8 @@ class SqliteAuswertungsService
   }
 
   List<Zeitwert> _andrang(AuswertungsFilter filter) {
-    final rows = _db.verbindung.select('''
+    final rows = _db.verbindung.select(
+      '''
       SELECT b.wert, ob.bewertet_am, o.name
       FROM bewertungen b
       JOIN ortsbewertungen ob ON ob.id = b.ortsbewertung_id
@@ -425,16 +452,18 @@ class SqliteAuswertungsService
         AND (? IS NULL OR b.kriterium_id = ?)
         AND (? IS NULL OR b.herkunft_profil_id = ?)
       ORDER BY ob.bewertet_am
-    ''', [
-      filter.objektId,
-      filter.objektArt.name,
-      filter.objektId,
-      filter.objektArt.name,
-      filter.kriteriumId,
-      filter.kriteriumId,
-      filter.herkunftProfilId,
-      filter.herkunftProfilId,
-    ]);
+    ''',
+      [
+        filter.objektId,
+        filter.objektArt.name,
+        filter.objektId,
+        filter.objektArt.name,
+        filter.kriteriumId,
+        filter.kriteriumId,
+        filter.herkunftProfilId,
+        filter.herkunftProfilId,
+      ],
+    );
     return [
       for (final row in rows)
         Zeitwert(

@@ -24,23 +24,23 @@ enum _StatistikAnsicht {
   final String titel;
 
   List<Zeitwert> werte(AuswertungsUebersicht daten) => switch (this) {
-        _StatistikAnsicht.preise => daten.preisverlauf,
-        _StatistikAnsicht.ausgaben => daten.ausgabenverlauf,
-        _StatistikAnsicht.produktqualitaet => daten.qualitaetsverlauf,
-        _StatistikAnsicht.ortsqualitaet => daten.ortsverlauf,
-        _StatistikAnsicht.andrang => daten.andrangBeobachtungen,
-        _StatistikAnsicht.auffaelligkeiten => daten.auffaelligkeiten,
-        _StatistikAnsicht.qualitaetsvergleich => [
-            ...daten.qualitaetsverlauf,
-            ...daten.ortsverlauf,
-          ],
-        _StatistikAnsicht.preisQualitaet => [
-            ...daten.preisverlauf,
-            ...daten.qualitaetsverlauf,
-            ...daten.ortsverlauf,
-          ],
-        _StatistikAnsicht.haeufigkeit => daten.besuchverlauf,
-      };
+    _StatistikAnsicht.preise => daten.preisverlauf,
+    _StatistikAnsicht.ausgaben => daten.ausgabenverlauf,
+    _StatistikAnsicht.produktqualitaet => daten.qualitaetsverlauf,
+    _StatistikAnsicht.ortsqualitaet => daten.ortsverlauf,
+    _StatistikAnsicht.andrang => daten.andrangBeobachtungen,
+    _StatistikAnsicht.auffaelligkeiten => daten.auffaelligkeiten,
+    _StatistikAnsicht.qualitaetsvergleich => [
+      ...daten.qualitaetsverlauf,
+      ...daten.ortsverlauf,
+    ],
+    _StatistikAnsicht.preisQualitaet => [
+      ...daten.preisverlauf,
+      ...daten.qualitaetsverlauf,
+      ...daten.ortsverlauf,
+    ],
+    _StatistikAnsicht.haeufigkeit => daten.besuchverlauf,
+  };
 }
 
 class AuswertungenScreen extends StatefulWidget {
@@ -109,13 +109,13 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
   }
 
   void _neuLaden() => setState(() {
-        _daten = widget.service.berechne(_filter);
-      });
+    _daten = widget.service.berechne(_filter);
+  });
 
   void _filterZuruecksetzen() => setState(() {
-        _filter = const AuswertungsFilter();
-        _daten = widget.service.berechne(_filter);
-      });
+    _filter = const AuswertungsFilter();
+    _daten = widget.service.berechne(_filter);
+  });
 
   Future<void> _zeitraumWaehlen() async {
     final jetzt = DateTime.now();
@@ -153,14 +153,15 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
     final werte = _ansicht.werte(daten);
     final einzelBeobachtungen =
         _ansicht == _StatistikAnsicht.auffaelligkeiten ||
-            (_ansicht == _StatistikAnsicht.preise &&
-                _filter.objektArt == StatistikObjektart.ort &&
-                _aggregation == StatistikZeitraum.tag);
+        (_ansicht == _StatistikAnsicht.preise &&
+            _filter.objektArt == StatistikObjektart.ort &&
+            _aggregation == StatistikZeitraum.tag);
     if (einzelBeobachtungen) return werte;
     return StatistikRechnung.aggregiere(
       werte,
       _aggregation,
-      summieren: _ansicht == _StatistikAnsicht.ausgaben ||
+      summieren:
+          _ansicht == _StatistikAnsicht.ausgaben ||
           _ansicht == _StatistikAnsicht.haeufigkeit,
     );
   }
@@ -251,11 +252,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
     );
   }
 
-  Widget _preisExtremZeile(
-    List<Zeitwert> werte,
-    String titel,
-    bool minimum,
-  ) {
+  Widget _preisExtremZeile(List<Zeitwert> werte, String titel, bool minimum) {
     if (werte.isEmpty) return const SizedBox.shrink();
     final extrem = werte
         .map((wert) => wert.wert)
@@ -276,298 +273,293 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Auswertungen'),
-          actions: const [
-            AppSupportMenu(contextName: SupportKontexte.auswertungen),
-          ],
-        ),
-        body: SafeArea(
-          child: FutureBuilder<AuswertungsUebersicht>(
-            future: _daten,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Auswertungen konnten nicht geladen werden.',
-                      ),
-                      FilledButton.icon(
-                        onPressed: _neuLaden,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Erneut laden'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              if (!snapshot.hasData) {
-                return Semantics(
-                  label: 'Auswertungen werden berechnet',
-                  child: const Center(child: CircularProgressIndicator()),
-                );
-              }
-              final daten = snapshot.data!;
-              final punkte = _auswertungsPunkte(daten);
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+    appBar: AppBar(
+      title: const Text('Auswertungen'),
+      actions: const [
+        AppSupportMenu(contextName: SupportKontexte.auswertungen),
+      ],
+    ),
+    body: SafeArea(
+      child: FutureBuilder<AuswertungsUebersicht>(
+        future: _daten,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'Alle Berechnungen erfolgen lokal. Mittelwerte werden nur für Qualitätswertungen derselben Kriterienversion gebildet; fehlende Werte werden ausgelassen.',
+                  const Text('Auswertungen konnten nicht geladen werden.'),
+                  FilledButton.icon(
+                    onPressed: _neuLaden,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Erneut laden'),
                   ),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          DropdownButtonFormField<_StatistikAnsicht>(
-                            initialValue: _ansicht,
-                            decoration: const InputDecoration(
-                              labelText: 'Statistik',
+                ],
+              ),
+            );
+          }
+          if (!snapshot.hasData) {
+            return Semantics(
+              label: 'Auswertungen werden berechnet',
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          }
+          final daten = snapshot.data!;
+          final punkte = _auswertungsPunkte(daten);
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+            children: [
+              const Text(
+                'Alle Berechnungen erfolgen lokal. Mittelwerte werden nur für Qualitätswertungen derselben Kriterienversion gebildet; fehlende Werte werden ausgelassen.',
+              ),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      DropdownButtonFormField<_StatistikAnsicht>(
+                        initialValue: _ansicht,
+                        decoration: const InputDecoration(
+                          labelText: 'Statistik',
+                        ),
+                        items: [
+                          for (final ansicht in _StatistikAnsicht.values)
+                            DropdownMenuItem(
+                              value: ansicht,
+                              child: Text(ansicht.titel),
                             ),
-                            items: [
-                              for (final ansicht in _StatistikAnsicht.values)
-                                DropdownMenuItem(
-                                  value: ansicht,
-                                  child: Text(ansicht.titel),
-                                ),
-                            ],
-                            onChanged: (wert) {
-                              if (wert == null) return;
-                              setState(() => _ansicht = wert);
-                            },
+                        ],
+                        onChanged: (wert) {
+                          if (wert == null) return;
+                          setState(() => _ansicht = wert);
+                        },
+                      ),
+                      DropdownButtonFormField<StatistikZeitraum>(
+                        initialValue: _aggregation,
+                        decoration: const InputDecoration(
+                          labelText: 'Gruppierung',
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: StatistikZeitraum.tag,
+                            child: Text('Tag'),
                           ),
-                          DropdownButtonFormField<StatistikZeitraum>(
-                            initialValue: _aggregation,
-                            decoration: const InputDecoration(
-                              labelText: 'Gruppierung',
-                            ),
-                            items: const [
-                              DropdownMenuItem(
-                                value: StatistikZeitraum.tag,
-                                child: Text('Tag'),
-                              ),
-                              DropdownMenuItem(
-                                value: StatistikZeitraum.woche,
-                                child: Text('Woche'),
-                              ),
-                              DropdownMenuItem(
-                                value: StatistikZeitraum.monat,
-                                child: Text('Monat'),
-                              ),
-                              DropdownMenuItem(
-                                value: StatistikZeitraum.jahr,
-                                child: Text('Jahr'),
-                              ),
-                            ],
-                            onChanged: (wert) {
-                              if (wert == null) return;
-                              setState(() => _aggregation = wert);
-                            },
+                          DropdownMenuItem(
+                            value: StatistikZeitraum.woche,
+                            child: Text('Woche'),
                           ),
-                          FutureBuilder<AuswertungsFilterOptionen>(
-                            future: _filterOptionen,
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                return TextButton.icon(
-                                  onPressed: () => setState(() {
-                                    _filterOptionen = _ladeFilterOptionen();
-                                  }),
-                                  icon: const Icon(Icons.refresh),
-                                  label: const Text(
-                                    'Filteroptionen erneut laden',
-                                  ),
-                                );
-                              }
-                              if (!snapshot.hasData) {
-                                return Semantics(
-                                  label: 'Filteroptionen werden geladen',
-                                  child: LinearProgressIndicator(),
-                                );
-                              }
-                              final optionen = snapshot.data!;
-                              return Column(
-                                children: [
-                                  DropdownButtonFormField<String>(
-                                    initialValue: _filter.objektArt ==
-                                            StatistikObjektart.produkt
-                                        ? _filter.objektId
-                                        : null,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Produkt',
-                                    ),
-                                    items: [
-                                      const DropdownMenuItem(
-                                        value: null,
-                                        child: Text('Alle Produkte'),
-                                      ),
-                                      for (final option in optionen.produkte)
-                                        DropdownMenuItem(
-                                          value: option.id,
-                                          child: Text(option.bezeichnung),
-                                        ),
-                                    ],
-                                    onChanged: (id) => _filterAnwenden(
-                                      objektId: id,
-                                      objektArt: StatistikObjektart.produkt,
-                                      objektAendern: true,
-                                    ),
-                                  ),
-                                  DropdownButtonFormField<String>(
-                                    initialValue: _filter.objektArt ==
-                                            StatistikObjektart.ort
-                                        ? _filter.objektId
-                                        : null,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Ort',
-                                    ),
-                                    items: [
-                                      const DropdownMenuItem(
-                                        value: null,
-                                        child: Text('Alle Orte'),
-                                      ),
-                                      for (final option in optionen.orte)
-                                        DropdownMenuItem(
-                                          value: option.id,
-                                          child: Text(option.bezeichnung),
-                                        ),
-                                    ],
-                                    onChanged: (id) => _filterAnwenden(
-                                      objektId: id,
-                                      objektArt: StatistikObjektart.ort,
-                                      objektAendern: true,
-                                    ),
-                                  ),
-                                  DropdownButtonFormField<String>(
-                                    initialValue: _filter.kategorieId,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Kategorie',
-                                    ),
-                                    items: [
-                                      const DropdownMenuItem(
-                                        value: null,
-                                        child: Text('Alle Kategorien'),
-                                      ),
-                                      for (final option in optionen.kategorien)
-                                        DropdownMenuItem(
-                                          value: option.id,
-                                          child: Text(option.bezeichnung),
-                                        ),
-                                    ],
-                                    onChanged: (id) => _filterAnwenden(
-                                      kategorieId: id,
-                                      kategorieAendern: true,
-                                    ),
-                                  ),
-                                  DropdownButtonFormField<String>(
-                                    initialValue: _filter.kriteriumId,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Kriterium',
-                                    ),
-                                    items: [
-                                      const DropdownMenuItem(
-                                        value: null,
-                                        child: Text('Alle Kriterien'),
-                                      ),
-                                      for (final option in optionen.kriterien)
-                                        DropdownMenuItem(
-                                          value: option.id,
-                                          child: Text(option.bezeichnung),
-                                        ),
-                                    ],
-                                    onChanged: (id) => _filterAnwenden(
-                                      kriteriumId: id,
-                                      kriteriumAendern: true,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
+                          DropdownMenuItem(
+                            value: StatistikZeitraum.monat,
+                            child: Text('Monat'),
                           ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            crossAxisAlignment: WrapCrossAlignment.center,
+                          DropdownMenuItem(
+                            value: StatistikZeitraum.jahr,
+                            child: Text('Jahr'),
+                          ),
+                        ],
+                        onChanged: (wert) {
+                          if (wert == null) return;
+                          setState(() => _aggregation = wert);
+                        },
+                      ),
+                      FutureBuilder<AuswertungsFilterOptionen>(
+                        future: _filterOptionen,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return TextButton.icon(
+                              onPressed: () => setState(() {
+                                _filterOptionen = _ladeFilterOptionen();
+                              }),
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Filteroptionen erneut laden'),
+                            );
+                          }
+                          if (!snapshot.hasData) {
+                            return Semantics(
+                              label: 'Filteroptionen werden geladen',
+                              child: LinearProgressIndicator(),
+                            );
+                          }
+                          final optionen = snapshot.data!;
+                          return Column(
                             children: [
-                              OutlinedButton.icon(
-                                onPressed: _zeitraumWaehlen,
-                                icon: const Icon(Icons.date_range),
-                                label: const Text('Zeitraum wählen'),
-                              ),
-                              if (_filter.von != null)
-                                Text(
-                                  '${_filter.von!.toLocal().toString().split(' ').first} bis ${_filter.bis!.toLocal().toString().split(' ').first}',
+                              DropdownButtonFormField<String>(
+                                initialValue:
+                                    _filter.objektArt ==
+                                        StatistikObjektart.produkt
+                                    ? _filter.objektId
+                                    : null,
+                                decoration: const InputDecoration(
+                                  labelText: 'Produkt',
                                 ),
-                              TextButton(
-                                onPressed: _filter.von == null
-                                    ? null
-                                    : _filterZuruecksetzen,
-                                child: const Text('Filter zurücksetzen'),
+                                items: [
+                                  const DropdownMenuItem(
+                                    value: null,
+                                    child: Text('Alle Produkte'),
+                                  ),
+                                  for (final option in optionen.produkte)
+                                    DropdownMenuItem(
+                                      value: option.id,
+                                      child: Text(option.bezeichnung),
+                                    ),
+                                ],
+                                onChanged: (id) => _filterAnwenden(
+                                  objektId: id,
+                                  objektArt: StatistikObjektart.produkt,
+                                  objektAendern: true,
+                                ),
+                              ),
+                              DropdownButtonFormField<String>(
+                                initialValue:
+                                    _filter.objektArt == StatistikObjektart.ort
+                                    ? _filter.objektId
+                                    : null,
+                                decoration: const InputDecoration(
+                                  labelText: 'Ort',
+                                ),
+                                items: [
+                                  const DropdownMenuItem(
+                                    value: null,
+                                    child: Text('Alle Orte'),
+                                  ),
+                                  for (final option in optionen.orte)
+                                    DropdownMenuItem(
+                                      value: option.id,
+                                      child: Text(option.bezeichnung),
+                                    ),
+                                ],
+                                onChanged: (id) => _filterAnwenden(
+                                  objektId: id,
+                                  objektArt: StatistikObjektart.ort,
+                                  objektAendern: true,
+                                ),
+                              ),
+                              DropdownButtonFormField<String>(
+                                initialValue: _filter.kategorieId,
+                                decoration: const InputDecoration(
+                                  labelText: 'Kategorie',
+                                ),
+                                items: [
+                                  const DropdownMenuItem(
+                                    value: null,
+                                    child: Text('Alle Kategorien'),
+                                  ),
+                                  for (final option in optionen.kategorien)
+                                    DropdownMenuItem(
+                                      value: option.id,
+                                      child: Text(option.bezeichnung),
+                                    ),
+                                ],
+                                onChanged: (id) => _filterAnwenden(
+                                  kategorieId: id,
+                                  kategorieAendern: true,
+                                ),
+                              ),
+                              DropdownButtonFormField<String>(
+                                initialValue: _filter.kriteriumId,
+                                decoration: const InputDecoration(
+                                  labelText: 'Kriterium',
+                                ),
+                                items: [
+                                  const DropdownMenuItem(
+                                    value: null,
+                                    child: Text('Alle Kriterien'),
+                                  ),
+                                  for (final option in optionen.kriterien)
+                                    DropdownMenuItem(
+                                      value: option.id,
+                                      child: Text(option.bezeichnung),
+                                    ),
+                                ],
+                                onChanged: (id) => _filterAnwenden(
+                                  kriteriumId: id,
+                                  kriteriumAendern: true,
+                                ),
                               ),
                             ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: _zeitraumWaehlen,
+                            icon: const Icon(Icons.date_range),
+                            label: const Text('Zeitraum wählen'),
+                          ),
+                          if (_filter.von != null)
+                            Text(
+                              '${_filter.von!.toLocal().toString().split(' ').first} bis ${_filter.bis!.toLocal().toString().split(' ').first}',
+                            ),
+                          TextButton(
+                            onPressed: _filter.von == null
+                                ? null
+                                : _filterZuruecksetzen,
+                            child: const Text('Filter zurücksetzen'),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                  if (widget.statistikExportService != null &&
-                      widget.exportZielService != null) ...[
-                    const SizedBox(height: 16),
-                    Semantics(
-                      liveRegion: true,
-                      child: FilledButton.icon(
-                        onPressed: _exportLaeuft ? null : _exportieren,
-                        icon: _exportLaeuft
-                            ? const SizedBox.square(
-                                dimension: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.table_view_outlined),
-                        label: Text(
-                          _exportLaeuft
-                              ? 'Excel-Export wird erstellt'
-                              : 'Exportieren',
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Der Excel-Export enthält Produkt- und Ortsbewertungen, den Ortsverlauf sowie die aktuell gefilterte Zeitreihe mit Metadaten.',
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                  _Karte(
-                    titel: _ansicht.titel,
-                    zeilen: [
-                      for (final wert in punkte)
-                        '${wert.zeitpunkt.toLocal()}: ${wert.wert.toStringAsFixed(2)} · ${wert.beschreibung}',
                     ],
-                    verlauf: punkte,
-                    onErlebnisOeffnen: widget.onErlebnisOeffnen,
                   ),
-                  if (_ansicht == _StatistikAnsicht.preise &&
-                      _filter.objektArt == StatistikObjektart.produkt &&
-                      _filter.objektId != null)
-                    _preisExtrema(daten.preisverlauf),
-                  if (_ansicht == _StatistikAnsicht.preisQualitaet)
-                    const Text(
-                      'Preise und Wertungen werden in getrennten Diagrammreihen und eigenen Skalen dargestellt. Der Verlauf zeigt keine Ursache-Wirkung-Beziehung.',
+                ),
+              ),
+              if (widget.statistikExportService != null &&
+                  widget.exportZielService != null) ...[
+                const SizedBox(height: 16),
+                Semantics(
+                  liveRegion: true,
+                  child: FilledButton.icon(
+                    onPressed: _exportLaeuft ? null : _exportieren,
+                    icon: _exportLaeuft
+                        ? const SizedBox.square(
+                            dimension: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.table_view_outlined),
+                    label: Text(
+                      _exportLaeuft
+                          ? 'Excel-Export wird erstellt'
+                          : 'Exportieren',
                     ),
-                  const Text(
-                    'Zeitliche Zusammenhänge werden als Beobachtung dargestellt. Aus Uhrzeit oder Wochentag wird kein Andrang abgeleitet und keine Ursache behauptet.',
                   ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Der Excel-Export enthält Produkt- und Ortsbewertungen, den Ortsverlauf sowie die aktuell gefilterte Zeitreihe mit Metadaten.',
+                ),
+              ],
+              const SizedBox(height: 16),
+              _Karte(
+                titel: _ansicht.titel,
+                zeilen: [
+                  for (final wert in punkte)
+                    '${wert.zeitpunkt.toLocal()}: ${wert.wert.toStringAsFixed(2)} · ${wert.beschreibung}',
                 ],
-              );
-            },
-          ),
-        ),
-      );
+                verlauf: punkte,
+                onErlebnisOeffnen: widget.onErlebnisOeffnen,
+              ),
+              if (_ansicht == _StatistikAnsicht.preise &&
+                  _filter.objektArt == StatistikObjektart.produkt &&
+                  _filter.objektId != null)
+                _preisExtrema(daten.preisverlauf),
+              if (_ansicht == _StatistikAnsicht.preisQualitaet)
+                const Text(
+                  'Preise und Wertungen werden in getrennten Diagrammreihen und eigenen Skalen dargestellt. Der Verlauf zeigt keine Ursache-Wirkung-Beziehung.',
+                ),
+              const Text(
+                'Zeitliche Zusammenhänge werden als Beobachtung dargestellt. Aus Uhrzeit oder Wochentag wird kein Andrang abgeleitet und keine Ursache behauptet.',
+              ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class _Karte extends StatelessWidget {
@@ -585,35 +577,34 @@ class _Karte extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Semantics(
-                header: true,
-                child:
-                    Text(titel, style: Theme.of(context).textTheme.titleMedium),
-              ),
-              const SizedBox(height: 8),
-              if (verlauf == null)
-                if (zeilen.isEmpty)
-                  const Text('Noch keine passenden Daten vorhanden.')
-                else
-                  for (final zeile in zeilen)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Text(zeile),
-                    ),
-              if (verlauf != null) ...[
-                const SizedBox(height: 12),
-                StatistikVerlaufDarstellung(
-                  daten: verlauf!,
-                  onErlebnisOeffnen: onErlebnisOeffnen,
-                ),
-              ],
-            ],
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(titel, style: Theme.of(context).textTheme.titleMedium),
           ),
-        ),
-      );
+          const SizedBox(height: 8),
+          if (verlauf == null)
+            if (zeilen.isEmpty)
+              const Text('Noch keine passenden Daten vorhanden.')
+            else
+              for (final zeile in zeilen)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text(zeile),
+                ),
+          if (verlauf != null) ...[
+            const SizedBox(height: 12),
+            StatistikVerlaufDarstellung(
+              daten: verlauf!,
+              onErlebnisOeffnen: onErlebnisOeffnen,
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
 }

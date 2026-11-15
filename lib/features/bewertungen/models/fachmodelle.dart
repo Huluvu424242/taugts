@@ -10,7 +10,7 @@ enum KriteriumEingabetyp {
   jaNein,
   zahl,
   auswahl,
-  freitext
+  freitext,
 }
 
 enum KriteriumObjektart {
@@ -18,7 +18,7 @@ enum KriteriumObjektart {
   speise,
   sonstigesProdukt,
   gastronomie,
-  geschaeft
+  geschaeft,
 }
 
 enum Erlebnistyp { restaurantbesuch, einkauf }
@@ -74,16 +74,18 @@ class Produkt extends BewertbaresObjekt {
   bool get istUnvollstaendig {
     if (name.trim().isEmpty) return true;
     if (produktart == Produktart.sonstiges) return false;
-    return [marke, brauerei, sorte].any(
-      (wert) => wert == null || wert.trim().isEmpty,
-    );
+    return [
+      marke,
+      brauerei,
+      sorte,
+    ].any((wert) => wert == null || wert.trim().isEmpty);
   }
 
   String get anzeigetitel => name.trim().isNotEmpty
       ? name.trim()
       : (barcode?.trim().isNotEmpty ?? false)
-          ? barcode!.trim()
-          : 'Unbenanntes Produkt';
+      ? barcode!.trim()
+      : 'Unbenanntes Produkt';
 }
 
 class Ort {
@@ -170,33 +172,29 @@ class Erlebnis {
     Object? ende = _nichtGesetzt,
     Object? notiz = _nichtGesetzt,
     DateTime? geaendertAm,
-  }) =>
-      Erlebnis(
-        id: id,
-        herkunftProfilId: herkunftProfilId,
-        typ: typ ?? this.typ,
-        ortId: identical(ortId, _nichtGesetzt) ? this.ortId : ortId as String?,
-        beginn: identical(beginn, _nichtGesetzt)
-            ? this.beginn
-            : beginn as DateTime?,
-        ende: identical(ende, _nichtGesetzt) ? this.ende : ende as DateTime?,
-        produktId: produktId,
-        kaufortId: kaufortId,
-        konsumortId: konsumortId,
-        preis: preis,
-        menge: menge,
-        gebinde: gebinde,
-        notiz: identical(notiz, _nichtGesetzt) ? this.notiz : notiz as String?,
-        erstelltAm: erstelltAm,
-        geaendertAm: geaendertAm ?? this.geaendertAm,
-      );
+  }) => Erlebnis(
+    id: id,
+    herkunftProfilId: herkunftProfilId,
+    typ: typ ?? this.typ,
+    ortId: identical(ortId, _nichtGesetzt) ? this.ortId : ortId as String?,
+    beginn: identical(beginn, _nichtGesetzt)
+        ? this.beginn
+        : beginn as DateTime?,
+    ende: identical(ende, _nichtGesetzt) ? this.ende : ende as DateTime?,
+    produktId: produktId,
+    kaufortId: kaufortId,
+    konsumortId: konsumortId,
+    preis: preis,
+    menge: menge,
+    gebinde: gebinde,
+    notiz: identical(notiz, _nichtGesetzt) ? this.notiz : notiz as String?,
+    erstelltAm: erstelltAm,
+    geaendertAm: geaendertAm ?? this.geaendertAm,
+  );
 }
 
 class Geldbetrag {
-  const Geldbetrag({
-    required this.minorEinheiten,
-    this.waehrung = 'EUR',
-  });
+  const Geldbetrag({required this.minorEinheiten, this.waehrung = 'EUR'});
 
   final int minorEinheiten;
   final String waehrung;
@@ -334,65 +332,65 @@ abstract final class StandardGetraenkekriterien {
   static const farbintensitaetId = 'c0000000-0000-4000-8000-000000000007';
 
   static List<Bewertungskriterium> alle(DateTime zeitpunkt) => [
-        Bewertungskriterium(
-          id: gesamturteilId,
-          name: 'Gesamturteil',
-          beschreibung: 'Unabhängige Gesamtwertung des Getränks.',
-          reihenfolge: 0,
-          erstelltAm: zeitpunkt,
-          geaendertAm: zeitpunkt,
-        ),
-        Bewertungskriterium(
-          id: geschmackId,
-          name: 'Geschmack',
-          beschreibung: 'Wie gut hat das Getränk geschmeckt?',
-          reihenfolge: 10,
-          erstelltAm: zeitpunkt,
-          geaendertAm: zeitpunkt,
-        ),
-        Bewertungskriterium(
-          id: aromaId,
-          name: 'Aroma',
-          beschreibung: 'Wie angenehm war das wahrgenommene Aroma?',
-          reihenfolge: 20,
-          erstelltAm: zeitpunkt,
-          geaendertAm: zeitpunkt,
-        ),
-        Bewertungskriterium(
-          id: frischeId,
-          name: 'Frische',
-          beschreibung: 'Wie frisch wirkte das Getränk?',
-          reihenfolge: 30,
-          erstelltAm: zeitpunkt,
-          geaendertAm: zeitpunkt,
-        ),
-        Bewertungskriterium(
-          id: preisLeistungId,
-          name: 'Preis-Leistung',
-          beschreibung: 'Wie passend war der Preis für dieses Erlebnis?',
-          reihenfolge: 40,
-          erstelltAm: zeitpunkt,
-          geaendertAm: zeitpunkt,
-        ),
-        Bewertungskriterium(
-          id: bitterkeitId,
-          name: 'Bitterkeit',
-          beschreibung: 'Beschreibende Intensität, keine Qualitätswertung.',
-          eingabetyp: KriteriumEingabetyp.intensitaet,
-          reihenfolge: 50,
-          erstelltAm: zeitpunkt,
-          geaendertAm: zeitpunkt,
-        ),
-        Bewertungskriterium(
-          id: farbintensitaetId,
-          name: 'Farbintensität',
-          beschreibung: 'Beschreibende Intensität, keine Qualitätswertung.',
-          eingabetyp: KriteriumEingabetyp.intensitaet,
-          reihenfolge: 60,
-          erstelltAm: zeitpunkt,
-          geaendertAm: zeitpunkt,
-        ),
-      ];
+    Bewertungskriterium(
+      id: gesamturteilId,
+      name: 'Gesamturteil',
+      beschreibung: 'Unabhängige Gesamtwertung des Getränks.',
+      reihenfolge: 0,
+      erstelltAm: zeitpunkt,
+      geaendertAm: zeitpunkt,
+    ),
+    Bewertungskriterium(
+      id: geschmackId,
+      name: 'Geschmack',
+      beschreibung: 'Wie gut hat das Getränk geschmeckt?',
+      reihenfolge: 10,
+      erstelltAm: zeitpunkt,
+      geaendertAm: zeitpunkt,
+    ),
+    Bewertungskriterium(
+      id: aromaId,
+      name: 'Aroma',
+      beschreibung: 'Wie angenehm war das wahrgenommene Aroma?',
+      reihenfolge: 20,
+      erstelltAm: zeitpunkt,
+      geaendertAm: zeitpunkt,
+    ),
+    Bewertungskriterium(
+      id: frischeId,
+      name: 'Frische',
+      beschreibung: 'Wie frisch wirkte das Getränk?',
+      reihenfolge: 30,
+      erstelltAm: zeitpunkt,
+      geaendertAm: zeitpunkt,
+    ),
+    Bewertungskriterium(
+      id: preisLeistungId,
+      name: 'Preis-Leistung',
+      beschreibung: 'Wie passend war der Preis für dieses Erlebnis?',
+      reihenfolge: 40,
+      erstelltAm: zeitpunkt,
+      geaendertAm: zeitpunkt,
+    ),
+    Bewertungskriterium(
+      id: bitterkeitId,
+      name: 'Bitterkeit',
+      beschreibung: 'Beschreibende Intensität, keine Qualitätswertung.',
+      eingabetyp: KriteriumEingabetyp.intensitaet,
+      reihenfolge: 50,
+      erstelltAm: zeitpunkt,
+      geaendertAm: zeitpunkt,
+    ),
+    Bewertungskriterium(
+      id: farbintensitaetId,
+      name: 'Farbintensität',
+      beschreibung: 'Beschreibende Intensität, keine Qualitätswertung.',
+      eingabetyp: KriteriumEingabetyp.intensitaet,
+      reihenfolge: 60,
+      erstelltAm: zeitpunkt,
+      geaendertAm: zeitpunkt,
+    ),
+  ];
 }
 
 abstract final class StandardSpeisekriterien {
@@ -450,61 +448,52 @@ abstract final class StandardFallbackKriterien {
 }
 
 abstract final class StandardOrtskriterien {
-  static List<Bewertungskriterium> gastronomie(DateTime zeitpunkt) => _erstelle(
-        zeitpunkt,
-        KriteriumObjektart.gastronomie,
-        'f1',
-        const [
-          'Gesamturteil',
-          'Service',
-          'Freundlichkeit',
-          'Sauberkeit',
-          'Atmosphäre',
-          'Auswahl',
-          'Preis-Leistung'
-        ],
-      );
+  static List<Bewertungskriterium> gastronomie(DateTime zeitpunkt) =>
+      _erstelle(zeitpunkt, KriteriumObjektart.gastronomie, 'f1', const [
+        'Gesamturteil',
+        'Service',
+        'Freundlichkeit',
+        'Sauberkeit',
+        'Atmosphäre',
+        'Auswahl',
+        'Preis-Leistung',
+      ]);
 
-  static List<Bewertungskriterium> geschaeft(DateTime zeitpunkt) => _erstelle(
-        zeitpunkt,
-        KriteriumObjektart.geschaeft,
-        'f2',
-        const [
-          'Gesamturteil',
-          'Andrang / Auslastung',
-          'Wartezeit',
-          'Sauberkeit',
-          'Auffindbarkeit',
-          'Sortiment',
-          'Verfügbarkeit',
-          'Service'
-        ],
-      );
+  static List<Bewertungskriterium> geschaeft(DateTime zeitpunkt) =>
+      _erstelle(zeitpunkt, KriteriumObjektart.geschaeft, 'f2', const [
+        'Gesamturteil',
+        'Andrang / Auslastung',
+        'Wartezeit',
+        'Sauberkeit',
+        'Auffindbarkeit',
+        'Sortiment',
+        'Verfügbarkeit',
+        'Service',
+      ]);
 
   static List<Bewertungskriterium> _erstelle(
     DateTime zeitpunkt,
     KriteriumObjektart objektart,
     String praefix,
     List<String> namen,
-  ) =>
-      [
-        for (var index = 0; index < namen.length; index++)
-          Bewertungskriterium(
-            id: '$praefix${index.toString().padLeft(2, '0')}0000-0000-4000-8000-000000000001',
-            name: namen[index],
-            beschreibung:
-                'Bewertung für ${objektart == KriteriumObjektart.gastronomie ? 'Gastronomie' : 'Geschäfte'}.',
-            eingabetyp: namen[index] == 'Andrang / Auslastung'
-                ? KriteriumEingabetyp.intensitaet
-                : namen[index] == 'Wartezeit'
-                    ? KriteriumEingabetyp.zahl
-                    : KriteriumEingabetyp.wertung,
-            reihenfolge: index * 10,
-            objektart: objektart,
-            erstelltAm: zeitpunkt,
-            geaendertAm: zeitpunkt,
-          ),
-      ];
+  ) => [
+    for (var index = 0; index < namen.length; index++)
+      Bewertungskriterium(
+        id: '$praefix${index.toString().padLeft(2, '0')}0000-0000-4000-8000-000000000001',
+        name: namen[index],
+        beschreibung:
+            'Bewertung für ${objektart == KriteriumObjektart.gastronomie ? 'Gastronomie' : 'Geschäfte'}.',
+        eingabetyp: namen[index] == 'Andrang / Auslastung'
+            ? KriteriumEingabetyp.intensitaet
+            : namen[index] == 'Wartezeit'
+            ? KriteriumEingabetyp.zahl
+            : KriteriumEingabetyp.wertung,
+        reihenfolge: index * 10,
+        objektart: objektart,
+        erstelltAm: zeitpunkt,
+        geaendertAm: zeitpunkt,
+      ),
+  ];
 }
 
 class Bewertung {
@@ -526,8 +515,8 @@ class Bewertung {
     this.kriteriumVersion,
     this.kriteriumAuswahlwerte = const [],
     this.ortsbewertungId,
-  })  : assert(wert != null || textWert != null),
-        assert(wert == null || textWert == null);
+  }) : assert(wert != null || textWert != null),
+       assert(wert == null || textWert == null);
 
   final String id;
   final String erlebnisId;
@@ -571,8 +560,10 @@ class Ortsbewertung {
 }
 
 class OrtsbewertungMitWerten {
-  const OrtsbewertungMitWerten(
-      {required this.ortsbewertung, required this.werte});
+  const OrtsbewertungMitWerten({
+    required this.ortsbewertung,
+    required this.werte,
+  });
 
   final Ortsbewertung ortsbewertung;
   final List<Bewertung> werte;

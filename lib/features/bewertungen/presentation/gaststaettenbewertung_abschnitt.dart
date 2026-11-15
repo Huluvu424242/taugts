@@ -143,9 +143,9 @@ class _GaststaettenbewertungAbschnittState
   }
 
   void _neuLaden() => setState(() {
-        _lokalGespeichert = false;
-        _laden = _ladeDaten();
-      });
+    _lokalGespeichert = false;
+    _laden = _ladeDaten();
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -164,12 +164,12 @@ class _GaststaettenbewertungAbschnittState
                 final text = _lokalGespeichert && widget.controller != null
                     ? 'Bewertung im Entwurf – erst mit dem Erlebnis gespeichert.'
                     : _lokalGespeichert || snapshot.data?.vorhanden != null
-                        ? 'Für diesen $_kontext liegt eine Bewertung vor.'
-                        : snapshot.hasError
-                            ? 'Der Bewertungsstatus konnte nicht geladen werden.'
-                            : snapshot.hasData
-                                ? 'Noch keine Bewertung für diesen $_kontext.'
-                                : 'Bewertungsstatus wird geladen.';
+                    ? 'Für diesen $_kontext liegt eine Bewertung vor.'
+                    : snapshot.hasError
+                    ? 'Der Bewertungsstatus konnte nicht geladen werden.'
+                    : snapshot.hasData
+                    ? 'Noch keine Bewertung für diesen $_kontext.'
+                    : 'Bewertungsstatus wird geladen.';
                 return Text(text);
               },
             ),
@@ -322,11 +322,12 @@ class _FormularState extends State<_Formular> {
       for (final kriterium in widget.daten.kriterien)
         kriterium.id: gleicheOrtsbewertung
             ? (entwurf?._entwurfWerte?[kriterium.id] ??
-                KriteriumEingabewert.ausBewertung(vorhanden[kriterium.id]))
+                  KriteriumEingabewert.ausBewertung(vorhanden[kriterium.id]))
             : KriteriumEingabewert.ausBewertung(vorhanden[kriterium.id]),
     };
     _geaendert = gleicheOrtsbewertung && (entwurf?._entwurfGeaendert ?? false);
-    _validierungAngezeigt = gleicheOrtsbewertung &&
+    _validierungAngezeigt =
+        gleicheOrtsbewertung &&
         (entwurf?._entwurfValidierungAngezeigt ?? false);
     _kriteriumFokusse = {
       for (final kriterium in widget.daten.kriterien) kriterium.id: FocusNode(),
@@ -447,9 +448,8 @@ class _FormularState extends State<_Formular> {
       _validierungAngezeigt = true;
       _eingabeFehlt = !_hatEingabe;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Bitte $_bezeichnung prüfen.')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Bitte $_bezeichnung prüfen.')));
     widget.fehlerFokus.requestFocus();
   }
 
@@ -469,9 +469,8 @@ class _FormularState extends State<_Formular> {
         _eingabeFehlt = false;
       });
       widget.onGespeichert();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$_bezeichnung gespeichert.')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('$_bezeichnung gespeichert.')));
     } catch (_) {
       if (!mounted) return;
       setState(() => _speichert = false);
@@ -503,9 +502,11 @@ class _FormularState extends State<_Formular> {
                 'Keine aktiven ${widget.istGeschaeft ? 'Geschäfts' : 'Gaststätten'}kriterien. Eine Notiz kann dennoch gespeichert werden.',
               ),
             ),
-          for (var index = 0;
-              index < widget.daten.kriterien.length;
-              index++) ...[
+          for (
+            var index = 0;
+            index < widget.daten.kriterien.length;
+            index++
+          ) ...[
             KriteriumEingabefeld(
               kriterium: widget.daten.kriterien[index],
               wert: _werte[widget.daten.kriterien[index].id]!,
