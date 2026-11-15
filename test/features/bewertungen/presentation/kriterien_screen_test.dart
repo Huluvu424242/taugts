@@ -20,27 +20,27 @@ void main() {
 
   tearDown(() => datenbank.schliessen());
 
-  testWidgets('zeigt Lade- und Leerzustand auch mit großer Schrift',
-      (tester) async {
+  testWidgets('zeigt Lade- und Leerzustand auch mit großer Schrift', (
+    tester,
+  ) async {
     final gesteuert = _GesteuertesLadenRepository(datenbank);
-    await tester.pumpWidget(MaterialApp(
-      home: MediaQuery(
-        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
-        child: KriterienScreen(
-          repository: gesteuert,
-          idGenerator: _FesterIdGenerator(),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: KriterienScreen(
+            repository: gesteuert,
+            idGenerator: _FesterIdGenerator(),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     gesteuert.laden.complete([]);
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Keine Kriterien für diese Objektart.'),
-      findsWidgets,
-    );
+    expect(find.text('Keine Kriterien für diese Objektart.'), findsWidgets);
     await tester.scrollUntilVisible(
       find.text('Geschäfte'),
       300,
@@ -51,14 +51,17 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('zeigt einen verständlichen Ladefehler mit Wiederholung',
-      (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: KriterienScreen(
-        repository: _LadefehlerRepository(datenbank),
-        idGenerator: _FesterIdGenerator(),
+  testWidgets('zeigt einen verständlichen Ladefehler mit Wiederholung', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: KriterienScreen(
+          repository: _LadefehlerRepository(datenbank),
+          idGenerator: _FesterIdGenerator(),
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     expect(
@@ -92,32 +95,33 @@ void main() {
       'Schaumart',
     );
     await tester.enterText(
-      find.widgetWithText(
-        TextField,
-        'Auswahlwerte (eine Zeile je Wert)',
-      ),
+      find.widgetWithText(TextField, 'Auswahlwerte (eine Zeile je Wert)'),
       'Fein\nGrob',
     );
     await tester.tap(find.text('Speichern'));
     await tester.pumpAndSettle();
 
     expect(find.text('Kriterium wurde angelegt.'), findsOneWidget);
-    final gespeichert = (await repository.ladeKriterien())
-        .singleWhere((wert) => wert.name == 'Schaumart');
+    final gespeichert = (await repository.ladeKriterien()).singleWhere(
+      (wert) => wert.name == 'Schaumart',
+    );
     expect(gespeichert.eingabetyp, KriteriumEingabetyp.auswahl);
     expect(gespeichert.auswahlwerte, ['Fein', 'Grob']);
   });
 
-  testWidgets('löscht ein unbenutztes Kriterium nach Bestätigung',
-      (tester) async {
+  testWidgets('löscht ein unbenutztes Kriterium nach Bestätigung', (
+    tester,
+  ) async {
     const id = '9ef4ace9-f038-40d4-a042-042eac68ca50';
     final zeit = DateTime.utc(2026, 8, 31);
-    await repository.speichereKriterium(Bewertungskriterium(
-      id: id,
-      name: 'Temporär',
-      erstelltAm: zeit,
-      geaendertAm: zeit,
-    ));
+    await repository.speichereKriterium(
+      Bewertungskriterium(
+        id: id,
+        name: 'Temporär',
+        erstelltAm: zeit,
+        geaendertAm: zeit,
+      ),
+    );
     await _pumpScreen(tester, repository);
 
     await tester.tap(find.byTooltip('Temporär – Aktionen'));
@@ -129,7 +133,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-        find.text('Das unbenutzte Kriterium wurde gelöscht.'), findsOneWidget);
+      find.text('Das unbenutzte Kriterium wurde gelöscht.'),
+      findsOneWidget,
+    );
     expect(
       (await repository.ladeKriterien()).any((wert) => wert.id == id),
       isFalse,
@@ -167,12 +173,14 @@ Future<void> _pumpScreen(
   WidgetTester tester,
   SqliteBewertungsRepository repository,
 ) async {
-  await tester.pumpWidget(MaterialApp(
-    home: KriterienScreen(
-      repository: repository,
-      idGenerator: _FesterIdGenerator(),
+  await tester.pumpWidget(
+    MaterialApp(
+      home: KriterienScreen(
+        repository: repository,
+        idGenerator: _FesterIdGenerator(),
+      ),
     ),
-  ));
+  );
   await tester.pumpAndSettle();
 }
 
