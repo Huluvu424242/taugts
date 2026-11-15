@@ -88,9 +88,7 @@ void main() {
     }
   });
 
-  test(
-      'Kategorie- und Klassifikationsdaten bestehen einen vollständigen Roundtrip',
-      () {
+  test('Kategorie- und Klassifikationsdaten bestehen einen vollständigen Roundtrip', () {
     const produkt = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
     const kategorie = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
     datenbank.verbindung.execute(
@@ -101,7 +99,7 @@ void main() {
         'Testbier',
         'produkt',
         '2026-09-01T00:00:00.000Z',
-        '2026-09-01T00:00:00.000Z'
+        '2026-09-01T00:00:00.000Z',
       ],
     );
     datenbank.verbindung.execute(
@@ -145,8 +143,11 @@ void main() {
       jetzt: () => DateTime.utc(2026, 10, 10),
     ).erzeugeJson();
     final validierung = const ImportValidierungsService().validiere(text);
-    expect(validierung.istGueltig, isTrue,
-        reason: validierung.fehler.toString());
+    expect(
+      validierung.istGueltig,
+      isTrue,
+      reason: validierung.fehler.toString(),
+    );
 
     final neu = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     addTearDown(neu.schliessen);
@@ -160,8 +161,9 @@ void main() {
     ) as Map<String, Object?>;
     expect(
       neu.verbindung.select(
-          'SELECT geloescht FROM produkte WHERE objekt_id = ?',
-          [produkt]).single['geloescht'],
+        'SELECT geloescht FROM produkte WHERE objekt_id = ?',
+        [produkt],
+      ).single['geloescht'],
       1,
     );
     for (final name in const [
@@ -190,7 +192,7 @@ void main() {
         'Allgemeines Objekt',
         'allgemein',
         '2026-09-01T00:00:00.000Z',
-        '2026-09-01T00:00:00.000Z'
+        '2026-09-01T00:00:00.000Z',
       ],
     );
     final dokument = const ImportValidierungsService().validiere(
@@ -205,23 +207,21 @@ void main() {
       strategie: ImportStrategie.bestandErsetzen,
     );
     expect(
-      ziel.verbindung
-          .select('SELECT art FROM objekte WHERE id = ?', [id]).single['art'],
+      ziel.verbindung.select('SELECT art FROM objekte WHERE id = ?', [
+        id,
+      ]).single['art'],
       'allgemein',
     );
     expect(ziel.verbindung.select('SELECT * FROM produkte'), isEmpty);
   });
 
   test('exportiert lokale Profile ohne den Datenbestand zu verändern', () {
-    datenbank.verbindung.execute(
-      'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [
-        '10000000-0000-4000-8000-000000000001',
-        'Anna',
-        '2026-09-01T10:00:00.000Z',
-        '2026-09-01T10:00:00.000Z',
-      ],
-    );
+    datenbank.verbindung.execute('INSERT INTO profile VALUES (?, ?, ?, ?)', [
+      '10000000-0000-4000-8000-000000000001',
+      'Anna',
+      '2026-09-01T10:00:00.000Z',
+      '2026-09-01T10:00:00.000Z',
+    ]);
     final vorher = datenbank.verbindung
         .select('SELECT COUNT(*) AS n FROM profile')
         .single['n'];

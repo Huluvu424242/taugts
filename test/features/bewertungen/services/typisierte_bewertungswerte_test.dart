@@ -14,10 +14,12 @@ void main() {
   setUp(() async {
     datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
     repository = SqliteBewertungsRepository(datenbank);
-    datenbank.verbindung.execute(
-      'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [profilId, 'Test', zeit.toIso8601String(), zeit.toIso8601String()],
-    );
+    datenbank.verbindung.execute('INSERT INTO profile VALUES (?, ?, ?, ?)', [
+      profilId,
+      'Test',
+      zeit.toIso8601String(),
+      zeit.toIso8601String(),
+    ]);
     await repository.speichereErlebnis(
       Erlebnis(
         id: erlebnisId,

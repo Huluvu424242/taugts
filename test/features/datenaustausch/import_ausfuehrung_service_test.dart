@@ -13,223 +13,216 @@ void main() {
 
   Map<String, Object?> leeresDokument({
     List<Map<String, Object?>> profile = const [],
-  }) =>
-      {
-        'profile': profile,
-        'objekte': <Object?>[],
-        'orte': <Object?>[],
-        'bewertungskriterien': <Object?>[],
-        'erlebnisse': <Object?>[],
-        'erlebnisPositionen': <Object?>[],
-        'preisbeobachtungen': <Object?>[],
-        'ortsbewertungen': <Object?>[],
-        'bewertungen': <Object?>[],
-      };
+  }) => {
+    'profile': profile,
+    'objekte': <Object?>[],
+    'orte': <Object?>[],
+    'bewertungskriterien': <Object?>[],
+    'erlebnisse': <Object?>[],
+    'erlebnisPositionen': <Object?>[],
+    'preisbeobachtungen': <Object?>[],
+    'ortsbewertungen': <Object?>[],
+    'bewertungen': <Object?>[],
+  };
 
   Map<String, Object?> vollstaendigesDokument() => {
-        'profile': [
-          {
-            'id': 'profil-1',
-            'anzeigename': 'Importprofil',
-            'erstelltAm': '2026-09-01T10:00:00.000Z',
-            'geaendertAm': '2026-09-01T10:00:00.000Z',
-          },
-        ],
-        'objekte': [
-          {
-            'id': 'produkt-1',
-            'name': 'Testbier',
-            'art': 'getraenk',
-            'produktart': 'bier',
-            'marke': 'Testmarke',
-            'erstelltAm': '2026-09-01T10:00:00.000Z',
-            'geaendertAm': '2026-09-01T10:00:00.000Z',
-          },
-        ],
-        'orte': [
-          {
-            'id': 'ort-1',
-            'name': 'Testlokal',
-            'typ': 'gastronomie',
-            'erstelltAm': '2026-09-01T10:00:00.000Z',
-            'geaendertAm': '2026-09-01T10:00:00.000Z',
-          },
-        ],
-        'bewertungskriterien': [
-          {
-            'id': 'kriterium-1',
-            'name': 'Geschmack',
-            'beschreibung': null,
-            'eingabetyp': 'wertung',
-            'reihenfolge': 1,
-            'aktiv': true,
-            'produktart': 'bier',
-            'objektart': 'getraenk',
-            'version': 1,
-            'auswahlwerte': <String>[],
-            'erstelltAm': '2026-09-01T10:00:00.000Z',
-            'geaendertAm': '2026-09-01T10:00:00.000Z',
-          },
-        ],
-        'erlebnisse': [
-          {
-            'id': 'erlebnis-1',
-            'herkunftProfilId': 'profil-1',
-            'typ': 'gastronomie',
-            'status': 'abgeschlossen',
-            'ortId': 'ort-1',
-            'tatsaechlicherBeginn': '2026-09-01T18:00:00.000Z',
-            'tatsaechlichesEnde': '2026-09-01T20:00:00.000Z',
-            'istEntwurf': false,
-            'erstelltAm': '2026-09-01T20:00:00.000Z',
-            'geaendertAm': '2026-09-01T20:00:00.000Z',
-          },
-        ],
-        'erlebnisPositionen': [
-          {
-            'id': 'position-1',
-            'erlebnisId': 'erlebnis-1',
-            'produktId': 'produkt-1',
-            'anzahl': 1,
-            'erstelltAm': '2026-09-01T20:00:00.000Z',
-            'geaendertAm': '2026-09-01T20:00:00.000Z',
-          },
-        ],
-        'preisbeobachtungen': [
-          {
-            'id': 'preis-1',
-            'erlebnisId': 'erlebnis-1',
-            'erlebnisPositionId': 'position-1',
-            'produktId': 'produkt-1',
-            'ortId': 'ort-1',
-            'betragMinor': 450,
-            'waehrung': 'EUR',
-            'beobachtetAm': '2026-09-01T18:30:00.000Z',
-            'erstelltAm': '2026-09-01T20:00:00.000Z',
-            'geaendertAm': '2026-09-01T20:00:00.000Z',
-          },
-        ],
-        'ortsbewertungen': [
-          {
-            'id': 'ortsbewertung-1',
-            'erlebnisId': 'erlebnis-1',
-            'ortId': 'ort-1',
-            'herkunftProfilId': 'profil-1',
-            'bewertetAm': '2026-09-01T20:00:00.000Z',
-            'notiz': 'Angenehm',
-            'erstelltAm': '2026-09-01T20:00:00.000Z',
-            'geaendertAm': '2026-09-01T20:00:00.000Z',
-          },
-        ],
-        'bewertungen': [
-          {
-            'id': 'produktbewertung-1',
-            'zielart': 'produkt',
-            'objektId': 'produkt-1',
-            'erlebnisId': 'erlebnis-1',
-            'erlebnisPositionId': 'position-1',
-            'ortId': 'ort-1',
-            'herkunftProfilId': 'profil-1',
-            'wert': 4.0,
-            'erstelltAm': '2026-09-01T20:00:00.000Z',
-            'geaendertAm': '2026-09-01T20:00:00.000Z',
-            'kriterium': {
-              'id': 'kriterium-1',
-              'name': 'Geschmack',
-              'beschreibung': null,
-              'eingabetyp': 'wertung',
-              'reihenfolge': 1,
-              'version': 1,
-              'auswahlwerte': <String>[],
-            },
-          },
-          {
-            'id': 'ortsbewertungswert-1',
-            'zielart': 'ort',
-            'objektId': 'ort-1',
-            'erlebnisId': 'erlebnis-1',
-            'ortsbewertungId': 'ortsbewertung-1',
-            'ortId': 'ort-1',
-            'herkunftProfilId': 'profil-1',
-            'wert': 5.0,
-            'erstelltAm': '2026-09-01T20:00:00.000Z',
-            'geaendertAm': '2026-09-01T20:00:00.000Z',
-            'kriterium': {
-              'id': 'kriterium-1',
-              'name': 'Geschmack',
-              'beschreibung': null,
-              'eingabetyp': 'wertung',
-              'reihenfolge': 1,
-              'version': 1,
-              'auswahlwerte': <String>[],
-            },
-          },
-        ],
-      };
+    'profile': [
+      {
+        'id': 'profil-1',
+        'anzeigename': 'Importprofil',
+        'erstelltAm': '2026-09-01T10:00:00.000Z',
+        'geaendertAm': '2026-09-01T10:00:00.000Z',
+      },
+    ],
+    'objekte': [
+      {
+        'id': 'produkt-1',
+        'name': 'Testbier',
+        'art': 'getraenk',
+        'produktart': 'bier',
+        'marke': 'Testmarke',
+        'erstelltAm': '2026-09-01T10:00:00.000Z',
+        'geaendertAm': '2026-09-01T10:00:00.000Z',
+      },
+    ],
+    'orte': [
+      {
+        'id': 'ort-1',
+        'name': 'Testlokal',
+        'typ': 'gastronomie',
+        'erstelltAm': '2026-09-01T10:00:00.000Z',
+        'geaendertAm': '2026-09-01T10:00:00.000Z',
+      },
+    ],
+    'bewertungskriterien': [
+      {
+        'id': 'kriterium-1',
+        'name': 'Geschmack',
+        'beschreibung': null,
+        'eingabetyp': 'wertung',
+        'reihenfolge': 1,
+        'aktiv': true,
+        'produktart': 'bier',
+        'objektart': 'getraenk',
+        'version': 1,
+        'auswahlwerte': <String>[],
+        'erstelltAm': '2026-09-01T10:00:00.000Z',
+        'geaendertAm': '2026-09-01T10:00:00.000Z',
+      },
+    ],
+    'erlebnisse': [
+      {
+        'id': 'erlebnis-1',
+        'herkunftProfilId': 'profil-1',
+        'typ': 'gastronomie',
+        'status': 'abgeschlossen',
+        'ortId': 'ort-1',
+        'tatsaechlicherBeginn': '2026-09-01T18:00:00.000Z',
+        'tatsaechlichesEnde': '2026-09-01T20:00:00.000Z',
+        'istEntwurf': false,
+        'erstelltAm': '2026-09-01T20:00:00.000Z',
+        'geaendertAm': '2026-09-01T20:00:00.000Z',
+      },
+    ],
+    'erlebnisPositionen': [
+      {
+        'id': 'position-1',
+        'erlebnisId': 'erlebnis-1',
+        'produktId': 'produkt-1',
+        'anzahl': 1,
+        'erstelltAm': '2026-09-01T20:00:00.000Z',
+        'geaendertAm': '2026-09-01T20:00:00.000Z',
+      },
+    ],
+    'preisbeobachtungen': [
+      {
+        'id': 'preis-1',
+        'erlebnisId': 'erlebnis-1',
+        'erlebnisPositionId': 'position-1',
+        'produktId': 'produkt-1',
+        'ortId': 'ort-1',
+        'betragMinor': 450,
+        'waehrung': 'EUR',
+        'beobachtetAm': '2026-09-01T18:30:00.000Z',
+        'erstelltAm': '2026-09-01T20:00:00.000Z',
+        'geaendertAm': '2026-09-01T20:00:00.000Z',
+      },
+    ],
+    'ortsbewertungen': [
+      {
+        'id': 'ortsbewertung-1',
+        'erlebnisId': 'erlebnis-1',
+        'ortId': 'ort-1',
+        'herkunftProfilId': 'profil-1',
+        'bewertetAm': '2026-09-01T20:00:00.000Z',
+        'notiz': 'Angenehm',
+        'erstelltAm': '2026-09-01T20:00:00.000Z',
+        'geaendertAm': '2026-09-01T20:00:00.000Z',
+      },
+    ],
+    'bewertungen': [
+      {
+        'id': 'produktbewertung-1',
+        'zielart': 'produkt',
+        'objektId': 'produkt-1',
+        'erlebnisId': 'erlebnis-1',
+        'erlebnisPositionId': 'position-1',
+        'ortId': 'ort-1',
+        'herkunftProfilId': 'profil-1',
+        'wert': 4.0,
+        'erstelltAm': '2026-09-01T20:00:00.000Z',
+        'geaendertAm': '2026-09-01T20:00:00.000Z',
+        'kriterium': {
+          'id': 'kriterium-1',
+          'name': 'Geschmack',
+          'beschreibung': null,
+          'eingabetyp': 'wertung',
+          'reihenfolge': 1,
+          'version': 1,
+          'auswahlwerte': <String>[],
+        },
+      },
+      {
+        'id': 'ortsbewertungswert-1',
+        'zielart': 'ort',
+        'objektId': 'ort-1',
+        'erlebnisId': 'erlebnis-1',
+        'ortsbewertungId': 'ortsbewertung-1',
+        'ortId': 'ort-1',
+        'herkunftProfilId': 'profil-1',
+        'wert': 5.0,
+        'erstelltAm': '2026-09-01T20:00:00.000Z',
+        'geaendertAm': '2026-09-01T20:00:00.000Z',
+        'kriterium': {
+          'id': 'kriterium-1',
+          'name': 'Geschmack',
+          'beschreibung': null,
+          'eingabetyp': 'wertung',
+          'reihenfolge': 1,
+          'version': 1,
+          'auswahlwerte': <String>[],
+        },
+      },
+    ],
+  };
 
   test(
-      'importiert alle historischen Entitäten anhand stabiler IDs genau einmal',
-      () {
-    final import = vollstaendigesDokument();
+    'importiert alle historischen Entitäten anhand stabiler IDs genau einmal',
+    () {
+      final import = vollstaendigesDokument();
 
-    final erstes = service.ausfuehren(
-      datenbank: datenbank,
-      importDokument: import,
-      strategie: ImportStrategie.importBevorzugen,
-      ausgefuehrtAm: DateTime.utc(2026, 9, 2, 10),
-    );
-    final zweites = service.ausfuehren(
-      datenbank: datenbank,
-      importDokument: import,
-      strategie: ImportStrategie.importBevorzugen,
-      ausgefuehrtAm: DateTime.utc(2026, 9, 2, 11),
-    );
-
-    expect(erstes.nachSammlung['erlebnisse']!.hinzugefuegt, 1);
-    expect(erstes.nachSammlung['erlebnisPositionen']!.hinzugefuegt, 1);
-    expect(erstes.nachSammlung['preisbeobachtungen']!.hinzugefuegt, 1);
-    expect(erstes.nachSammlung['ortsbewertungen']!.hinzugefuegt, 1);
-    expect(erstes.nachSammlung['produktbewertungen']!.hinzugefuegt, 1);
-    expect(erstes.nachSammlung['ortsbewertungswerte']!.hinzugefuegt, 1);
-
-    for (final name in const [
-      'erlebnisse',
-      'erlebnisPositionen',
-      'preisbeobachtungen',
-      'ortsbewertungen',
-      'produktbewertungen',
-      'ortsbewertungswerte',
-    ]) {
-      final zaehler = zweites.nachSammlung[name]!;
-      expect(
-        zaehler.aktualisiert + zaehler.uebersprungen,
-        1,
-        reason: name,
+      final erstes = service.ausfuehren(
+        datenbank: datenbank,
+        importDokument: import,
+        strategie: ImportStrategie.importBevorzugen,
+        ausgefuehrtAm: DateTime.utc(2026, 9, 2, 10),
       );
-    }
-    expect(erstes.gesamt.hinzugefuegt, 10);
-    expect(zweites.gesamt.hinzugefuegt, 0);
-    expect(
-      zweites.gesamt.aktualisiert + zweites.gesamt.uebersprungen,
-      10,
-    );
-
-    for (final tabelle in const {
-      'erlebnisse': 1,
-      'erlebnispositionen': 1,
-      'preisbeobachtungen': 1,
-      'ortsbewertungen': 1,
-      'bewertungen': 2,
-    }.entries) {
-      expect(
-        datenbank.verbindung
-            .select('SELECT COUNT(*) AS n FROM ${tabelle.key}')
-            .single['n'],
-        tabelle.value,
-        reason: tabelle.key,
+      final zweites = service.ausfuehren(
+        datenbank: datenbank,
+        importDokument: import,
+        strategie: ImportStrategie.importBevorzugen,
+        ausgefuehrtAm: DateTime.utc(2026, 9, 2, 11),
       );
-    }
-  });
+
+      expect(erstes.nachSammlung['erlebnisse']!.hinzugefuegt, 1);
+      expect(erstes.nachSammlung['erlebnisPositionen']!.hinzugefuegt, 1);
+      expect(erstes.nachSammlung['preisbeobachtungen']!.hinzugefuegt, 1);
+      expect(erstes.nachSammlung['ortsbewertungen']!.hinzugefuegt, 1);
+      expect(erstes.nachSammlung['produktbewertungen']!.hinzugefuegt, 1);
+      expect(erstes.nachSammlung['ortsbewertungswerte']!.hinzugefuegt, 1);
+
+      for (final name in const [
+        'erlebnisse',
+        'erlebnisPositionen',
+        'preisbeobachtungen',
+        'ortsbewertungen',
+        'produktbewertungen',
+        'ortsbewertungswerte',
+      ]) {
+        final zaehler = zweites.nachSammlung[name]!;
+        expect(zaehler.aktualisiert + zaehler.uebersprungen, 1, reason: name);
+      }
+      expect(erstes.gesamt.hinzugefuegt, 10);
+      expect(zweites.gesamt.hinzugefuegt, 0);
+      expect(zweites.gesamt.aktualisiert + zweites.gesamt.uebersprungen, 10);
+
+      for (final tabelle in const {
+        'erlebnisse': 1,
+        'erlebnispositionen': 1,
+        'preisbeobachtungen': 1,
+        'ortsbewertungen': 1,
+        'bewertungen': 2,
+      }.entries) {
+        expect(
+          datenbank.verbindung
+              .select('SELECT COUNT(*) AS n FROM ${tabelle.key}')
+              .single['n'],
+          tabelle.value,
+          reason: tabelle.key,
+        );
+      }
+    },
+  );
 
   test('rollt den gesamten Import bei einem Fehler zurück', () {
     final vorher = {
@@ -282,14 +275,16 @@ void main() {
   test('protokolliert Erfolg und Rollback lokal ohne Fachinhalte', () {
     service.ausfuehren(
       datenbank: datenbank,
-      importDokument: leeresDokument(profile: [
-        {
-          'id': 'profil-1',
-          'anzeigename': 'Nicht im Protokoll speichern',
-          'erstelltAm': '2026-09-01T10:00:00.000Z',
-          'geaendertAm': '2026-09-01T10:00:00.000Z',
-        },
-      ]),
+      importDokument: leeresDokument(
+        profile: [
+          {
+            'id': 'profil-1',
+            'anzeigename': 'Nicht im Protokoll speichern',
+            'erstelltAm': '2026-09-01T10:00:00.000Z',
+            'geaendertAm': '2026-09-01T10:00:00.000Z',
+          },
+        ],
+      ),
       strategie: ImportStrategie.importBevorzugen,
       ausgefuehrtAm: DateTime.utc(2026, 9, 2, 13),
     );
@@ -445,31 +440,35 @@ void main() {
     }
   });
 
-  test('weist zusammengeführte Datensätze getrennt von Aktualisierungen aus',
-      () {
-    final import = leeresDokument(profile: [
-      {
-        'id': 'profil-1',
-        'anzeigename': 'Importprofil',
-        'erstelltAm': '2026-09-01T10:00:00.000Z',
-        'geaendertAm': '2026-09-01T10:00:00.000Z',
-      },
-    ]);
-    service.ausfuehren(
-      datenbank: datenbank,
-      importDokument: import,
-      strategie: ImportStrategie.importBevorzugen,
-    );
+  test(
+    'weist zusammengeführte Datensätze getrennt von Aktualisierungen aus',
+    () {
+      final import = leeresDokument(
+        profile: [
+          {
+            'id': 'profil-1',
+            'anzeigename': 'Importprofil',
+            'erstelltAm': '2026-09-01T10:00:00.000Z',
+            'geaendertAm': '2026-09-01T10:00:00.000Z',
+          },
+        ],
+      );
+      service.ausfuehren(
+        datenbank: datenbank,
+        importDokument: import,
+        strategie: ImportStrategie.importBevorzugen,
+      );
 
-    final ergebnis = service.ausfuehren(
-      datenbank: datenbank,
-      importDokument: import,
-      strategie: ImportStrategie.importBevorzugen,
-      zusammengefuehrtNachSammlung: const {'profile': 1},
-    );
+      final ergebnis = service.ausfuehren(
+        datenbank: datenbank,
+        importDokument: import,
+        strategie: ImportStrategie.importBevorzugen,
+        zusammengefuehrtNachSammlung: const {'profile': 1},
+      );
 
-    expect(ergebnis.nachSammlung['profile']!.zusammengefuehrt, 1);
-    expect(ergebnis.nachSammlung['profile']!.aktualisiert, 0);
-    expect(service.ladeProtokoll(datenbank).first.zusammengefuehrt, 1);
-  });
+      expect(ergebnis.nachSammlung['profile']!.zusammengefuehrt, 1);
+      expect(ergebnis.nachSammlung['profile']!.aktualisiert, 0);
+      expect(service.ladeProtokoll(datenbank).first.zusammengefuehrt, 1);
+    },
+  );
 }

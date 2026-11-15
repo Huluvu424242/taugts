@@ -43,10 +43,7 @@ class _NichtVerwendetesExportZiel implements ExportZielService {
   }
 
   @override
-  Future<void> teilen({
-    required String dateiname,
-    required String inhalt,
-  }) {
+  Future<void> teilen({required String dateiname, required String inhalt}) {
     throw StateError('Export darf in diesem Test nicht gestartet werden.');
   }
 }
@@ -74,9 +71,7 @@ void main() {
           home: DatenaustauschScreen(
             exportService: exportService,
             exportZielService: _NichtVerwendetesExportZiel(),
-            importQuelleService: _FesteImportQuelle(
-              jsonEncode(importDokument),
-            ),
+            importQuelleService: _FesteImportQuelle(jsonEncode(importDokument)),
           ),
         ),
       );
@@ -94,8 +89,9 @@ void main() {
       bestaetigungsButton.onPressed!();
       await tester.pumpAndSettle();
 
-      final protokoll =
-          const ImportAusfuehrungService().ladeProtokoll(datenbank);
+      final protokoll = const ImportAusfuehrungService().ladeProtokoll(
+        datenbank,
+      );
       expect(protokoll, hasLength(1));
       expect(protokoll.single.erfolgreich, isTrue);
     },
@@ -108,10 +104,7 @@ void main() {
       addTearDown(() => tester.binding.setSurfaceSize(null));
       final datenbank = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
       addTearDown(datenbank.schliessen);
-      final exportService = ExportService(
-        datenbank,
-        appVersion: '0.0.0-test',
-      );
+      final exportService = ExportService(datenbank, appVersion: '0.0.0-test');
       final dokument = Map<String, Object?>.from(
         jsonDecode(exportService.erzeugeJson()) as Map,
       );
@@ -120,17 +113,20 @@ void main() {
       if (profile.isNotEmpty) {
         // Derselbe Datensatz ist vorhanden; die Vorschau benötigt
         // keine manuell ausgewählte Entscheidung.
-        dokument['profile'] =
-            profile.map((profil) => Map<String, Object?>.from(profil)).toList();
+        dokument['profile'] = profile
+            .map((profil) => Map<String, Object?>.from(profil))
+            .toList();
       }
 
-      await tester.pumpWidget(MaterialApp(
-        home: DatenaustauschScreen(
-          exportService: exportService,
-          exportZielService: _NichtVerwendetesExportZiel(),
-          importQuelleService: _FesteImportQuelle(jsonEncode(dokument)),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DatenaustauschScreen(
+            exportService: exportService,
+            exportZielService: _NichtVerwendetesExportZiel(),
+            importQuelleService: _FesteImportQuelle(jsonEncode(dokument)),
+          ),
         ),
-      ));
+      );
       await tester.tap(find.text('Importdatei auswählen und prüfen'));
       await tester.pumpAndSettle();
 
@@ -145,199 +141,215 @@ void main() {
     },
   );
 
-  testWidgets(
-    'bevorzugt Import bei Versionskonflikt ohne Einzelentscheidung',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1000, 2400));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-      addTearDown(db.schliessen);
-      db.verbindung.execute(
-        'INSERT INTO profile (id, anzeigename, erstellt_am, geaendert_am) '
-        'VALUES (?, ?, ?, ?)',
-        [
-          '11111111-1111-4111-8111-111111111111',
-          'Lokal',
-          '2026-09-01T00:00:00Z',
-          '2026-09-01T00:00:00Z'
-        ],
-      );
-      final export = ExportService(db, appVersion: '0.0.0-test');
-      final dokument = Map<String, Object?>.from(
-        jsonDecode(export.erzeugeJson()) as Map,
-      );
-      dokument['bewertungskriterien'] = <Object?>[];
-      final profile = (dokument['profile'] as List).cast<Map>();
-      dokument['profile'] = [
-        for (final profil in profile)
-          {...Map<String, Object?>.from(profil), 'anzeigename': 'Import'},
-      ];
-      await tester.pumpWidget(MaterialApp(
+  testWidgets('bevorzugt Import bei Versionskonflikt ohne Einzelentscheidung', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+    addTearDown(db.schliessen);
+    db.verbindung.execute(
+      'INSERT INTO profile (id, anzeigename, erstellt_am, geaendert_am) '
+      'VALUES (?, ?, ?, ?)',
+      [
+        '11111111-1111-4111-8111-111111111111',
+        'Lokal',
+        '2026-09-01T00:00:00Z',
+        '2026-09-01T00:00:00Z',
+      ],
+    );
+    final export = ExportService(db, appVersion: '0.0.0-test');
+    final dokument = Map<String, Object?>.from(
+      jsonDecode(export.erzeugeJson()) as Map,
+    );
+    dokument['bewertungskriterien'] = <Object?>[];
+    final profile = (dokument['profile'] as List).cast<Map>();
+    dokument['profile'] = [
+      for (final profil in profile)
+        {...Map<String, Object?>.from(profil), 'anzeigename': 'Import'},
+    ];
+    await tester.pumpWidget(
+      MaterialApp(
         home: DatenaustauschScreen(
           exportService: export,
           exportZielService: _NichtVerwendetesExportZiel(),
           importQuelleService: _FesteImportQuelle(jsonEncode(dokument)),
         ),
-      ));
-      await tester.tap(find.text('Importdatei auswählen und prüfen'));
-      await tester.pumpAndSettle();
-      final aktion = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
-      );
-      expect(aktion.onPressed, isNotNull);
-      await tester
-          .tap(find.text('Automatische Entscheidungen ansehen / anpassen'));
-      await tester.pumpAndSettle();
-      final konfliktAuswahl =
-          tester.widget<DropdownButtonFormField<ImportKonfliktAktion>>(
-        find.byType(DropdownButtonFormField<ImportKonfliktAktion>).first,
-      );
-      expect(konfliktAuswahl.initialValue, ImportKonfliktAktion.importVersion);
-      await tester.tap(find.text('Zurück zur Importvorschau'));
-      await tester.pumpAndSettle();
-      final importAktion = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
-      );
-      importAktion.onPressed!();
-      await tester.pumpAndSettle();
-      expect(
-        db.verbindung
-            .select(
-              "SELECT anzeigename FROM profile WHERE id = '11111111-1111-4111-8111-111111111111'",
-            )
-            .single['anzeigename'],
-        'Import',
-      );
-    },
-  );
-
-  testWidgets('Ersatz verlangt separate Checkbox und lässt Abbruch unverändert',
-      (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 2400));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-    addTearDown(db.schliessen);
-    const alt = '11111111-1111-4111-8111-111111111111';
-    const neu = '22222222-2222-4222-8222-222222222222';
-    db.verbindung.execute(
-      'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [alt, 'Alt', '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z'],
-    );
-    final export = ExportService(db, appVersion: '0.0.0-test');
-    final dokument = Map<String, Object?>.from(
-      jsonDecode(export.erzeugeJson()) as Map,
-    );
-    dokument['bewertungskriterien'] = <Object?>[];
-    dokument['profile'] = [
-      {
-        'id': neu,
-        'anzeigename': 'Neu',
-        'erstelltAm': '2026-09-01T00:00:00.000Z',
-        'geaendertAm': '2026-09-01T00:00:00.000Z',
-      },
-    ];
-    await tester.pumpWidget(MaterialApp(
-      home: DatenaustauschScreen(
-        exportService: export,
-        exportZielService: _NichtVerwendetesExportZiel(),
-        importQuelleService: _FesteImportQuelle(jsonEncode(dokument)),
       ),
-    ));
+    );
     await tester.tap(find.text('Importdatei auswählen und prüfen'));
     await tester.pumpAndSettle();
-
-    await tester.tap(find.byType(DropdownButtonFormField<ImportStrategie>));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Gesamten lokalen Datenbestand ersetzen').last);
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Zu entfernende Datensätze:'), findsOneWidget);
-
-    FilledButton ersatzAktion() => tester.widget<FilledButton>(
-          find
-              .widgetWithText(FilledButton, 'Bestand ersetzen und importieren')
-              .last,
-        );
-    ersatzAktion().onPressed!();
-    await tester.pumpAndSettle();
-    final dialogAktion = tester.widget<FilledButton>(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.widgetWithText(
-          FilledButton,
-          'Bestand ersetzen und importieren',
-        ),
-      ),
-    );
-    expect(dialogAktion.onPressed, isNull);
-    await tester.tap(find.text('Abbrechen'));
-    await tester.pumpAndSettle();
-    expect(db.verbindung.select('SELECT id FROM profile').single['id'], alt);
-
-    ersatzAktion().onPressed!();
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.text('Ich bestätige den vollständigen Ersatz der lokalen Daten'),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.widgetWithText(
-          FilledButton,
-          'Bestand ersetzen und importieren',
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(db.verbindung.select('SELECT id FROM profile').single['id'], neu);
-  });
-
-  testWidgets('verwirft eine durch lokale Änderungen veraltete Importvorschau',
-      (tester) async {
-    await tester.binding.setSurfaceSize(const Size(900, 2400));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-    addTearDown(db.schliessen);
-    const id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-    db.verbindung.execute(
-      'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [id, 'Vorher', '2026-09-01T00:00:00.000Z', '2026-09-01T00:00:00.000Z'],
-    );
-    final export = ExportService(db, appVersion: '0.0.0-test');
-    final dokument = Map<String, Object?>.from(
-      jsonDecode(export.erzeugeJson()) as Map,
-    );
-    dokument['bewertungskriterien'] = <Object?>[];
-    await tester.pumpWidget(MaterialApp(
-      home: DatenaustauschScreen(
-        exportService: export,
-        exportZielService: _NichtVerwendetesExportZiel(),
-        importQuelleService: _FesteImportQuelle(jsonEncode(dokument)),
-      ),
-    ));
-    await tester.tap(find.text('Importdatei auswählen und prüfen'));
-    await tester.pumpAndSettle();
-    db.verbindung.execute(
-      'UPDATE profile SET anzeigename = ? WHERE id = ?',
-      ['Nachher', id],
-    );
     final aktion = tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
     );
-    aktion.onPressed!();
+    expect(aktion.onPressed, isNotNull);
+    await tester.tap(
+      find.text('Automatische Entscheidungen ansehen / anpassen'),
+    );
+    await tester.pumpAndSettle();
+    final konfliktAuswahl = tester
+        .widget<DropdownButtonFormField<ImportKonfliktAktion>>(
+          find.byType(DropdownButtonFormField<ImportKonfliktAktion>).first,
+        );
+    expect(konfliktAuswahl.initialValue, ImportKonfliktAktion.importVersion);
+    await tester.tap(find.text('Zurück zur Importvorschau'));
+    await tester.pumpAndSettle();
+    final importAktion = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
+    );
+    importAktion.onPressed!();
     await tester.pumpAndSettle();
     expect(
-      find.textContaining('seit der Vorschau verändert'),
-      findsOneWidget,
-    );
-    expect(
       db.verbindung
-          .select('SELECT anzeigename FROM profile')
+          .select(
+            "SELECT anzeigename FROM profile WHERE id = '11111111-1111-4111-8111-111111111111'",
+          )
           .single['anzeigename'],
-      'Nachher',
+      'Import',
     );
-    expect(const ImportAusfuehrungService().ladeProtokoll(db), isEmpty);
   });
+
+  testWidgets(
+    'Ersatz verlangt separate Checkbox und lässt Abbruch unverändert',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 2400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+      addTearDown(db.schliessen);
+      const alt = '11111111-1111-4111-8111-111111111111';
+      const neu = '22222222-2222-4222-8222-222222222222';
+      db.verbindung.execute('INSERT INTO profile VALUES (?, ?, ?, ?)', [
+        alt,
+        'Alt',
+        '2026-09-01T00:00:00.000Z',
+        '2026-09-01T00:00:00.000Z',
+      ]);
+      final export = ExportService(db, appVersion: '0.0.0-test');
+      final dokument = Map<String, Object?>.from(
+        jsonDecode(export.erzeugeJson()) as Map,
+      );
+      dokument['bewertungskriterien'] = <Object?>[];
+      dokument['profile'] = [
+        {
+          'id': neu,
+          'anzeigename': 'Neu',
+          'erstelltAm': '2026-09-01T00:00:00.000Z',
+          'geaendertAm': '2026-09-01T00:00:00.000Z',
+        },
+      ];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DatenaustauschScreen(
+            exportService: export,
+            exportZielService: _NichtVerwendetesExportZiel(),
+            importQuelleService: _FesteImportQuelle(jsonEncode(dokument)),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Importdatei auswählen und prüfen'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(DropdownButtonFormField<ImportStrategie>));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.text('Gesamten lokalen Datenbestand ersetzen').last,
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Zu entfernende Datensätze:'), findsOneWidget);
+
+      FilledButton ersatzAktion() => tester.widget<FilledButton>(
+        find
+            .widgetWithText(FilledButton, 'Bestand ersetzen und importieren')
+            .last,
+      );
+      ersatzAktion().onPressed!();
+      await tester.pumpAndSettle();
+      final dialogAktion = tester.widget<FilledButton>(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.widgetWithText(
+            FilledButton,
+            'Bestand ersetzen und importieren',
+          ),
+        ),
+      );
+      expect(dialogAktion.onPressed, isNull);
+      await tester.tap(find.text('Abbrechen'));
+      await tester.pumpAndSettle();
+      expect(db.verbindung.select('SELECT id FROM profile').single['id'], alt);
+
+      ersatzAktion().onPressed!();
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.text('Ich bestätige den vollständigen Ersatz der lokalen Daten'),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.widgetWithText(
+            FilledButton,
+            'Bestand ersetzen und importieren',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(db.verbindung.select('SELECT id FROM profile').single['id'], neu);
+    },
+  );
+
+  testWidgets(
+    'verwirft eine durch lokale Änderungen veraltete Importvorschau',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(900, 2400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+      addTearDown(db.schliessen);
+      const id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+      db.verbindung.execute('INSERT INTO profile VALUES (?, ?, ?, ?)', [
+        id,
+        'Vorher',
+        '2026-09-01T00:00:00.000Z',
+        '2026-09-01T00:00:00.000Z',
+      ]);
+      final export = ExportService(db, appVersion: '0.0.0-test');
+      final dokument = Map<String, Object?>.from(
+        jsonDecode(export.erzeugeJson()) as Map,
+      );
+      dokument['bewertungskriterien'] = <Object?>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DatenaustauschScreen(
+            exportService: export,
+            exportZielService: _NichtVerwendetesExportZiel(),
+            importQuelleService: _FesteImportQuelle(jsonEncode(dokument)),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Importdatei auswählen und prüfen'));
+      await tester.pumpAndSettle();
+      db.verbindung.execute('UPDATE profile SET anzeigename = ? WHERE id = ?', [
+        'Nachher',
+        id,
+      ]);
+      final aktion = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Import verbindlich ausführen'),
+      );
+      aktion.onPressed!();
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('seit der Vorschau verändert'),
+        findsOneWidget,
+      );
+      expect(
+        db.verbindung
+            .select('SELECT anzeigename FROM profile')
+            .single['anzeigename'],
+        'Nachher',
+      );
+      expect(const ImportAusfuehrungService().ladeProtokoll(db), isEmpty);
+    },
+  );
 
   testWidgets(
     'sperrt weitere Aktionen und verändert bei abgebrochener Auswahl nichts',
@@ -350,10 +362,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: DatenaustauschScreen(
-            exportService: ExportService(
-              datenbank,
-              appVersion: '0.0.0-test',
-            ),
+            exportService: ExportService(datenbank, appVersion: '0.0.0-test'),
             exportZielService: _NichtVerwendetesExportZiel(),
             importQuelleService: quelle,
           ),
@@ -409,45 +418,51 @@ void main() {
     },
   );
 
-  testWidgets('Alle Daten löschen erfordert Bestätigung und leert den Bestand',
-      (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 2400));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
-    addTearDown(db.schliessen);
-    db.verbindung.execute(
-      'INSERT INTO profile VALUES (?, ?, ?, ?)',
-      [
+  testWidgets(
+    'Alle Daten löschen erfordert Bestätigung und leert den Bestand',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 2400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final db = LokaleDatenbank.oeffnen(sqlite3.openInMemory());
+      addTearDown(db.schliessen);
+      db.verbindung.execute('INSERT INTO profile VALUES (?, ?, ?, ?)', [
         '11111111-1111-4111-8111-111111111111',
         'Testprofil',
         '2026-09-01T00:00:00Z',
         '2026-09-01T00:00:00Z',
-      ],
-    );
-    await tester.pumpWidget(MaterialApp(
-      home: DatenaustauschScreen(
-        exportService: ExportService(db, appVersion: '0.0.0-test'),
-        exportZielService: _NichtVerwendetesExportZiel(),
-      ),
-    ));
+      ]);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DatenaustauschScreen(
+            exportService: ExportService(db, appVersion: '0.0.0-test'),
+            exportZielService: _NichtVerwendetesExportZiel(),
+          ),
+        ),
+      );
 
-    await tester.tap(find.text('Alle Daten löschen'));
-    await tester.pumpAndSettle();
-    expect(find.text('Alle lokalen Daten endgültig löschen?'), findsOneWidget);
-    await tester.tap(find.text('Abbrechen'));
-    await tester.pumpAndSettle();
-    expect(
+      await tester.tap(find.text('Alle Daten löschen'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Alle lokalen Daten endgültig löschen?'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Abbrechen'));
+      await tester.pumpAndSettle();
+      expect(
         db.verbindung.select('SELECT COUNT(*) AS n FROM profile').single['n'],
-        1);
+        1,
+      );
 
-    await tester.tap(find.text('Alle Daten löschen'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Alle Daten endgültig löschen'));
-    await tester.pumpAndSettle();
-    expect(
+      await tester.tap(find.text('Alle Daten löschen'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Alle Daten endgültig löschen'));
+      await tester.pumpAndSettle();
+      expect(
         db.verbindung.select('SELECT COUNT(*) AS n FROM profile').single['n'],
-        0);
-    expect(find.text('Alle lokalen Daten wurden gelöscht.'), findsOneWidget);
-    expect(const ImportAusfuehrungService().ladeProtokoll(db), isEmpty);
-  });
+        0,
+      );
+      expect(find.text('Alle lokalen Daten wurden gelöscht.'), findsOneWidget);
+      expect(const ImportAusfuehrungService().ladeProtokoll(db), isEmpty);
+    },
+  );
 }
