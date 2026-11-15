@@ -63,7 +63,7 @@ void main() {
         produkte: [AuswertungsFilterOption(id: 'p1', bezeichnung: 'Produkt 1')],
         orte: [],
         kategorien: [
-          AuswertungsFilterOption(id: 'k1', bezeichnung: 'Getränke')
+          AuswertungsFilterOption(id: 'k1', bezeichnung: 'Getränke'),
         ],
         kriterien: [
           AuswertungsFilterOption(id: 'kriterium1', bezeichnung: 'Geschmack'),
@@ -94,10 +94,7 @@ void main() {
       containsAll(['Produktbewertungen', 'Ortsbewertungen', 'Ortsverlauf']),
     );
 
-    expect(
-      excel.tables.keys,
-      contains('Aktuelle Auswertung'),
-    );
+    expect(excel.tables.keys, contains('Aktuelle Auswertung'));
     final aktuelleAuswertung = excel['Aktuelle Auswertung'];
     expect(
       aktuelleAuswertung.cell(CellIndex.indexByString('B1')).value.toString(),
@@ -149,37 +146,19 @@ void main() {
       produkte.cell(CellIndex.indexByString('A3')).value.toString(),
       'Produkt 1',
     );
-    expect(
-      produkte.cell(CellIndex.indexByString('B3')).value.toString(),
-      '5',
-    );
-    expect(
-      produkte.cell(CellIndex.indexByString('C3')).value.toString(),
-      '3',
-    );
-    expect(
-      produkte.cell(CellIndex.indexByString('D3')).value.toString(),
-      '4',
-    );
+    expect(produkte.cell(CellIndex.indexByString('B3')).value.toString(), '5');
+    expect(produkte.cell(CellIndex.indexByString('C3')).value.toString(), '3');
+    expect(produkte.cell(CellIndex.indexByString('D3')).value.toString(), '4');
 
     final orte = excel['Ortsbewertungen'];
-    expect(
-      orte.cell(CellIndex.indexByString('A2')).value.toString(),
-      'Ort A',
-    );
-    expect(
-      orte.cell(CellIndex.indexByString('D2')).value.toString(),
-      '3.5',
-    );
+    expect(orte.cell(CellIndex.indexByString('A2')).value.toString(), 'Ort A');
+    expect(orte.cell(CellIndex.indexByString('D2')).value.toString(), '3.5');
 
     final verlauf = excel['Ortsverlauf'];
     expect(
       verlauf.cell(CellIndex.indexByString('B2')).value.toString(),
       'Ort A',
     );
-    expect(
-      verlauf.cell(CellIndex.indexByString('B3')).value.toString(),
-      '3',
-    );
+    expect(verlauf.cell(CellIndex.indexByString('B3')).value.toString(), '3');
   });
 }
