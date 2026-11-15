@@ -610,7 +610,10 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         onPopInvokedWithResult: (didPop, _) {
           if (!didPop) _zurueckNavigieren();
         },
-        child: Scaffold(
+        child: _baueScaffold(context),
+      );
+
+  Widget _baueScaffold(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Text(_typLabel),
           actions: [
@@ -804,7 +807,6 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
             ],
           ),
         ),
-      ),
       );
 }
 
