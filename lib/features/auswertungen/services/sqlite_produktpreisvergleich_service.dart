@@ -40,10 +40,14 @@ class SqliteProduktpreisvergleichService implements ProduktPreisvergleichService
         continue;
       }
       final zeit = DateTime.tryParse(row['zeitpunkt'] as String? ?? '');
-      if (zeit == null || !filter.enthaelt(zeit)) continue;
+      if (zeit == null || !filter.enthaelt(zeit)) {
+        continue;
+      }
       // Die Sortierung stellt sicher, dass der erste Treffer der letzte
       // dokumentierte Kauf ist; ältere Käufe ersetzen ihn niemals.
-      if (letzte.containsKey(ortId)) continue;
+      if (letzte.containsKey(ortId)) {
+        continue;
+      }
       final minor = row['betrag_minor'] as int;
       final waehrung = row['waehrung'] as String;
       final menge = row['fuellmenge_ml'] as int?;
