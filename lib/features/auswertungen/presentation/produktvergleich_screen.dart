@@ -230,7 +230,8 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
                       Builder(
                         builder: (context) {
                           final wert = eintrag.einheitspreis;
-                          final neueEinheit = wert != null &&
+                          final neueEinheit =
+                              wert != null &&
                               eintrag.einheitspreisEinheit != vorherEinheit;
                           if (neueEinheit) {
                             rang = 0;
@@ -247,38 +248,40 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
                                   padding: const EdgeInsets.only(top: 12),
                                   child: Text(
                                     'Eigenständige Rangliste: ${eintrag.einheitspreisEinheit}',
-                                    style: Theme.of(context).textTheme.titleSmall,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall,
                                   ),
                                 ),
                               Card(
                                 child: ListTile(
-                              title: Text(
-                                wert == null
-                                    ? eintrag.ortName
-                                    : '$rang. ${eintrag.ortName}',
-                              ),
-                              subtitle: Text(
-                                '${eintrag.zeitpunkt.toLocal().toString().substring(0, 16)} · '
-                                '${eintrag.preis.toStringAsFixed(2)} ${eintrag.waehrung}'
-                                '${eintrag.mengeMl == null ? '' : ' / ${eintrag.mengeMl} ${eintrag.bezugseinheit ?? ''}'}',
-                              ),
-                              trailing: Text(
-                                wert == null
-                                    ? 'Nicht vergleichbar'
-                                    : '${wert.toStringAsFixed(2)} ${eintrag.einheitspreisEinheit}',
-                              ),
-                              isThreeLine: wert == null,
-                              onTap: wert == null
-                                  ? () => ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              eintrag.nichtVergleichbar ??
-                                                  'Nicht vergleichbar',
-                                            ),
-                                          ),
-                                        )
-                                  : null,
+                                  title: Text(
+                                    wert == null
+                                        ? eintrag.ortName
+                                        : '$rang. ${eintrag.ortName}',
+                                  ),
+                                  subtitle: Text(
+                                    '${eintrag.zeitpunkt.toLocal().toString().substring(0, 16)} · '
+                                    '${eintrag.preis.toStringAsFixed(2)} ${eintrag.waehrung}'
+                                    '${eintrag.mengeMl == null ? '' : ' / ${eintrag.mengeMl} ${eintrag.bezugseinheit ?? ''}'}',
+                                  ),
+                                  trailing: Text(
+                                    wert == null
+                                        ? 'Nicht vergleichbar'
+                                        : '${wert.toStringAsFixed(2)} ${eintrag.einheitspreisEinheit}',
+                                  ),
+                                  isThreeLine: wert == null,
+                                  onTap: wert == null
+                                      ? () => ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  eintrag.nichtVergleichbar ??
+                                                      'Nicht vergleichbar',
+                                                ),
+                                              ),
+                                            )
+                                      : null,
                                 ),
                               ),
                             ],
