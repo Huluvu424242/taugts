@@ -31,6 +31,13 @@ Flutter und Dart werden als Entwicklungs- und Laufzeittechnologien verwendet.
 Die jeweils mit der eingesetzten SDK-Version ausgelieferten Lizenztexte und
 Third-Party-Notices bleiben maßgeblich.
 
+## Material-Oberfläche
+
+- [material_ui](https://pub.dev/packages/material_ui) – Copyright The Flutter Authors,
+  BSD-3-Clause; offizielle, vom Flutter-SDK entkoppelte Material-Komponenten
+- [cupertino_ui](https://pub.dev/packages/cupertino_ui) – Copyright The Flutter Authors,
+  BSD-3-Clause; transitive Abhängigkeit der offiziellen Material-Komponenten
+
 ## Laufzeitabhängigkeiten der lokalen Persistenz
 
 - [sqlite3](https://pub.dev/packages/sqlite3) – MIT; Dart-Bindings und
