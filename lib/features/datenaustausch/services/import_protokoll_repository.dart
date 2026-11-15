@@ -66,17 +66,17 @@ class ImportProtokollRepository {
   }) {
     _stelleTabelleBereit(datenbank);
     return datenbank.verbindung
-        .select(
-          'SELECT * FROM import_protokoll ORDER BY id DESC LIMIT ?',
-          [limit],
-        )
+        .select('SELECT * FROM import_protokoll ORDER BY id DESC LIMIT ?', [
+          limit,
+        ])
         .map(
           (zeile) => ImportProtokollEintrag(
             id: zeile['id'] as int,
             ausgefuehrtAm: DateTime.parse(zeile['ausgefuehrt_am'] as String),
             erfolgreich: zeile['erfolgreich'] == 1,
-            strategie:
-                ImportStrategie.values.byName(zeile['strategie'] as String),
+            strategie: ImportStrategie.values.byName(
+              zeile['strategie'] as String,
+            ),
             hinzugefuegt: zeile['hinzugefuegt'] as int,
             aktualisiert: zeile['aktualisiert'] as int,
             uebersprungen: zeile['uebersprungen'] as int,

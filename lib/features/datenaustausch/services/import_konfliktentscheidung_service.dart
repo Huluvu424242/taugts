@@ -5,7 +5,7 @@ enum ImportKonfliktArt {
   unveraendert,
   versionskonflikt,
   identitaetskonflikt,
-  fachlicheDublette
+  fachlicheDublette,
 }
 
 enum ImportKonfliktAktion {
@@ -156,7 +156,8 @@ class ImportKonfliktentscheidungService {
           continue;
         }
         final importWert = eintrag.value;
-        final identitaetskonflikt = (_istHistorisch(sammlung) &&
+        final identitaetskonflikt =
+            (_istHistorisch(sammlung) &&
                 !_gleicherHistorischerKontext(sammlung, importWert, lokal)) ||
             (sammlung == 'kategorien' &&
                 importWert['zielart'] != lokal['zielart']) ||
@@ -184,10 +185,16 @@ class ImportKonfliktentscheidungService {
     }
 
     for (final dublette in analyse.fachlicheDubletten) {
-      final importWert =
-          _finde(importDokument, dublette.sammlung, dublette.importId);
-      final lokal =
-          _finde(lokalesDokument, dublette.sammlung, dublette.lokaleId);
+      final importWert = _finde(
+        importDokument,
+        dublette.sammlung,
+        dublette.importId,
+      );
+      final lokal = _finde(
+        lokalesDokument,
+        dublette.sammlung,
+        dublette.lokaleId,
+      );
       konflikte.add(
         ImportEinzelKonflikt(
           schluessel:
@@ -296,19 +303,19 @@ class ImportKonfliktentscheidungService {
       'erlebnisse' => const ['ortId', 'beginn', 'ende'],
       'erlebnisPositionen' => const ['erlebnisId', 'produktId'],
       'preisbeobachtungen' => const [
-          'erlebnisId',
-          'erlebnisPositionId',
-          'produktId',
-          'ortId',
-          'beobachtetAm',
-        ],
+        'erlebnisId',
+        'erlebnisPositionId',
+        'produktId',
+        'ortId',
+        'beobachtetAm',
+      ],
       'bewertungen' => const [
-          'objektId',
-          'erlebnisId',
-          'erlebnisPositionId',
-          'ortId',
-          'bewertetAm',
-        ],
+        'objektId',
+        'erlebnisId',
+        'erlebnisPositionId',
+        'ortId',
+        'bewertetAm',
+      ],
       'ortsbewertungen' => const ['erlebnisId', 'ortId', 'bewertetAm'],
       _ => const <String>[],
     };
@@ -319,18 +326,16 @@ class ImportKonfliktentscheidungService {
     Map<String, Object?> dokument,
     String sammlung,
     String id,
-  ) =>
-      _nachId(sammlung, _liste(dokument, sammlung))[id];
+  ) => _nachId(sammlung, _liste(dokument, sammlung))[id];
 
   Map<String, Map<String, Object?>> _nachId(
     String sammlung,
     List<Map<String, Object?>> werte,
-  ) =>
-      {
-        for (final wert in werte)
-          if (identitaet(sammlung, wert).isNotEmpty)
-            identitaet(sammlung, wert): wert,
-      };
+  ) => {
+    for (final wert in werte)
+      if (identitaet(sammlung, wert).isNotEmpty)
+        identitaet(sammlung, wert): wert,
+  };
 
   static String identitaet(String sammlung, Map<String, Object?> wert) =>
       switch (sammlung) {
@@ -344,11 +349,12 @@ class ImportKonfliktentscheidungService {
       };
 
   List<Map<String, Object?>> _liste(
-          Map<String, Object?> dokument, String name) =>
-      ((dokument[name] as List?) ?? const [])
-          .whereType<Map>()
-          .map((e) => Map<String, Object?>.from(e))
-          .toList();
+    Map<String, Object?> dokument,
+    String name,
+  ) => ((dokument[name] as List?) ?? const [])
+      .whereType<Map>()
+      .map((e) => Map<String, Object?>.from(e))
+      .toList();
 
   bool _gleich(Object? a, Object? b) {
     if (a is Map && b is Map) {

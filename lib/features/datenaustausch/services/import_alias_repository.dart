@@ -156,7 +156,12 @@ class ImportAliasRepository {
       _ersetze(dokument, 'kategorieZuordnungen', 'zielId', vonId, aufId);
       _ersetze(dokument, 'objektTags', 'objektId', vonId, aufId);
       _ersetze(
-          dokument, 'objektKlassifikationsmerkmale', 'objektId', vonId, aufId);
+        dokument,
+        'objektKlassifikationsmerkmale',
+        'objektId',
+        vonId,
+        aufId,
+      );
     } else if (sammlung == 'orte') {
       _ersetze(dokument, 'erlebnisse', 'ortId', vonId, aufId);
       _ersetze(dokument, 'preisbeobachtungen', 'ortId', vonId, aufId);
@@ -201,16 +206,15 @@ class ImportAliasRepository {
   List<Map<String, Object?>> _liste(
     Map<String, Object?> dokument,
     String name,
-  ) =>
-      ((dokument[name] as List?) ?? const [])
-          .whereType<Map>()
-          .map((e) => Map<String, Object?>.from(e))
-          .toList();
+  ) => ((dokument[name] as List?) ?? const [])
+      .whereType<Map>()
+      .map((e) => Map<String, Object?>.from(e))
+      .toList();
 
   Map<String, Object?> _tiefeKopie(Map<String, Object?> dokument) => {
-        for (final eintrag in dokument.entries)
-          eintrag.key: _kopiereWert(eintrag.value),
-      };
+    for (final eintrag in dokument.entries)
+      eintrag.key: _kopiereWert(eintrag.value),
+  };
 
   Object? _kopiereWert(Object? wert) {
     if (wert is Map) {
