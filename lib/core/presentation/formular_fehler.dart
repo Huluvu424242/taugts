@@ -26,28 +26,28 @@ class FormularFehlersammler extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        liveRegion: true,
-        container: true,
-        label: '${fehler.length} Validierungsfehler',
-        child: Focus(
-          focusNode: focusNode,
-          child: Card(
-            color: Theme.of(context).colorScheme.errorContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Bitte Eingaben prüfen'),
-                  for (final eintrag in fehler)
-                    TextButton(
-                      onPressed: () => fokussiereFormularfeld(eintrag.$2),
-                      child: Text(eintrag.$1),
-                    ),
-                ],
-              ),
-            ),
+    liveRegion: true,
+    container: true,
+    label: '${fehler.length} Validierungsfehler',
+    child: Focus(
+      focusNode: focusNode,
+      child: Card(
+        color: Theme.of(context).colorScheme.errorContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Bitte Eingaben prüfen'),
+              for (final eintrag in fehler)
+                TextButton(
+                  onPressed: () => fokussiereFormularfeld(eintrag.$2),
+                  child: Text(eintrag.$1),
+                ),
+            ],
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
