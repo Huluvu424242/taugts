@@ -9,13 +9,13 @@ void main() {
 
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
 
-    expect(LokaleDatenbank.schemaVersion, 4);
-    expect(verbindung.userVersion, 4);
+    expect(LokaleDatenbank.schemaVersion, 5);
+    expect(verbindung.userVersion, 5);
     expect(verbindung.select('PRAGMA foreign_key_check'), isEmpty);
     datenbank.schliessen();
   });
 
-  test('Schema 4 enthält den vollständigen aktuellen Tabellenstand', () {
+  test('Schema 5 enthält den vollständigen aktuellen Tabellenstand', () {
     final verbindung = sqlite3.openInMemory();
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
 
@@ -44,6 +44,7 @@ void main() {
       containsAll(<String>{'typ', 'beginn', 'ende'}),
     );
     expect(_spalten(verbindung, 'produkte'), contains('geloescht'));
+    expect(_spalten(verbindung, 'preisbeobachtungen'), containsAll(<String>{'bezugsmenge', 'bezugseinheit'}));
     expect(_spalten(verbindung, 'orte'), contains('geloescht'));
     expect(
       _spalten(verbindung, 'kriterien'),
@@ -53,7 +54,7 @@ void main() {
     datenbank.schliessen();
   });
 
-  test('Schema 4 stellt die aktuellen Standardkriterien bereit', () {
+  test('Schema 5 stellt die aktuellen Standardkriterien bereit', () {
     final verbindung = sqlite3.openInMemory();
     final datenbank = LokaleDatenbank.oeffnen(verbindung);
 
@@ -158,7 +159,7 @@ void main() {
       'SELECT wert, text_wert FROM bewertungen WHERE id = ?',
       [bewertungId],
     ).single;
-    expect(verbindung.userVersion, 4);
+    expect(verbindung.userVersion, 5);
     expect(zeile['wert'], 4.0);
     expect(zeile['text_wert'], isNull);
     expect(verbindung.select('PRAGMA foreign_key_check'), isEmpty);
@@ -222,7 +223,7 @@ void main() {
 
   test('lehnt eine Datenbank mit höherer Schemaversion ab', () {
     final verbindung = sqlite3.openInMemory();
-    verbindung.userVersion = 5;
+    verbindung.userVersion = 6;
 
     expect(
       () => LokaleDatenbank.oeffnen(verbindung),
@@ -230,7 +231,7 @@ void main() {
         isA<StateError>().having(
           (fehler) => fehler.message,
           'message',
-          'Nicht unterstützte Schemaversion: 5',
+          'Nicht unterstützte Schemaversion: 6',
         ),
       ),
     );
