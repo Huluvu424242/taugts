@@ -17,12 +17,11 @@ class SqliteProduktpreisvergleichService
       SELECT pb.id AS preis_id, pb.betrag_minor, pb.waehrung,
         pb.beobachtet_am, COALESCE(e.beginn, pb.beobachtet_am) AS zeitpunkt,
         o.id AS ort_id, o.name AS ort_name, o.typ AS ort_typ,
-        p.fuellmenge_ml
+        pb.bezugsmenge, pb.bezugseinheit, ep.anzahl
       FROM preisbeobachtungen pb
       JOIN erlebnisse e ON e.id = pb.erlebnis_id
       JOIN erlebnispositionen ep ON ep.id = pb.erlebnis_position_id
         AND ep.produkt_id = pb.produkt_id
-      JOIN produkte p ON p.objekt_id = pb.produkt_id
       LEFT JOIN orte o ON o.id = COALESCE(
         pb.ort_id, e.ort_id, e.konsumort_id, e.kaufort_id
       )
@@ -49,13 +48,21 @@ class SqliteProduktpreisvergleichService
       }
       final minor = row['betrag_minor'] as int;
       final waehrung = row['waehrung'] as String;
-      final menge = row['fuellmenge_ml'] as int?;
+      final menge = row['bezugsmenge'] as int?;
+      final einheit = row['bezugseinheit'] as String?;
+      final anzahl = row['anzahl'] as int;
       final grund = waehrung != 'EUR'
           ? 'Währung $waehrung wird nicht umgerechnet.'
           : menge == null || menge <= 0
-          ? 'Keine positive Füllmenge für dieses Produkt erfasst.'
+          ? 'Historische Bezugsmenge fehlt oder ist ungültig.'
+          : einheit == null
+          ? 'Historische Mengeneinheit fehlt.'
           : null;
       final preis = minor / 100;
+      final faktor = einheit == 'ml' || einheit == 'g' ? 1000 : 1;
+      final einheitspreis = grund == null
+          ? preis * faktor / (menge! * anzahl)
+          : null;
       letzte[ortId] = ProduktPreisRang(
         ortId: ortId,
         ortName: row['ort_name'] as String,
@@ -65,18 +72,28 @@ class SqliteProduktpreisvergleichService
         preis: preis,
         waehrung: waehrung,
         mengeMl: menge,
-        euroProLiter: grund == null ? preis * 1000 / menge! : null,
+        bezugseinheit: einheit,
+        einheitspreis: einheitspreis,
+        einheitspreisEinheit: einheit == 'ml'
+            ? '€/l'
+            : einheit == 'g'
+            ? '€/kg'
+            : '€/Stück',
+        euroProLiter: einheit == 'ml' ? einheitspreis : null,
         nichtVergleichbar: grund,
       );
     }
     return letzte.values.toList()..sort((a, b) {
-      if (a.euroProLiter == null) {
-        return b.euroProLiter == null ? a.ortName.compareTo(b.ortName) : 1;
+      if (a.einheitspreis == null) {
+        return b.einheitspreis == null ? a.ortName.compareTo(b.ortName) : 1;
       }
-      if (b.euroProLiter == null) {
+      if (b.einheitspreis == null) {
         return -1;
       }
-      final cmp = a.euroProLiter!.compareTo(b.euroProLiter!);
+      if (a.einheitspreisEinheit != b.einheitspreisEinheit) {
+        return a.einheitspreisEinheit!.compareTo(b.einheitspreisEinheit!);
+      }
+      final cmp = a.einheitspreis!.compareTo(b.einheitspreis!);
       return cmp == 0 ? a.ortName.compareTo(b.ortName) : cmp;
     });
   }
