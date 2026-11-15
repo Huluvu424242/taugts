@@ -41,19 +41,19 @@ void main() {
   Future<void> formularAnzeigen(
     WidgetTester tester,
     StandortService standortService,
-  ) =>
-      tester.pumpWidget(
-        MaterialApp(
-          home: OrtFormular(
-            repository: repository,
-            idGenerator: _FesterIdGenerator(),
-            standortService: standortService,
-          ),
-        ),
-      );
+  ) => tester.pumpWidget(
+    MaterialApp(
+      home: OrtFormular(
+        repository: repository,
+        idGenerator: _FesterIdGenerator(),
+        standortService: standortService,
+      ),
+    ),
+  );
 
-  testWidgets('ermittelt den Standort nur nach bewusster Nutzeraktion',
-      (tester) async {
+  testWidgets('ermittelt den Standort nur nach bewusster Nutzeraktion', (
+    tester,
+  ) async {
     final service = _StandortService(
       ergebnis: const StandortErgebnis(
         breitengrad: 50.8323,
@@ -74,36 +74,52 @@ void main() {
   });
 
   testWidgets(
-      'übernimmt Koordinaten erst nach Bestätigung und lässt Änderungen zu',
-      (tester) async {
-    final service = _StandortService(
-      ergebnis: const StandortErgebnis(
-        breitengrad: 50.8323,
-        laengengrad: 12.9253,
-      ),
-    );
-    await formularAnzeigen(tester, service);
+    'übernimmt Koordinaten erst nach Bestätigung und lässt Änderungen zu',
+    (tester) async {
+      final service = _StandortService(
+        ergebnis: const StandortErgebnis(
+          breitengrad: 50.8323,
+          laengengrad: 12.9253,
+        ),
+      );
+      await formularAnzeigen(tester, service);
 
-    await tester.tap(find.text('Aktuellen Standort verwenden'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Koordinaten übernehmen'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Aktuellen Standort verwenden'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Koordinaten übernehmen'));
+      await tester.pumpAndSettle();
 
-    final breite = find.widgetWithText(TextFormField, 'Breitengrad (optional)');
-    final laenge = find.widgetWithText(TextFormField, 'Längengrad (optional)');
-    expect(find.text('Standort übernommen. Koordinaten sind bearbeitbar.'),
-        findsOneWidget);
-    expect(tester.widget<TextFormField>(breite).controller!.text, '50.832300');
-    expect(tester.widget<TextFormField>(laenge).controller!.text, '12.925300');
+      final breite = find.widgetWithText(
+        TextFormField,
+        'Breitengrad (optional)',
+      );
+      final laenge = find.widgetWithText(
+        TextFormField,
+        'Längengrad (optional)',
+      );
+      expect(
+        find.text('Standort übernommen. Koordinaten sind bearbeitbar.'),
+        findsOneWidget,
+      );
+      expect(
+        tester.widget<TextFormField>(breite).controller!.text,
+        '50.832300',
+      );
+      expect(
+        tester.widget<TextFormField>(laenge).controller!.text,
+        '12.925300',
+      );
 
-    await tester.enterText(breite, '50,9');
-    await tester.enterText(laenge, '');
-    expect(tester.widget<TextFormField>(breite).controller!.text, '50,9');
-    expect(tester.widget<TextFormField>(laenge).controller!.text, isEmpty);
-  });
+      await tester.enterText(breite, '50,9');
+      await tester.enterText(laenge, '');
+      expect(tester.widget<TextFormField>(breite).controller!.text, '50,9');
+      expect(tester.widget<TextFormField>(laenge).controller!.text, isEmpty);
+    },
+  );
 
-  testWidgets('zeigt Berechtigungsfehler und lässt manuelle Eingabe nutzbar',
-      (tester) async {
+  testWidgets('zeigt Berechtigungsfehler und lässt manuelle Eingabe nutzbar', (
+    tester,
+  ) async {
     final service = _StandortService(
       fehler: const StandortAusnahme(
         'Die Standortberechtigung wurde nicht erteilt.',
@@ -114,8 +130,10 @@ void main() {
     await tester.tap(find.text('Aktuellen Standort verwenden'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Die Standortberechtigung wurde nicht erteilt.'),
-        findsOneWidget);
+    expect(
+      find.text('Die Standortberechtigung wurde nicht erteilt.'),
+      findsOneWidget,
+    );
     final breite = find.widgetWithText(TextFormField, 'Breitengrad (optional)');
     await tester.enterText(breite, '50.8');
     expect(tester.widget<TextFormField>(breite).controller!.text, '50.8');

@@ -30,14 +30,14 @@ void main() {
                     externalUrlGateway: gateway,
                     kartenFlaecheBuilder:
                         (context, position, positionGeaendert) => Center(
-                      child: FilledButton(
-                        onPressed: () =>
-                            positionGeaendert(const LatLng(50.9, 13.1)),
-                        child: Text(
-                          'Testkarte ${position.latitude}, ${position.longitude}',
+                          child: FilledButton(
+                            onPressed: () =>
+                                positionGeaendert(const LatLng(50.9, 13.1)),
+                            child: Text(
+                              'Testkarte ${position.latitude}, ${position.longitude}',
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
                   ),
                 ),
               );
