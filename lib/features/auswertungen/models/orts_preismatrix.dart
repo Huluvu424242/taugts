@@ -12,9 +12,6 @@ class OrtsPreisMatrixZeile {
 
 class OrtsPreisMatrix {
   const OrtsPreisMatrix(this.zeitpunkte, this.zeilen);
-  final List<DateTime> zeitpunkte;
-  final List<OrtsPreisMatrixZeile> zeilen;
-
   factory OrtsPreisMatrix.ausBeobachtungen(Iterable<Zeitwert> beobachtungen) {
     final werte = [...beobachtungen]
       ..sort((a, b) => a.zeitpunkt.compareTo(b.zeitpunkt));
@@ -36,4 +33,7 @@ class OrtsPreisMatrix {
       ],
     );
   }
+
+  final List<DateTime> zeitpunkte;
+  final List<OrtsPreisMatrixZeile> zeilen;
 }
