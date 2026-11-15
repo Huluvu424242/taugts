@@ -245,18 +245,24 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     final gespeichert = _gespeichertesErlebnis;
     return _entwurf.hatUngespeicherteAenderungen ||
         _ortsbewertungController.hatUngespeicherteAenderungen ||
-        _ort?.id != gespeichert?.wirksamerOrtId ||
+        (_ort != null && _ort!.id != gespeichert?.wirksamerOrtId) ||
         _beginn?.toUtc() != gespeichert?.beginn ||
         _ende?.toUtc() != gespeichert?.ende ||
         (_notiz.text.trim().isEmpty ? null : _notiz.text.trim()) !=
             gespeichert?.notiz;
   }
 
+  Future<void> _schliessen([Erlebnis? erlebnis]) async {
+    setState(() => _darfSchliessen = true);
+    // PopScope übernimmt canPop erst beim nächsten Build.
+    await WidgetsBinding.instance.endOfFrame;
+    if (mounted) Navigator.of(context).pop(erlebnis);
+  }
+
   Future<void> _zurueckNavigieren() async {
     if (_speichert || _fragtNachVerwerfen) return;
     if (!_hatUngespeicherteAenderungen) {
-      setState(() => _darfSchliessen = true);
-      if (mounted) Navigator.of(context).pop();
+      await _schliessen();
       return;
     }
     _fragtNachVerwerfen = true;
@@ -282,8 +288,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
         ),
       );
       if (!mounted || verwerfen != true) return;
-      setState(() => _darfSchliessen = true);
-      Navigator.of(context).pop();
+      await _schliessen();
     } finally {
       _fragtNachVerwerfen = false;
     }
@@ -301,8 +306,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       await _entwurf.uebernehmen(erlebnis);
       if (!mounted) return;
       if (schliessen && Navigator.of(context).canPop()) {
-        setState(() => _darfSchliessen = true);
-        Navigator.of(context).pop(erlebnis);
+        await _schliessen(erlebnis);
         return;
       }
       setState(() {
