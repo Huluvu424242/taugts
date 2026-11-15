@@ -50,6 +50,8 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   DateTime? _beginn;
   DateTime? _ende;
   var _speichert = false;
+  var _darfSchliessen = false;
+  var _fragtNachVerwerfen = false;
   var _zeitfehler = <String>[];
   late Future<List<ErlebnispositionMitProdukt>> _positionen;
   late final ErlebnisEntwurfRepository _entwurf;
@@ -239,6 +241,54 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
     return _beginnFokus;
   }
 
+  bool get _hatUngespeicherteAenderungen {
+    final gespeichert = _gespeichertesErlebnis;
+    return _entwurf.hatUngespeicherteAenderungen ||
+        _ortsbewertungController.hatUngespeicherteAenderungen ||
+        _ort?.id != gespeichert?.wirksamerOrtId ||
+        _beginn?.toUtc() != gespeichert?.beginn ||
+        _ende?.toUtc() != gespeichert?.ende ||
+        (_notiz.text.trim().isEmpty ? null : _notiz.text.trim()) !=
+            gespeichert?.notiz;
+  }
+
+  Future<void> _zurueckNavigieren() async {
+    if (_speichert || _fragtNachVerwerfen) return;
+    if (!_hatUngespeicherteAenderungen) {
+      setState(() => _darfSchliessen = true);
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
+    _fragtNachVerwerfen = true;
+    try {
+      final verwerfen = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Ungespeicherte Änderungen'),
+          content: const Text(
+            'Deine Änderungen am Erlebnis sind noch nicht gespeichert. '
+            'Möchtest du sie verwerfen?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Weiter bearbeiten'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Änderungen verwerfen'),
+            ),
+          ],
+        ),
+      );
+      if (!mounted || verwerfen != true) return;
+      setState(() => _darfSchliessen = true);
+      Navigator.of(context).pop();
+    } finally {
+      _fragtNachVerwerfen = false;
+    }
+  }
+
   Future<void> _persistieren({
     required bool schliessen,
   }) async {
@@ -251,6 +301,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
       await _entwurf.uebernehmen(erlebnis);
       if (!mounted) return;
       if (schliessen && Navigator.of(context).canPop()) {
+        setState(() => _darfSchliessen = true);
         Navigator.of(context).pop(erlebnis);
         return;
       }
@@ -554,7 +605,12 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => PopScope(
+        canPop: _darfSchliessen,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) _zurueckNavigieren();
+        },
+        child: Scaffold(
         appBar: AppBar(
           title: Text(_typLabel),
           actions: [
@@ -748,6 +804,7 @@ class _ErlebnisScreenState extends State<ErlebnisScreen> {
             ],
           ),
         ),
+      ),
       );
 }
 
