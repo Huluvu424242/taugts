@@ -21,8 +21,8 @@ class ProduktvergleichScreen extends StatefulWidget {
 }
 
 class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
-  late Future<AuswertungsFilterOptionen> _optionen =
-      widget.optionenService.ladeFilterOptionen();
+  late Future<AuswertungsFilterOptionen> _optionen = widget.optionenService
+      .ladeFilterOptionen();
   String? _produktId;
   VergleichOrtstyp _ortstyp = VergleichOrtstyp.gaststaetten;
   DateTime? _von;
@@ -95,7 +95,8 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
               if (snapshot.hasError) {
                 return TextButton.icon(
                   onPressed: () => setState(
-                    () => _optionen = widget.optionenService.ladeFilterOptionen(),
+                    () =>
+                        _optionen = widget.optionenService.ladeFilterOptionen(),
                   ),
                   icon: const Icon(Icons.refresh),
                   label: const Text('Produkte erneut laden'),
@@ -116,14 +117,15 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
                   _produktId = produkt.id;
                   _aktualisieren();
                 },
-                fieldViewBuilder: (context, controller, focusNode, onSubmitted) =>
-                    TextField(
+                fieldViewBuilder:
+                    (context, controller, focusNode, onSubmitted) => TextField(
                       controller: controller,
                       focusNode: focusNode,
                       maxLength: 120,
                       decoration: InputDecoration(
                         labelText: 'Produkt suchen und auswählen',
-                        helperText: 'Ein Produkt aus der Vorschlagsliste wählen',
+                        helperText:
+                            'Ein Produkt aus der Vorschlagsliste wählen',
                         suffixIcon: IconButton(
                           tooltip: 'Produktauswahl löschen',
                           onPressed: () {
@@ -177,10 +179,12 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
               OutlinedButton.icon(
                 onPressed: _zeitraumWaehlen,
                 icon: const Icon(Icons.date_range),
-                label: Text(_von == null
-                    ? 'Gesamter Zeitraum'
-                    : '${_von!.day}.${_von!.month}.${_von!.year} – '
-                        '${_bis!.day}.${_bis!.month}.${_bis!.year}'),
+                label: Text(
+                  _von == null
+                      ? 'Gesamter Zeitraum'
+                      : '${_von!.day}.${_von!.month}.${_von!.year} – '
+                            '${_bis!.day}.${_bis!.month}.${_bis!.year}',
+                ),
               ),
               if (_von != null)
                 TextButton(
@@ -223,38 +227,44 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     for (final eintrag in snapshot.data!)
-                      Builder(builder: (context) {
-                        final wert = eintrag.euroProLiter;
-                        if (wert != null && wert != vorher) rang++;
-                        if (wert != null) vorher = wert;
-                        return Card(
-                          child: ListTile(
-                            title: Text(
-                              wert == null
-                                  ? eintrag.ortName
-                                  : '$rang. ${eintrag.ortName}',
+                      Builder(
+                        builder: (context) {
+                          final wert = eintrag.euroProLiter;
+                          if (wert != null && wert != vorher) rang++;
+                          if (wert != null) vorher = wert;
+                          return Card(
+                            child: ListTile(
+                              title: Text(
+                                wert == null
+                                    ? eintrag.ortName
+                                    : '$rang. ${eintrag.ortName}',
+                              ),
+                              subtitle: Text(
+                                '${eintrag.zeitpunkt.toLocal().toString().substring(0, 16)} · '
+                                '${eintrag.preis.toStringAsFixed(2)} ${eintrag.waehrung}'
+                                '${eintrag.mengeMl == null ? '' : ' / ${eintrag.mengeMl} ml'}',
+                              ),
+                              trailing: Text(
+                                wert == null
+                                    ? 'Nicht vergleichbar'
+                                    : '${wert.toStringAsFixed(2)} €/l',
+                              ),
+                              isThreeLine: wert == null,
+                              onTap: wert == null
+                                  ? () => ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              eintrag.nichtVergleichbar ??
+                                                  'Nicht vergleichbar',
+                                            ),
+                                          ),
+                                        )
+                                  : null,
                             ),
-                            subtitle: Text(
-                              '${eintrag.zeitpunkt.toLocal().toString().substring(0, 16)} · '
-                              '${eintrag.preis.toStringAsFixed(2)} ${eintrag.waehrung}'
-                              '${eintrag.mengeMl == null ? '' : ' / ${eintrag.mengeMl} ml'}',
-                            ),
-                            trailing: Text(
-                              wert == null
-                                  ? 'Nicht vergleichbar'
-                                  : '${wert.toStringAsFixed(2)} €/l',
-                            ),
-                            isThreeLine: wert == null,
-                            onTap: wert == null
-                                ? () => ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(
-                                      eintrag.nichtVergleichbar ?? 'Nicht vergleichbar',
-                                    )),
-                                  )
-                                : null,
-                          ),
-                        );
-                      }),
+                          );
+                        },
+                      ),
                   ],
                 );
               },

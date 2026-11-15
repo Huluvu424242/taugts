@@ -2,7 +2,8 @@ import 'package:taugts/features/auswertungen/models/produktvergleich_modelle.dar
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 
 /// Vergleicht dokumentierte Käufe. Keine Abfrage aktueller Marktpreise.
-class SqliteProduktpreisvergleichService implements ProduktPreisvergleichService {
+class SqliteProduktpreisvergleichService
+    implements ProduktPreisvergleichService {
   const SqliteProduktpreisvergleichService(this._db);
 
   final LokaleDatenbank _db;
@@ -34,9 +35,7 @@ class SqliteProduktpreisvergleichService implements ProduktPreisvergleichService
     for (final row in rows) {
       final ortId = row['ort_id'] as String?;
       final ortTyp = row['ort_typ'] as String?;
-      if (ortId == null ||
-          ortTyp == null ||
-          !filter.enthaeltOrtstyp(ortTyp)) {
+      if (ortId == null || ortTyp == null || !filter.enthaeltOrtstyp(ortTyp)) {
         continue;
       }
       final zeit = DateTime.tryParse(row['zeitpunkt'] as String? ?? '');
@@ -70,18 +69,15 @@ class SqliteProduktpreisvergleichService implements ProduktPreisvergleichService
         nichtVergleichbar: grund,
       );
     }
-    return letzte.values.toList()
-      ..sort((a, b) {
-        if (a.euroProLiter == null) {
-          return b.euroProLiter == null
-              ? a.ortName.compareTo(b.ortName)
-              : 1;
-        }
-        if (b.euroProLiter == null) {
-          return -1;
-        }
-        final cmp = a.euroProLiter!.compareTo(b.euroProLiter!);
-        return cmp == 0 ? a.ortName.compareTo(b.ortName) : cmp;
-      });
+    return letzte.values.toList()..sort((a, b) {
+      if (a.euroProLiter == null) {
+        return b.euroProLiter == null ? a.ortName.compareTo(b.ortName) : 1;
+      }
+      if (b.euroProLiter == null) {
+        return -1;
+      }
+      final cmp = a.euroProLiter!.compareTo(b.euroProLiter!);
+      return cmp == 0 ? a.ortName.compareTo(b.ortName) : cmp;
+    });
   }
 }

@@ -321,8 +321,11 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => ProduktvergleichScreen(
-                          optionenService: widget.service as AuswertungsFilterOptionenService,
-                          preisService: widget.service as ProduktPreisvergleichService,
+                          optionenService:
+                              widget.service
+                                  as AuswertungsFilterOptionenService,
+                          preisService:
+                              widget.service as ProduktPreisvergleichService,
                         ),
                       ),
                     ),

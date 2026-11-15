@@ -5,7 +5,10 @@ import 'package:taugts/features/auswertungen/services/sqlite_produktpreisverglei
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 
 class SqliteAuswertungsService
-    implements AuswertungsService, AuswertungsFilterOptionenService, ProduktPreisvergleichService {
+    implements
+        AuswertungsService,
+        AuswertungsFilterOptionenService,
+        ProduktPreisvergleichService {
   const SqliteAuswertungsService(this._db);
 
   final LokaleDatenbank _db;

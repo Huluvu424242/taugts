@@ -48,8 +48,17 @@ void main() {
           id, erlebnis_id, erlebnis_position_id, produkt_id, ort_id,
           beobachtet_am, betrag_minor, waehrung, erstellt_am, geaendert_am
         ) VALUES (?, ?, ?, ?, ?, ?, ?, 'EUR', ?, ?)''',
-        ['preis-${kauf.$1}', kauf.$1, 'pos-${kauf.$1}',
-          'bier', kauf.$2, kauf.$3, kauf.$4, zeit, zeit],
+        [
+          'preis-${kauf.$1}',
+          kauf.$1,
+          'pos-${kauf.$1}',
+          'bier',
+          kauf.$2,
+          kauf.$3,
+          kauf.$4,
+          zeit,
+          zeit,
+        ],
       );
     }
 
@@ -113,12 +122,13 @@ void main() {
       ) VALUES ('pb', 'e', 'ep', 'p', 'o', ?, 123, 'EUR', ?, ?)''',
       [zeit, zeit, zeit],
     );
-    final vergleich = await SqliteProduktpreisvergleichService(db).ladeLetztePreise(
-      const ProduktvergleichFilter(
-        produktId: 'p',
-        ortstyp: VergleichOrtstyp.geschaefte,
-      ),
-    );
+    final vergleich = await SqliteProduktpreisvergleichService(db)
+        .ladeLetztePreise(
+          const ProduktvergleichFilter(
+            produktId: 'p',
+            ortstyp: VergleichOrtstyp.geschaefte,
+          ),
+        );
     expect(vergleich, hasLength(1));
     expect(vergleich.single.euroProLiter, isNull);
     expect(vergleich.single.nichtVergleichbar, isNotNull);
