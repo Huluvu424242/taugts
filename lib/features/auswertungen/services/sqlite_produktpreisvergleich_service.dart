@@ -72,10 +72,14 @@ class SqliteProduktpreisvergleichService implements ProduktPreisvergleichService
     }
     return letzte.values.toList()
       ..sort((a, b) {
-        if (a.euroProLiter == null) return b.euroProLiter == null
-            ? a.ortName.compareTo(b.ortName)
-            : 1;
-        if (b.euroProLiter == null) return -1;
+        if (a.euroProLiter == null) {
+          return b.euroProLiter == null
+              ? a.ortName.compareTo(b.ortName)
+              : 1;
+        }
+        if (b.euroProLiter == null) {
+          return -1;
+        }
         final cmp = a.euroProLiter!.compareTo(b.euroProLiter!);
         return cmp == 0 ? a.ortName.compareTo(b.ortName) : cmp;
       });
