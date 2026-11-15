@@ -1,7 +1,7 @@
 import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
 import 'package:taugts/features/auswertungen/models/produktvergleich_modelle.dart';
-import 'package:taugts/features/auswertungen/services/sqlite_produktpreisvergleich_service.dart';
 import 'package:taugts/features/auswertungen/services/auswertungs_service.dart';
+import 'package:taugts/features/auswertungen/services/sqlite_produktpreisvergleich_service.dart';
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 
 class SqliteAuswertungsService
