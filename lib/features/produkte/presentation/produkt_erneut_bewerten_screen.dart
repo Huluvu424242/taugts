@@ -39,18 +39,16 @@ class _ProduktErneutBewertenScreenState
         title: const Text('Neues Erlebnis'),
         children: [
           SimpleDialogOption(
-            onPressed: () => Navigator.of(dialogContext).pop(
-              Erlebnistyp.restaurantbesuch,
-            ),
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(Erlebnistyp.restaurantbesuch),
             child: const ListTile(
               leading: Icon(Icons.restaurant_outlined),
               title: Text('Restaurantbesuch'),
             ),
           ),
           SimpleDialogOption(
-            onPressed: () => Navigator.of(dialogContext).pop(
-              Erlebnistyp.einkauf,
-            ),
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(Erlebnistyp.einkauf),
             child: const ListTile(
               leading: Icon(Icons.shopping_bag_outlined),
               title: Text('Einkauf'),
@@ -93,8 +91,9 @@ class _ProduktErneutBewertenScreenState
     if (_oeffnet) return;
     setState(() => _oeffnet = true);
     try {
-      var positionen =
-          await widget.repository.ladeErlebnispositionen(erlebnis.id);
+      var positionen = await widget.repository.ladeErlebnispositionen(
+        erlebnis.id,
+      );
       if (!mounted) return;
       ErlebnispositionMitProdukt? position;
       for (final eintrag in positionen) {
@@ -116,8 +115,9 @@ class _ProduktErneutBewertenScreenState
           ),
         );
         if (gespeichert != true || !mounted) return;
-        positionen =
-            await widget.repository.ladeErlebnispositionen(erlebnis.id);
+        positionen = await widget.repository.ladeErlebnispositionen(
+          erlebnis.id,
+        );
         if (!mounted) return;
         for (final eintrag in positionen) {
           if (eintrag.produkt.id == widget.produkt.id) {
@@ -131,8 +131,9 @@ class _ProduktErneutBewertenScreenState
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content:
-                  Text('Die Produktposition konnte nicht vorbereitet werden.'),
+              content: Text(
+                'Die Produktposition konnte nicht vorbereitet werden.',
+              ),
             ),
           );
         }
@@ -157,8 +158,9 @@ class _ProduktErneutBewertenScreenState
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content:
-              Text('Die erneute Bewertung konnte nicht vorbereitet werden.'),
+          content: Text(
+            'Die erneute Bewertung konnte nicht vorbereitet werden.',
+          ),
         ),
       );
     } finally {
@@ -167,9 +169,9 @@ class _ProduktErneutBewertenScreenState
   }
 
   String _typText(Erlebnistyp typ) => switch (typ) {
-        Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
-        Erlebnistyp.einkauf => 'Einkauf',
-      };
+    Erlebnistyp.restaurantbesuch => 'Restaurantbesuch',
+    Erlebnistyp.einkauf => 'Einkauf',
+  };
 
   String _zeitText(BuildContext context, Erlebnis erlebnis) {
     final lokal = erlebnis.erlebtAm.toLocal();
@@ -180,100 +182,96 @@ class _ProduktErneutBewertenScreenState
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Erneut bewerten'),
-          actions: const [
-            AppSupportMenu(contextName: 'Produkt erneut bewerten'),
-          ],
-        ),
-        body: SafeArea(
-          child: FutureBuilder<List<Erlebnis>>(
-            future: _erlebnisse,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                            'Die Erlebnisse konnten nicht geladen werden.'),
-                        const SizedBox(height: 16),
-                        FilledButton.icon(
-                          onPressed: () => setState(
-                            () => _erlebnisse =
-                                widget.repository.ladeErlebnisse(),
-                          ),
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Erneut versuchen'),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-              if (!snapshot.hasData) {
-                return Center(
-                  child: Semantics(
-                    label: 'Erlebnisse werden geladen',
-                    child: const CircularProgressIndicator(),
-                  ),
-                );
-              }
-              final erlebnisse = snapshot.data!;
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
-                children: [
-                  Semantics(
-                    header: true,
-                    child: Text(
-                      widget.produkt.anzeigetitel,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Wähle ein vorhandenes Erlebnis oder registriere ein neues. '
-                    'Das Produkt wird als bestehender Stammdatensatz wiederverwendet.',
-                  ),
-                  const SizedBox(height: 20),
-                  FilledButton.icon(
-                    onPressed: _oeffnet ? null : _neuesErlebnis,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Neues Erlebnis registrieren'),
-                  ),
-                  const SizedBox(height: 20),
-                  Semantics(
-                    header: true,
-                    child: Text(
-                      'Vorhandenes Erlebnis',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (erlebnisse.isEmpty)
-                    const Text('Noch keine vorhandenen Erlebnisse verfügbar.')
-                  else
-                    for (final erlebnis in erlebnisse)
-                      Card(
-                        child: ListTile(
-                          enabled: !_oeffnet,
-                          leading: Icon(
-                            erlebnis.typ == Erlebnistyp.restaurantbesuch
-                                ? Icons.restaurant_outlined
-                                : Icons.shopping_bag_outlined,
-                          ),
-                          title: Text(_typText(erlebnis.typ)),
-                          subtitle: Text(_zeitText(context, erlebnis)),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () => _bewertenInErlebnis(erlebnis),
-                        ),
+    appBar: AppBar(
+      title: const Text('Erneut bewerten'),
+      actions: const [AppSupportMenu(contextName: 'Produkt erneut bewerten')],
+    ),
+    body: SafeArea(
+      child: FutureBuilder<List<Erlebnis>>(
+        future: _erlebnisse,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Die Erlebnisse konnten nicht geladen werden.'),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: () => setState(
+                        () => _erlebnisse = widget.repository.ladeErlebnisse(),
                       ),
-                ],
-              );
-            },
-          ),
-        ),
-      );
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Erneut versuchen'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          if (!snapshot.hasData) {
+            return Center(
+              child: Semantics(
+                label: 'Erlebnisse werden geladen',
+                child: const CircularProgressIndicator(),
+              ),
+            );
+          }
+          final erlebnisse = snapshot.data!;
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
+            children: [
+              Semantics(
+                header: true,
+                child: Text(
+                  widget.produkt.anzeigetitel,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Wähle ein vorhandenes Erlebnis oder registriere ein neues. '
+                'Das Produkt wird als bestehender Stammdatensatz wiederverwendet.',
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: _oeffnet ? null : _neuesErlebnis,
+                icon: const Icon(Icons.add),
+                label: const Text('Neues Erlebnis registrieren'),
+              ),
+              const SizedBox(height: 20),
+              Semantics(
+                header: true,
+                child: Text(
+                  'Vorhandenes Erlebnis',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (erlebnisse.isEmpty)
+                const Text('Noch keine vorhandenen Erlebnisse verfügbar.')
+              else
+                for (final erlebnis in erlebnisse)
+                  Card(
+                    child: ListTile(
+                      enabled: !_oeffnet,
+                      leading: Icon(
+                        erlebnis.typ == Erlebnistyp.restaurantbesuch
+                            ? Icons.restaurant_outlined
+                            : Icons.shopping_bag_outlined,
+                      ),
+                      title: Text(_typText(erlebnis.typ)),
+                      subtitle: Text(_zeitText(context, erlebnis)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => _bewertenInErlebnis(erlebnis),
+                    ),
+                  ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
 }

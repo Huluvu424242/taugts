@@ -137,10 +137,11 @@ class _ProduktFormularState extends State<ProduktFormular> {
   }
 
   Future<void> _barcodeScannen() async {
-    final barcode = await (widget.barcodeScanStart?.call(context) ??
-        Navigator.of(context).push<String>(
-          MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
-        ));
+    final barcode =
+        await (widget.barcodeScanStart?.call(context) ??
+            Navigator.of(context).push<String>(
+              MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+            ));
     if (!mounted || barcode == null) {
       return;
     }
@@ -164,13 +165,11 @@ class _ProduktFormularState extends State<ProduktFormular> {
         _zeigtFehler = true;
         _fehler = validierungsfehler;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bitte Eingaben prüfen.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Bitte Eingaben prüfen.')));
       if (_scrollController.hasClients) {
-        _scrollController.jumpTo(
-          _scrollController.position.minScrollExtent,
-        );
+        _scrollController.jumpTo(_scrollController.position.minScrollExtent);
       }
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted) {
@@ -219,22 +218,25 @@ class _ProduktFormularState extends State<ProduktFormular> {
   List<_Validierungsfehler> _validierungsfehler() {
     final fehler = <_Validierungsfehler>[];
     if (_name.text.trim().isEmpty && _barcode.text.trim().isEmpty) {
-      fehler.add(_Validierungsfehler(
-        'Name oder Barcode ist erforderlich.',
-        _nameFokus,
-      ));
+      fehler.add(
+        _Validierungsfehler('Name oder Barcode ist erforderlich.', _nameFokus),
+      );
     }
     if (_alkoholPruefen(_alkohol.text) != null) {
-      fehler.add(_Validierungsfehler(
-        'Alkoholgehalt muss zwischen 0 und 100 liegen.',
-        _alkoholFokus,
-      ));
+      fehler.add(
+        _Validierungsfehler(
+          'Alkoholgehalt muss zwischen 0 und 100 liegen.',
+          _alkoholFokus,
+        ),
+      );
     }
     if (_fuellmengePruefen(_fuellmenge.text) != null) {
-      fehler.add(_Validierungsfehler(
-        'Füllmenge muss eine positive ganze Zahl sein.',
-        _fuellmengeFokus,
-      ));
+      fehler.add(
+        _Validierungsfehler(
+          'Füllmenge muss eine positive ganze Zahl sein.',
+          _fuellmengeFokus,
+        ),
+      );
     }
     return fehler;
   }
@@ -249,136 +251,133 @@ class _ProduktFormularState extends State<ProduktFormular> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(
-            widget.produkt == null ? 'Produkt anlegen' : 'Produkt bearbeiten',
+    appBar: AppBar(
+      title: Text(
+        widget.produkt == null ? 'Produkt anlegen' : 'Produkt bearbeiten',
+      ),
+      actions: [
+        AppSupportMenu(
+          contextName: SupportKontexte.produktFormular(
+            bearbeiten: widget.produkt != null,
           ),
-          actions: [
-            AppSupportMenu(
-              contextName: SupportKontexte.produktFormular(
-                bearbeiten: widget.produkt != null,
+        ),
+      ],
+    ),
+    body: SafeArea(
+      child: Form(
+        autovalidateMode: _zeigtFehler
+            ? AutovalidateMode.always
+            : AutovalidateMode.disabled,
+        child: ListView(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(24),
+          children: [
+            Builder(
+              builder: (_) => _zeigtFehler
+                  ? FormularFehlersammler(
+                      key: _fehlerKey,
+                      focusNode: _fehlerFokus,
+                      fehler: [
+                        for (final fehler in _fehler)
+                          (fehler.text, fehler.fokus),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            if (widget.produkt != null && widget.onErneutBewerten != null) ...[
+              FilledButton.icon(
+                onPressed: _speichert ? null : widget.onErneutBewerten,
+                icon: const Icon(Icons.rate_review_outlined),
+                label: const Text('Erneut bewerten'),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Die erneute Bewertung legt einen neuen historischen Datensatz an. '
+                'Änderungen hier bearbeiten dagegen die Produktstammdaten.',
+              ),
+              const SizedBox(height: 16),
+            ],
+            DropdownButtonFormField<Produktart>(
+              initialValue: _produktart,
+              decoration: const InputDecoration(labelText: 'Produktart'),
+              items: const [
+                DropdownMenuItem(value: Produktart.bier, child: Text('Bier')),
+                DropdownMenuItem(
+                  value: Produktart.getraenk,
+                  child: Text('Getränk'),
+                ),
+                DropdownMenuItem(
+                  value: Produktart.speise,
+                  child: Text('Speise'),
+                ),
+                DropdownMenuItem(
+                  value: Produktart.sonstiges,
+                  child: Text('Anderes Produkt'),
+                ),
+              ],
+              onChanged: (wert) => setState(() => _produktart = wert!),
+            ),
+            const SizedBox(height: 16),
+            _textfeld(
+              _name,
+              'Name',
+              maxLength: 120,
+              focusNode: _nameFokus,
+              validator: _minimalangabePruefen,
+            ),
+            _textfeld(
+              _barcode,
+              'EAN / Barcode',
+              maxLength: 80,
+              validator: _minimalangabePruefen,
+              keyboardType: TextInputType.number,
+              focusNode: _barcodeFokus,
+              suffixIcon: IconButton(
+                tooltip: 'EAN scannen',
+                onPressed: _speichert ? null : _barcodeScannen,
+                icon: const Icon(Icons.qr_code_scanner),
               ),
             ),
+            _textfeld(_marke, 'Marke (optional)', maxLength: 120),
+            if (_produktart == Produktart.bier) ...[
+              _textfeld(_brauerei, 'Brauerei (optional)', maxLength: 120),
+              _textfeld(_sorte, 'Sorte (optional)', maxLength: 80),
+              _textfeld(
+                _alkohol,
+                'Alkoholgehalt in % (optional)',
+                maxLength: 5,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                validator: _alkoholPruefen,
+                focusNode: _alkoholFokus,
+              ),
+            ],
+            _textfeld(_herkunft, 'Herkunft (optional)', maxLength: 120),
+            _textfeld(_gebinde, 'Gebinde (optional)', maxLength: 80),
+            _textfeld(
+              _fuellmenge,
+              'Füllmenge in ml (optional)',
+              maxLength: 6,
+              keyboardType: TextInputType.number,
+              validator: _fuellmengePruefen,
+              focusNode: _fuellmengeFokus,
+            ),
+            _textfeld(_notiz, 'Notiz (optional)', maxLength: 1000, maxLines: 4),
+            const SizedBox(height: 16),
           ],
         ),
-        body: SafeArea(
-          child: Form(
-            autovalidateMode: _zeigtFehler
-                ? AutovalidateMode.always
-                : AutovalidateMode.disabled,
-            child: ListView(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(24),
-              children: [
-                Builder(
-                  builder: (_) => _zeigtFehler
-                      ? FormularFehlersammler(
-                          key: _fehlerKey,
-                          focusNode: _fehlerFokus,
-                          fehler: [
-                            for (final fehler in _fehler)
-                              (fehler.text, fehler.fokus),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                ),
-                if (widget.produkt != null &&
-                    widget.onErneutBewerten != null) ...[
-                  FilledButton.icon(
-                    onPressed: _speichert ? null : widget.onErneutBewerten,
-                    icon: const Icon(Icons.rate_review_outlined),
-                    label: const Text('Erneut bewerten'),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Die erneute Bewertung legt einen neuen historischen Datensatz an. '
-                    'Änderungen hier bearbeiten dagegen die Produktstammdaten.',
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                DropdownButtonFormField<Produktart>(
-                  initialValue: _produktart,
-                  decoration: const InputDecoration(labelText: 'Produktart'),
-                  items: const [
-                    DropdownMenuItem(
-                        value: Produktart.bier, child: Text('Bier')),
-                    DropdownMenuItem(
-                      value: Produktart.getraenk,
-                      child: Text('Getränk'),
-                    ),
-                    DropdownMenuItem(
-                      value: Produktart.speise,
-                      child: Text('Speise'),
-                    ),
-                    DropdownMenuItem(
-                      value: Produktart.sonstiges,
-                      child: Text('Anderes Produkt'),
-                    ),
-                  ],
-                  onChanged: (wert) => setState(() => _produktart = wert!),
-                ),
-                const SizedBox(height: 16),
-                _textfeld(
-                  _name,
-                  'Name',
-                  maxLength: 120,
-                  focusNode: _nameFokus,
-                  validator: _minimalangabePruefen,
-                ),
-                _textfeld(
-                  _barcode,
-                  'EAN / Barcode',
-                  maxLength: 80,
-                  validator: _minimalangabePruefen,
-                  keyboardType: TextInputType.number,
-                  focusNode: _barcodeFokus,
-                  suffixIcon: IconButton(
-                    tooltip: 'EAN scannen',
-                    onPressed: _speichert ? null : _barcodeScannen,
-                    icon: const Icon(Icons.qr_code_scanner),
-                  ),
-                ),
-                _textfeld(_marke, 'Marke (optional)', maxLength: 120),
-                if (_produktart == Produktart.bier) ...[
-                  _textfeld(_brauerei, 'Brauerei (optional)', maxLength: 120),
-                  _textfeld(_sorte, 'Sorte (optional)', maxLength: 80),
-                  _textfeld(
-                    _alkohol,
-                    'Alkoholgehalt in % (optional)',
-                    maxLength: 5,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: _alkoholPruefen,
-                    focusNode: _alkoholFokus,
-                  ),
-                ],
-                _textfeld(_herkunft, 'Herkunft (optional)', maxLength: 120),
-                _textfeld(_gebinde, 'Gebinde (optional)', maxLength: 80),
-                _textfeld(
-                  _fuellmenge,
-                  'Füllmenge in ml (optional)',
-                  maxLength: 6,
-                  keyboardType: TextInputType.number,
-                  validator: _fuellmengePruefen,
-                  focusNode: _fuellmengeFokus,
-                ),
-                _textfeld(_notiz, 'Notiz (optional)',
-                    maxLength: 1000, maxLines: 4),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          minimum: const EdgeInsets.all(16),
-          child: FilledButton(
-            onPressed: _speichert ? null : _speichern,
-            child: Text(_speichert ? 'Speichert …' : 'Produkt speichern'),
-          ),
-        ),
-      );
+      ),
+    ),
+    bottomNavigationBar: SafeArea(
+      top: false,
+      minimum: const EdgeInsets.all(16),
+      child: FilledButton(
+        onPressed: _speichert ? null : _speichern,
+        child: Text(_speichert ? 'Speichert …' : 'Produkt speichern'),
+      ),
+    ),
+  );
 
   Widget _textfeld(
     TextEditingController controller,
@@ -389,17 +388,16 @@ class _ProduktFormularState extends State<ProduktFormular> {
     String? Function(String?)? validator,
     TextInputType? keyboardType,
     Widget? suffixIcon,
-  }) =>
-      Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: TextFormField(
-          controller: controller,
-          focusNode: focusNode,
-          decoration: InputDecoration(labelText: label, suffixIcon: suffixIcon),
-          keyboardType: keyboardType,
-          maxLength: maxLength,
-          maxLines: maxLines,
-          validator: validator,
-        ),
-      );
+  }) => Padding(
+    padding: const EdgeInsets.only(top: 16),
+    child: TextFormField(
+      controller: controller,
+      focusNode: focusNode,
+      decoration: InputDecoration(labelText: label, suffixIcon: suffixIcon),
+      keyboardType: keyboardType,
+      maxLength: maxLength,
+      maxLines: maxLines,
+      validator: validator,
+    ),
+  );
 }
