@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:taugts/core/presentation/formular_fehler.dart';
 import 'package:taugts/core/support/app_info.dart';
 import 'package:taugts/core/support/app_info_service.dart';
