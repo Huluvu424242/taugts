@@ -74,10 +74,13 @@ class SqliteBewertungsRepository
 
   @override
   Future<Produkt?> ladeProdukt(String id) async {
-    final rows = datenbank.verbindung.select('''
+    final rows = datenbank.verbindung.select(
+      '''
       SELECT o.*, p.* FROM objekte o
       JOIN produkte p ON p.objekt_id = o.id WHERE o.id = ? AND p.geloescht = 0
-    ''', [id]);
+    ''',
+      [id],
+    );
     if (rows.isEmpty) return null;
     final row = rows.single;
     return _produktAusZeile(row);
@@ -86,7 +89,8 @@ class SqliteBewertungsRepository
   @override
   Future<List<Produkt>> ladeProdukte({String suchtext = ''}) async {
     final suche = '%${suchtext.trim().toLowerCase()}%';
-    final rows = datenbank.verbindung.select('''
+    final rows = datenbank.verbindung.select(
+      '''
       SELECT o.*, p.* FROM objekte o
       JOIN produkte p ON p.objekt_id = o.id
       WHERE p.geloescht = 0 AND (? = '%%'
@@ -96,7 +100,9 @@ class SqliteBewertungsRepository
          OR LOWER(COALESCE(p.sorte, '')) LIKE ?
          OR LOWER(COALESCE(p.barcode, '')) LIKE ?)
       ORDER BY o.geaendert_am DESC, o.name COLLATE NOCASE
-    ''', [suche, suche, suche, suche, suche, suche]);
+    ''',
+      [suche, suche, suche, suche, suche, suche],
+    );
     return rows.map(_produktAusZeile).toList();
   }
 
@@ -104,11 +110,14 @@ class SqliteBewertungsRepository
   Future<Produkt?> ladeProduktMitBarcode(String barcode) async {
     final wert = barcode.trim();
     if (wert.isEmpty) return null;
-    final rows = datenbank.verbindung.select('''
+    final rows = datenbank.verbindung.select(
+      '''
       SELECT o.*, p.* FROM objekte o
       JOIN produkte p ON p.objekt_id = o.id
       WHERE p.barcode = ? AND p.geloescht = 0 LIMIT 1
-    ''', [wert]);
+    ''',
+      [wert],
+    );
     return rows.isEmpty ? null : _produktAusZeile(rows.single);
   }
 
@@ -225,17 +234,17 @@ class SqliteBewertungsRepository
   }
 
   Ort _ortAusZeile(Map<String, Object?> row) => Ort(
-        id: row['id'] as String,
-        name: row['name'] as String,
-        typ: Ortstyp.values.byName(row['typ'] as String),
-        adresse: row['adresse'] as String?,
-        breitengrad: (row['breitengrad'] as num?)?.toDouble(),
-        laengengrad: (row['laengengrad'] as num?)?.toDouble(),
-        osmReferenz: row['osm_referenz'] as String?,
-        notiz: row['notiz'] as String?,
-        erstelltAm: DateTime.parse(row['erstellt_am'] as String),
-        geaendertAm: DateTime.parse(row['geaendert_am'] as String),
-      );
+    id: row['id'] as String,
+    name: row['name'] as String,
+    typ: Ortstyp.values.byName(row['typ'] as String),
+    adresse: row['adresse'] as String?,
+    breitengrad: (row['breitengrad'] as num?)?.toDouble(),
+    laengengrad: (row['laengengrad'] as num?)?.toDouble(),
+    osmReferenz: row['osm_referenz'] as String?,
+    notiz: row['notiz'] as String?,
+    erstelltAm: DateTime.parse(row['erstellt_am'] as String),
+    geaendertAm: DateTime.parse(row['geaendert_am'] as String),
+  );
 
   @override
   Future<void> loescheProdukt(String id) async {
@@ -247,10 +256,9 @@ class SqliteBewertungsRepository
 
   @override
   Future<void> loescheOrt(String id) async {
-    datenbank.verbindung.execute(
-      'UPDATE orte SET geloescht = 1 WHERE id = ?',
-      [id],
-    );
+    datenbank.verbindung.execute('UPDATE orte SET geloescht = 1 WHERE id = ?', [
+      id,
+    ]);
   }
 
   @override
@@ -359,13 +367,16 @@ class SqliteBewertungsRepository
           (eintrag) => eintrag.position.erlebnisId != erlebnis.id,
         ) ||
         produktbewertungen.entries.any(
-          (eintrag) => eintrag.value.any((wert) =>
-              wert.erlebnisId != erlebnis.id ||
-              wert.erlebnisPositionId != eintrag.key ||
-              wert.herkunftProfilId != erlebnis.herkunftProfilId),
+          (eintrag) => eintrag.value.any(
+            (wert) =>
+                wert.erlebnisId != erlebnis.id ||
+                wert.erlebnisPositionId != eintrag.key ||
+                wert.herkunftProfilId != erlebnis.herkunftProfilId,
+          ),
         )) {
       throw ArgumentError(
-          'Positionen oder Bewertungen gehören nicht zum Erlebnis.');
+        'Positionen oder Bewertungen gehören nicht zum Erlebnis.',
+      );
     }
     Ort? bewerteterOrt;
     if (ortsbewertung != null) {
@@ -453,7 +464,8 @@ class SqliteBewertungsRepository
   Future<List<ErlebnispositionMitProdukt>> ladeErlebnispositionen(
     String erlebnisId,
   ) async {
-    final rows = datenbank.verbindung.select('''
+    final rows = datenbank.verbindung.select(
+      '''
       SELECT p.id AS position_id, p.erlebnis_id, p.produkt_id, p.anzahl,
         p.erstellt_am AS position_erstellt_am,
         p.geaendert_am AS position_geaendert_am,
@@ -467,7 +479,9 @@ class SqliteBewertungsRepository
       LEFT JOIN preisbeobachtungen pb ON pb.erlebnis_position_id = p.id
       WHERE p.erlebnis_id = ?
       ORDER BY p.erstellt_am, p.id
-    ''', [erlebnisId]);
+    ''',
+      [erlebnisId],
+    );
     return rows.map((row) {
       final position = ErlebnisPosition(
         id: row['position_id'] as String,
@@ -503,8 +517,9 @@ class SqliteBewertungsRepository
                   waehrung: row['waehrung'] as String,
                 ),
                 erstelltAm: DateTime.parse(row['preis_erstellt_am'] as String),
-                geaendertAm:
-                    DateTime.parse(row['preis_geaendert_am'] as String),
+                geaendertAm: DateTime.parse(
+                  row['preis_geaendert_am'] as String,
+                ),
               ),
       );
     }).toList();
@@ -629,22 +644,22 @@ class SqliteBewertungsRepository
   }
 
   Erlebnis _erlebnisAusZeile(Map<String, Object?> row) => Erlebnis(
-        id: row['id'] as String,
-        typ: Erlebnistyp.values.byName(row['typ'] as String),
-        ortId: row['ort_id'] as String?,
-        beginn: _optionalesDatum(row['beginn'] as String?),
-        ende: _optionalesDatum(row['ende'] as String?),
-        produktId: row['produkt_id'] as String?,
-        kaufortId: row['kaufort_id'] as String?,
-        konsumortId: row['konsumort_id'] as String?,
-        herkunftProfilId: row['herkunft_profil_id'] as String,
-        erstelltAm: DateTime.parse(row['erstellt_am'] as String),
-        geaendertAm: DateTime.parse(row['geaendert_am'] as String),
-        preis: (row['preis'] as num?)?.toDouble(),
-        menge: (row['menge'] as num?)?.toDouble(),
-        gebinde: row['gebinde'] as String?,
-        notiz: row['notiz'] as String?,
-      );
+    id: row['id'] as String,
+    typ: Erlebnistyp.values.byName(row['typ'] as String),
+    ortId: row['ort_id'] as String?,
+    beginn: _optionalesDatum(row['beginn'] as String?),
+    ende: _optionalesDatum(row['ende'] as String?),
+    produktId: row['produkt_id'] as String?,
+    kaufortId: row['kaufort_id'] as String?,
+    konsumortId: row['konsumort_id'] as String?,
+    herkunftProfilId: row['herkunft_profil_id'] as String,
+    erstelltAm: DateTime.parse(row['erstellt_am'] as String),
+    geaendertAm: DateTime.parse(row['geaendert_am'] as String),
+    preis: (row['preis'] as num?)?.toDouble(),
+    menge: (row['menge'] as num?)?.toDouble(),
+    gebinde: row['gebinde'] as String?,
+    notiz: row['notiz'] as String?,
+  );
 
   @override
   Future<void> speichereKriterium(Bewertungskriterium kriterium) async {
@@ -655,9 +670,11 @@ class SqliteBewertungsRepository
       'SELECT * FROM kriterien WHERE id = ?',
       [kriterium.id],
     );
-    final bisherigeVersion =
-        vorhanden.isEmpty ? 0 : (vorhanden.single['version'] as int? ?? 1);
-    final bedeutungGeaendert = vorhanden.isNotEmpty &&
+    final bisherigeVersion = vorhanden.isEmpty
+        ? 0
+        : (vorhanden.single['version'] as int? ?? 1);
+    final bedeutungGeaendert =
+        vorhanden.isNotEmpty &&
         (vorhanden.single['name'] != kriterium.name.trim() ||
             vorhanden.single['beschreibung'] !=
                 _leerAlsNull(kriterium.beschreibung) ||
@@ -742,10 +759,12 @@ class SqliteBewertungsRepository
       if (vorhanden.isEmpty) {
         throw ArgumentError.value(kriteriumId, 'kriteriumId');
       }
-      final verwendungen = datenbank.verbindung.select(
-        'SELECT COUNT(*) AS anzahl FROM bewertungen WHERE kriterium_id = ?',
-        [kriteriumId],
-      ).single['anzahl'] as int;
+      final verwendungen =
+          datenbank.verbindung.select(
+                'SELECT COUNT(*) AS anzahl FROM bewertungen WHERE kriterium_id = ?',
+                [kriteriumId],
+              ).single['anzahl']
+              as int;
       wurdeDeaktiviert =
           verwendungen > 0 || _standardkriteriumIds.contains(kriteriumId);
       if (wurdeDeaktiviert) {
@@ -754,10 +773,9 @@ class SqliteBewertungsRepository
           [_zeit(DateTime.now().toUtc()), kriteriumId],
         );
       } else {
-        datenbank.verbindung.execute(
-          'DELETE FROM kriterien WHERE id = ?',
-          [kriteriumId],
-        );
+        datenbank.verbindung.execute('DELETE FROM kriterien WHERE id = ?', [
+          kriteriumId,
+        ]);
       }
     });
     return wurdeDeaktiviert;
@@ -894,8 +912,9 @@ class SqliteBewertungsRepository
     Bewertung bewertung,
     Map<String, Object?> kriterium,
   ) {
-    final typ =
-        KriteriumEingabetyp.values.byName(kriterium['eingabetyp'] as String);
+    final typ = KriteriumEingabetyp.values.byName(
+      kriterium['eingabetyp'] as String,
+    );
     final zahl = bewertung.wert;
     final text = _leerAlsNull(bewertung.textWert);
     final hatGenauEinenWert = (zahl == null) != (text == null);
@@ -926,7 +945,8 @@ class SqliteBewertungsRepository
             .toSet();
         if (text == null || !auswahlwerte.contains(text)) {
           throw ArgumentError(
-              'Der Auswahlwert ist für das Kriterium ungültig.');
+            'Der Auswahlwert ist für das Kriterium ungültig.',
+          );
         }
       case KriteriumEingabetyp.freitext:
         if (text == null || text.length > 500) {
@@ -972,10 +992,12 @@ class SqliteBewertungsRepository
     required List<Bewertung> bewertungen,
   }) async {
     if (position.erlebnisId != erlebnis.id ||
-        bewertungen.any((bewertung) =>
-            bewertung.erlebnisId != erlebnis.id ||
-            bewertung.erlebnisPositionId != position.id ||
-            bewertung.herkunftProfilId != erlebnis.herkunftProfilId)) {
+        bewertungen.any(
+          (bewertung) =>
+              bewertung.erlebnisId != erlebnis.id ||
+              bewertung.erlebnisPositionId != position.id ||
+              bewertung.herkunftProfilId != erlebnis.herkunftProfilId,
+        )) {
       throw ArgumentError('Bewertungen müssen zur Erlebnisposition gehören.');
     }
     datenbank.transaktion(() {
@@ -991,9 +1013,7 @@ class SqliteBewertungsRepository
   }
 
   @override
-  Future<List<Bewertung>> ladeBewertungenFuerErlebnis(
-    String erlebnisId,
-  ) async {
+  Future<List<Bewertung>> ladeBewertungenFuerErlebnis(String erlebnisId) async {
     final rows = datenbank.verbindung.select(
       'SELECT * FROM bewertungen WHERE erlebnis_id = ? '
       'ORDER BY erstellt_am, kriterium_id',
@@ -1015,41 +1035,44 @@ class SqliteBewertungsRepository
   }
 
   Bewertung _bewertungAusZeile(Map<String, Object?> row) => Bewertung(
-        id: row['id'] as String,
-        erlebnisId: row['erlebnis_id'] as String,
-        kriteriumId: row['kriterium_id'] as String,
-        herkunftProfilId: row['herkunft_profil_id'] as String,
-        erlebnisPositionId: row['erlebnis_position_id'] as String?,
-        ortId: row['ort_id'] as String?,
-        ortsbewertungId: row['ortsbewertung_id'] as String?,
-        wert: (row['wert'] as num?)?.toDouble(),
-        textWert: row['text_wert'] as String?,
-        erstelltAm: DateTime.parse(row['erstellt_am'] as String),
-        geaendertAm: DateTime.parse(row['geaendert_am'] as String),
-        kriteriumName: row['kriterium_name'] as String?,
-        kriteriumBeschreibung: row['kriterium_beschreibung'] as String?,
-        kriteriumEingabetyp: row['kriterium_eingabetyp'] == null
-            ? null
-            : KriteriumEingabetyp.values.byName(
-                row['kriterium_eingabetyp'] as String,
-              ),
-        kriteriumReihenfolge: row['kriterium_reihenfolge'] as int?,
-        kriteriumVersion: row['kriterium_version'] as int?,
-        kriteriumAuswahlwerte: (row['kriterium_auswahlwerte'] as String? ?? '')
-            .split('\n')
-            .where((wert) => wert.isNotEmpty)
-            .toList(),
-      );
+    id: row['id'] as String,
+    erlebnisId: row['erlebnis_id'] as String,
+    kriteriumId: row['kriterium_id'] as String,
+    herkunftProfilId: row['herkunft_profil_id'] as String,
+    erlebnisPositionId: row['erlebnis_position_id'] as String?,
+    ortId: row['ort_id'] as String?,
+    ortsbewertungId: row['ortsbewertung_id'] as String?,
+    wert: (row['wert'] as num?)?.toDouble(),
+    textWert: row['text_wert'] as String?,
+    erstelltAm: DateTime.parse(row['erstellt_am'] as String),
+    geaendertAm: DateTime.parse(row['geaendert_am'] as String),
+    kriteriumName: row['kriterium_name'] as String?,
+    kriteriumBeschreibung: row['kriterium_beschreibung'] as String?,
+    kriteriumEingabetyp: row['kriterium_eingabetyp'] == null
+        ? null
+        : KriteriumEingabetyp.values.byName(
+            row['kriterium_eingabetyp'] as String,
+          ),
+    kriteriumReihenfolge: row['kriterium_reihenfolge'] as int?,
+    kriteriumVersion: row['kriterium_version'] as int?,
+    kriteriumAuswahlwerte: (row['kriterium_auswahlwerte'] as String? ?? '')
+        .split('\n')
+        .where((wert) => wert.isNotEmpty)
+        .toList(),
+  );
 
   @override
   Future<List<Bewertung>> ladeBewertungenFuerProdukt(String produktId) async {
-    final rows = datenbank.verbindung.select('''
+    final rows = datenbank.verbindung.select(
+      '''
       SELECT b.* FROM bewertungen b
       LEFT JOIN erlebnispositionen p ON p.id = b.erlebnis_position_id
       LEFT JOIN erlebnisse e ON e.id = b.erlebnis_id
       WHERE p.produkt_id = ? OR (p.id IS NULL AND e.produkt_id = ?)
       ORDER BY b.erstellt_am
-    ''', [produktId, produktId]);
+    ''',
+      [produktId, produktId],
+    );
     return rows.map(_bewertungAusZeile).toList();
   }
 
@@ -1138,12 +1161,14 @@ class SqliteBewertungsRepository
         (vorhandeneOrtsbewertung.isNotEmpty &&
             vorhandeneOrtsbewertung.single['id'] != ortsbewertung.id) ||
         unpassendeKriterien.isNotEmpty ||
-        bewertungen.any((bewertung) =>
-            bewertung.erlebnisId != erlebnis.id ||
-            bewertung.ortId != ort.id ||
-            bewertung.ortsbewertungId != ortsbewertung.id ||
-            bewertung.herkunftProfilId != erlebnis.herkunftProfilId ||
-            bewertung.erlebnisPositionId != null)) {
+        bewertungen.any(
+          (bewertung) =>
+              bewertung.erlebnisId != erlebnis.id ||
+              bewertung.ortId != ort.id ||
+              bewertung.ortsbewertungId != ortsbewertung.id ||
+              bewertung.herkunftProfilId != erlebnis.herkunftProfilId ||
+              bewertung.erlebnisPositionId != null,
+        )) {
       throw ArgumentError(
         'Ortsbewertung, Ort, Kriterien und Erlebnis passen nicht zusammen.',
       );
@@ -1217,15 +1242,17 @@ class SqliteBewertungsRepository
         }
       }
       final ortId = erlebnis.wirksamerOrtId;
-      ergebnis.add(BewertungsverlaufEintrag(
-        erlebnis: erlebnis,
-        ort: ortId == null ? null : await ladeOrt(ortId),
-        position: position,
-        preis: geladenePosition?.preis,
-        bewertungen: await ladeBewertungenFuerErlebnisposition(position.id),
-        herkunftProfilId: erlebnis.herkunftProfilId,
-        notiz: erlebnis.notiz,
-      ));
+      ergebnis.add(
+        BewertungsverlaufEintrag(
+          erlebnis: erlebnis,
+          ort: ortId == null ? null : await ladeOrt(ortId),
+          position: position,
+          preis: geladenePosition?.preis,
+          bewertungen: await ladeBewertungenFuerErlebnisposition(position.id),
+          herkunftProfilId: erlebnis.herkunftProfilId,
+          notiz: erlebnis.notiz,
+        ),
+      );
     }
     final direkteErlebnisse = datenbank.verbindung.select(
       'SELECT id FROM erlebnisse WHERE produkt_id = ?',
@@ -1237,22 +1264,26 @@ class SqliteBewertungsRepository
       final erlebnis = await ladeErlebnis(erlebnisId);
       if (erlebnis == null) continue;
       final bewertungen = (await ladeBewertungenFuerErlebnis(erlebnis.id))
-          .where((bewertung) =>
-              bewertung.erlebnisPositionId == null &&
-              bewertung.ortsbewertungId == null)
+          .where(
+            (bewertung) =>
+                bewertung.erlebnisPositionId == null &&
+                bewertung.ortsbewertungId == null,
+          )
           .toList();
       if (bewertungen.isEmpty && erlebnis.preis == null) continue;
       final ortId = erlebnis.wirksamerOrtId;
-      ergebnis.add(BewertungsverlaufEintrag(
-        erlebnis: erlebnis,
-        ort: ortId == null ? null : await ladeOrt(ortId),
-        bewertungen: bewertungen,
-        herkunftProfilId: erlebnis.herkunftProfilId,
-        historischerPreis: erlebnis.preis,
-        historischeMenge: erlebnis.menge,
-        historischesGebinde: erlebnis.gebinde,
-        notiz: erlebnis.notiz,
-      ));
+      ergebnis.add(
+        BewertungsverlaufEintrag(
+          erlebnis: erlebnis,
+          ort: ortId == null ? null : await ladeOrt(ortId),
+          bewertungen: bewertungen,
+          herkunftProfilId: erlebnis.herkunftProfilId,
+          historischerPreis: erlebnis.preis,
+          historischeMenge: erlebnis.menge,
+          historischesGebinde: erlebnis.gebinde,
+          notiz: erlebnis.notiz,
+        ),
+      );
     }
     ergebnis.sort((a, b) => b.erlebnis.erlebtAm.compareTo(a.erlebnis.erlebtAm));
     return ergebnis;
@@ -1271,13 +1302,15 @@ class SqliteBewertungsRepository
       if (erlebnis == null) continue;
       final geladen = await ladeOrtsbewertungFuerErlebnis(erlebnis.id);
       if (geladen == null) continue;
-      ergebnis.add(BewertungsverlaufEintrag(
-        erlebnis: erlebnis,
-        ort: ort,
-        bewertungen: geladen.werte,
-        herkunftProfilId: geladen.ortsbewertung.herkunftProfilId,
-        notiz: geladen.ortsbewertung.notiz,
-      ));
+      ergebnis.add(
+        BewertungsverlaufEintrag(
+          erlebnis: erlebnis,
+          ort: ort,
+          bewertungen: geladen.werte,
+          herkunftProfilId: geladen.ortsbewertung.herkunftProfilId,
+          notiz: geladen.ortsbewertung.notiz,
+        ),
+      );
     }
     return ergebnis;
   }

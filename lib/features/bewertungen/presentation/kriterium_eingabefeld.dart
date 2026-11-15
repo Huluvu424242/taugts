@@ -2,14 +2,15 @@ import 'package:material_ui/material_ui.dart';
 import 'package:taugts/features/bewertungen/models/fachmodelle.dart';
 
 class KriteriumEingabewert {
-  const KriteriumEingabewert(
-      {this.zahl, this.text, this.fehler, this.roheEingabe});
+  const KriteriumEingabewert({
+    this.zahl,
+    this.text,
+    this.fehler,
+    this.roheEingabe,
+  });
 
   factory KriteriumEingabewert.ausBewertung(Bewertung? bewertung) =>
-      KriteriumEingabewert(
-        zahl: bewertung?.wert,
-        text: bewertung?.textWert,
-      );
+      KriteriumEingabewert(zahl: bewertung?.wert, text: bewertung?.textWert);
 
   final double? zahl;
   final String? text;
@@ -68,50 +69,50 @@ class _KriteriumEingabefeldState extends State<KriteriumEingabefeld> {
 
   String _anzeigetext(KriteriumEingabewert wert) =>
       widget.kriterium.eingabetyp == KriteriumEingabetyp.zahl
-          ? wert.roheEingabe ?? wert.zahl?.toString() ?? ''
-          : wert.text ?? '';
+      ? wert.roheEingabe ?? wert.zahl?.toString() ?? ''
+      : wert.text ?? '';
 
   InputDecoration _dekoration({String? helperText}) => InputDecoration(
-        labelText: widget.kriterium.name,
-        helperText: helperText ?? widget.kriterium.beschreibung,
-        errorText: widget.errorText ?? widget.wert.fehler,
-      );
+    labelText: widget.kriterium.name,
+    helperText: helperText ?? widget.kriterium.beschreibung,
+    errorText: widget.errorText ?? widget.wert.fehler,
+  );
 
   @override
   Widget build(BuildContext context) => Semantics(
-        container: true,
-        label: widget.kriterium.name,
-        child: switch (widget.kriterium.eingabetyp) {
-          KriteriumEingabetyp.wertung => _skala(false),
-          KriteriumEingabetyp.intensitaet => _skala(true),
-          KriteriumEingabetyp.jaNein => _jaNein(),
-          KriteriumEingabetyp.zahl => _zahl(),
-          KriteriumEingabetyp.auswahl => _auswahl(),
-          KriteriumEingabetyp.freitext => _freitext(),
-        },
-      );
+    container: true,
+    label: widget.kriterium.name,
+    child: switch (widget.kriterium.eingabetyp) {
+      KriteriumEingabetyp.wertung => _skala(false),
+      KriteriumEingabetyp.intensitaet => _skala(true),
+      KriteriumEingabetyp.jaNein => _jaNein(),
+      KriteriumEingabetyp.zahl => _zahl(),
+      KriteriumEingabetyp.auswahl => _auswahl(),
+      KriteriumEingabetyp.freitext => _freitext(),
+    },
+  );
 
   Widget _skala(bool intensitaet) => DropdownButtonFormField<double?>(
-        key: ValueKey('kriterium-${widget.kriterium.id}'),
-        initialValue: widget.wert.zahl,
-        focusNode: widget.focusNode,
-        isExpanded: true,
-        decoration: _dekoration(),
-        items: [
-          const DropdownMenuItem<double?>(
-            value: null,
-            child: Text('Nicht bewertet'),
-          ),
-          for (var wert = 1; wert <= 5; wert++)
-            DropdownMenuItem<double?>(
-              value: wert.toDouble(),
-              child: Text(_skalaLabel(wert, intensitaet)),
-            ),
-        ],
-        onChanged: widget.enabled
-            ? (wert) => widget.onChanged(KriteriumEingabewert(zahl: wert))
-            : null,
-      );
+    key: ValueKey('kriterium-${widget.kriterium.id}'),
+    initialValue: widget.wert.zahl,
+    focusNode: widget.focusNode,
+    isExpanded: true,
+    decoration: _dekoration(),
+    items: [
+      const DropdownMenuItem<double?>(
+        value: null,
+        child: Text('Nicht bewertet'),
+      ),
+      for (var wert = 1; wert <= 5; wert++)
+        DropdownMenuItem<double?>(
+          value: wert.toDouble(),
+          child: Text(_skalaLabel(wert, intensitaet)),
+        ),
+    ],
+    onChanged: widget.enabled
+        ? (wert) => widget.onChanged(KriteriumEingabewert(zahl: wert))
+        : null,
+  );
 
   String _skalaLabel(int wert, bool intensitaet) {
     if (intensitaet) {
@@ -133,55 +134,53 @@ class _KriteriumEingabefeldState extends State<KriteriumEingabefeld> {
   }
 
   Widget _jaNein() => DropdownButtonFormField<double?>(
-        key: ValueKey('kriterium-${widget.kriterium.id}'),
-        initialValue: widget.wert.zahl,
-        focusNode: widget.focusNode,
-        isExpanded: true,
-        decoration: _dekoration(),
-        items: const [
-          DropdownMenuItem<double?>(
-            value: null,
-            child: Text('Nicht bewertet'),
-          ),
-          DropdownMenuItem<double?>(value: 1, child: Text('Ja')),
-          DropdownMenuItem<double?>(value: 0, child: Text('Nein')),
-        ],
-        onChanged: widget.enabled
-            ? (wert) => widget.onChanged(KriteriumEingabewert(zahl: wert))
-            : null,
-      );
+    key: ValueKey('kriterium-${widget.kriterium.id}'),
+    initialValue: widget.wert.zahl,
+    focusNode: widget.focusNode,
+    isExpanded: true,
+    decoration: _dekoration(),
+    items: const [
+      DropdownMenuItem<double?>(value: null, child: Text('Nicht bewertet')),
+      DropdownMenuItem<double?>(value: 1, child: Text('Ja')),
+      DropdownMenuItem<double?>(value: 0, child: Text('Nein')),
+    ],
+    onChanged: widget.enabled
+        ? (wert) => widget.onChanged(KriteriumEingabewert(zahl: wert))
+        : null,
+  );
 
   Widget _zahl() => TextField(
-        key: ValueKey('kriterium-${widget.kriterium.id}'),
-        controller: _textController,
-        focusNode: widget.focusNode,
-        enabled: widget.enabled,
-        keyboardType: const TextInputType.numberWithOptions(
-          decimal: true,
-          signed: true,
-        ),
-        maxLength: 32,
-        decoration: _dekoration(
-          helperText: widget.kriterium.beschreibung ??
-              'Freie Zahl; Dezimaltrennzeichen Komma oder Punkt.',
-        ),
-        onChanged: (text) {
-          final getrimmt = text.trim();
-          if (getrimmt.isEmpty) {
-            widget.onChanged(const KriteriumEingabewert());
-            return;
-          }
-          final zahl = double.tryParse(getrimmt.replaceAll(',', '.'));
-          widget.onChanged(
-            zahl == null
-                ? KriteriumEingabewert(
-                    fehler: 'Bitte eine gültige Zahl eingeben.',
-                    roheEingabe: text,
-                  )
-                : KriteriumEingabewert(zahl: zahl),
-          );
-        },
+    key: ValueKey('kriterium-${widget.kriterium.id}'),
+    controller: _textController,
+    focusNode: widget.focusNode,
+    enabled: widget.enabled,
+    keyboardType: const TextInputType.numberWithOptions(
+      decimal: true,
+      signed: true,
+    ),
+    maxLength: 32,
+    decoration: _dekoration(
+      helperText:
+          widget.kriterium.beschreibung ??
+          'Freie Zahl; Dezimaltrennzeichen Komma oder Punkt.',
+    ),
+    onChanged: (text) {
+      final getrimmt = text.trim();
+      if (getrimmt.isEmpty) {
+        widget.onChanged(const KriteriumEingabewert());
+        return;
+      }
+      final zahl = double.tryParse(getrimmt.replaceAll(',', '.'));
+      widget.onChanged(
+        zahl == null
+            ? KriteriumEingabewert(
+                fehler: 'Bitte eine gültige Zahl eingeben.',
+                roheEingabe: text,
+              )
+            : KriteriumEingabewert(zahl: zahl),
       );
+    },
+  );
 
   Widget _auswahl() {
     final auswahlwerte = widget.kriterium.auswahlwerte;
@@ -211,20 +210,20 @@ class _KriteriumEingabefeldState extends State<KriteriumEingabefeld> {
   }
 
   Widget _freitext() => TextField(
-        key: ValueKey('kriterium-${widget.kriterium.id}'),
-        controller: _textController,
-        focusNode: widget.focusNode,
-        enabled: widget.enabled,
-        maxLength: 500,
-        maxLines: 3,
-        decoration: _dekoration(),
-        onChanged: (text) {
-          final getrimmt = text.trim();
-          widget.onChanged(
-            getrimmt.isEmpty
-                ? const KriteriumEingabewert()
-                : KriteriumEingabewert(text: getrimmt),
-          );
-        },
+    key: ValueKey('kriterium-${widget.kriterium.id}'),
+    controller: _textController,
+    focusNode: widget.focusNode,
+    enabled: widget.enabled,
+    maxLength: 500,
+    maxLines: 3,
+    decoration: _dekoration(),
+    onChanged: (text) {
+      final getrimmt = text.trim();
+      widget.onChanged(
+        getrimmt.isEmpty
+            ? const KriteriumEingabewert()
+            : KriteriumEingabewert(text: getrimmt),
       );
+    },
+  );
 }
