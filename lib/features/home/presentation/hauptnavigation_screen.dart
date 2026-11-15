@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:taugts/core/ids/id_generator.dart';
 import 'package:taugts/features/auswertungen/presentation/auswertungen_screen.dart';
 import 'package:taugts/features/auswertungen/services/auswertungs_service.dart';
