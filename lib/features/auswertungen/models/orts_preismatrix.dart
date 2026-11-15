@@ -25,13 +25,10 @@ class OrtsPreisMatrix {
           .putIfAbsent(zeit, () => [])
           .add(wert.wert);
     }
-    return OrtsPreisMatrix(
-      zeiten.values.toList(),
-      [
-        for (final key in (gruppen.keys.toList()..sort()))
-          OrtsPreisMatrixZeile(key, gruppen[key]!),
-      ],
-    );
+    return OrtsPreisMatrix(zeiten.values.toList(), [
+      for (final key in (gruppen.keys.toList()..sort()))
+        OrtsPreisMatrixZeile(key, gruppen[key]!),
+    ]);
   }
 
   final List<DateTime> zeitpunkte;

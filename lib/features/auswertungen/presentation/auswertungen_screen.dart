@@ -302,9 +302,7 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                     const DataColumn(label: Text('Produkt · Währung')),
                     for (final zeit in matrix.zeitpunkte)
                       DataColumn(
-                        label: Text(
-                          zeit.toLocal().toString().substring(0, 16),
-                        ),
+                        label: Text(zeit.toLocal().toString().substring(0, 16)),
                       ),
                   ],
                   rows: [
