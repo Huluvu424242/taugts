@@ -153,6 +153,7 @@ class SqliteAuswertungsService
     final rows = _db.verbindung.select(
       '''
       SELECT pb.beobachtet_am, pb.betrag_minor, pb.waehrung,
+        pb.erlebnis_id,
         COALESCE(o.name, 'Ohne Ort') AS ort_name,
         COALESCE(prod.name, 'Gelöschtes Produkt') AS produkt_name
       FROM preisbeobachtungen pb
@@ -180,6 +181,7 @@ class SqliteAuswertungsService
         Zeitwert(
           zeitpunkt: DateTime.parse(row['beobachtet_am']! as String),
           wert: (row['betrag_minor']! as int) / 100,
+          erlebnisIds: [row['erlebnis_id']! as String],
           beschreibung: filter.objektArt == StatistikObjektart.ort
               ? '${row['produkt_name']} · ${row['ort_name']}'
               : '${row['ort_name']} · ${row['waehrung']}',
