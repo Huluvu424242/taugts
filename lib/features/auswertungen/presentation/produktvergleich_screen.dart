@@ -10,11 +10,13 @@ class ProduktvergleichScreen extends StatefulWidget {
   const ProduktvergleichScreen({
     required this.optionenService,
     required this.preisService,
+    required this.bewertungsService,
     super.key,
   });
 
   final AuswertungsFilterOptionenService optionenService;
   final ProduktPreisvergleichService preisService;
+  final ProduktBewertungsvergleichService bewertungsService;
 
   @override
   State<ProduktvergleichScreen> createState() => _ProduktvergleichScreenState();
@@ -28,10 +30,21 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
   DateTime? _von;
   DateTime? _bis;
   Future<List<ProduktPreisRang>>? _preise;
+  Future<List<ProduktBewertungsRang>>? _bewertungen;
 
   void _aktualisieren() {
     final produktId = _produktId;
     setState(() {
+      _bewertungen = produktId == null
+          ? null
+          : widget.bewertungsService.ladeBewertungen(
+              ProduktvergleichFilter(
+                produktId: produktId,
+                ortstyp: _ortstyp,
+                von: _von,
+                bis: _bis,
+              ),
+            );
       _preise = produktId == null
           ? null
           : widget.preisService.ladeLetztePreise(
@@ -285,6 +298,65 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
                                 ),
                               ),
                             ],
+                          );
+                        },
+                      ),
+                  ],
+                );
+              },
+            ),
+          const SizedBox(height: 20),
+          Text(
+            'Bewertungsvergleich – Durchschnitt je Ort',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const Text(
+            'Nur Produktwertungen. Pro Erlebnis zählt ein Gesamturteil '
+            'oder ersatzweise der Mittelwert der Qualitätskriterien. '
+            'Nur die neueste Kriterienversion wird berücksichtigt.',
+          ),
+          if (_bewertungen == null)
+            const Text('Wählen Sie zuerst ein Produkt aus.')
+          else
+            FutureBuilder<List<ProduktBewertungsRang>>(
+              future: _bewertungen,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return TextButton.icon(
+                    onPressed: _aktualisieren,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Bewertungsvergleich erneut laden'),
+                  );
+                }
+                if (!snapshot.hasData) {
+                  return const LinearProgressIndicator();
+                }
+                if (snapshot.data!.isEmpty) {
+                  return const Text('Keine vergleichbaren Produktbewertungen.');
+                }
+                var rang = 0;
+                double? vorher;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final eintrag in snapshot.data!)
+                      Builder(
+                        builder: (context) {
+                          if (eintrag.durchschnitt != vorher) {
+                            rang++;
+                          }
+                          vorher = eintrag.durchschnitt;
+                          return Card(
+                            child: ListTile(
+                              title: Text('$rang. ${eintrag.ortName}'),
+                              subtitle: Text(
+                                '${eintrag.anzahlErlebnisse} Erlebnisse · '
+                                'zuletzt ${eintrag.letzteBewertung.toLocal().toString().substring(0, 16)}',
+                              ),
+                              trailing: Text(
+                                'Ø ${eintrag.durchschnitt.toStringAsFixed(2)}',
+                              ),
+                            ),
                           );
                         },
                       ),

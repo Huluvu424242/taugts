@@ -67,3 +67,24 @@ abstract interface class ProduktPreisvergleichService {
     ProduktvergleichFilter filter,
   );
 }
+
+class ProduktBewertungsRang {
+  const ProduktBewertungsRang({
+    required this.ortId,
+    required this.ortName,
+    required this.durchschnitt,
+    required this.anzahlErlebnisse,
+    required this.letzteBewertung,
+  });
+  final String ortId;
+  final String ortName;
+  final double durchschnitt;
+  final int anzahlErlebnisse;
+  final DateTime letzteBewertung;
+}
+
+abstract interface class ProduktBewertungsvergleichService {
+  Future<List<ProduktBewertungsRang>> ladeBewertungen(
+    ProduktvergleichFilter filter,
+  );
+}

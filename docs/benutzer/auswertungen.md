@@ -1,5 +1,9 @@
 # Auswertungen
 
+## Produktvergleich – Bewertungen je Ort
+
+Die zweite, getrennt sortierte Rangliste zeigt den **Durchschnitt aller vergleichbaren Produktwertungen je Ort** im selben Zeitraum und nach denselben Ortstypfiltern. Ortsbewertungen und andere Eingabetypen als **Wertung** werden ausgeschlossen. Ein **Gesamturteil** je Erlebnis zählt vorrangig; ansonsten ergibt der Mittelwert der Qualitätskriterien einen Erlebniswert. Die Erlebniswerte werden pro Ort gleich gewichtet. Angezeigt werden Durchschnitt, Anzahl berücksichtigter Erlebnisse und letzter Bewertungszeitpunkt. Bei mehreren Versionen desselben Kriteriums zählt nur dessen neueste Version innerhalb der Auswahl; ältere Versionen werden ausdrücklich ausgeschlossen, nicht vermischt.
+
 ## Produktvergleich – letzter Einheitspreis je Ort
 
 Öffnen Sie unter **Auswertungen** den **Produktvergleich**. Suchen und wählen Sie genau ein bestehendes Produkt. Standardmäßig werden **alle Zeitpunkte** und **nur Gaststätten** berücksichtigt; alternativ können Sie Geschäfte oder beide Ortstypen und einen eigenen Zeitraum auswählen. Die Preisrangliste verwendet für jeden Ort **ausschließlich den letzten dokumentierten Kauf innerhalb des Zeitraums**, nicht den niedrigsten historischen Preis. Die Sortierung erfolgt aufsteigend nach **Euro pro Liter**, nicht nach dem Einzelpreis. Nicht vergleichbare Währungen und fehlende oder ungültige Füllmengen erhalten keinen Rang.
