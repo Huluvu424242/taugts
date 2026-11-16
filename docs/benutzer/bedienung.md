@@ -2,7 +2,7 @@
 
 Taugt’s? dient dazu, Produkte, Orte und Erlebnisse lokal zu erfassen und zu bewerten.
 
-**Versionshinweis:** Diese Seite erläutert den aktuellen Entwicklungsstand auf `master`. Die für 0.1.0+10 vorbereiteten Änderungen stehen im [Changelog](https://github.com/Huluvu424242/taugts/blob/master/CHANGELOG.md). Bis zur Veröffentlichung bleibt 0.1.0+8 der letzte offizielle Release.
+**Versionshinweis:** Diese Seite beschreibt den für **0.1.0+11** vorbereiteten Entwicklungsstand. Die Änderungen gegenüber dem zuletzt veröffentlichten Release **0.1.0+10** stehen im [Changelog](https://github.com/Huluvu424242/taugts/blob/master/CHANGELOG.md).
 
 ## Startseite
 
