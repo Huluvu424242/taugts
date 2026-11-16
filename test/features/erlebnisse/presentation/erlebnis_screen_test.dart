@@ -304,22 +304,33 @@ void main() {
     final bewertungsHeader = find.text('Gaststätte bewerten');
     expect(find.text('5 – taugt sehr'), findsOneWidget);
 
-    await tester.scrollUntilVisible(
-      bewertungsHeader,
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(bewertungsHeader);
-    await tester.pumpAndSettle();
+    // scrollUntilVisible allein reicht nicht, wenn der bereits aufgebaute
+    // Header unter der AppBar liegt: Der Finder findet ihn trotzdem, aber
+    // ein Tap trifft die AppBar statt des ExpansionTile-Headers.
+    Future<void> tippeSichtbarenBewertungsHeader() async {
+      await tester.ensureVisible(bewertungsHeader);
+      await tester.pumpAndSettle();
+      const sichererAbstandVomOben = 120.0;
+      final obereKante = tester.getTopLeft(bewertungsHeader).dy;
+      if (obereKante < sichererAbstandVomOben) {
+        await tester.drag(
+          find.byType(Scrollable).first,
+          Offset(0, sichererAbstandVomOben - obereKante + 24),
+        );
+        await tester.pumpAndSettle();
+      }
+      expect(
+        tester.getTopLeft(bewertungsHeader).dy,
+        greaterThanOrEqualTo(sichererAbstandVomOben),
+      );
+      await tester.tap(bewertungsHeader);
+      await tester.pumpAndSettle();
+    }
+
+    await tippeSichtbarenBewertungsHeader();
     expect(find.text('5 – taugt sehr'), findsNothing);
 
-    await tester.scrollUntilVisible(
-      bewertungsHeader,
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(bewertungsHeader);
-    await tester.pumpAndSettle();
+    await tippeSichtbarenBewertungsHeader();
     expect(find.text('5 – taugt sehr'), findsOneWidget);
   });
 }
