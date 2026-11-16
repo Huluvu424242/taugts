@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
+import 'package:taugts/features/auswertungen/models/preisvergleich_kennzahlen.dart';
 import 'package:taugts/features/auswertungen/models/produktvergleich_modelle.dart';
 import 'package:taugts/features/auswertungen/presentation/produktvergleich_screen.dart';
 import 'package:taugts/features/auswertungen/presentation/statistik_verlauf_darstellung.dart';
@@ -136,6 +137,11 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
     if (!mounted || zeitraum == null) return;
     setState(() {
       _filter = AuswertungsFilter(
+        kategorieId: _filter.kategorieId,
+        objektId: _filter.objektId,
+        objektArt: _filter.objektArt,
+        kriteriumId: _filter.kriteriumId,
+        herkunftProfilId: _filter.herkunftProfilId,
         von: zeitraum.start,
         bis: DateTime(
           zeitraum.end.year,
@@ -156,7 +162,6 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
     final einzelBeobachtungen =
         _ansicht == _StatistikAnsicht.auffaelligkeiten ||
         (_ansicht == _StatistikAnsicht.preise &&
-            _filter.objektArt == StatistikObjektart.ort &&
             _aggregation == StatistikZeitraum.tag);
     if (einzelBeobachtungen) return werte;
     return StatistikRechnung.aggregiere(
@@ -216,6 +221,50 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
         setState(() => _exportLaeuft = false);
       }
     }
+  }
+
+  Widget _ortspreiseImVergleich(List<Zeitwert> werte) {
+    final serien = OrtsPreisAnalyse.berechne(werte);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Preisvergleich je Ort und Währung',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const Text(
+              'Beobachtete Einzelpreise, keine normalisierten Einheitspreise '
+              'und keine aktuellen Angebote.',
+            ),
+            for (final serie in serien) ...[
+              const SizedBox(height: 12),
+              Text(serie.serie, style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                '${serie.anzahl} Käufe · Durchschnitt '
+                '${serie.durchschnitt.toStringAsFixed(2)}',
+              ),
+              Text(
+                'Günstigster Kauf: ${serie.minimum.toStringAsFixed(2)} '
+                '(${serie.minimumBeobachtungen.length}×)',
+              ),
+              Text(
+                'Teuerster Kauf: ${serie.maximum.toStringAsFixed(2)} '
+                '(${serie.maximumBeobachtungen.length}×)',
+              ),
+              Text(
+                'Erster: ${serie.ersterKauf.toLocal().toString().substring(0, 16)} · '
+                'Letzter: ${serie.letzterKauf.toLocal().toString().substring(0, 16)}',
+              ),
+            ],
+            if (serien.isEmpty)
+              const Text('Keine beobachteten Preise im gewählten Zeitraum.'),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _preisExtrema(List<Zeitwert> werte) {
@@ -573,6 +622,10 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
                   _filter.objektArt == StatistikObjektart.produkt &&
                   _filter.objektId != null)
                 _preisExtrema(daten.preisverlauf),
+              if (_ansicht == _StatistikAnsicht.preise &&
+                  _filter.objektArt == StatistikObjektart.produkt &&
+                  _filter.objektId != null)
+                _ortspreiseImVergleich(daten.preisverlauf),
               if (_ansicht == _StatistikAnsicht.preisQualitaet)
                 const Text(
                   'Preise und Wertungen werden in getrennten Diagrammreihen und eigenen Skalen dargestellt. Der Verlauf zeigt keine Ursache-Wirkung-Beziehung.',
