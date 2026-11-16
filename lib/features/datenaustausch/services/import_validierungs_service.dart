@@ -610,6 +610,32 @@ class ImportValidierungsService {
       _optionaleUuid(wert, 'ortId', '$pfad.ortId', fehler);
       _ganzzahl(wert, 'betragMinor', '$pfad.betragMinor', fehler, minimum: 0);
       _waehrung(wert, 'waehrung', '$pfad.waehrung', fehler);
+      final menge = wert['bezugsMenge'];
+      final einheit = wert['bezugsEinheit'];
+      if (menge != null && (menge is! int || menge <= 0)) {
+        _fehler(
+          fehler,
+          'bezugsmenge_ungueltig',
+          '$pfad.bezugsMenge',
+          'Die Bezugsmenge muss eine positive Ganzzahl sein.',
+        );
+      }
+      if (einheit != null && !const {'ml', 'g', 'stueck'}.contains(einheit)) {
+        _fehler(
+          fehler,
+          'bezugseinheit_ungueltig',
+          '$pfad.bezugsEinheit',
+          'Erlaubte Einheiten: ml, g, stueck.',
+        );
+      }
+      if ((menge == null) != (einheit == null)) {
+        _fehler(
+          fehler,
+          'bezugsdaten_unvollstaendig',
+          '$pfad.bezugsMenge',
+          'Menge und Einheit müssen gemeinsam angegeben werden.',
+        );
+      }
       _utcZeit(wert, 'beobachtetAm', '$pfad.beobachtetAm', fehler);
       _zeitstempel(wert, pfad, fehler);
     }

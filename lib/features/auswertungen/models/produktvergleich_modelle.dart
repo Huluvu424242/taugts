@@ -40,6 +40,9 @@ class ProduktPreisRang {
     required this.waehrung,
     required this.preisId,
     this.mengeMl,
+    this.bezugseinheit,
+    this.einheitspreis,
+    this.einheitspreisEinheit,
     this.euroProLiter,
     this.nichtVergleichbar,
   });
@@ -52,6 +55,9 @@ class ProduktPreisRang {
   final double preis;
   final String waehrung;
   final int? mengeMl;
+  final String? bezugseinheit;
+  final double? einheitspreis;
+  final String? einheitspreisEinheit;
   final double? euroProLiter;
   final String? nichtVergleichbar;
 }

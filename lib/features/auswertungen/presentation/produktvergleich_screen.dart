@@ -84,9 +84,8 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
         children: [
           const Text(
             'Historische Beobachtungen, keine aktuellen Marktpreise. '
-            'Einheitspreise verwenden die gespeicherte Produktfüllmenge; '
-            'bei nachträglich veränderten Stammdaten kann sie vom '
-            'früheren Gebinde abweichen.',
+            'Einheitspreise verwenden die beim Kauf erfasste Bezugsmenge. '
+            'Bei historischen Käufen ohne Menge wird kein Einheitspreis berechnet.',
           ),
           const SizedBox(height: 12),
           FutureBuilder<AuswertungsFilterOptionen>(
@@ -223,45 +222,69 @@ class _ProduktvergleichScreenState extends State<ProduktvergleichScreen> {
                 }
                 var rang = 0;
                 double? vorher;
+                String? vorherEinheit;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     for (final eintrag in snapshot.data!)
                       Builder(
                         builder: (context) {
-                          final wert = eintrag.euroProLiter;
+                          final wert = eintrag.einheitspreis;
+                          final neueEinheit =
+                              wert != null &&
+                              eintrag.einheitspreisEinheit != vorherEinheit;
+                          if (neueEinheit) {
+                            rang = 0;
+                            vorher = null;
+                            vorherEinheit = eintrag.einheitspreisEinheit;
+                          }
                           if (wert != null && wert != vorher) rang++;
                           if (wert != null) vorher = wert;
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                wert == null
-                                    ? eintrag.ortName
-                                    : '$rang. ${eintrag.ortName}',
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (neueEinheit)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 12),
+                                  child: Text(
+                                    'Eigenständige Rangliste: ${eintrag.einheitspreisEinheit}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall,
+                                  ),
+                                ),
+                              Card(
+                                child: ListTile(
+                                  title: Text(
+                                    wert == null
+                                        ? eintrag.ortName
+                                        : '$rang. ${eintrag.ortName}',
+                                  ),
+                                  subtitle: Text(
+                                    '${eintrag.zeitpunkt.toLocal().toString().substring(0, 16)} · '
+                                    '${eintrag.preis.toStringAsFixed(2)} ${eintrag.waehrung}'
+                                    '${eintrag.mengeMl == null ? '' : ' / ${eintrag.mengeMl} ${eintrag.bezugseinheit ?? ''}'}',
+                                  ),
+                                  trailing: Text(
+                                    wert == null
+                                        ? 'Nicht vergleichbar'
+                                        : '${wert.toStringAsFixed(2)} ${eintrag.einheitspreisEinheit}',
+                                  ),
+                                  isThreeLine: wert == null,
+                                  onTap: wert == null
+                                      ? () => ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  eintrag.nichtVergleichbar ??
+                                                      'Nicht vergleichbar',
+                                                ),
+                                              ),
+                                            )
+                                      : null,
+                                ),
                               ),
-                              subtitle: Text(
-                                '${eintrag.zeitpunkt.toLocal().toString().substring(0, 16)} · '
-                                '${eintrag.preis.toStringAsFixed(2)} ${eintrag.waehrung}'
-                                '${eintrag.mengeMl == null ? '' : ' / ${eintrag.mengeMl} ml'}',
-                              ),
-                              trailing: Text(
-                                wert == null
-                                    ? 'Nicht vergleichbar'
-                                    : '${wert.toStringAsFixed(2)} €/l',
-                              ),
-                              isThreeLine: wert == null,
-                              onTap: wert == null
-                                  ? () => ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              eintrag.nichtVergleichbar ??
-                                                  'Nicht vergleichbar',
-                                            ),
-                                          ),
-                                        )
-                                  : null,
-                            ),
+                            ],
                           );
                         },
                       ),

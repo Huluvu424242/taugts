@@ -46,8 +46,9 @@ void main() {
       db.verbindung.execute(
         '''INSERT INTO preisbeobachtungen (
           id, erlebnis_id, erlebnis_position_id, produkt_id, ort_id,
-          beobachtet_am, betrag_minor, waehrung, erstellt_am, geaendert_am
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'EUR', ?, ?)''',
+          beobachtet_am, betrag_minor, waehrung, bezugsmenge,
+          bezugseinheit, erstellt_am, geaendert_am
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'EUR', 500, 'ml', ?, ?)''',
         [
           'preis-${kauf.$1}',
           kauf.$1,
@@ -69,6 +70,46 @@ void main() {
     expect(nurGast, hasLength(1));
     expect(nurGast.single.preis, 4);
     expect(nurGast.single.euroProLiter, 8);
+    // Eine Stammdatenänderung darf keinen beobachteten Kauf verändern.
+    db.verbindung.execute(
+      'UPDATE produkte SET fuellmenge_ml = 330 WHERE objekt_id = ?',
+      ['bier'],
+    );
+    final nachStammdatenAenderung = await service.ladeLetztePreise(
+      const ProduktvergleichFilter(produktId: 'bier'),
+    );
+    expect(nachStammdatenAenderung.single.euroProLiter, 8);
+    // Die Preise bleiben je Mengendimension vergleichbar; Anzahl der
+    // Gebinde ist nicht Teil der gespeicherten Menge je Gebinde.
+    db.verbindung.execute(
+      "UPDATE preisbeobachtungen SET bezugsmenge = 250, bezugseinheit = 'g' "
+      "WHERE id = 'preis-zwei'",
+    );
+    db.verbindung.execute(
+      "UPDATE erlebnispositionen SET anzahl = 2 WHERE id = 'pos-zwei'",
+    );
+    final gramm = await service.ladeLetztePreise(
+      const ProduktvergleichFilter(produktId: 'bier'),
+    );
+    expect(gramm.single.euroProLiter, isNull);
+    expect(gramm.single.einheitspreis, 8);
+    expect(gramm.single.einheitspreisEinheit, '€/kg');
+    db.verbindung.execute(
+      "UPDATE preisbeobachtungen SET bezugsmenge = 1, "
+      "bezugseinheit = 'stueck' WHERE id = 'preis-zwei'",
+    );
+    final stueck = await service.ladeLetztePreise(
+      const ProduktvergleichFilter(produktId: 'bier'),
+    );
+    expect(stueck.single.einheitspreis, 2);
+    expect(stueck.single.einheitspreisEinheit, '€/Stück');
+    db.verbindung.execute(
+      "UPDATE preisbeobachtungen SET bezugsmenge = 500, "
+      "bezugseinheit = 'ml' WHERE id = 'preis-zwei'",
+    );
+    db.verbindung.execute(
+      "UPDATE erlebnispositionen SET anzahl = 1 WHERE id = 'pos-zwei'",
+    );
 
     final beide = await service.ladeLetztePreise(
       const ProduktvergleichFilter(

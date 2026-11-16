@@ -494,6 +494,8 @@ class ImportAusfuehrungService {
       'ortId': 'ort_id',
       'betragMinor': 'betrag_minor',
       'waehrung': 'waehrung',
+      'bezugsMenge': 'bezugsmenge',
+      'bezugsEinheit': 'bezugseinheit',
       'beobachtetAm': 'beobachtet_am',
       'erstelltAm': 'erstellt_am',
       'geaendertAm': 'geaendert_am',

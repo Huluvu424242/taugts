@@ -471,6 +471,7 @@ class SqliteBewertungsRepository
         p.geaendert_am AS position_geaendert_am,
         o.*, pr.*, pr.geloescht AS produkt_geloescht, pb.id AS preis_id, pb.ort_id AS preis_ort_id,
         pb.beobachtet_am, pb.betrag_minor, pb.waehrung,
+        pb.bezugsmenge, pb.bezugseinheit,
         pb.erstellt_am AS preis_erstellt_am,
         pb.geaendert_am AS preis_geaendert_am
       FROM erlebnispositionen p
@@ -511,6 +512,8 @@ class SqliteBewertungsRepository
                 erlebnisPositionId: position.id,
                 produktId: position.produktId,
                 ortId: row['preis_ort_id'] as String?,
+                bezugsmenge: row['bezugsmenge'] as int?,
+                bezugseinheit: row['bezugseinheit'] as String?,
                 beobachtetAm: DateTime.parse(row['beobachtet_am'] as String),
                 betrag: Geldbetrag(
                   minorEinheiten: row['betrag_minor'] as int,
@@ -578,14 +581,17 @@ class SqliteBewertungsRepository
         '''
           INSERT INTO preisbeobachtungen (
             id, erlebnis_id, erlebnis_position_id, produkt_id, ort_id,
-            beobachtet_am, betrag_minor, waehrung, erstellt_am, geaendert_am
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            beobachtet_am, betrag_minor, waehrung, bezugsmenge,
+            bezugseinheit, erstellt_am, geaendert_am
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(erlebnis_position_id) DO UPDATE SET
             produkt_id = excluded.produkt_id,
             ort_id = excluded.ort_id,
             beobachtet_am = excluded.beobachtet_am,
             betrag_minor = excluded.betrag_minor,
             waehrung = excluded.waehrung,
+            bezugsmenge = excluded.bezugsmenge,
+            bezugseinheit = excluded.bezugseinheit,
             geaendert_am = excluded.geaendert_am
         ''',
         [
@@ -597,6 +603,8 @@ class SqliteBewertungsRepository
           _zeit(preis.beobachtetAm),
           preis.betrag.minorEinheiten,
           preis.betrag.waehrung,
+          preis.bezugsmenge,
+          preis.bezugseinheit,
           _zeit(preis.erstelltAm),
           _zeit(preis.geaendertAm),
         ],
@@ -633,6 +641,8 @@ class SqliteBewertungsRepository
       erlebnisPositionId: row['erlebnis_position_id'] as String,
       produktId: row['produkt_id'] as String,
       ortId: row['ort_id'] as String?,
+      bezugsmenge: row['bezugsmenge'] as int?,
+      bezugseinheit: row['bezugseinheit'] as String?,
       beobachtetAm: DateTime.parse(row['beobachtet_am'] as String),
       betrag: Geldbetrag(
         minorEinheiten: row['betrag_minor'] as int,

@@ -36,8 +36,11 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
   final _produktFokus = FocusNode();
   final _anzahlFokus = FocusNode();
   final _preisFokus = FocusNode();
+  final _mengeFokus = FocusNode();
   final _anzahl = TextEditingController();
   final _preis = TextEditingController();
+  final _menge = TextEditingController();
+  String _einheit = 'ml';
   Produkt? _produkt;
   String _waehrung = 'EUR';
   Preisbeobachtung? _letzterPreis;
@@ -52,6 +55,10 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
     _anzahl.text = (vorhanden?.position.anzahl ?? 1).toString();
     _waehrung = vorhanden?.preis?.betrag.waehrung ?? 'EUR';
     _preis.text = vorhanden?.preis?.betrag.dezimalText ?? '';
+    _einheit = vorhanden?.preis?.bezugseinheit ?? 'ml';
+    _menge.text =
+        vorhanden?.preis?.bezugsmenge?.toString() ??
+        (vorhanden == null ? _produkt?.fuellmengeMl?.toString() ?? '' : '');
     if (_produkt != null) _ladeLetztenPreis();
   }
 
@@ -61,8 +68,10 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
     _produktFokus.dispose();
     _anzahlFokus.dispose();
     _preisFokus.dispose();
+    _mengeFokus.dispose();
     _anzahl.dispose();
     _preis.dispose();
+    _menge.dispose();
     super.dispose();
   }
 
@@ -78,7 +87,11 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
       ),
     );
     if (produkt == null || !mounted) return;
-    setState(() => _produkt = produkt);
+    setState(() {
+      _produkt = produkt;
+      _einheit = 'ml';
+      _menge.text = produkt.fuellmengeMl?.toString() ?? '';
+    });
     await _ladeLetztenPreis();
   }
 
@@ -134,6 +147,8 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
     final produkt = _produkt;
     final anzahl = int.tryParse(_anzahl.text.trim());
     final preisText = _preis.text.trim();
+    final mengeText = _menge.text.trim();
+    final bezugsmenge = int.tryParse(mengeText);
     final betrag = preisText.isEmpty
         ? null
         : Geldbetrag.ausEingabe(preisText, _waehrung);
@@ -143,6 +158,8 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
         ('Die Anzahl muss mindestens 1 sein.', _anzahlFokus),
       if (preisText.isNotEmpty && betrag == null)
         ('Der Preis muss höchstens zwei Nachkommastellen haben.', _preisFokus),
+      if (mengeText.isNotEmpty && (bezugsmenge == null || bezugsmenge <= 0))
+        ('Die Bezugsmenge muss eine positive Ganzzahl sein.', _mengeFokus),
     ];
     if (fehler.isNotEmpty) {
       setState(() => _fehler = fehler);
@@ -175,6 +192,8 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
             ortId: widget.erlebnis.wirksamerOrtId,
             beobachtetAm: widget.erlebnis.erlebtAm,
             betrag: betrag,
+            bezugsmenge: bezugsmenge,
+            bezugseinheit: bezugsmenge == null ? null : _einheit,
             erstelltAm: vorher?.preis?.erstelltAm ?? jetzt,
             geaendertAm: jetzt,
           );
@@ -295,6 +314,33 @@ class _ErlebnispositionFormularState extends State<ErlebnispositionFormular> {
                 },
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            key: const ValueKey('preis-bezugsmenge'),
+            controller: _menge,
+            focusNode: _mengeFokus,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: const InputDecoration(
+              labelText: 'Menge pro Stück für diesen Kauf (optional)',
+              helperText:
+                  'Historische Packungsgröße, z. B. 500 ml, 250 g oder 1 Stück',
+            ),
+          ),
+          DropdownButtonFormField<String>(
+            initialValue: _einheit,
+            decoration: const InputDecoration(
+              labelText: 'Einheit der Bezugsmenge',
+            ),
+            items: const [
+              DropdownMenuItem(value: 'ml', child: Text('Milliliter (ml)')),
+              DropdownMenuItem(value: 'g', child: Text('Gramm (g)')),
+              DropdownMenuItem(value: 'stueck', child: Text('Stück')),
+            ],
+            onChanged: (wert) {
+              if (wert != null) setState(() => _einheit = wert);
+            },
           ),
           if (_letzterPreis != null)
             Padding(
