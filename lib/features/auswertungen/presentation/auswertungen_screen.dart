@@ -2,6 +2,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:taugts/core/support/app_support.dart';
 import 'package:taugts/core/support/support_kontexte.dart';
 import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
+import 'package:taugts/features/auswertungen/models/produktvergleich_modelle.dart';
+import 'package:taugts/features/auswertungen/presentation/produktvergleich_screen.dart';
 import 'package:taugts/features/auswertungen/presentation/statistik_verlauf_darstellung.dart';
 import 'package:taugts/features/auswertungen/services/auswertungs_service.dart';
 import 'package:taugts/features/auswertungen/services/statistik_excel_service.dart';
@@ -309,6 +311,26 @@ class _AuswertungenScreenState extends State<AuswertungenScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             children: [
+              if (widget.service is AuswertungsFilterOptionenService &&
+                  widget.service is ProduktPreisvergleichService)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: FilledButton.icon(
+                    icon: const Icon(Icons.compare_arrows),
+                    label: const Text('Produktvergleich öffnen'),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ProduktvergleichScreen(
+                          optionenService:
+                              widget.service
+                                  as AuswertungsFilterOptionenService,
+                          preisService:
+                              widget.service as ProduktPreisvergleichService,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               const Text(
                 'Alle Berechnungen erfolgen lokal. Mittelwerte werden nur für Qualitätswertungen derselben Kriterienversion gebildet; fehlende Werte werden ausgelassen.',
               ),

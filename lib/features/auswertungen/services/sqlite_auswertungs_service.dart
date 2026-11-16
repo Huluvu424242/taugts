@@ -1,12 +1,22 @@
 import 'package:taugts/features/auswertungen/models/auswertungsmodelle.dart';
+import 'package:taugts/features/auswertungen/models/produktvergleich_modelle.dart';
 import 'package:taugts/features/auswertungen/services/auswertungs_service.dart';
+import 'package:taugts/features/auswertungen/services/sqlite_produktpreisvergleich_service.dart';
 import 'package:taugts/features/bewertungen/services/lokale_datenbank.dart';
 
 class SqliteAuswertungsService
-    implements AuswertungsService, AuswertungsFilterOptionenService {
+    implements
+        AuswertungsService,
+        AuswertungsFilterOptionenService,
+        ProduktPreisvergleichService {
   const SqliteAuswertungsService(this._db);
 
   final LokaleDatenbank _db;
+
+  @override
+  Future<List<ProduktPreisRang>> ladeLetztePreise(
+    ProduktvergleichFilter filter,
+  ) => SqliteProduktpreisvergleichService(_db).ladeLetztePreise(filter);
 
   @override
   Future<AuswertungsFilterOptionen> ladeFilterOptionen() async =>
