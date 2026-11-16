@@ -299,14 +299,26 @@ void main() {
     await tester.tap(find.text('5 – taugt sehr').last);
     await tester.pumpAndSettle();
 
-    final expansionTile = find.byType(ExpansionTile);
-    await tester.ensureVisible(expansionTile);
+    // Der Tap muss den Header treffen, nicht die Mitte des gesamten
+    // ExpansionTile einschließlich seines ausgeklappten Inhalts.
+    final bewertungsHeader = find.text('Gaststätte bewerten');
+    expect(find.text('5 – taugt sehr'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      bewertungsHeader,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(bewertungsHeader);
     await tester.pumpAndSettle();
-    await tester.tap(expansionTile);
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(expansionTile);
-    await tester.pumpAndSettle();
-    await tester.tap(expansionTile);
+    expect(find.text('5 – taugt sehr'), findsNothing);
+
+    await tester.scrollUntilVisible(
+      bewertungsHeader,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(bewertungsHeader);
     await tester.pumpAndSettle();
     expect(find.text('5 – taugt sehr'), findsOneWidget);
   });
