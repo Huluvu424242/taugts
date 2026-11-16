@@ -5,6 +5,7 @@ enum StatistikObjektart { produkt, ort }
 class AuswertungsFilter {
   const AuswertungsFilter({
     this.kategorieId,
+    this.preisProduktId,
     this.objektId,
     this.objektArt = StatistikObjektart.produkt,
     this.kriteriumId,
@@ -14,6 +15,9 @@ class AuswertungsFilter {
   });
 
   final String? kategorieId;
+
+  /// Zusätzlicher Produktfilter bei Orts-Preisauswertungen.
+  final String? preisProduktId;
   final String? objektId;
   final StatistikObjektart objektArt;
   final String? kriteriumId;
