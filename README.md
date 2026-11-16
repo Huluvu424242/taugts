@@ -6,9 +6,9 @@ Taugt’s? ist eine Offline-first-Flutter-App zur lokalen Erfassung und Bewertun
 von Produkten, Orten und Erlebnissen. Die Datenhaltung bleibt auf dem Gerät;
 für die Kernfunktionen sind weder Konto noch Serververbindung erforderlich.
 
-**Für die Veröffentlichung vorbereitet:** 0.1.0+10 (10. Oktober 2026). Die Veröffentlichung von 0.1.0+9 ist anhand der vorliegenden Releaseunterlagen nicht bestätigt; vor der Freigabe die tatsächlich veröffentlichten GitHub Releases prüfen. Der folgende Funktionsumfang beschreibt den für 0.1.0+10 vorgesehenen Stand.
+**Für die Veröffentlichung vorbereitet:** 0.1.0+11 (16. November 2026). Der letzte offizielle Release ist 0.1.0+10 vom 10. Oktober 2026. Der folgende Funktionsumfang beschreibt 0.1.0+11; neue Funktionen stehen erst nach Veröffentlichung der entsprechenden APK offiziell zur Verfügung.
 
-## Funktionsumfang von 0.1.0+10
+## Funktionsumfang von 0.1.0+11
 
 - Produkte wie Getränke, Speisen und andere Produkte lokal anlegen, suchen,
   bearbeiten und erneut bewerten, ohne Stammdaten neu anzulegen
@@ -69,7 +69,14 @@ für die Kernfunktionen sind weder Konto noch Serververbindung erforderlich.
 - lokales Profil als Herkunftskennung verwenden
 - Offline-Barrierefreiheitserklärung und kontextbezogene Bug-Meldung nutzen
 
-## Neuerungen gegenüber 0.1.0+9
+## Neuerungen gegenüber 0.1.0+10
+
+- Neue Offline-Auswertungen mit zeitlichen Verläufen, Filtern, Preis- und Qualitätsvergleichen, statistischen Kennzahlen, Preismatrix und erweitertem Excel-Export.
+- Schutz ungespeicherter Erlebnisänderungen vor unbeabsichtigtem Verwerfen.
+- Historische Bezugsmenge beim Kauf, Vergleich nach Mengendimension und SQLite-Migration auf Schema 5.
+- Umstellung der Material-UI-Abhängigkeit und aktualisierte SDK-Voraussetzungen.
+
+## Bereits in 0.1.0+9 enthalten
 
 Die folgenden Funktionen wurden bereits für 0.1.0+9 vorbereitet und sind auch in 0.1.0+10 enthalten:
 
@@ -82,14 +89,14 @@ Die folgenden Funktionen wurden bereits für 0.1.0+9 vorbereitet und sind auch i
 - Der JSON-Import ergänzt neue Datensätze standardmäßig ohne Überschreiben; sichere Konfliktentscheidungen sind vorbelegt und können vor der Übernahme angepasst werden. Alternativ lassen sich Importdaten bevorzugen oder nach Sicherungsangebot und gesonderter Bestätigung sämtliche lokalen Fachdaten atomar durch einen gültigen Importbestand ersetzen. Der Export und Import berücksichtigen nun auch Kategorien, Zuordnungen, Klassifikationen, Kriterienset-Regeln und gelöschte Stammdaten. Die Bedienung ist in der [Datenhaltungsdokumentation](docs/benutzer/datenhaltung.md#import-und-export) erklärt.
 - Ein separater, manuell auszulösender Workflow kann nach ausdrücklicher Freigabe eine signierte **Test-APK** vom aktuellen `master` bereitstellen. Dies ist kein offizielles Release; siehe [Test-APK-Dokumentation](docs/entwicklung/android-test-apk.md).
 
-Die seit 0.1.0+9 zusätzlich aufgenommenen Import-Verbesserungen und die Freigabe des separaten Branch-Formatters sind in den Release Notes für 0.1.0+10 dokumentiert. Die Funktionen stehen erst nach Veröffentlichung einer entsprechenden APK offiziell zur Verfügung. Vor einem Test-Update ist ein JSON-Backup empfehlenswert; die derzeitige Datenbankmigration und das JSON-Austauschformat sind in der [Datenhaltungsdokumentation](docs/benutzer/datenhaltung.md) beschrieben.
+Die seit 0.1.0+9 hinzugekommenen Import-Verbesserungen und der freigegebene Branch-Formatter wurden mit 0.1.0+10 veröffentlicht. Vor einem Test-Update ist ein JSON-Backup empfehlenswert; die derzeitige Datenbankmigration und das JSON-Austauschformat sind in der [Datenhaltungsdokumentation](docs/benutzer/datenhaltung.md) beschrieben.
 
 ## Installation unter Android
 
 Nach Veröffentlichung steht die APK unter
 [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) bereit:
 
-1. `taugts-0.1.0+10.apk` und die zugehörige
+1. `taugts-0.1.0+11.apk` und die zugehörige
    `.apk.sha256`-Datei herunterladen.
 2. Die SHA-256-Prüfsumme kontrollieren.
 3. Unter Android gegebenenfalls die Installation aus der verwendeten
@@ -99,11 +106,11 @@ Nach Veröffentlichung steht die APK unter
 Unter Windows lässt sich die Prüfsumme so ermitteln:
 
 ```powershell
-Get-FileHash .\taugts-0.1.0+10.apk -Algorithm SHA256
+Get-FileHash .\taugts-0.1.0+11.apk -Algorithm SHA256
 ```
 
 Der Hash muss mit dem Inhalt von
-`taugts-0.1.0+10.apk.sha256` übereinstimmen. APK-Updates funktionieren nur mit
+`taugts-0.1.0+11.apk.sha256` übereinstimmen. APK-Updates funktionieren nur mit
 demselben Release-Signierschlüssel.
 
 ### Hinweis für Updates aus älteren Vorabversionen
@@ -245,11 +252,11 @@ Der ausschließlich manuell startbare GitHub-Actions-Workflow
 ihrer SHA-256-Prüfsumme als GitHub Release veröffentlichen.
 
 Einrichtung, Sicherheitsvorgaben und Ablauf stehen in
-[docs/android-release.md](docs/android-release.md). Für die vorbereitete Version 0.1.0+10 liegen
+[docs/android-release.md](docs/android-release.md). Für die vorbereitete Version 0.1.0+11 liegen
 außerdem folgende Dokumente bereit:
 
-- [Release Notes](docs/releases/0.1.0+10.md)
-- [Release-Checkliste](docs/release-checklist-0.1.0+10.md)
+- [Release Notes](docs/releases/0.1.0+11.md)
+- [Release-Checkliste](docs/release-checklist-0.1.0+11.md)
 - [Changelog](CHANGELOG.md)
 
 Der Release-Workflow darf erst nach Einrichtung der Signing-Secrets und einer
