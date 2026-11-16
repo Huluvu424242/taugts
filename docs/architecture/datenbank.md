@@ -10,7 +10,7 @@ Diese Seite beschreibt den aktuellen physischen Schema-Stand, seine Beziehungen,
 
 `LokaleDatenbank.oeffnen()` aktiviert `PRAGMA foreign_keys = ON`, liest `PRAGMA user_version` und führt notwendige Vorwärtsmigrationen innerhalb einer `BEGIN IMMEDIATE`-Transaktion aus.
 
-Vor dem ersten produktiven Release wurde die während der Entwicklung entstandene Migrationskette konsolidiert. **Schema 1 bleibt die dauerhafte produktive Baseline. Der aktuelle physische Datenbankstand auf `master` ist **Schema 4**.**
+Vor dem ersten produktiven Release wurde die während der Entwicklung entstandene Migrationskette konsolidiert. **Schema 1 bleibt die dauerhafte produktive Baseline. Der aktuelle physische Datenbankstand auf `master` ist Schema 5.**
 
 - Eine neue Datenbank besitzt zunächst `user_version = 0`.
 - Der initiale Migrationsschritt **0 → 1** erzeugt die produktive Baseline einschließlich der Feature-Tabellen für Kategorien, Klassifikation, Kriteriensets und Import-Unterstützung.
@@ -18,7 +18,8 @@ Vor dem ersten produktiven Release wurde die während der Entwicklung entstanden
 - Bereits vorhandene numerische Bewertungen werden bei **1 → 2** unverändert in die neue Tabelle übernommen; `text_wert` bleibt für sie `NULL`.
 - **2 → 3** ergänzt für `produkte` und `orte` die Löschmarkierung `geloescht INTEGER NOT NULL DEFAULT 0` (bei bereits vorhandener Spalte idempotent), damit das Entfernen aktiver Stammdaten die historische Zuordnung nicht vernichtet.
 - **3 → 4** baut die Erlebnistabelle neu auf und führt `beginn` und `ende` als gemeinsamen Zeitraum ein. Ein tatsächlicher Beginn hat Vorrang, sonst wird der geplante Zeitpunkt und ersatzweise `erlebt_am` übernommen. Ein tatsächliches Ende wird nur mit vorhandenem tatsächlichem Beginn übernommen. Getrennte Plan-/Ist-Felder und Status entfallen.
-- Anschließend werden die Standardkriterien idempotent bereitgestellt und `user_version` auf **4** gesetzt. Erst nach erfolgreicher Migration und Fremdschlüsselprüfung gilt die Datenbank als Schema 4.
+- **4 → 5** ergänzt die optionalen Spalten `bezugsmenge` (positive ganze Zahl) und `bezugseinheit` (`ml`, `g`, `stueck`) für historische Preisbeobachtungen. Vorhandene Beobachtungen behalten `NULL`; eine historische Bezugsgröße darf nicht geschätzt werden (Bug #302).
+- Anschließend werden die Standardkriterien idempotent bereitgestellt und `user_version` auf **5** gesetzt. Erst nach erfolgreicher Migration und Fremdschlüsselprüfung gilt die Datenbank als Schema 5.
 
 Die früheren Entwicklungsstände 1 bis 13 vor der Baseline-Konsolidierung sind keine unterstützten Produktivschemata mehr. Für sie existiert bewusst kein Upgradepfad. Die nach der Konsolidierung definierte produktive **Schemaversion 1** ist davon zu unterscheiden und besitzt mit **1 → 2** nun den ersten dauerhaft zu erhaltenden Vorwärtsmigrationspfad.
 
@@ -27,15 +28,15 @@ Die früheren Entwicklungsstände 1 bis 13 vor der Baseline-Konsolidierung sind 
 Die Konsolidierung entfernt nur historische Entwicklungsaltlasten; der Migrationsmechanismus selbst bleibt verbindlich erhalten. Ab dem produktiven Schema 1 gilt:
 
 1. Jede persistenzrelevante Schemaänderung erhöht `schemaVersion` genau um einen Schritt.
-2. Der erste produktive Folgeschritt ist **1 → 2** für typisierte Bewertungswerte. Die Folgeschritte **2 → 3** (Löschmarkierung) und **3 → 4** (Erlebniszeitraum) sind implementiert; die nächste Änderung erfolgt als **4 → 5**.
+2. Der erste produktive Folgeschritt ist **1 → 2** für typisierte Bewertungswerte. Die Folgeschritte **2 → 3** (Löschmarkierung), **3 → 4** (Erlebniszeitraum) und **4 → 5** (historische Bezugsgröße) sind implementiert; die nächste Änderung erfolgt als **5 → 6**.
 3. Eine Migration wird transaktional ausgeführt und erst nach erfolgreichem Abschluss durch die neue `user_version` bestätigt.
 4. Für einmal produktiv ausgelieferte Schemaversionen bleibt der Upgradepfad erhalten. Produktive Nutzerdaten dürfen nicht still verworfen werden.
 5. Eine Datenbank mit einer höheren, von der installierten App nicht unterstützten Schemaversion wird verständlich abgelehnt.
 6. Jede neue Migration erhält Tests für den unmittelbar vorherigen unterstützten Produktivstand sowie die Neuanlage auf dem aktuellen Schema.
 
-Damit ist Schema 1 der dauerhafte Ausgangspunkt der produktiven Migrationshistorie und Schema 4 der aktuelle Stand. Die vor der Baseline liegenden Entwicklungszwischenstände werden nicht mehr im Anwendungscode nachgebildet.
+Damit ist Schema 1 der dauerhafte Ausgangspunkt der produktiven Migrationshistorie und Schema 5 der aktuelle Stand. Die vor der Baseline liegenden Entwicklungszwischenstände werden nicht mehr im Anwendungscode nachgebildet.
 
-Einige Legacy-Spalten aus dem frühen Vor-Positionsmodell (`produkt_id`, `kaufort_id`, `konsumort_id`, `preis`, `menge`, `gebinde`) existieren auch in Schema 4 weiterhin. Die zeitlichen Legacy-Felder sowie `status` wurden dagegen mit 3 → 4 entfernt; siehe „Fachlicher Schema-Abgleich“.
+Einige Legacy-Spalten aus dem frühen Vor-Positionsmodell (`produkt_id`, `kaufort_id`, `konsumort_id`, `preis`, `menge`, `gebinde`) existieren auch in Schema 5 weiterhin. Die zeitlichen Legacy-Felder sowie `status` wurden dagegen mit 3 → 4 entfernt; siehe „Fachlicher Schema-Abgleich“.
 
 ## Tabellen und Verantwortlichkeiten
 
@@ -50,7 +51,7 @@ Einige Legacy-Spalten aus dem frühen Vor-Positionsmodell (`produkt_id`, `kaufor
 
 - `erlebnisse`: zeitlicher Kontext für Restaurantbesuch oder Einkauf mit einem optionalen `beginn` und `ende`, Ort, Notiz und Herkunftsprofil. Ein gesonderter persistierter Status existiert nicht mehr.
 - `erlebnispositionen`: Produkte innerhalb eines Erlebnisses; Anzahl ist mindestens 1.
-- `preisbeobachtungen`: beobachteter Einzelpreis einer konkreten Position mit Minor-Einheiten, Währung, Zeitpunkt und optionalem Ort. Pro Position existiert höchstens eine Preisbeobachtung; eine Korrektur aktualisiert diese Beobachtung, ein neues Erlebnis erzeugt eine neue Position und damit eine neue historische Beobachtung.
+- `preisbeobachtungen`: beobachteter Einzelpreis einer konkreten Position mit Minor-Einheiten, Währung, Zeitpunkt, optionalem Ort und ab Schema 5 historischem optionalen Snapshot von Bezugsmenge und -einheit. Pro Position existiert höchstens eine Preisbeobachtung; eine Korrektur aktualisiert diese Beobachtung, ein neues Erlebnis erzeugt eine neue Position und damit eine neue historische Beobachtung.
 - `ortsbewertungen`: eigenständige historische Bewertung des Ortes in genau einem Erlebnis. `erlebnis_id` ist eindeutig, sodass ein Erlebnis höchstens eine Ortsbewertung besitzt.
 - `bewertungen`: einzelne Kriterienwerte. Produktwerte verweisen auf die Erlebnisposition; Ortswerte können auf `ortsbewertungen` verweisen. Numerische Eingabetypen verwenden `wert`, Auswahl und Freitext verwenden `text_wert`; genau eines der beiden Felder ist pro Datensatz gesetzt. Zusätzlich werden Kriterienname, -typ, -reihenfolge, -version, -beschreibung und Auswahlwerte als Snapshot gespeichert, damit alte Bewertungen trotz später geänderter Kriterien interpretierbar bleiben.
 - `kriterien`: aktuelle konfigurierbare Definitionen der Bewertungsdimensionen.
