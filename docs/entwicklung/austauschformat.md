@@ -1,6 +1,6 @@
 # Versioniertes JSON-Austauschformat
 
-Taugt’s? verwendet für Sicherung und Datenaustausch ein eigenes, von der lokalen SQLite-Datenbank unabhängiges JSON-Format. Diese Dokumentation beschreibt die aktuelle **Schemaversion 3** auf `master`. Der vollständige Export, die sichere Importvalidierung, die Konfliktvorschau und die bestätigte atomare Importausführung sind implementiert. Die Version des Austauschformats ist unabhängig von der lokalen SQLite-Schemaversion (derzeit 4).
+Taugt’s? verwendet für Sicherung und Datenaustausch ein eigenes, von der lokalen SQLite-Datenbank unabhängiges JSON-Format. Diese Dokumentation beschreibt die aktuelle **Schemaversion 3** auf `master`. Der vollständige Export, die sichere Importvalidierung, die Konfliktvorschau und die bestätigte atomare Importausführung sind implementiert. Die Version des Austauschformats ist unabhängig von der lokalen SQLite-Schemaversion (derzeit 5).
 
 ## Kennung und Versionierung
 
