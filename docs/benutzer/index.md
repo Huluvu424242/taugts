@@ -1,6 +1,6 @@
 # Benutzerdokumentation
 
-Diese Dokumentation richtet sich an Nutzerinnen und Nutzer von **Taugt’s?**. Sie beschreibt den für **0.1.0+10** (Releasevorbereitung vom 10. Oktober 2026) vorgesehenen Stand. Die Veröffentlichung vorheriger vorbereiteter Versionen muss anhand von GitHub Releases geprüft werden.
+Diese Dokumentation richtet sich an Nutzerinnen und Nutzer von **Taugt’s?**. Sie beschreibt den für **0.1.0+11** (Releasevorbereitung vom 16. November 2026) vorgesehenen Stand. Der letzte offizielle Release ist **0.1.0+10** vom 10. Oktober 2026.
 
 Taugt’s? speichert Produkte, Orte, Erlebnisse und Bewertungen lokal auf dem Gerät. Für die Kernfunktionen sind weder ein Konto noch eine Serververbindung erforderlich.
 
