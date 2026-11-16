@@ -2,7 +2,7 @@
 
 ## Versionsstand
 
-**0.1.0+10 ist für die Veröffentlichung vorbereitet**, aber noch nicht als offizielle APK bestätigt. Ob eine vorherige vorbereitete Version bereits veröffentlicht wurde, ist vor der Freigabe anhand von GitHub Releases zu prüfen. Die Änderungen für 0.1.0+10 stehen im [Changelog](https://github.com/Huluvu424242/taugts/blob/master/CHANGELOG.md).
+**0.1.0+11 wird für die Veröffentlichung vorbereitet**. Der letzte offiziell veröffentlichte Release ist **0.1.0+10** vom 10. Oktober 2026. Neuerungen für 0.1.0+11 stehen im [Changelog](https://github.com/Huluvu424242/taugts/blob/master/CHANGELOG.md).
 
 ## Bekannte Einschränkungen
 
