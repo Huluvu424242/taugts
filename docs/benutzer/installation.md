@@ -2,13 +2,13 @@
 
 ## Offizielle Android-Version
 
-Die Version **0.1.0+10** wird derzeit für die Veröffentlichung vorbereitet; der tatsächlich zuletzt veröffentlichte Stand ist vor Freigabe auf GitHub Releases zu prüfen. Die APK und ihre SHA-256-Prüfsummendatei werden über [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) bereitgestellt. Die neuen Funktionen von 0.1.0+10 sind erst nach Veröffentlichung der entsprechenden APK verfügbar.
+**0.1.0+11** wird für die Veröffentlichung vorbereitet. Der letzte offizielle Release ist **0.1.0+10** vom 10. Oktober 2026. APK und SHA-256-Prüfsumme stehen nach Veröffentlichung unter [GitHub Releases](https://github.com/Huluvu424242/taugts/releases) bereit; die neuen Funktionen sind erst dann offiziell verfügbar.
 
-1. Die Datei `taugts-0.1.0+10.apk` und die zugehörige Datei `.apk.sha256` aus demselben Release herunterladen.
+1. Die Datei `taugts-0.1.0+11.apk` und die zugehörige Datei `.apk.sha256` aus demselben Release herunterladen.
 2. Die Prüfsumme kontrollieren. Unter Windows beispielsweise:
 
 ```powershell
-Get-FileHash .\taugts-0.1.0+10.apk -Algorithm SHA256
+Get-FileHash .\taugts-0.1.0+11.apk -Algorithm SHA256
 ```
 
 3. Die ermittelte SHA-256-Prüfsumme mit der veröffentlichten Prüfsummendatei vergleichen.
@@ -20,7 +20,7 @@ Ein Update über eine vorhandene Android-Installation setzt denselben Signiersch
 
 Besonders wichtig: Die SQLite-Datenbanken aus Vorabversionen **0.1.0+6 und früher** besitzen keinen direkten Upgradepfad zur ab 0.1.0+7 konsolidierten Baseline. Für solche Daten ist ein geprüfter JSON-Export und Import in eine frisch angelegte Datenbank erforderlich. Für 0.1.0+7 → 0.1.0+8 wurde keine neue Datenbank-Baseline eingeführt.
 
-Der unveröffentlichte `master` enthält zusätzlich eine Datenmigration für den vereinheitlichten Erlebniszeitraum sowie das JSON-Austauschformat Version 3. Hinweise stehen in [Datenschutz und Datenhaltung](datenhaltung.md) und in der [Datenbankdokumentation](../architecture/datenbank.md).
+0.1.0+11 führt die SQLite-Migration von Schema 4 auf **5** aus. Neue Preisbeobachtungen erhalten eine historische Bezugsmenge und -einheit; bei älteren Beobachtungen werden unbekannte Werte nicht geschätzt. Das JSON-Austauschformat bleibt Version 3. Näheres unter [Datenschutz und Datenhaltung](datenhaltung.md) und [Datenbankdokumentation](../architecture/datenbank.md).
 
 ## Test-APK vom aktuellen master
 
