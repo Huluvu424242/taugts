@@ -6,6 +6,31 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## [Unreleased]
 
+## [0.1.0+11] - 2026-11-16
+
+### Added
+
+- Erweiterte Offline-Auswertungen mit Zeitgruppierung, Diagrammen, Datentabellen und Filtern für Produkt, Ort, Kategorie, Bewertungskriterium und Zeitraum (Stories #240–#248).
+- Vergleich des letzten dokumentierten Einheitspreises eines Produkts je Ort und separate Produktbewertungsrangliste je Ort; unterschiedliche Mengen-Dimensionen werden nicht vermischt (Stories #295, #296).
+- Historische Produktpreisverläufe je Ort, Orts-Preismatrix, zusätzliche Preiskennzahlen und Zeitreihenansichten (Stories #241, #242).
+- Einkaufskosten, Produkt-/Ortsqualitätsverläufe, Wertungsauffälligkeiten, Erlebnis- und Kriterienvergleiche sowie Besuchshäufigkeit; Statistik-Excel-Export um gefilterte Zeitreihen und Metadaten erweitert (Stories #243–#248).
+
+### Changed
+
+- Die App fragt beim Zurückgehen aus einem geänderten Erlebnisformular vor dem Verwerfen ungespeicherter Änderungen nach; separat gespeicherte Stammdaten bleiben erhalten (#292).
+- Umstellung auf das offizielle Material-UI-Paket und angepasste Flutter-/Dart-Mindestversionen (#293).
+- Neue Käufe speichern die damals gültige Bezugsmenge und -einheit (ml, g oder Stück) als historischen Snapshot statt spätere Produktstammdaten zur Preisnormalisierung heranzuziehen (Bug #302).
+
+### Fixed
+
+- Einheitspreise berücksichtigen historische Mengen und Positionsanzahl. Nicht vergleichbare Dimensionen werden getrennt rangiert; alten Käufen ohne belegbare Bezugsmenge wird kein fiktiver Einheitspreis zugeordnet (Bug #302).
+- Statistik-Zeitfilter verwenden fachliche Erlebniszeitpunkte, fehlende Wertungen zählen nicht als Null und verknüpfte Ortsbewertungen werden nicht mehrfach aggregiert (Story #240).
+
+### Migration
+
+- SQLite-Schema 4 → 5 ergänzt die optionalen Felder bezugsmenge und bezugseinheit in preisbeobachtungen. Vorhandene Zeilen behalten dort NULL, weil frühere Mengen nicht zuverlässig rekonstruierbar sind. JSON-Austauschformat bleibt Version 3.
+- Vor dem Update einen vollständigen JSON-Export sichern und Wiederherstellung kontrollieren. Für alte Entwicklungsdatenbanken aus 0.1.0+6 und früher besteht weiterhin kein direkter SQLite-Upgradepfad.
+
 ## [0.1.0+10] - 2026-10-10
 
 ### Changed
@@ -201,7 +226,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 - Flutter-Projektgrundgerüst für Android mit vorbereiteter Windows- und Linux-Unterstützung.
 - Featureorientierte Ausgangsstruktur, Startscreen und Widget-Test.
 
-[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+10...HEAD
+[Unreleased]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+11...HEAD
+[0.1.0+11]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+10...v0.1.0+11
 [0.1.0+10]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+9...v0.1.0+10
 [0.1.0+9]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+8...v0.1.0+9
 [0.1.0+8]: https://github.com/Huluvu424242/taugts/compare/v0.1.0+7...v0.1.0+8
